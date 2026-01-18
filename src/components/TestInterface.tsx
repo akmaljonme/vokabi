@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowLeft, ArrowRight, Clock, Flag, Volume2, Pause, Play, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, Flag, Volume2, Pause, Play, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { MockTest, UserAnswer, Part, TestResult, Question } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { CEFRLevel, SkillType } from '@/types/cefr';
@@ -17,9 +17,10 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
   const [currentPart, setCurrentPart] = useState(1);
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<UserAnswer[]>([]);
-  const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes
+  const [timeLeft, setTimeLeft] = useState(30 * 60);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
+  const [showTranscript, setShowTranscript] = useState(false);
   const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
@@ -138,8 +139,7 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
     setCurrentQuestion(1);
   };
 
-  const handleQuestionNav = (partId: number, questionIndex: number) => {
-    setCurrentPart(partId);
+  const handleQuestionNav = (questionIndex: number) => {
     setCurrentQuestion(questionIndex + 1);
   };
 
@@ -277,56 +277,63 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex">
-        {/* Left Side - Passage */}
-        <div className="hidden lg:flex w-1/2 bg-card border-r border-border">
-          <div className="p-6 h-[calc(100vh-8rem)] flex flex-col">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-display font-bold">{part?.passage.title}</h2>
-              {skill === 'listening' && (
-                <button 
-                  onClick={playAudio}
-                  className="btn-primary py-2 px-4 flex items-center gap-2"
-                >
-                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  <Volume2 className="w-4 h-4" />
-                  {isPlaying ? 'Pause' : 'Play Audio'}
-                </button>
-              )}
-            </div>
-            <div className="passage-container flex-1">
-              {part?.passage.paragraphs?.map((para) => (
-                <div key={para.label} className="mb-4">
-                  <span className="font-bold text-primary mr-2">{para.label}</span>
-                  <span className="text-foreground/90 leading-relaxed">{para.text}</span>
-                </div>
-              )) || (
-                <p className="text-foreground/90 leading-relaxed whitespace-pre-line">
-                  {part?.passage.content}
-                </p>
-              )}
+      <div className="flex-1 flex flex-col lg:flex-row">
+        {/* Left Side - Passage (Reading only) */}
+        {skill === 'reading' && (
+          <div className="lg:w-1/2 bg-card border-r border-border">
+            <div className="p-6 h-[calc(100vh-12rem)] lg:h-[calc(100vh-8rem)] flex flex-col">
+              <h2 className="text-xl font-display font-bold mb-4">{part?.passage.title}</h2>
+              <div className="passage-container flex-1 overflow-y-auto">
+                {part?.passage.paragraphs?.map((para) => (
+                  <div key={para.label} className="mb-4">
+                    <span className="font-bold text-primary mr-2">{para.label}</span>
+                    <span className="text-foreground/90 leading-relaxed">{para.text}</span>
+                  </div>
+                )) || (
+                  <p className="text-foreground/90 leading-relaxed whitespace-pre-line">
+                    {part?.passage.content}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Right Side - Questions */}
-        <div className="flex-1 flex flex-col">
-          <div className="p-6 flex-1 overflow-y-auto">
-            {/* Mobile Passage Toggle */}
-            <details className="lg:hidden mb-6 card-elevated">
-              <summary className="font-semibold cursor-pointer">
-                📖 View Passage: {part?.passage.title}
-              </summary>
-              <div className="mt-4 max-h-60 overflow-y-auto text-sm">
-                {part?.passage.paragraphs?.map((para) => (
-                  <div key={para.label} className="mb-3">
-                    <span className="font-bold text-primary mr-2">{para.label}</span>
-                    <span>{para.text}</span>
-                  </div>
-                ))}
+        <div className={`flex-1 flex flex-col ${skill === 'listening' ? 'lg:max-w-4xl lg:mx-auto' : ''}`}>
+          {/* Listening Controls */}
+          {skill === 'listening' && (
+            <div className="bg-card border-b border-border p-4">
+              <div className="flex items-center justify-between gap-4 max-w-2xl mx-auto">
+                <button 
+                  onClick={playAudio}
+                  className="btn-primary py-3 px-6 flex items-center gap-2"
+                >
+                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                  <Volume2 className="w-5 h-5" />
+                  {isPlaying ? 'Pause Audio' : 'Play Audio'}
+                </button>
+                
+                <button
+                  onClick={() => setShowTranscript(!showTranscript)}
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showTranscript ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
+                </button>
               </div>
-            </details>
+              
+              {showTranscript && (
+                <div className="mt-4 p-4 bg-muted rounded-xl max-w-2xl mx-auto max-h-40 overflow-y-auto">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {part?.passage.content}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
+          <div className="p-6 flex-1 overflow-y-auto">
             {/* Question */}
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-2">
@@ -342,7 +349,7 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
             </div>
 
             {/* Options */}
-            <div className="space-y-3">
+            <div className="space-y-3 mb-6">
               {question?.options.map((option, index) => (
                 <button
                   key={index}
@@ -358,11 +365,36 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
             </div>
 
             {question?.type === 'list-selection' && (
-              <p className="mt-4 text-sm text-muted-foreground flex items-center gap-2">
+              <p className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
                 Select exactly 2 options
               </p>
             )}
+
+            {/* Horizontal Question Navigator */}
+            <div className="bg-muted/50 rounded-xl p-4 mt-auto">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-medium">Part {currentPart} Questions</h4>
+                <span className="text-xs text-muted-foreground">
+                  {getCurrentPart()?.questions.filter((_, i) => isQuestionAnswered(currentPart, i)).length}/10 answered
+                </span>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {Array.from({ length: 10 }, (_, i) => {
+                  const isAnswered = isQuestionAnswered(currentPart, i);
+                  const isCurrent = i + 1 === currentQuestion;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => handleQuestionNav(i)}
+                      className={`test-nav-item ${isAnswered ? 'answered' : 'unanswered'} ${isCurrent ? 'current' : ''}`}
+                    >
+                      {i + 1}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -376,6 +408,10 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
               Previous
             </button>
 
+            <div className="text-sm text-muted-foreground">
+              {answers.length}/40 answered
+            </div>
+
             <button 
               onClick={() => handleNavigate('next')}
               disabled={currentPart === 4 && currentQuestion === 10}
@@ -384,46 +420,6 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
               Next
               <ArrowRight className="w-4 h-4" />
             </button>
-          </div>
-        </div>
-
-        {/* Question Navigation Sidebar */}
-        <div className="hidden xl:flex w-64 bg-card border-l border-border p-4 flex-col">
-          <h3 className="font-semibold mb-4">Question Navigator</h3>
-          <div className="flex-1 overflow-y-auto">
-            {mockTest.parts.map((p) => (
-              <div key={p.id} className="mb-4">
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">Part {p.id}</h4>
-                <div className="grid grid-cols-5 gap-2">
-                  {p.questions.map((_, index) => {
-                    const isAnswered = isQuestionAnswered(p.id, index);
-                    const isCurrent = p.id === currentPart && index + 1 === currentQuestion;
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => handleQuestionNav(p.id, index)}
-                        className={`test-nav-item ${isAnswered ? 'answered' : 'unanswered'} ${isCurrent ? 'current' : ''}`}
-                      >
-                        {(p.id - 1) * 10 + index + 1}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="border-t border-border pt-4 mt-4">
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-muted-foreground">Answered</span>
-              <span className="font-semibold">{answers.length}/40</span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-2">
-              <div 
-                className="bg-primary rounded-full h-2 transition-all"
-                style={{ width: `${(answers.length / 40) * 100}%` }}
-              />
-            </div>
           </div>
         </div>
       </div>

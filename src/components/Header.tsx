@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { ChevronDown, Menu, X, MapPin } from 'lucide-react';
+import { ChevronDown, Menu, X, MapPin, LogOut, User } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onNavigate: (view: 'landing' | 'levels') => void;
@@ -8,6 +10,13 @@ interface HeaderProps {
 export const Header = ({ onNavigate }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPracticeOpen, setIsPracticeOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    onNavigate('landing');
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
@@ -66,10 +75,30 @@ export const Header = ({ onNavigate }: HeaderProps) => {
           </nav>
 
           {/* Auth Button */}
-          <div className="hidden lg:block">
-            <button className="btn-primary">
-              Authenticate
-            </button>
+          <div className="hidden lg:flex items-center gap-4">
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
+                  <User className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium truncate max-w-32">
+                    {user.email}
+                  </span>
+                </div>
+                <button 
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => navigate('/auth')}
+                className="btn-primary"
+              >
+                Authenticate
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -98,9 +127,29 @@ export const Header = ({ onNavigate }: HeaderProps) => {
             <a href="#materials" className="py-2 font-medium">Study Materials</a>
             <a href="#pricing" className="py-2 font-medium">Pricing</a>
             <a href="#faq" className="py-2 font-medium">FAQ</a>
-            <button className="btn-primary w-full mt-2">
-              Authenticate
-            </button>
+            
+            {user ? (
+              <>
+                <div className="flex items-center gap-2 py-2">
+                  <User className="w-4 h-4 text-primary" />
+                  <span className="text-sm">{user.email}</span>
+                </div>
+                <button 
+                  onClick={handleSignOut}
+                  className="btn-outline w-full flex items-center justify-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <button 
+                onClick={() => navigate('/auth')}
+                className="btn-primary w-full mt-2"
+              >
+                Authenticate
+              </button>
+            )}
           </nav>
         </div>
       )}

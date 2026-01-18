@@ -1,6 +1,9 @@
-import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, Trophy, RotateCcw } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, Trophy, RotateCcw, Save } from 'lucide-react';
 import { TestResult } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTestResults } from '@/hooks/useTestResults';
 
 interface ResultPageProps {
   result: TestResult;
@@ -10,6 +13,22 @@ interface ResultPageProps {
 
 export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
   const mockTest = generateMockTest(result.mockId, result.level, result.skill);
+  const { user } = useAuth();
+  const { saveResult } = useTestResults();
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const save = async () => {
+      if (user && !saved) {
+        setSaving(true);
+        await saveResult(result);
+        setSaved(true);
+        setSaving(false);
+      }
+    };
+    save();
+  }, [user, result, saved]);
   
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -58,6 +77,19 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
               : `You need more practice for ${result.level} level.`
             }
           </p>
+          
+          {user && (
+            <div className="mt-4 flex items-center justify-center gap-2 text-sm">
+              {saving ? (
+                <span className="text-muted-foreground">Saving result...</span>
+              ) : saved ? (
+                <span className="text-emerald-600 flex items-center gap-1">
+                  <Save className="w-4 h-4" />
+                  Result saved to your account
+                </span>
+              ) : null}
+            </div>
+          )}
         </div>
 
         {/* Score Cards */}
