@@ -14,7 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      test_results: {
+        Row: {
+          answers: Json | null
+          correct_answers: number
+          created_at: string
+          id: string
+          level: string
+          mock_id: number
+          passed: boolean
+          percentage: number
+          skill: string
+          time_taken: number
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          correct_answers: number
+          created_at?: string
+          id?: string
+          level: string
+          mock_id: number
+          passed: boolean
+          percentage: number
+          skill: string
+          time_taken: number
+          total_questions: number
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          correct_answers?: number
+          created_at?: string
+          id?: string
+          level?: string
+          mock_id?: number
+          passed?: boolean
+          percentage?: number
+          skill?: string
+          time_taken?: number
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
