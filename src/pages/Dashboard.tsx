@@ -10,17 +10,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { ArrowLeft, TrendingUp, Target, Clock, Award, BookOpen, Headphones, AlertTriangle, CheckCircle, BarChart3 } from 'lucide-react';
 import { CEFRLevel } from '@/types/cefr';
-import Header from '@/components/Header';
+import { Header } from '@/components/Header';
 
 interface TestResult {
   id: string;
   skill: string;
   level: string;
-  score: number;
+  correct_answers: number;
   total_questions: number;
   percentage: number;
   time_taken: number;
-  completed_at: string;
+  created_at: string;
 }
 
 interface SkillAnalysis {
@@ -64,10 +64,10 @@ export default function Dashboard() {
         .from('test_results')
         .select('*')
         .eq('user_id', user?.id)
-        .order('completed_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setResults(data || []);
+      setResults((data || []) as unknown as TestResult[]);
     } catch (error) {
       console.error('Error fetching results:', error);
     } finally {
@@ -77,13 +77,13 @@ export default function Dashboard() {
 
   const getProgressOverTime = () => {
     const sortedResults = [...results].sort((a, b) => 
-      new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime()
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
 
     return sortedResults.slice(-10).map((result, index) => ({
       test: index + 1,
       score: result.percentage,
-      date: new Date(result.completed_at).toLocaleDateString(),
+      date: new Date(result.created_at).toLocaleDateString(),
       skill: result.skill,
       level: result.level,
     }));
@@ -114,7 +114,7 @@ export default function Dashboard() {
   };
 
   const getLevelAnalysis = (): LevelAnalysis[] => {
-    const levels: CEFRLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const levels: CEFRLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1'];
     const analyses = levels.map(level => {
       const levelResults = results.filter(r => r.level === level);
       const averageScore = levelResults.length > 0
@@ -149,9 +149,10 @@ export default function Dashboard() {
     const highestPassingLevel = levelAnalysis.filter(l => l.averageScore >= 60 && l.testsCompleted > 0);
     if (highestPassingLevel.length > 0) {
       const highest = highestPassingLevel[highestPassingLevel.length - 1];
-      const nextLevelIndex = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].indexOf(highest.level) + 1;
-      if (nextLevelIndex < 6) {
-        const nextLevel = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'][nextLevelIndex];
+      const allLevels: CEFRLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1'];
+      const nextLevelIndex = allLevels.indexOf(highest.level as CEFRLevel) + 1;
+      if (nextLevelIndex < 5) {
+        const nextLevel = allLevels[nextLevelIndex];
         recommendations.push(`Ready to try ${nextLevel}? You've been doing well at ${highest.level}!`);
       }
     }
@@ -160,7 +161,7 @@ export default function Dashboard() {
       recommendations.push('Start with an A1 test to establish your baseline level!');
     }
 
-    if (results.length > 0 && new Date().getTime() - new Date(results[0].completed_at).getTime() > 7 * 24 * 60 * 60 * 1000) {
+    if (results.length > 0 && new Date().getTime() - new Date(results[0].created_at).getTime() > 7 * 24 * 60 * 60 * 1000) {
       recommendations.push('You haven\'t taken a test in a while. Keep practicing to maintain your skills!');
     }
 
@@ -177,7 +178,7 @@ export default function Dashboard() {
   };
 
   const getLevelDistribution = () => {
-    const levels: CEFRLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const levels: CEFRLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1'];
     return levels.map(level => ({
       level,
       count: results.filter(r => r.level === level).length,
@@ -223,7 +224,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header onNavigate={() => navigate('/')} />
       
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-8">
@@ -428,7 +429,7 @@ export default function Dashboard() {
                           <div>
                             <p className="font-medium capitalize">{result.skill} - {result.level}</p>
                             <p className="text-sm text-muted-foreground">
-                              {new Date(result.completed_at).toLocaleDateString()} • {formatTime(result.time_taken)}
+                              {new Date(result.created_at).toLocaleDateString()} • {formatTime(result.time_taken)}
                             </p>
                           </div>
                         </div>
@@ -437,7 +438,7 @@ export default function Dashboard() {
                             {result.percentage}%
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {result.score}/{result.total_questions} correct
+                            {result.correct_answers}/{result.total_questions} correct
                           </p>
                         </div>
                       </div>

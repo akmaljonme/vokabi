@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowLeft, ArrowRight, Clock, Flag, Volume2, Pause, Play, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, Flag, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { MockTest, UserAnswer, Part, TestResult, Question } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { CEFRLevel, SkillType } from '@/types/cefr';
+import AudioPlayer from '@/components/AudioPlayer';
 
 interface TestInterfaceProps {
   level: CEFRLevel;
@@ -18,10 +19,8 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<UserAnswer[]>([]);
   const [timeLeft, setTimeLeft] = useState(30 * 60);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
-  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     const test = generateMockTest(mockId, level, skill);
@@ -142,27 +141,6 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
   const handleQuestionNav = (questionIndex: number) => {
     setCurrentQuestion(questionIndex + 1);
   };
-
-  const playAudio = useCallback(() => {
-    if (!mockTest || skill !== 'listening') return;
-    
-    const part = getCurrentPart();
-    if (!part) return;
-
-    if (isPlaying) {
-      window.speechSynthesis.cancel();
-      setIsPlaying(false);
-      return;
-    }
-
-    const utterance = new SpeechSynthesisUtterance(part.passage.content);
-    utterance.rate = 0.9;
-    utterance.onend = () => setIsPlaying(false);
-    synthRef.current = utterance;
-    
-    window.speechSynthesis.speak(utterance);
-    setIsPlaying(true);
-  }, [mockTest, skill, currentPart, isPlaying]);
 
   const handleFinishTest = () => {
     if (!mockTest) return;
@@ -302,34 +280,15 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
         {/* Right Side - Questions */}
         <div className={`flex-1 flex flex-col ${skill === 'listening' ? 'lg:max-w-4xl lg:mx-auto' : ''}`}>
           {/* Listening Controls */}
-          {skill === 'listening' && (
+          {skill === 'listening' && part && (
             <div className="bg-card border-b border-border p-4">
-              <div className="flex items-center justify-between gap-4 max-w-2xl mx-auto">
-                <button 
-                  onClick={playAudio}
-                  className="btn-primary py-3 px-6 flex items-center gap-2"
-                >
-                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                  <Volume2 className="w-5 h-5" />
-                  {isPlaying ? 'Pause Audio' : 'Play Audio'}
-                </button>
-                
-                <button
-                  onClick={() => setShowTranscript(!showTranscript)}
-                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showTranscript ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
-                </button>
+              <div className="max-w-2xl mx-auto space-y-4">
+                <AudioPlayer 
+                  text={part.passage.content}
+                  label={`Part ${currentPart} Audio`}
+                  showTranscript={true}
+                />
               </div>
-              
-              {showTranscript && (
-                <div className="mt-4 p-4 bg-muted rounded-xl max-w-2xl mx-auto max-h-40 overflow-y-auto">
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {part?.passage.content}
-                  </p>
-                </div>
-              )}
             </div>
           )}
 
