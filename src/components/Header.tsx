@@ -86,12 +86,15 @@ export const Header = ({ onNavigate }: HeaderProps) => {
           <div className="hidden lg:flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
+                <button 
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg hover:bg-accent transition-colors"
+                >
                   <User className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium truncate max-w-32">
                     {user.email}
                   </span>
-                </div>
+                </button>
                 <button 
                   onClick={handleSignOut}
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -138,10 +141,16 @@ export const Header = ({ onNavigate }: HeaderProps) => {
             
             {user ? (
               <>
-                <div className="flex items-center gap-2 py-2">
+                <button
+                  onClick={() => {
+                    navigate('/profile');
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 py-2"
+                >
                   <User className="w-4 h-4 text-primary" />
                   <span className="text-sm">{user.email}</span>
-                </div>
+                </button>
                 <button 
                   onClick={handleSignOut}
                   className="btn-outline w-full flex items-center justify-center gap-2"
