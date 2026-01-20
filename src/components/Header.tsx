@@ -66,6 +66,14 @@ export const Header = ({ onNavigate }: HeaderProps) => {
             <a href="#materials" className="text-foreground hover:text-primary transition-colors font-medium">
               Study Materials
             </a>
+            {user && (
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className="text-foreground hover:text-primary transition-colors font-medium"
+              >
+                Dashboard
+              </button>
+            )}
             <a href="#pricing" className="text-foreground hover:text-primary transition-colors font-medium">
               Pricing
             </a>
