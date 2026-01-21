@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { ChevronDown, Menu, X, MapPin, LogOut, User } from 'lucide-react';
+import { ChevronDown, Menu, X, MapPin, LogOut, User, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onNavigate: (view: 'landing' | 'levels') => void;
+  isAdmin?: boolean;
+  onToggleAdmin?: () => void;
 }
 
-export const Header = ({ onNavigate }: HeaderProps) => {
+export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPracticeOpen, setIsPracticeOpen] = useState(false);
   const { user, signOut } = useAuth();
@@ -86,6 +88,15 @@ export const Header = ({ onNavigate }: HeaderProps) => {
           <div className="hidden lg:flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-3">
+                {isAdmin && onToggleAdmin && (
+                  <button 
+                    onClick={onToggleAdmin}
+                    className="flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+                  >
+                    <Shield className="w-4 h-4" />
+                    <span className="text-sm font-medium">Admin</span>
+                  </button>
+                )}
                 <button 
                   onClick={() => navigate('/profile')}
                   className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg hover:bg-accent transition-colors"
