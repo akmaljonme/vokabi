@@ -6,6 +6,8 @@ import { LevelSelection } from '@/components/LevelSelection';
 import { SkillSelection } from '@/components/SkillSelection';
 import { TestInterface } from '@/components/TestInterface';
 import { ResultPage } from '@/components/ResultPage';
+import { AdminDashboard } from '@/components/admin/AdminDashboard';
+import { useUserRole } from '@/hooks/useUserRole';
 import { CEFRLevel, SkillType, ViewType, TestResult } from '@/types/cefr';
 
 const Index = () => {
@@ -14,6 +16,8 @@ const Index = () => {
   const [selectedSkill, setSelectedSkill] = useState<SkillType | null>(null);
   const [selectedMockId, setSelectedMockId] = useState<number | null>(null);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
+  const [showAdmin, setShowAdmin] = useState(false);
+  const { isAdmin } = useUserRole();
 
   const handleNavigate = useCallback((view: ViewType) => {
     setCurrentView(view);
@@ -52,12 +56,21 @@ const Index = () => {
     setTestResult(null);
   }, []);
 
+  // Show admin dashboard if user is admin and toggled
+  if (showAdmin && isAdmin) {
+    return <AdminDashboard onExitAdmin={() => setShowAdmin(false)} />;
+  }
+
   const renderContent = () => {
     switch (currentView) {
       case 'landing':
         return (
           <>
-            <Header onNavigate={(view) => handleNavigate(view === 'levels' ? 'levels' : 'landing')} />
+            <Header 
+              onNavigate={(view) => handleNavigate(view === 'levels' ? 'levels' : 'landing')} 
+              isAdmin={isAdmin}
+              onToggleAdmin={() => setShowAdmin(true)}
+            />
             <LandingPage onStartTest={() => setCurrentView('levels')} />
             <Footer />
           </>
@@ -66,7 +79,11 @@ const Index = () => {
       case 'levels':
         return (
           <>
-            <Header onNavigate={(view) => handleNavigate(view === 'levels' ? 'levels' : 'landing')} />
+            <Header 
+              onNavigate={(view) => handleNavigate(view === 'levels' ? 'levels' : 'landing')} 
+              isAdmin={isAdmin}
+              onToggleAdmin={() => setShowAdmin(true)}
+            />
             <LevelSelection 
               onSelectLevel={handleSelectLevel} 
               onBack={() => handleNavigate('landing')}
@@ -78,7 +95,11 @@ const Index = () => {
       case 'skills':
         return (
           <>
-            <Header onNavigate={(view) => handleNavigate(view === 'levels' ? 'levels' : 'landing')} />
+            <Header 
+              onNavigate={(view) => handleNavigate(view === 'levels' ? 'levels' : 'landing')} 
+              isAdmin={isAdmin}
+              onToggleAdmin={() => setShowAdmin(true)}
+            />
             <SkillSelection 
               level={selectedLevel!}
               onSelectMock={handleSelectMock}
@@ -102,7 +123,11 @@ const Index = () => {
       case 'result':
         return (
           <>
-            <Header onNavigate={(view) => handleNavigate(view === 'levels' ? 'levels' : 'landing')} />
+            <Header 
+              onNavigate={(view) => handleNavigate(view === 'levels' ? 'levels' : 'landing')} 
+              isAdmin={isAdmin}
+              onToggleAdmin={() => setShowAdmin(true)}
+            />
             <ResultPage
               result={testResult!}
               onRetry={handleRetry}
