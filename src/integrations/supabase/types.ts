@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      audio_files: {
+        Row: {
+          created_at: string
+          duration: number | null
+          file_name: string
+          file_url: string
+          id: string
+          question_id: string | null
+          test_id: string | null
+          transcript: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration?: number | null
+          file_name: string
+          file_url: string
+          id?: string
+          question_id?: string | null
+          test_id?: string | null
+          transcript?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration?: number | null
+          file_name?: string
+          file_url?: string
+          id?: string
+          question_id?: string | null
+          test_id?: string | null
+          transcript?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_files_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_files_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -49,6 +97,100 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      questions: {
+        Row: {
+          category: string
+          correct_answer: string
+          created_at: string
+          explanation: string | null
+          id: string
+          options: Json | null
+          order_index: number
+          points: number
+          question_text: string
+          question_type: string
+          test_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          correct_answer: string
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json | null
+          order_index?: number
+          points?: number
+          question_text: string
+          question_type: string
+          test_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          correct_answer?: string
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json | null
+          order_index?: number
+          points?: number
+          question_text?: string
+          question_type?: string
+          test_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_passages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          order_index: number
+          paragraphs: Json | null
+          test_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          order_index?: number
+          paragraphs?: Json | null
+          test_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          order_index?: number
+          paragraphs?: Json | null
+          test_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_passages_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       test_results: {
         Row: {
@@ -92,6 +234,48 @@ export type Database = {
           time_taken?: number
           total_questions?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      tests: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          level: string
+          randomize_questions: boolean
+          skill: string
+          time_limit: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          level: string
+          randomize_questions?: boolean
+          skill: string
+          time_limit?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          level?: string
+          randomize_questions?: boolean
+          skill?: string
+          time_limit?: number
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
