@@ -15,6 +15,7 @@ const Index = () => {
   const [selectedLevel, setSelectedLevel] = useState<CEFRLevel | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<SkillType | null>(null);
   const [selectedMockId, setSelectedMockId] = useState<number | null>(null);
+  const [selectedTestId, setSelectedTestId] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const { isAdmin } = useUserRole();
@@ -25,6 +26,7 @@ const Index = () => {
       setSelectedLevel(null);
       setSelectedSkill(null);
       setSelectedMockId(null);
+      setSelectedTestId(null);
       setTestResult(null);
     }
   }, []);
@@ -34,9 +36,10 @@ const Index = () => {
     setCurrentView('skills');
   }, []);
 
-  const handleSelectMock = useCallback((skill: SkillType, mockId: number) => {
+  const handleSelectMock = useCallback((skill: SkillType, mockId: number, testId?: string) => {
     setSelectedSkill(skill);
     setSelectedMockId(mockId);
+    setSelectedTestId(testId || null);
     setCurrentView('test');
   }, []);
 
@@ -53,6 +56,7 @@ const Index = () => {
   const handleBackToSkills = useCallback(() => {
     setCurrentView('skills');
     setSelectedMockId(null);
+    setSelectedTestId(null);
     setTestResult(null);
   }, []);
 
@@ -115,6 +119,7 @@ const Index = () => {
             level={selectedLevel!}
             skill={selectedSkill!}
             mockId={selectedMockId!}
+            testId={selectedTestId}
             onFinish={handleTestFinish}
             onBack={handleBackToSkills}
           />
