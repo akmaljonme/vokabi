@@ -1,14 +1,24 @@
 import { ArrowLeft, BookOpen, Headphones } from 'lucide-react';
 import { CEFRLevel, SkillType } from '@/types/cefr';
+import { useActiveTests, TestInfo } from '@/hooks/useTests';
+import { Loader2 } from 'lucide-react';
 
 interface SkillSelectionProps {
   level: CEFRLevel;
-  onSelectMock: (skill: SkillType, mockId: number) => void;
+  onSelectMock: (skill: SkillType, mockId: number, testId?: string) => void;
   onBack: () => void;
 }
 
 export const SkillSelection = ({ level, onSelectMock, onBack }: SkillSelectionProps) => {
-  const mocks = Array.from({ length: 20 }, (_, i) => i + 1);
+  const { readingTests, listeningTests, loading, error } = useActiveTests(level);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background py-8 animate-fade-in">
@@ -48,21 +58,32 @@ export const SkillSelection = ({ level, onSelectMock, onBack }: SkillSelectionPr
               </div>
             </div>
 
-            <div className="grid grid-cols-5 gap-2">
-              {mocks.map((mockId) => (
-                <button
-                  key={`reading-${mockId}`}
-                  onClick={() => onSelectMock('reading', mockId)}
-                  className="mock-grid-item hover:bg-emerald-100 hover:border-emerald-400 hover:text-emerald-700"
-                >
-                  {mockId}
-                </button>
-              ))}
-            </div>
-
-            <p className="text-center text-sm text-muted-foreground mt-4">
-              20 mock tests • 4 parts each • 40 questions
-            </p>
+            {readingTests.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 gap-2">
+                  {readingTests.map((test, index) => (
+                    <button
+                      key={test.id}
+                      onClick={() => onSelectMock('reading', index + 1, test.id)}
+                      className="mock-grid-item hover:bg-emerald-100 hover:border-emerald-400 hover:text-emerald-700 text-left p-3"
+                    >
+                      <div className="font-medium">{test.title}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-center text-sm text-muted-foreground mt-4">
+                  {readingTests.length} ta test mavjud
+                </p>
+              </>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <BookOpen className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>Hali reading testlari qo'shilmagan</p>
+              </div>
+            )}
           </div>
 
           {/* Listening Section */}
@@ -77,39 +98,56 @@ export const SkillSelection = ({ level, onSelectMock, onBack }: SkillSelectionPr
               </div>
             </div>
 
-            <div className="grid grid-cols-5 gap-2">
-              {mocks.map((mockId) => (
-                <button
-                  key={`listening-${mockId}`}
-                  onClick={() => onSelectMock('listening', mockId)}
-                  className="mock-grid-item hover:bg-blue-100 hover:border-blue-400 hover:text-blue-700"
-                >
-                  {mockId}
-                </button>
-              ))}
-            </div>
-
-            <p className="text-center text-sm text-muted-foreground mt-4">
-              20 mock tests • Audio included • Real exam format
-            </p>
+            {listeningTests.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 gap-2">
+                  {listeningTests.map((test, index) => (
+                    <button
+                      key={test.id}
+                      onClick={() => onSelectMock('listening', index + 1, test.id)}
+                      className="mock-grid-item hover:bg-blue-100 hover:border-blue-400 hover:text-blue-700 text-left p-3"
+                    >
+                      <div className="font-medium">{test.title}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-center text-sm text-muted-foreground mt-4">
+                  {listeningTests.length} ta test mavjud
+                </p>
+              </>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Headphones className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>Hali listening testlari qo'shilmagan</p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto">
-          <div className="card-elevated text-center">
-            <div className="text-3xl font-display font-bold text-primary mb-2">30 min</div>
-            <p className="text-muted-foreground">Time per test</p>
+        {(readingTests.length > 0 || listeningTests.length > 0) && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto">
+            <div className="card-elevated text-center">
+              <div className="text-3xl font-display font-bold text-primary mb-2">
+                {readingTests.length + listeningTests.length}
+              </div>
+              <p className="text-muted-foreground">Jami testlar</p>
+            </div>
+            <div className="card-elevated text-center">
+              <div className="text-3xl font-display font-bold text-primary mb-2">
+                {readingTests.reduce((sum, t) => sum + t.questionCount, 0) + listeningTests.reduce((sum, t) => sum + t.questionCount, 0)}
+              </div>
+              <p className="text-muted-foreground">Jami savollar</p>
+            </div>
+            <div className="card-elevated text-center">
+              <div className="text-3xl font-display font-bold text-primary mb-2">{level}</div>
+              <p className="text-muted-foreground">CEFR daraja</p>
+            </div>
           </div>
-          <div className="card-elevated text-center">
-            <div className="text-3xl font-display font-bold text-primary mb-2">40</div>
-            <p className="text-muted-foreground">Questions per test</p>
-          </div>
-          <div className="card-elevated text-center">
-            <div className="text-3xl font-display font-bold text-primary mb-2">4</div>
-            <p className="text-muted-foreground">Parts per test</p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft, ArrowRight, Clock, Flag, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { MockTest, UserAnswer, Part, TestResult, Question } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
+import { useTestWithQuestions } from '@/hooks/useTests';
 import { CEFRLevel, SkillType } from '@/types/cefr';
 import AudioPlayer from '@/components/AudioPlayer';
 
@@ -9,11 +10,12 @@ interface TestInterfaceProps {
   level: CEFRLevel;
   skill: SkillType;
   mockId: number;
+  testId?: string | null;
   onFinish: (result: TestResult) => void;
   onBack: () => void;
 }
 
-export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestInterfaceProps) => {
+export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }: TestInterfaceProps) => {
   const [mockTest, setMockTest] = useState<MockTest | null>(null);
   const [currentPart, setCurrentPart] = useState(1);
   const [currentQuestion, setCurrentQuestion] = useState(1);
@@ -22,11 +24,21 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
 
+  // Fetch from database if testId is provided
+  const { test: dbTest, loading: dbLoading } = useTestWithQuestions(testId);
+
   useEffect(() => {
-    const test = generateMockTest(mockId, level, skill);
-    setMockTest(test);
-    setTimeLeft(test.timeLimit);
-  }, [mockId, level, skill]);
+    // If we have a database test, use it
+    if (testId && dbTest) {
+      setMockTest(dbTest);
+      setTimeLeft(dbTest.timeLimit);
+    } else if (!testId) {
+      // Fallback to mock data if no testId
+      const test = generateMockTest(mockId, level, skill);
+      setMockTest(test);
+      setTimeLeft(test.timeLimit);
+    }
+  }, [mockId, level, skill, testId, dbTest]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -186,7 +198,7 @@ export const TestInterface = ({ level, skill, mockId, onFinish, onBack }: TestIn
     });
   };
 
-  if (!mockTest) {
+  if (!mockTest || (testId && dbLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
