@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Plus, 
   ArrowLeft, 
@@ -18,6 +19,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { QuestionFormDialog } from './QuestionFormDialog';
+import { ReadingPassageDialog } from './ReadingPassageDialog';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -54,6 +56,15 @@ interface Question {
   order_index: number;
 }
 
+interface ReadingPassage {
+  id: string;
+  test_id: string;
+  title: string;
+  content: string;
+  paragraphs: { label: string; text: string }[] | null;
+  order_index: number;
+}
+
 interface TestQuestionsPanelProps {
   test: Test;
   onBack: () => void;
@@ -84,15 +95,26 @@ const typeLabels: Record<string, string> = {
 
 export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [passages, setPassages] = useState<ReadingPassage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [passagesLoading, setPassagesLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [questionToDelete, setQuestionToDelete] = useState<Question | null>(null);
+  const [passageDialogOpen, setPassageDialogOpen] = useState(false);
+  const [selectedPassage, setSelectedPassage] = useState<ReadingPassage | null>(null);
+  const [deletePassageDialogOpen, setDeletePassageDialogOpen] = useState(false);
+  const [passageToDelete, setPassageToDelete] = useState<ReadingPassage | null>(null);
 
   useEffect(() => {
     fetchQuestions();
+    if (test.skill === 'reading') {
+      fetchPassages();
+    } else {
+      setPassagesLoading(false);
+    }
   }, [test.id]);
 
   const fetchQuestions = async () => {
@@ -203,6 +225,93 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
     setDeleteDialogOpen(true);
   };
 
+  const fetchPassages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('reading_passages')
+        .select('*')
+        .eq('test_id', test.id)
+        .order('order_index', { ascending: true });
+
+      if (error) throw error;
+      
+      const parsedPassages = ((data || []) as any[]).map(p => ({
+        ...p,
+        paragraphs: typeof p.paragraphs === 'string' ? JSON.parse(p.paragraphs) : p.paragraphs
+      })) as ReadingPassage[];
+      
+      setPassages(parsedPassages);
+    } catch (error) {
+      console.error('Error fetching passages:', error);
+      toast.error('Matnlarni yuklashda xatolik');
+    } finally {
+      setPassagesLoading(false);
+    }
+  };
+
+  const handleSavePassage = async (data: Omit<ReadingPassage, 'id'> & { id?: string }) => {
+    setSaving(true);
+    try {
+      if (data.id) {
+        const { error } = await supabase
+          .from('reading_passages')
+          .update({
+            title: data.title,
+            content: data.content,
+            paragraphs: data.paragraphs,
+            order_index: data.order_index,
+          })
+          .eq('id', data.id);
+
+        if (error) throw error;
+        toast.success('Matn yangilandi');
+      } else {
+        const { error } = await supabase
+          .from('reading_passages')
+          .insert({
+            test_id: data.test_id,
+            title: data.title,
+            content: data.content,
+            paragraphs: data.paragraphs,
+            order_index: data.order_index,
+          });
+
+        if (error) throw error;
+        toast.success("Matn qo'shildi");
+      }
+
+      setPassageDialogOpen(false);
+      setSelectedPassage(null);
+      fetchPassages();
+    } catch (error) {
+      console.error('Error saving passage:', error);
+      toast.error('Matnni saqlashda xatolik');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeletePassage = async () => {
+    if (!passageToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('reading_passages')
+        .delete()
+        .eq('id', passageToDelete.id);
+
+      if (error) throw error;
+      toast.success("Matn o'chirildi");
+      fetchPassages();
+    } catch (error) {
+      console.error('Error deleting passage:', error);
+      toast.error("Matnni o'chirishda xatolik");
+    } finally {
+      setDeletePassageDialogOpen(false);
+      setPassageToDelete(null);
+    }
+  };
+
   const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
 
   return (
@@ -220,18 +329,181 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
               <Badge variant="secondary">{test.skill}</Badge>
               <span className="text-sm text-muted-foreground">
                 {questions.length} ta savol • {totalPoints} ball
+                {test.skill === 'reading' && ` • ${passages.length} ta matn`}
               </span>
             </div>
           </div>
         </div>
-        <Button onClick={() => { setSelectedQuestion(null); setDialogOpen(true); }}>
-          <Plus className="w-4 h-4 mr-2" />
-          Savol qo'shish
-        </Button>
+        <div className="flex gap-2">
+          {test.skill === 'reading' && (
+            <Button variant="outline" onClick={() => { setSelectedPassage(null); setPassageDialogOpen(true); }}>
+              <BookOpen className="w-4 h-4 mr-2" />
+              Matn qo'shish
+            </Button>
+          )}
+          <Button onClick={() => { setSelectedQuestion(null); setDialogOpen(true); }}>
+            <Plus className="w-4 h-4 mr-2" />
+            Savol qo'shish
+          </Button>
+        </div>
       </div>
 
-      {/* Questions List */}
-      {loading ? (
+      {/* Tabs for Reading Tests */}
+      {test.skill === 'reading' ? (
+        <Tabs defaultValue="passages" className="w-full">
+          <TabsList>
+            <TabsTrigger value="passages">
+              <BookOpen className="w-4 h-4 mr-2" />
+              Matnlar ({passages.length})
+            </TabsTrigger>
+            <TabsTrigger value="questions">
+              <FileText className="w-4 h-4 mr-2" />
+              Savollar ({questions.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="passages" className="mt-4">
+            {passagesLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : passages.length === 0 ? (
+              <Card className="p-12 text-center">
+                <div className="text-muted-foreground">
+                  <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="font-semibold text-lg mb-2">Matnlar yo'q</h3>
+                  <p className="text-sm mb-4">Ushbu testga hali reading matn qo'shilmagan</p>
+                  <Button onClick={() => setPassageDialogOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Birinchi matnni qo'shing
+                  </Button>
+                </div>
+              </Card>
+            ) : (
+              <ScrollArea className="h-[calc(100vh-350px)]">
+                <div className="space-y-3 pr-4">
+                  {passages.map((passage, index) => (
+                    <Card key={passage.id} className="p-4 hover:shadow-md transition-shadow">
+                      <div className="flex gap-3">
+                        <div className="flex items-center text-muted-foreground cursor-move">
+                          <GripVertical className="w-5 h-5" />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="font-semibold text-sm">#{index + 1}</span>
+                                <h3 className="font-medium">{passage.title}</h3>
+                                {passage.paragraphs && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {passage.paragraphs.length} paragraf
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              <p className="text-sm text-muted-foreground line-clamp-3">
+                                {passage.content}
+                              </p>
+                            </div>
+                            
+                            <div className="flex gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => { setSelectedPassage(passage); setPassageDialogOpen(true); }}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => { setPassageToDelete(passage); setDeletePassageDialogOpen(true); }}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+          </TabsContent>
+
+          <TabsContent value="questions" className="mt-4">
+            {renderQuestionsList()}
+          </TabsContent>
+        </Tabs>
+      ) : (
+        renderQuestionsList()
+      )}
+
+      {/* Reading Passage Dialog */}
+      <ReadingPassageDialog
+        open={passageDialogOpen}
+        onOpenChange={setPassageDialogOpen}
+        passage={selectedPassage}
+        testId={test.id}
+        onSave={handleSavePassage}
+        loading={saving}
+        passageCount={passages.length}
+      />
+
+      {/* Delete Passage Confirmation Dialog */}
+      <AlertDialog open={deletePassageDialogOpen} onOpenChange={setDeletePassageDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Matnni o'chirish</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{passageToDelete?.title}" matnini o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeletePassage} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              O'chirish
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Question Form Dialog */}
+      <QuestionFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        question={selectedQuestion}
+        testId={test.id}
+        onSave={handleSaveQuestion}
+        loading={saving}
+        questionCount={questions.length}
+      />
+
+      {/* Delete Question Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Savolni o'chirish</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ushbu savolni o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteQuestion} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              O'chirish
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+
+  function renderQuestionsList() {
+    return loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
@@ -248,7 +520,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
           </div>
         </Card>
       ) : (
-        <ScrollArea className="h-[calc(100vh-300px)]">
+        <ScrollArea className="h-[calc(100vh-350px)]">
           <div className="space-y-3 pr-4">
             {questions.map((question, index) => (
               <Card key={question.id} className="p-4 hover:shadow-md transition-shadow">
@@ -326,36 +598,6 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
             ))}
           </div>
         </ScrollArea>
-      )}
-
-      {/* Question Form Dialog */}
-      <QuestionFormDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        question={selectedQuestion}
-        testId={test.id}
-        onSave={handleSaveQuestion}
-        loading={saving}
-        questionCount={questions.length}
-      />
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Savolni o'chirish</AlertDialogTitle>
-            <AlertDialogDescription>
-              Ushbu savolni o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteQuestion} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              O'chirish
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
+      );
+  }
 };
