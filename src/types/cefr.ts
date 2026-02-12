@@ -69,4 +69,4 @@ export interface TestResult {
   timeTaken: number;
 }
 
-export type ViewType = 'landing' | 'levels' | 'skills' | 'test' | 'result';
+export type ViewType = 'landing' | 'levels' | 'skills' | 'vocabulary' | 'test' | 'result';

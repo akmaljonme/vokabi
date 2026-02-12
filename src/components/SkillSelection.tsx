@@ -8,6 +8,8 @@ interface SkillSelectionProps {
   level: CEFRLevel;
   onSelectMock: (skill: SkillType, mockId: number, testId?: string) => void;
   onBack: () => void;
+  hideVocabulary?: boolean;
+  vocabularyOnly?: boolean;
 }
 
 const BOOK_NAMES = [
@@ -19,10 +21,11 @@ const BOOK_NAMES = [
   "6-Kitob",
 ];
 
-export const SkillSelection = ({ level, onSelectMock, onBack }: SkillSelectionProps) => {
-  const { readingTests, listeningTests, vocabularyTests, grammarTests, loading } = useActiveTests(level);
+export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vocabularyOnly }: SkillSelectionProps) => {
+  const { readingTests, listeningTests, vocabularyTests, grammarTests, loading } = useActiveTests(vocabularyOnly ? undefined : level);
   const [selectedVocabBook, setSelectedVocabBook] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<SkillType>('vocabulary');
+  const defaultTab = vocabularyOnly ? 'vocabulary' : (hideVocabulary ? 'grammar' : 'vocabulary');
+  const [activeTab, setActiveTab] = useState<SkillType>(defaultTab as SkillType);
 
   if (loading) {
     return (
@@ -43,12 +46,18 @@ export const SkillSelection = ({ level, onSelectMock, onBack }: SkillSelectionPr
   const grammarUnits = grammarTests
     .sort((a, b) => (a.unitNumber || 0) - (b.unitNumber || 0));
 
-  const tabs = [
+  const allTabs = [
     { key: 'vocabulary' as SkillType, label: "Lug'at", icon: Lightbulb, color: 'purple' },
     { key: 'grammar' as SkillType, label: 'Grammatika', icon: Brain, color: 'orange' },
     { key: 'reading' as SkillType, label: 'Reading', icon: BookOpen, color: 'emerald' },
     { key: 'listening' as SkillType, label: 'Listening', icon: Headphones, color: 'blue' },
   ];
+
+  const tabs = vocabularyOnly
+    ? allTabs.filter(t => t.key === 'vocabulary')
+    : hideVocabulary
+      ? allTabs.filter(t => t.key !== 'vocabulary')
+      : allTabs;
 
   const renderUnitList = (tests: TestInfo[], skill: SkillType) => {
     if (tests.length === 0) {
@@ -86,12 +95,18 @@ export const SkillSelection = ({ level, onSelectMock, onBack }: SkillSelectionPr
         </button>
 
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
-            <span className="font-bold">{level}</span>
-            <span>Daraja</span>
-          </div>
+          {!vocabularyOnly && (
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
+              <span className="font-bold">{level}</span>
+              <span>Daraja</span>
+            </div>
+          )}
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">
-            Test Turini <span className="text-gradient">Tanlang</span>
+            {vocabularyOnly ? (
+              <><span className="text-gradient">Lug'at</span> Testlari</>
+            ) : (
+              <>Test Turini <span className="text-gradient">Tanlang</span></>
+            )}
           </h1>
         </div>
 

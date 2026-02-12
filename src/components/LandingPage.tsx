@@ -5,9 +5,10 @@ import { useNavigate } from 'react-router-dom';
 
 interface LandingPageProps {
   onStartTest: () => void;
+  onGoToVocabulary?: () => void;
 }
 
-export const LandingPage = ({ onStartTest }: LandingPageProps) => {
+export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -52,13 +53,17 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
                 <button
                   onClick={handleStartTest}
                   className="btn-primary flex items-center gap-2 text-lg px-8 py-4">
-
                    {user ? 'Testni Boshlash' : 'Bepul Test Boshlash'}
                    <ArrowRight className="w-5 h-5" />
                 </button>
-                <button className="btn-outline flex items-center gap-2 text-lg px-8 py-4">
-                  Demo Ko'rish
-                </button>
+                {onGoToVocabulary && (
+                  <button
+                    onClick={() => user ? onGoToVocabulary() : navigate('/auth')}
+                    className="btn-outline flex items-center gap-2 text-lg px-8 py-4"
+                  >
+                    📚 Lug'at Testlari
+                  </button>
+                )}
               </div>
 
               <div className="flex items-center gap-6 mt-8 animate-slide-up" style={{ animationDelay: '0.4s' }}>
