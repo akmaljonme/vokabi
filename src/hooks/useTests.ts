@@ -36,16 +36,18 @@
    order_index: number;
  }
  
- export interface TestInfo {
-   id: string;
-   title: string;
-   description: string | null;
-   level: CEFRLevel;
-   skill: SkillType;
-   timeLimit: number;
-   questionCount: number;
-   isActive: boolean;
- }
+export interface TestInfo {
+    id: string;
+    title: string;
+    description: string | null;
+    level: CEFRLevel;
+    skill: SkillType;
+    timeLimit: number;
+    questionCount: number;
+    isActive: boolean;
+    bookNumber: number | null;
+    unitNumber: number | null;
+  }
  
  // Fetch all active tests grouped by level and skill
  export const useActiveTests = (level?: CEFRLevel) => {
@@ -78,16 +80,18 @@
                .select('*', { count: 'exact', head: true })
                .eq('test_id', test.id);
  
-             return {
-               id: test.id,
-               title: test.title,
-               description: test.description,
-               level: test.level as CEFRLevel,
-               skill: test.skill as SkillType,
-               timeLimit: test.time_limit,
-               questionCount: count || 0,
-               isActive: test.is_active,
-             };
+              return {
+                id: test.id,
+                title: test.title,
+                description: test.description,
+                level: test.level as CEFRLevel,
+                skill: test.skill as SkillType,
+                timeLimit: test.time_limit,
+                questionCount: count || 0,
+                isActive: test.is_active,
+                bookNumber: (test as any).book_number || null,
+                unitNumber: (test as any).unit_number || null,
+              };
            })
          );
  
