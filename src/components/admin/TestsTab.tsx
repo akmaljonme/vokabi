@@ -30,6 +30,8 @@ interface Test {
   randomize_questions: boolean;
   created_at: string;
   question_count?: number;
+  book_number?: number | null;
+  unit_number?: number | null;
 }
 
 const skillIcons: Record<string, React.ReactNode> = {
@@ -288,8 +290,18 @@ export const TestsTab = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm line-clamp-1">{test.title}</h3>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <Badge variant="outline" className="text-xs">{test.level}</Badge>
+                      {test.skill === 'vocabulary' && test.book_number && (
+                        <Badge variant="outline" className="text-xs bg-orange-500/10 text-orange-600 border-orange-200">
+                          Kitob {test.book_number}
+                        </Badge>
+                      )}
+                      {test.unit_number && (
+                        <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 border-blue-200">
+                          Unit {test.unit_number}
+                        </Badge>
+                      )}
                       <span className="text-xs text-muted-foreground">
                         {test.question_count} ta savol
                       </span>
