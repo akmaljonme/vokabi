@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Menu, X, MapPin, LogOut, User, Shield } from 'lucide-react';
+import { ChevronDown, Menu, X, MapPin, LogOut, User, Shield, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,8 +12,14 @@ interface HeaderProps {
 export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPracticeOpen, setIsPracticeOpen] = useState(false);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const toggleTheme = () => {
+    document.documentElement.classList.toggle('dark');
+    setIsDark(!isDark);
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -84,8 +90,19 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
             </a>
           </nav>
 
-          {/* Auth Button */}
-          <div className="hidden lg:flex items-center gap-4">
+           {/* Auth Button */}
+           <div className="hidden lg:flex items-center gap-4">
+             <button
+               onClick={toggleTheme}
+               className="p-2 rounded-lg hover:bg-muted transition-colors"
+               title="Toggle theme"
+             >
+               {isDark ? (
+                 <Sun className="w-5 h-5" />
+               ) : (
+                 <Moon className="w-5 h-5" />
+               )}
+             </button>
             {user ? (
               <div className="flex items-center gap-3">
                 {isAdmin && onToggleAdmin && (
@@ -146,10 +163,21 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
             >
               Practice Tests
             </button>
-            <a href="#materials" className="py-2 font-medium">Study Materials</a>
-            <a href="#pricing" className="py-2 font-medium">Pricing</a>
-            <a href="#faq" className="py-2 font-medium">FAQ</a>
-            
+             <a href="#materials" className="py-2 font-medium">Study Materials</a>
+             <a href="#pricing" className="py-2 font-medium">Pricing</a>
+             <a href="#faq" className="py-2 font-medium">FAQ</a>
+             
+             <button
+               onClick={toggleTheme}
+               className="flex items-center gap-2 py-2 text-sm"
+             >
+               {isDark ? (
+                 <><Sun className="w-4 h-4" /> Light Mode</>
+               ) : (
+                 <><Moon className="w-4 h-4" /> Dark Mode</>
+               )}
+             </button>
+             
             {user ? (
               <>
                 <button
