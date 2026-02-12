@@ -39,13 +39,13 @@ export const Footer = () => {
           <div>
             <h4 className="font-display font-semibold text-lg mb-4">Product</h4>
             <ul className="space-y-3">
-              {['Practice Tests', 'Mock Exams', 'Study Materials', 'Progress Tracking', 'Mobile App', 'API Access'].map((item) => (
-                <li key={item}>
+              {['Practice Tests', 'Mock Exams', 'Study Materials', 'Progress Tracking', 'Mobile App', 'API Access'].map((item) =>
+              <li key={item}>
                   <a href="#" className="text-secondary-foreground/70 hover:text-primary transition-colors">
                     {item}
                   </a>
                 </li>
-              ))}
+              )}
             </ul>
           </div>
 
@@ -53,13 +53,13 @@ export const Footer = () => {
           <div>
             <h4 className="font-display font-semibold text-lg mb-4">Company</h4>
             <ul className="space-y-3">
-              {['About Us', 'Careers', 'Blog', 'Press', 'Partners', 'Contact'].map((item) => (
-                <li key={item}>
+              {['About Us', 'Careers', 'Blog', 'Press', 'Partners', 'Contact'].map((item) =>
+              <li key={item}>
                   <a href="#" className="text-secondary-foreground/70 hover:text-primary transition-colors">
                     {item}
                   </a>
                 </li>
-              ))}
+              )}
             </ul>
           </div>
 
@@ -73,15 +73,15 @@ export const Footer = () => {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-primary" />
-                <span className="text-secondary-foreground/70">+998 90 123 45 67</span>
+                <span className="text-secondary-foreground/70">+998 92 198 1401</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-secondary-foreground/50 text-sm">
-            © 2024 CEFR Test Hub. All rights reserved.
+          <p className="text-secondary-foreground/50 text-sm">© 2026 CEFR Test Hub. All rights reserved. 
+Created by Akmal KArimboyev
           </p>
           <div className="flex gap-6 text-sm">
             <a href="#" className="text-secondary-foreground/50 hover:text-primary transition-colors">
@@ -96,6 +96,6 @@ export const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>);
+
 };
