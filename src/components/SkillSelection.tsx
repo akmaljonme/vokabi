@@ -1,4 +1,5 @@
-import { ArrowLeft, BookOpen, Headphones, Brain, Lightbulb } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, BookOpen, Headphones, Brain, Lightbulb, ChevronRight, BookMarked } from 'lucide-react';
 import { CEFRLevel, SkillType } from '@/types/cefr';
 import { useActiveTests, TestInfo } from '@/hooks/useTests';
 import { Loader2 } from 'lucide-react';
@@ -9,8 +10,19 @@ interface SkillSelectionProps {
   onBack: () => void;
 }
 
+const BOOK_NAMES = [
+  "1-Kitob",
+  "2-Kitob",
+  "3-Kitob",
+  "4-Kitob",
+  "5-Kitob",
+  "6-Kitob",
+];
+
 export const SkillSelection = ({ level, onSelectMock, onBack }: SkillSelectionProps) => {
-  const { readingTests, listeningTests, vocabularyTests, grammarTests, loading, error } = useActiveTests(level);
+  const { readingTests, listeningTests, vocabularyTests, grammarTests, loading } = useActiveTests(level);
+  const [selectedVocabBook, setSelectedVocabBook] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<SkillType>('vocabulary');
 
   if (loading) {
     return (
@@ -20,214 +32,186 @@ export const SkillSelection = ({ level, onSelectMock, onBack }: SkillSelectionPr
     );
   }
 
+  // Group vocabulary tests by book
+  const getVocabBookUnits = (bookNumber: number) => {
+    return vocabularyTests
+      .filter(t => t.bookNumber === bookNumber)
+      .sort((a, b) => (a.unitNumber || 0) - (b.unitNumber || 0));
+  };
+
+  // Group grammar tests by unit
+  const grammarUnits = grammarTests
+    .sort((a, b) => (a.unitNumber || 0) - (b.unitNumber || 0));
+
+  const tabs = [
+    { key: 'vocabulary' as SkillType, label: "Lug'at", icon: Lightbulb, color: 'purple' },
+    { key: 'grammar' as SkillType, label: 'Grammatika', icon: Brain, color: 'orange' },
+    { key: 'reading' as SkillType, label: 'Reading', icon: BookOpen, color: 'emerald' },
+    { key: 'listening' as SkillType, label: 'Listening', icon: Headphones, color: 'blue' },
+  ];
+
+  const renderUnitList = (tests: TestInfo[], skill: SkillType) => {
+    if (tests.length === 0) {
+      return (
+        <div className="text-center py-12 text-muted-foreground">
+          <p>Hali testlar qo'shilmagan</p>
+        </div>
+      );
+    }
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {tests.map((test, index) => (
+          <button
+            key={test.id}
+            onClick={() => onSelectMock(skill, index + 1, test.id)}
+            className="mock-grid-item hover:border-primary hover:bg-primary/5 text-left p-4"
+          >
+            <div className="font-semibold text-sm">Unit {test.unitNumber || index + 1}</div>
+            <div className="text-xs text-muted-foreground mt-1">{test.questionCount} ta savol</div>
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background py-8 animate-fade-in">
       <div className="container mx-auto px-4">
-        {/* Back Button */}
-        <button 
-          onClick={onBack}
+        <button
+          onClick={selectedVocabBook ? () => setSelectedVocabBook(null) : onBack}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
         >
           <ArrowLeft className="w-5 h-5" />
-          Darajalarga Qaytish
+          {selectedVocabBook ? "Kitoblarga Qaytish" : "Darajalarga Qaytish"}
         </button>
 
-         <div className="text-center mb-12">
-           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
-             <span className="font-bold">{level}</span>
-             <span>Daraja</span>
-           </div>
-           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
-             Test Turini <span className="text-gradient">Tanlang</span>
-           </h1>
-           <p className="text-muted-foreground text-lg">
-             Lug'at, Grammatika, Reading yoki Listening testini tanlang
-           </p>
-         </div>
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
+            <span className="font-bold">{level}</span>
+            <span>Daraja</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">
+            Test Turini <span className="text-gradient">Tanlang</span>
+          </h1>
+        </div>
 
-         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-           {/* Vocabulary Section */}
-           <div className="skill-card bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200">
-             <div className="flex items-center gap-4 mb-6">
-               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center shadow-lg">
-                 <Lightbulb className="w-8 h-8 text-white" />
-               </div>
-               <div>
-                 <h2 className="text-2xl font-display font-bold text-purple-700">Lug'at</h2>
-                 <p className="text-purple-600/70">So'z boyligingizni oshiring</p>
-               </div>
-             </div>
+        {/* Tabs */}
+        <div className="flex justify-center gap-2 mb-8 flex-wrap">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => { setActiveTab(tab.key); setSelectedVocabBook(null); }}
+                className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                  isActive
+                    ? 'bg-primary text-primary-foreground shadow-lg'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
 
-             {vocabularyTests.length > 0 ? (
-               <>
-                 <div className="grid grid-cols-1 gap-2">
-                   {vocabularyTests.map((test, index) => (
-                     <button
-                       key={test.id}
-                       onClick={() => onSelectMock('vocabulary', index + 1, test.id)}
-                       className="mock-grid-item hover:bg-purple-100 hover:border-purple-400 hover:text-purple-700 text-left p-3"
-                     >
-                       <div className="font-medium">{test.title}</div>
-                       <div className="text-xs text-muted-foreground mt-1">
-                         {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
-                       </div>
-                     </button>
-                   ))}
-                 </div>
-                 <p className="text-center text-sm text-muted-foreground mt-4">
-                   {vocabularyTests.length} ta test mavjud
-                 </p>
-               </>
-             ) : (
-               <div className="text-center py-8 text-muted-foreground">
-                 <Lightbulb className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                 <p>Hali lug'at testlari qo'shilmagan</p>
-               </div>
-             )}
-           </div>
+        {/* Content */}
+        <div className="max-w-5xl mx-auto">
+          {activeTab === 'vocabulary' && !selectedVocabBook && (
+            <div>
+              <h2 className="text-xl font-display font-bold mb-6 text-center">Kitobni Tanlang</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {BOOK_NAMES.map((name, i) => {
+                  const bookNum = i + 1;
+                  const unitCount = getVocabBookUnits(bookNum).length;
+                  return (
+                    <button
+                      key={bookNum}
+                      onClick={() => setSelectedVocabBook(bookNum)}
+                      className="card-elevated flex flex-col items-center gap-3 p-6 hover:border-primary cursor-pointer"
+                    >
+                      <BookMarked className="w-10 h-10 text-primary" />
+                      <div className="font-display font-bold text-lg">{name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {unitCount > 0 ? `${unitCount} ta unit` : "Hali bo'sh"}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-           {/* Grammar Section */}
-           <div className="skill-card bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200">
-             <div className="flex items-center gap-4 mb-6">
-               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-yellow-500 flex items-center justify-center shadow-lg">
-                 <Brain className="w-8 h-8 text-white" />
-               </div>
-               <div>
-                 <h2 className="text-2xl font-display font-bold text-orange-700">Grammatika</h2>
-                 <p className="text-orange-600/70">Til qoidalarini o'zlashtiring</p>
-               </div>
-             </div>
+          {activeTab === 'vocabulary' && selectedVocabBook && (
+            <div>
+              <h2 className="text-xl font-display font-bold mb-6 text-center">
+                {BOOK_NAMES[selectedVocabBook - 1]} — Unitlar
+              </h2>
+              {renderUnitList(getVocabBookUnits(selectedVocabBook), 'vocabulary')}
+            </div>
+          )}
 
-             {grammarTests.length > 0 ? (
-               <>
-                 <div className="grid grid-cols-1 gap-2">
-                   {grammarTests.map((test, index) => (
-                     <button
-                       key={test.id}
-                       onClick={() => onSelectMock('grammar', index + 1, test.id)}
-                       className="mock-grid-item hover:bg-orange-100 hover:border-orange-400 hover:text-orange-700 text-left p-3"
-                     >
-                       <div className="font-medium">{test.title}</div>
-                       <div className="text-xs text-muted-foreground mt-1">
-                         {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
-                       </div>
-                     </button>
-                   ))}
-                 </div>
-                 <p className="text-center text-sm text-muted-foreground mt-4">
-                   {grammarTests.length} ta test mavjud
-                 </p>
-               </>
-             ) : (
-               <div className="text-center py-8 text-muted-foreground">
-                 <Brain className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                 <p>Hali grammatika testlari qo'shilmagan</p>
-               </div>
-             )}
-           </div>
+          {activeTab === 'grammar' && (
+            <div>
+              <h2 className="text-xl font-display font-bold mb-6 text-center">Grammatika Unitlari</h2>
+              {renderUnitList(grammarUnits, 'grammar')}
+            </div>
+          )}
 
-           {/* Reading Section */}
-           <div className="skill-card bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200">
-             <div className="flex items-center gap-4 mb-6">
-               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
-                 <BookOpen className="w-8 h-8 text-white" />
-               </div>
-               <div>
-                 <h2 className="text-2xl font-display font-bold text-emerald-700">Reading</h2>
-                 <p className="text-emerald-600/70">O'qish qobiliyatingizni sinog'lash</p>
-               </div>
-             </div>
+          {activeTab === 'reading' && (
+            <div>
+              <h2 className="text-xl font-display font-bold mb-6 text-center">Reading Testlari</h2>
+              {readingTests.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3">
+                  {readingTests.map((test, index) => (
+                    <button
+                      key={test.id}
+                      onClick={() => onSelectMock('reading', index + 1, test.id)}
+                      className="mock-grid-item hover:border-primary text-left p-4"
+                    >
+                      <div className="font-medium">{test.title}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Hali reading testlari qo'shilmagan</p>
+                </div>
+              )}
+            </div>
+          )}
 
-             {readingTests.length > 0 ? (
-               <>
-                 <div className="grid grid-cols-1 gap-2">
-                   {readingTests.map((test, index) => (
-                     <button
-                       key={test.id}
-                       onClick={() => onSelectMock('reading', index + 1, test.id)}
-                       className="mock-grid-item hover:bg-emerald-100 hover:border-emerald-400 hover:text-emerald-700 text-left p-3"
-                     >
-                       <div className="font-medium">{test.title}</div>
-                       <div className="text-xs text-muted-foreground mt-1">
-                         {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
-                       </div>
-                     </button>
-                   ))}
-                 </div>
-                 <p className="text-center text-sm text-muted-foreground mt-4">
-                   {readingTests.length} ta test mavjud
-                 </p>
-               </>
-             ) : (
-               <div className="text-center py-8 text-muted-foreground">
-                 <BookOpen className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                 <p>Hali reading testlari qo'shilmagan</p>
-               </div>
-             )}
-           </div>
-
-           {/* Listening Section */}
-           <div className="skill-card bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200">
-             <div className="flex items-center gap-4 mb-6">
-               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-lg">
-                 <Headphones className="w-8 h-8 text-white" />
-               </div>
-               <div>
-                 <h2 className="text-2xl font-display font-bold text-blue-700">Listening</h2>
-                 <p className="text-blue-600/70">Tinglash qobiliyatingizni mashq qiling</p>
-               </div>
-             </div>
-
-             {listeningTests.length > 0 ? (
-               <>
-                 <div className="grid grid-cols-1 gap-2">
-                   {listeningTests.map((test, index) => (
-                     <button
-                       key={test.id}
-                       onClick={() => onSelectMock('listening', index + 1, test.id)}
-                       className="mock-grid-item hover:bg-blue-100 hover:border-blue-400 hover:text-blue-700 text-left p-3"
-                     >
-                       <div className="font-medium">{test.title}</div>
-                       <div className="text-xs text-muted-foreground mt-1">
-                         {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
-                       </div>
-                     </button>
-                   ))}
-                 </div>
-                 <p className="text-center text-sm text-muted-foreground mt-4">
-                   {listeningTests.length} ta test mavjud
-                 </p>
-               </>
-             ) : (
-               <div className="text-center py-8 text-muted-foreground">
-                 <Headphones className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                 <p>Hali listening testlari qo'shilmagan</p>
-               </div>
-             )}
-           </div>
-         </div>
-
-        {/* Info Cards */}
-         {(readingTests.length > 0 || listeningTests.length > 0 || vocabularyTests.length > 0 || grammarTests.length > 0) && (
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto">
-             <div className="card-elevated text-center">
-               <div className="text-3xl font-display font-bold text-primary mb-2">
-                 {readingTests.length + listeningTests.length + vocabularyTests.length + grammarTests.length}
-               </div>
-               <p className="text-muted-foreground">Jami testlar</p>
-             </div>
-             <div className="card-elevated text-center">
-               <div className="text-3xl font-display font-bold text-primary mb-2">
-                 {readingTests.reduce((sum, t) => sum + t.questionCount, 0) + listeningTests.reduce((sum, t) => sum + t.questionCount, 0) + vocabularyTests.reduce((sum, t) => sum + t.questionCount, 0) + grammarTests.reduce((sum, t) => sum + t.questionCount, 0)}
-               </div>
-               <p className="text-muted-foreground">Jami savollar</p>
-             </div>
-             <div className="card-elevated text-center">
-               <div className="text-3xl font-display font-bold text-primary mb-2">{level}</div>
-               <p className="text-muted-foreground">CEFR daraja</p>
-             </div>
-           </div>
-         )}
+          {activeTab === 'listening' && (
+            <div>
+              <h2 className="text-xl font-display font-bold mb-6 text-center">Listening Testlari</h2>
+              {listeningTests.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3">
+                  {listeningTests.map((test, index) => (
+                    <button
+                      key={test.id}
+                      onClick={() => onSelectMock('listening', index + 1, test.id)}
+                      className="mock-grid-item hover:border-primary text-left p-4"
+                    >
+                      <div className="font-medium">{test.title}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Hali listening testlari qo'shilmagan</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

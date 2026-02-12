@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowLeft, ArrowRight, Clock, Flag, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, Flag, AlertCircle, Eye, EyeOff, Maximize } from 'lucide-react';
 import { MockTest, UserAnswer, Part, TestResult, Question } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { useTestWithQuestions } from '@/hooks/useTests';
@@ -23,22 +23,62 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   const [timeLeft, setTimeLeft] = useState(30 * 60);
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const isNoParts = skill === 'vocabulary' || skill === 'grammar';
 
   // Fetch from database if testId is provided
   const { test: dbTest, loading: dbLoading } = useTestWithQuestions(testId);
 
   useEffect(() => {
-    // If we have a database test, use it
     if (testId && dbTest) {
       setMockTest(dbTest);
       setTimeLeft(dbTest.timeLimit);
     } else if (!testId) {
-      // Fallback to mock data if no testId
       const test = generateMockTest(mockId, level, skill);
       setMockTest(test);
       setTimeLeft(test.timeLimit);
     }
   }, [mockId, level, skill, testId, dbTest]);
+
+  // Fullscreen + prevent exit
+  useEffect(() => {
+    const enterFullscreen = async () => {
+      try {
+        if (containerRef.current && document.fullscreenElement === null) {
+          await containerRef.current.requestFullscreen();
+        }
+      } catch (e) {
+        // Fullscreen not supported or denied
+      }
+    };
+    enterFullscreen();
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = 'Test hali tugamagan. Chiqishni xohlaysizmi?';
+    };
+    
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && mockTest) {
+        // Re-enter fullscreen if exited during test
+        try {
+          containerRef.current?.requestFullscreen();
+        } catch {}
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    };
+  }, [mockTest]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -70,14 +110,6 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
     return part?.questions[currentQuestion - 1];
   };
 
-  const getQuestionNumber = (): number => {
-    return (currentPart - 1) * 10 + currentQuestion;
-  };
-
-  const isQuestionAnswered = (partId: number, questionIndex: number): boolean => {
-    const questionId = (partId - 1) * 10 + questionIndex + 1;
-    return answers.some((a) => a.questionId === questionId);
-  };
 
   const getAnswer = (questionId: number): string | string[] | undefined => {
     const answer = answers.find((a) => a.questionId === questionId);
@@ -102,8 +134,37 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
     });
   };
 
+  const getTotalQuestions = (): number => {
+    if (!mockTest) return 0;
+    if (isNoParts) {
+      return mockTest.parts.reduce((acc, part) => acc + part.questions.length, 0);
+    }
+    return mockTest.parts.reduce((acc, part) => acc + part.questions.length, 0);
+  };
+
+  const getQuestionNumber = (): number => {
+    if (isNoParts) {
+      return currentQuestion;
+    }
+    return (currentPart - 1) * 10 + currentQuestion;
+  };
+
+  const isQuestionAnswered = (partId: number, questionIndex: number): boolean => {
+    if (isNoParts) {
+      return answers.some((a) => a.questionId === questionIndex + 1);
+    }
+    const questionId = (partId - 1) * 10 + questionIndex + 1;
+    return answers.some((a) => a.questionId === questionId);
+  };
+
+  const getCurrentQuestionForNoParts = (): Question | undefined => {
+    if (!mockTest) return undefined;
+    const allQuestions = mockTest.parts.flatMap(p => p.questions);
+    return allQuestions[currentQuestion - 1];
+  };
+
   const handleOptionClick = (option: string) => {
-    const question = getCurrentQuestionInPart();
+    const question = isNoParts ? getCurrentQuestionForNoParts() : getCurrentQuestionInPart();
     if (!question) return;
 
     if (question.type === 'list-selection') {
@@ -128,19 +189,28 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   };
 
   const handleNavigate = (direction: 'prev' | 'next') => {
-    if (direction === 'next') {
-      if (currentQuestion < 10) {
-        setCurrentQuestion((prev) => prev + 1);
-      } else if (currentPart < 4) {
-        setCurrentPart((prev) => prev + 1);
-        setCurrentQuestion(1);
+    const total = getTotalQuestions();
+    if (isNoParts) {
+      if (direction === 'next' && currentQuestion < total) {
+        setCurrentQuestion(prev => prev + 1);
+      } else if (direction === 'prev' && currentQuestion > 1) {
+        setCurrentQuestion(prev => prev - 1);
       }
     } else {
-      if (currentQuestion > 1) {
-        setCurrentQuestion((prev) => prev - 1);
-      } else if (currentPart > 1) {
-        setCurrentPart((prev) => prev - 1);
-        setCurrentQuestion(10);
+      if (direction === 'next') {
+        if (currentQuestion < 10) {
+          setCurrentQuestion((prev) => prev + 1);
+        } else if (currentPart < 4) {
+          setCurrentPart((prev) => prev + 1);
+          setCurrentQuestion(1);
+        }
+      } else {
+        if (currentQuestion > 1) {
+          setCurrentQuestion((prev) => prev - 1);
+        } else if (currentPart > 1) {
+          setCurrentPart((prev) => prev - 1);
+          setCurrentQuestion(10);
+        }
       }
     }
   };
@@ -207,30 +277,26 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   }
 
   const part = getCurrentPart();
-  const question = getCurrentQuestionInPart();
+  const question = isNoParts ? getCurrentQuestionForNoParts() : getCurrentQuestionInPart();
+  const totalQ = getTotalQuestions();
+
+  const handleExitTest = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    onBack();
+  };
 
   return (
-    <div className="min-h-screen bg-muted/30 flex flex-col animate-fade-in">
+    <div ref={containerRef} className="min-h-screen bg-muted/30 flex flex-col animate-fade-in">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={onBack}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                <span className="hidden sm:inline">Exit</span>
-              </button>
-              <div className="h-8 w-px bg-border" />
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-primary">{level}</span>
-                <span className="text-muted-foreground">•</span>
-                <span className="capitalize">{skill}</span>
-                <span className="text-muted-foreground">•</span>
-                <span>Mock {mockId}</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-primary">{level}</span>
+              <span className="text-muted-foreground">•</span>
+              <span className="capitalize">{skill}</span>
             </div>
 
             <div className={`timer-display flex items-center gap-2 ${timeLeft < 300 ? 'timer-warning' : ''}`}>
@@ -243,28 +309,30 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
               className="btn-primary py-2 px-4 flex items-center gap-2"
             >
               <Flag className="w-4 h-4" />
-              <span className="hidden sm:inline">Finish Test</span>
+              <span className="hidden sm:inline">Tugatish</span>
             </button>
           </div>
         </div>
       </header>
 
-      {/* Part Tabs */}
-      <div className="bg-card border-b border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex">
-            {mockTest.parts.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => handlePartChange(p.id)}
-                className={`part-tab ${currentPart === p.id ? 'active' : ''}`}
-              >
-                Part {p.id}
-              </button>
-            ))}
+      {/* Part Tabs - only for reading/listening */}
+      {!isNoParts && (
+        <div className="bg-card border-b border-border">
+          <div className="container mx-auto px-4">
+            <div className="flex">
+              {mockTest.parts.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => handlePartChange(p.id)}
+                  className={`part-tab ${currentPart === p.id ? 'active' : ''}`}
+                >
+                  Part {p.id}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:flex-row">
@@ -290,7 +358,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
         )}
 
         {/* Right Side - Questions */}
-        <div className={`flex-1 flex flex-col ${skill === 'listening' ? 'lg:max-w-4xl lg:mx-auto' : ''}`}>
+        <div className={`flex-1 flex flex-col ${skill === 'listening' ? 'lg:max-w-4xl lg:mx-auto' : ''} ${isNoParts ? 'max-w-3xl mx-auto w-full' : ''}`}>
           {/* Listening Controls */}
           {skill === 'listening' && part && (
             <div className="bg-card border-b border-border p-4">
@@ -309,13 +377,13 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-2">
                 <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                  Question {getQuestionNumber()} of 40
+                  Savol {getQuestionNumber()} / {totalQ}
                 </span>
                 <span className="text-sm text-muted-foreground capitalize">
                   {question?.type.replace(/-/g, ' ')}
                 </span>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">{part?.instruction}</p>
+              {!isNoParts && <p className="text-sm text-muted-foreground mb-4">{part?.instruction}</p>}
               <h3 className="text-lg font-semibold">{question?.question}</h3>
             </div>
 
@@ -338,32 +406,50 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
             {question?.type === 'list-selection' && (
               <p className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
-                Select exactly 2 options
+                2 ta javobni tanlang
               </p>
             )}
 
-            {/* Horizontal Question Navigator */}
+            {/* Question Navigator */}
             <div className="bg-muted/50 rounded-xl p-4 mt-auto">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-medium">Part {currentPart} Questions</h4>
+                <h4 className="text-sm font-medium">
+                  {isNoParts ? 'Savollar' : `Part ${currentPart} Savollar`}
+                </h4>
                 <span className="text-xs text-muted-foreground">
-                  {getCurrentPart()?.questions.filter((_, i) => isQuestionAnswered(currentPart, i)).length}/10 answered
+                  {answers.length}/{totalQ} javob berildi
                 </span>
               </div>
               <div className="flex gap-2 flex-wrap">
-                {Array.from({ length: 10 }, (_, i) => {
-                  const isAnswered = isQuestionAnswered(currentPart, i);
-                  const isCurrent = i + 1 === currentQuestion;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => handleQuestionNav(i)}
-                      className={`test-nav-item ${isAnswered ? 'answered' : 'unanswered'} ${isCurrent ? 'current' : ''}`}
-                    >
-                      {i + 1}
-                    </button>
-                  );
-                })}
+                {isNoParts ? (
+                  Array.from({ length: totalQ }, (_, i) => {
+                    const isAnswered = answers.some(a => a.questionId === i + 1);
+                    const isCurrent = i + 1 === currentQuestion;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentQuestion(i + 1)}
+                        className={`test-nav-item ${isAnswered ? 'answered' : 'unanswered'} ${isCurrent ? 'current' : ''}`}
+                      >
+                        {i + 1}
+                      </button>
+                    );
+                  })
+                ) : (
+                  Array.from({ length: 10 }, (_, i) => {
+                    const isAnswered = isQuestionAnswered(currentPart, i);
+                    const isCurrent = i + 1 === currentQuestion;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => handleQuestionNav(i)}
+                        className={`test-nav-item ${isAnswered ? 'answered' : 'unanswered'} ${isCurrent ? 'current' : ''}`}
+                      >
+                        {i + 1}
+                      </button>
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>
@@ -372,23 +458,23 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
           <div className="p-4 bg-card border-t border-border flex items-center justify-between">
             <button 
               onClick={() => handleNavigate('prev')}
-              disabled={currentPart === 1 && currentQuestion === 1}
+              disabled={isNoParts ? currentQuestion === 1 : (currentPart === 1 && currentQuestion === 1)}
               className="btn-outline py-2 px-4 flex items-center gap-2 disabled:opacity-50"
             >
               <ArrowLeft className="w-4 h-4" />
-              Previous
+              Oldingi
             </button>
 
             <div className="text-sm text-muted-foreground">
-              {answers.length}/40 answered
+              {answers.length}/{totalQ} javob
             </div>
 
             <button 
               onClick={() => handleNavigate('next')}
-              disabled={currentPart === 4 && currentQuestion === 10}
+              disabled={isNoParts ? currentQuestion === totalQ : (currentPart === 4 && currentQuestion === 10)}
               className="btn-primary py-2 px-4 flex items-center gap-2"
             >
-              Next
+              Keyingi
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -399,23 +485,28 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
       {showConfirmFinish && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-2xl p-6 max-w-md w-full animate-slide-up">
-            <h3 className="text-xl font-display font-bold mb-2">Finish Test?</h3>
+            <h3 className="text-xl font-display font-bold mb-2">Testni tugataysizmi?</h3>
             <p className="text-muted-foreground mb-4">
-              You have answered {answers.length} out of 40 questions.
-              {answers.length < 40 && ` ${40 - answers.length} questions are unanswered.`}
+              Siz {answers.length} ta savolga javob berdingiz ({totalQ} tadan).
+              {answers.length < totalQ && ` ${totalQ - answers.length} ta savol javobsiz qoldi.`}
             </p>
             <div className="flex gap-3">
               <button 
                 onClick={() => setShowConfirmFinish(false)}
                 className="btn-outline flex-1"
               >
-                Continue Test
+                Davom etish
               </button>
               <button 
-                onClick={handleFinishTest}
+                onClick={() => {
+                  handleFinishTest();
+                  if (document.fullscreenElement) {
+                    document.exitFullscreen().catch(() => {});
+                  }
+                }}
                 className="btn-primary flex-1"
               >
-                Finish & Submit
+                Tugatish
               </button>
             </div>
           </div>

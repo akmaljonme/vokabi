@@ -239,6 +239,7 @@ export type Database = {
       }
       tests: {
         Row: {
+          book_number: number | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -249,9 +250,11 @@ export type Database = {
           skill: string
           time_limit: number
           title: string
+          unit_number: number | null
           updated_at: string
         }
         Insert: {
+          book_number?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -262,9 +265,11 @@ export type Database = {
           skill: string
           time_limit?: number
           title: string
+          unit_number?: number | null
           updated_at?: string
         }
         Update: {
+          book_number?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -275,6 +280,7 @@ export type Database = {
           skill?: string
           time_limit?: number
           title?: string
+          unit_number?: number | null
           updated_at?: string
         }
         Relationships: []
