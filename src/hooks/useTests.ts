@@ -103,12 +103,14 @@
      fetchTests();
    }, [level]);
  
-   // Group tests by skill
-   const readingTests = tests.filter(t => t.skill === 'reading');
-   const listeningTests = tests.filter(t => t.skill === 'listening');
- 
-   return { tests, readingTests, listeningTests, loading, error };
- };
+    // Group tests by skill
+    const readingTests = tests.filter(t => t.skill === 'reading');
+    const listeningTests = tests.filter(t => t.skill === 'listening');
+    const vocabularyTests = tests.filter(t => t.skill === 'vocabulary');
+    const grammarTests = tests.filter(t => t.skill === 'grammar');
+  
+    return { tests, readingTests, listeningTests, vocabularyTests, grammarTests, loading, error };
+  };
  
  // Fetch a single test with all its questions and passages
  export const useTestWithQuestions = (testId: string | null) => {
