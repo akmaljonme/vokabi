@@ -229,7 +229,7 @@ const questionTypes: QuestionType[] = [
 export const generateMockTest = (
   mockId: number,
   level: CEFRLevel,
-  skill: 'reading' | 'listening'
+  skill: 'reading' | 'listening' | 'vocabulary' | 'grammar'
 ): MockTest => {
   const parts: Part[] = [];
   

@@ -1,6 +1,6 @@
 export type CEFRLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1';
 
-export type SkillType = 'reading' | 'listening';
+export type SkillType = 'reading' | 'listening' | 'vocabulary' | 'grammar';
 
 export type QuestionType = 
   | 'matching-headings'
