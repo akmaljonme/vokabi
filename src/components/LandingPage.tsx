@@ -34,7 +34,7 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
             <div className="text-left">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6 animate-slide-up">
                 <Star className="w-4 h-4 fill-primary" />
-                <span className="font-medium text-sm">50,000+ foydalanuvchi ishonchini qozongan</span>
+                <span className="font-medium text-sm">5+ foydalanuvchi ishonchini qozongan</span>
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6 leading-tight animate-slide-up" style={{ animationDelay: '0.1s' }}>
@@ -49,10 +49,10 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
               </p>
               
               <div className="flex flex-col sm:flex-row items-start gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-                <button 
+                <button
                   onClick={handleStartTest}
-                  className="btn-primary flex items-center gap-2 text-lg px-8 py-4"
-                >
+                  className="btn-primary flex items-center gap-2 text-lg px-8 py-4">
+
                    {user ? 'Testni Boshlash' : 'Bepul Test Boshlash'}
                    <ArrowRight className="w-5 h-5" />
                 </button>
@@ -76,23 +76,23 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
             {/* Right Content - Stats Cards */}
             <div className="hidden lg:grid grid-cols-2 gap-4">
               {[
-                { icon: BookOpen, value: '500+', label: 'Testlar', color: 'from-emerald-400 to-teal-500' },
-                { icon: Users, value: '50K+', label: 'Foydalanuvchilar', color: 'from-blue-400 to-indigo-500' },
-                { icon: Award, value: '95%', label: "Muvaffaqiyat", color: 'from-amber-400 to-orange-500' },
-                { icon: Globe, value: '4', label: 'Test Turi', color: 'from-primary to-red-600' },
-              ].map((stat, index) => (
-                <div 
-                  key={index}
-                  className="card-elevated p-6 animate-slide-up"
-                  style={{ animationDelay: `${0.3 + index * 0.1}s` }}
-                >
+              { icon: BookOpen, value: '500+', label: 'Testlar', color: 'from-emerald-400 to-teal-500' },
+              { icon: Users, value: '50K+', label: 'Foydalanuvchilar', color: 'from-blue-400 to-indigo-500' },
+              { icon: Award, value: '95%', label: "Muvaffaqiyat", color: 'from-amber-400 to-orange-500' },
+              { icon: Globe, value: '4', label: 'Test Turi', color: 'from-primary to-red-600' }].
+              map((stat, index) =>
+              <div
+                key={index}
+                className="card-elevated p-6 animate-slide-up"
+                style={{ animationDelay: `${0.3 + index * 0.1}s` }}>
+
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4`}>
                     <stat.icon className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-3xl font-display font-bold mb-1">{stat.value}</div>
                   <div className="text-muted-foreground text-sm">{stat.label}</div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -107,11 +107,11 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
         <div className="container mx-auto px-4">
           <p className="text-center text-muted-foreground mb-8">Xalqaro til standartlariga mos</p>
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-60">
-            {['IELTS', 'TOEFL', 'Cambridge', 'Goethe', 'DELF'].map((brand) => (
-              <div key={brand} className="text-2xl font-display font-bold text-muted-foreground/50">
+            {['IELTS', 'TOEFL', 'Cambridge', 'Goethe', 'DELF'].map((brand) =>
+            <div key={brand} className="text-2xl font-display font-bold text-muted-foreground/50">
                 {brand}
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -131,51 +131,51 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
              {[
-               {
-                 icon: BookOpen,
-                 title: "Lug'at Testlari",
-                 description: "So'z boyligingizni sinab ko'ring. Har bir daraja uchun maxsus tayyorlangan so'z testlari bilan leksik bilimingizni oshiring.",
-                 color: 'bg-emerald-500',
-               },
-               {
-                 icon: Zap,
-                 title: 'Grammatika Testlari',
-                 description: "Grammatik qoidalarni mustahkamlang. Gap tuzilishi, fe'l zamonlari va boshqa mavzular bo'yicha testlar.",
-                 color: 'bg-purple-500',
-               },
-               {
-                 icon: BookOpen,
-                 title: 'Reading Testlari',
-                 description: "Haqiqiy CEFR formatidagi o'qish testlari. Matnlarni tahlil qilish va tushunish qobiliyatingizni sinang.",
-                 color: 'bg-blue-500',
-               },
-               {
-                 icon: Headphones,
-                 title: 'Listening Testlari',
-                 description: "Audio materiallar bilan tinglash qobiliyatingizni rivojlantiring. Real hayotiy vaziyatlarga asoslangan testlar.",
-                 color: 'bg-amber-500',
-               },
-               {
-                 icon: TrendingUp,
-                 title: "Natijalar Tahlili",
-                 description: "Har bir test bo'yicha batafsil natijalar va kamchiliklaringizni aniqlash imkoniyati.",
-                 color: 'bg-pink-500',
-               },
-               {
-                 icon: Shield,
-                 title: 'Ekspert Kontent',
-                 description: "Barcha testlar sertifikatlangan CEFR o'qituvchilari tomonidan tayyorlangan.",
-                 color: 'bg-primary',
-               },
-             ].map((feature, index) => (
-              <div key={index} className="card-elevated group p-8">
+            {
+              icon: BookOpen,
+              title: "Lug'at Testlari",
+              description: "So'z boyligingizni sinab ko'ring. Har bir daraja uchun maxsus tayyorlangan so'z testlari bilan leksik bilimingizni oshiring.",
+              color: 'bg-emerald-500'
+            },
+            {
+              icon: Zap,
+              title: 'Grammatika Testlari',
+              description: "Grammatik qoidalarni mustahkamlang. Gap tuzilishi, fe'l zamonlari va boshqa mavzular bo'yicha testlar.",
+              color: 'bg-purple-500'
+            },
+            {
+              icon: BookOpen,
+              title: 'Reading Testlari',
+              description: "Haqiqiy CEFR formatidagi o'qish testlari. Matnlarni tahlil qilish va tushunish qobiliyatingizni sinang.",
+              color: 'bg-blue-500'
+            },
+            {
+              icon: Headphones,
+              title: 'Listening Testlari',
+              description: "Audio materiallar bilan tinglash qobiliyatingizni rivojlantiring. Real hayotiy vaziyatlarga asoslangan testlar.",
+              color: 'bg-amber-500'
+            },
+            {
+              icon: TrendingUp,
+              title: "Natijalar Tahlili",
+              description: "Har bir test bo'yicha batafsil natijalar va kamchiliklaringizni aniqlash imkoniyati.",
+              color: 'bg-pink-500'
+            },
+            {
+              icon: Shield,
+              title: 'Ekspert Kontent',
+              description: "Barcha testlar sertifikatlangan CEFR o'qituvchilari tomonidan tayyorlangan.",
+              color: 'bg-primary'
+            }].
+            map((feature, index) =>
+            <div key={index} className="card-elevated group p-8">
                 <div className={`w-14 h-14 rounded-2xl ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                   <feature.icon className="w-7 h-7 text-white" />
                 </div>
                 <h3 className="text-xl font-display font-semibold mb-3">{feature.title}</h3>
                 <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -200,23 +200,23 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
                 A2: 'from-teal-400 to-teal-600',
                 B1: 'from-amber-400 to-amber-600',
                 B2: 'from-orange-400 to-orange-600',
-                C1: 'from-red-400 to-red-600',
+                C1: 'from-red-400 to-red-600'
               };
-              
+
               return (
                 <button
                   key={level.level}
                   onClick={handleStartTest}
                   className="level-card text-center group"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
+                  style={{ animationDelay: `${index * 0.1}s` }}>
+
                   <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${colors[level.level]} text-white text-2xl font-display font-bold mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
                     {level.level}
                   </div>
                   <h3 className="text-lg font-semibold mb-2">{level.name}</h3>
                   <p className="text-sm text-muted-foreground">{level.description}</p>
-                </button>
-              );
+                </button>);
+
             })}
           </div>
         </div>
@@ -234,43 +234,43 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {[
-               {
-                 step: '01',
-                 title: 'Darajangizni Tanlang',
-                 description: "A1 dan C1 gacha o'z darajangizga mos testni tanlang",
-                 icon: '🎯',
-               },
-               {
-                 step: '02',
-                 title: 'Testni Yeching',
-                 description: "Lug'at, grammatika, reading yoki listening testini yeching",
-                 icon: '📝',
-               },
-               {
-                 step: '03',
-                 title: "Natijani Ko'ring",
-                 description: "Natijalaringizni tahlil qiling va kamchiliklaringiz ustida ishlang",
-                 icon: '📈',
-               },
-            ].map((item, index) => (
-              <div key={index} className="relative text-center p-8">
+            {
+              step: '01',
+              title: 'Darajangizni Tanlang',
+              description: "A1 dan C1 gacha o'z darajangizga mos testni tanlang",
+              icon: '🎯'
+            },
+            {
+              step: '02',
+              title: 'Testni Yeching',
+              description: "Lug'at, grammatika, reading yoki listening testini yeching",
+              icon: '📝'
+            },
+            {
+              step: '03',
+              title: "Natijani Ko'ring",
+              description: "Natijalaringizni tahlil qiling va kamchiliklaringiz ustida ishlang",
+              icon: '📈'
+            }].
+            map((item, index) =>
+            <div key={index} className="relative text-center p-8">
                 <div className="text-6xl mb-4">{item.icon}</div>
                 <div className="text-sm text-primary font-bold mb-2">STEP {item.step}</div>
                 <h3 className="text-xl font-display font-semibold mb-3">{item.title}</h3>
                 <p className="text-muted-foreground">{item.description}</p>
                 
-                {index < 2 && (
-                  <ArrowRight className="hidden md:block absolute top-12 -right-4 w-8 h-8 text-primary/30" />
-                )}
+                {index < 2 &&
+              <ArrowRight className="hidden md:block absolute top-12 -right-4 w-8 h-8 text-primary/30" />
+              }
               </div>
-            ))}
+            )}
           </div>
 
           <div className="text-center mt-12">
-             <button 
-               onClick={handleStartTest}
-               className="btn-primary inline-flex items-center gap-2 text-lg px-8 py-4"
-             >
+             <button
+              onClick={handleStartTest}
+              className="btn-primary inline-flex items-center gap-2 text-lg px-8 py-4">
+
                Hozir Boshlang
                <ArrowRight className="w-5 h-5" />
             </button>
@@ -290,26 +290,26 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[
-              {
-                name: 'Aziza Karimova',
-                 level: 'B2 Sertifikat',
-                 text: "Lug'at va grammatika testlari juda foydali bo'ldi. 3 oyda B2 imtihoniga to'liq tayyorlandim!",
-                 avatar: 'AK',
-               },
-               {
-                 name: 'Sardor Rahimov',
-                 level: 'C1 Sertifikat',
-                 text: "Tezkor natijalar va batafsil tushuntirishlar xatolarimni tushunishni osonlashtirdi. Juda tavsiya qilaman!",
-                 avatar: 'SR',
-               },
-               {
-                 name: 'Malika Usmanova',
-                 level: 'B1 Sertifikat',
-                 text: "Istalgan vaqtda, istalgan joyda mashq qilish mumkin. Mobil qurilmalar uchun qulay interfeys juda yoqdi.",
-                 avatar: 'MU',
-              },
-            ].map((testimonial, index) => (
-              <div key={index} className="bg-white/5 rounded-2xl p-8 backdrop-blur-sm border border-white/10">
+            {
+              name: 'Aziza Karimova',
+              level: 'B2 Sertifikat',
+              text: "Lug'at va grammatika testlari juda foydali bo'ldi. 3 oyda B2 imtihoniga to'liq tayyorlandim!",
+              avatar: 'AK'
+            },
+            {
+              name: 'Sardor Rahimov',
+              level: 'C1 Sertifikat',
+              text: "Tezkor natijalar va batafsil tushuntirishlar xatolarimni tushunishni osonlashtirdi. Juda tavsiya qilaman!",
+              avatar: 'SR'
+            },
+            {
+              name: 'Malika Usmanova',
+              level: 'B1 Sertifikat',
+              text: "Istalgan vaqtda, istalgan joyda mashq qilish mumkin. Mobil qurilmalar uchun qulay interfeys juda yoqdi.",
+              avatar: 'MU'
+            }].
+            map((testimonial, index) =>
+            <div key={index} className="bg-white/5 rounded-2xl p-8 backdrop-blur-sm border border-white/10">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-red-600 flex items-center justify-center font-semibold text-lg text-white">
                     {testimonial.avatar}
@@ -320,13 +320,13 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
                   </div>
                 </div>
                 <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-primary text-primary" />
-                  ))}
+                  {[...Array(5)].map((_, i) =>
+                <Star key={i} className="w-5 h-5 fill-primary text-primary" />
+                )}
                 </div>
                 <p className="text-secondary-foreground/80 leading-relaxed">{testimonial.text}</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -343,35 +343,35 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
 
           <div className="max-w-3xl mx-auto space-y-4">
             {[
-               {
-                 q: 'CEFR nima?',
-                 a: "CEFR (Common European Framework of Reference for Languages) — tillarni bilish darajasini belgilovchi xalqaro standart. A1 dan C2 gacha 6 ta daraja mavjud.",
-               },
-               {
-                 q: "Qanday turdagi testlar mavjud?",
-                 a: "Platformamizda 4 xil test turi mavjud: Lug'at, Grammatika, Reading va Listening. Har bir test turi A1-C1 darajalar uchun tayyorlangan.",
-               },
-               {
-                 q: "Testlar haqiqiy CEFR imtihonlariga o'xshaydimi?",
-                 a: "Ha! Testlarimiz rasmiy CEFR imtihonlarining formati va qiyinlik darajasiga mos ravishda tuzilgan.",
-               },
-               {
-                 q: "Natijalarimni kuzatib bora olamanmi?",
-                 a: "Albatta! Bepul ro'yxatdan o'ting va barcha test natijalaringizni saqlang hamda rivojlanishingizni kuzating.",
-               },
-               {
-                 q: 'Har bir test qancha vaqt oladi?',
-                 a: "Har bir test 30 daqiqaga mo'ljallangan — haqiqiy CEFR imtihon bo'limlari kabi.",
-               },
-            ].map((faq, index) => (
-              <details key={index} className="group card-elevated cursor-pointer p-6">
+            {
+              q: 'CEFR nima?',
+              a: "CEFR (Common European Framework of Reference for Languages) — tillarni bilish darajasini belgilovchi xalqaro standart. A1 dan C2 gacha 6 ta daraja mavjud."
+            },
+            {
+              q: "Qanday turdagi testlar mavjud?",
+              a: "Platformamizda 4 xil test turi mavjud: Lug'at, Grammatika, Reading va Listening. Har bir test turi A1-C1 darajalar uchun tayyorlangan."
+            },
+            {
+              q: "Testlar haqiqiy CEFR imtihonlariga o'xshaydimi?",
+              a: "Ha! Testlarimiz rasmiy CEFR imtihonlarining formati va qiyinlik darajasiga mos ravishda tuzilgan."
+            },
+            {
+              q: "Natijalarimni kuzatib bora olamanmi?",
+              a: "Albatta! Bepul ro'yxatdan o'ting va barcha test natijalaringizni saqlang hamda rivojlanishingizni kuzating."
+            },
+            {
+              q: 'Har bir test qancha vaqt oladi?',
+              a: "Har bir test 30 daqiqaga mo'ljallangan — haqiqiy CEFR imtihon bo'limlari kabi."
+            }].
+            map((faq, index) =>
+            <details key={index} className="group card-elevated cursor-pointer p-6">
                 <summary className="flex items-center justify-between font-semibold text-lg list-none">
                   {faq.q}
                   <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
                 </summary>
                 <p className="mt-4 text-muted-foreground leading-relaxed">{faq.a}</p>
               </details>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -385,15 +385,15 @@ export const LandingPage = ({ onStartTest }: LandingPageProps) => {
            <p className="text-white/80 text-lg mb-10 max-w-2xl mx-auto">
              Minglab o'rganuvchilar qatoriga qo'shiling va ingliz tili bilimingizni yangi darajaga olib chiqing.
            </p>
-           <button 
-             onClick={handleStartTest}
-             className="bg-white text-primary px-10 py-5 rounded-xl font-semibold text-lg hover:bg-white/90 transition-colors inline-flex items-center gap-3 shadow-lg"
-           >
+           <button
+            onClick={handleStartTest}
+            className="bg-white text-primary px-10 py-5 rounded-xl font-semibold text-lg hover:bg-white/90 transition-colors inline-flex items-center gap-3 shadow-lg">
+
              Bepul Testni Boshlang
              <ArrowRight className="w-6 h-6" />
            </button>
         </div>
       </section>
-    </div>
-  );
+    </div>);
+
 };
