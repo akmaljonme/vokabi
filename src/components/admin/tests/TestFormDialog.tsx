@@ -17,6 +17,8 @@ interface Test {
   time_limit: number;
   is_active: boolean;
   randomize_questions: boolean;
+  book_number?: number | null;
+  unit_number?: number | null;
 }
 
 interface TestFormDialogProps {
@@ -39,6 +41,8 @@ export const TestFormDialog = ({ open, onOpenChange, test, onSave, loading }: Te
     time_limit: 30,
     is_active: true,
     randomize_questions: false,
+    book_number: null as number | null,
+    unit_number: null as number | null,
   });
 
   useEffect(() => {
@@ -51,6 +55,8 @@ export const TestFormDialog = ({ open, onOpenChange, test, onSave, loading }: Te
         time_limit: test.time_limit / 60, // Convert seconds to minutes for display
         is_active: test.is_active,
         randomize_questions: test.randomize_questions,
+        book_number: test.book_number || null,
+        unit_number: test.unit_number || null,
       });
     } else {
       setFormData({
@@ -61,6 +67,8 @@ export const TestFormDialog = ({ open, onOpenChange, test, onSave, loading }: Te
         time_limit: 30,
         is_active: true,
         randomize_questions: false,
+        book_number: null,
+        unit_number: null,
       });
     }
   }, [test, open]);
@@ -76,7 +84,9 @@ export const TestFormDialog = ({ open, onOpenChange, test, onSave, loading }: Te
       time_limit: formData.time_limit * 60, // Convert minutes to seconds for storage
       is_active: formData.is_active,
       randomize_questions: formData.randomize_questions,
-    });
+      book_number: formData.skill === 'vocabulary' ? formData.book_number : null,
+      unit_number: formData.skill === 'vocabulary' ? formData.unit_number : null,
+    } as any);
   };
 
   return (
@@ -148,17 +158,48 @@ export const TestFormDialog = ({ open, onOpenChange, test, onSave, loading }: Te
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="time_limit">Vaqt chegarasi (daqiqalarda) *</Label>
-            <Input
-              id="time_limit"
-              type="number"
-              min={5}
-              max={180}
-              value={formData.time_limit}
-              onChange={(e) => setFormData({ ...formData, time_limit: parseInt(e.target.value) || 30 })}
-            />
-          </div>
+           <div className="space-y-2">
+             <Label htmlFor="time_limit">Vaqt chegarasi (daqiqalarda) *</Label>
+             <Input
+               id="time_limit"
+               type="number"
+               min={5}
+               max={180}
+               value={formData.time_limit}
+               onChange={(e) => setFormData({ ...formData, time_limit: parseInt(e.target.value) || 30 })}
+             />
+           </div>
+
+           {formData.skill === 'vocabulary' && (
+             <div className="grid grid-cols-2 gap-4">
+               <div className="space-y-2">
+                 <Label htmlFor="book_number">Kitob raqami *</Label>
+                 <Input
+                   id="book_number"
+                   type="number"
+                   min={1}
+                   max={6}
+                   value={formData.book_number || ''}
+                   onChange={(e) => setFormData({ ...formData, book_number: parseInt(e.target.value) || null })}
+                   placeholder="1-6 orasida"
+                   required={formData.skill === 'vocabulary'}
+                 />
+               </div>
+               <div className="space-y-2">
+                 <Label htmlFor="unit_number">Unit raqami *</Label>
+                 <Input
+                   id="unit_number"
+                   type="number"
+                   min={1}
+                   max={30}
+                   value={formData.unit_number || ''}
+                   onChange={(e) => setFormData({ ...formData, unit_number: parseInt(e.target.value) || null })}
+                   placeholder="1-30 orasida"
+                   required={formData.skill === 'vocabulary'}
+                 />
+               </div>
+             </div>
+           )}
 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -184,7 +225,10 @@ export const TestFormDialog = ({ open, onOpenChange, test, onSave, loading }: Te
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Bekor qilish
             </Button>
-            <Button type="submit" disabled={loading || !formData.title}>
+            <Button 
+              type="submit" 
+              disabled={loading || !formData.title || (formData.skill === 'vocabulary' && (!formData.book_number || !formData.unit_number))}
+            >
               {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {test ? 'Saqlash' : 'Yaratish'}
             </Button>
