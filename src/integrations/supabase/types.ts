@@ -339,6 +339,35 @@ export type Database = {
           },
         ]
       }
+      exam_user_assignments: {
+        Row: {
+          assigned_at: string
+          exam_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          exam_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          exam_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_user_assignments_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exams: {
         Row: {
           created_at: string

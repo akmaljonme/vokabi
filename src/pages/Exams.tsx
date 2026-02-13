@@ -117,7 +117,7 @@ export default function ExamsPage() {
               <Lock className="h-16 w-16 text-muted-foreground/30 mb-4" />
               <h3 className="text-xl font-semibold mb-2">Examlar mavjud emas</h3>
               <p className="text-muted-foreground text-center max-w-md">
-                Hozircha sizga ruxsat berilgan examlar yo'q. Admin sizni guruhga qo'shganda bu yerda examlar paydo bo'ladi.
+                Hozircha sizga tayinlangan examlar yo'q. Admin sizga exam tayinlaganda bu yerda paydo bo'ladi.
               </p>
             </CardContent>
           </Card>
