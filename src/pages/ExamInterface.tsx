@@ -5,8 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Clock, Flag, ArrowLeft, ArrowRight, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { Clock, Flag, ArrowLeft, ArrowRight, AlertCircle, CheckCircle, XCircle, BookOpen, Headphones, Pen, BookA } from 'lucide-react';
 
 interface ExamQuestion {
   id: string;
@@ -45,6 +46,14 @@ interface AudioFile {
   order_index: number;
 }
 
+const skillConfig: Record<string, { label: string; icon: any; color: string }> = {
+  vocabulary: { label: "Lug'at", icon: BookA, color: 'text-purple-500' },
+  grammar: { label: 'Grammatika', icon: BookOpen, color: 'text-amber-500' },
+  reading: { label: 'Reading', icon: BookOpen, color: 'text-primary' },
+  listening: { label: 'Listening', icon: Headphones, color: 'text-primary' },
+  writing: { label: 'Writing', icon: Pen, color: 'text-primary' },
+};
+
 export default function ExamInterfacePage() {
   const { examId } = useParams<{ examId: string }>();
   const { user, loading: authLoading } = useAuth();
@@ -56,11 +65,13 @@ export default function ExamInterfacePage() {
   const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [writingAnswers, setWritingAnswers] = useState<Record<string, string>>({});
   const [timeLeft, setTimeLeft] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isFinished, setIsFinished] = useState(false);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [results, setResults] = useState<{ score: number; total: number; percentage: number } | null>(null);
+  const [showTranscript, setShowTranscript] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const storageKey = `exam_progress_${examId}`;
 
@@ -100,6 +111,7 @@ export default function ExamInterfacePage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.answers) setAnswers(parsed.answers);
+        if (parsed.writingAnswers) setWritingAnswers(parsed.writingAnswers);
         if (parsed.currentQ !== undefined) setCurrentQ(parsed.currentQ);
         if (parsed.timeLeft) setTimeLeft(parsed.timeLeft);
         if (parsed.attemptId) setAttemptId(parsed.attemptId);
@@ -145,8 +157,8 @@ export default function ExamInterfacePage() {
   // Auto-save
   useEffect(() => {
     if (isFinished || isLoading) return;
-    localStorage.setItem(storageKey, JSON.stringify({ answers, currentQ, timeLeft, attemptId }));
-  }, [answers, currentQ, timeLeft, attemptId, isFinished, isLoading]);
+    localStorage.setItem(storageKey, JSON.stringify({ answers, writingAnswers, currentQ, timeLeft, attemptId }));
+  }, [answers, writingAnswers, currentQ, timeLeft, attemptId, isFinished, isLoading]);
 
   // Fullscreen
   useEffect(() => {
@@ -208,6 +220,11 @@ export default function ExamInterfacePage() {
     return ans === option;
   };
 
+  const isWritingSkill = exam?.skill === 'writing';
+  const isReading = exam?.skill === 'reading';
+  const isListening = exam?.skill === 'listening';
+  const isVocabOrGrammar = exam?.skill === 'vocabulary' || exam?.skill === 'grammar';
+
   const handleFinish = useCallback(async () => {
     if (isFinished) return;
     setIsFinished(true);
@@ -218,31 +235,34 @@ export default function ExamInterfacePage() {
     }
 
     let score = 0;
-    questions.forEach(q => {
-      const userAns = answers[q.id];
-      if (Array.isArray(q.correct_answer)) {
-        if (Array.isArray(userAns) &&
-          JSON.stringify([...userAns].sort()) === JSON.stringify([...(q.correct_answer as any)].sort())) {
-          score += q.points;
+    if (!isWritingSkill) {
+      questions.forEach(q => {
+        const userAns = answers[q.id];
+        if (Array.isArray(q.correct_answer)) {
+          if (Array.isArray(userAns) &&
+            JSON.stringify([...userAns].sort()) === JSON.stringify([...(q.correct_answer as any)].sort())) {
+            score += q.points;
+          }
+        } else {
+          if (userAns === q.correct_answer) score += q.points;
         }
-      } else {
-        if (userAns === q.correct_answer) score += q.points;
-      }
-    });
+      });
+    }
 
     const totalPoints = questions.reduce((a, q) => a + q.points, 0);
-    const percentage = totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0;
+    const percentage = isWritingSkill ? 0 : (totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0);
     setResults({ score, total: totalPoints, percentage });
 
     // Save to DB
+    const allAnswers = isWritingSkill ? writingAnswers : answers;
     if (attemptId) {
       try {
         await supabase.from('exam_attempts').update({
-          score,
+          score: isWritingSkill ? null : score,
           total_questions: questions.length,
-          percentage,
-          passed: percentage >= 60,
-          answers: answers as any,
+          percentage: isWritingSkill ? null : percentage,
+          passed: isWritingSkill ? null : percentage >= 60,
+          answers: allAnswers as any,
           time_taken: exam ? exam.time_limit - timeLeft : 0,
           completed_at: new Date().toISOString(),
         }).eq('id', attemptId);
@@ -250,7 +270,7 @@ export default function ExamInterfacePage() {
         console.error('Error saving result:', error);
       }
     }
-  }, [isFinished, questions, answers, attemptId, exam, timeLeft, storageKey]);
+  }, [isFinished, questions, answers, writingAnswers, attemptId, exam, timeLeft, storageKey, isWritingSkill]);
 
   if (authLoading || isLoading) {
     return (
@@ -262,6 +282,42 @@ export default function ExamInterfacePage() {
 
   // Results screen
   if (isFinished && results) {
+    const config = skillConfig[exam?.skill || ''] || skillConfig.reading;
+
+    if (isWritingSkill) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <Card className="max-w-lg w-full">
+            <CardContent className="pt-8 text-center space-y-6">
+              <CheckCircle className="h-20 w-20 text-primary mx-auto" />
+              <h1 className="text-3xl font-bold">{exam?.title}</h1>
+              <p className="text-lg text-muted-foreground">
+                Writing javoblaringiz yuborildi!
+              </p>
+              <Badge variant="secondary" className="text-lg px-4 py-1">
+                Admin tekshirgandan so'ng natijangiz ko'rinadi
+              </Badge>
+
+              <div className="text-left space-y-3 mt-6 max-h-80 overflow-y-auto">
+                {questions.map((q, i) => (
+                  <div key={q.id} className="p-3 rounded-lg border border-border">
+                    <p className="text-sm font-medium mb-1">{i + 1}. {q.question_text}</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {writingAnswers[q.id] || '— Javob berilmagan —'}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <Button className="w-full" onClick={() => navigate('/exams')}>
+                Examlarga qaytish
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-lg w-full">
@@ -280,7 +336,6 @@ export default function ExamInterfacePage() {
               {results.percentage >= 60 ? "O'tdi ✓" : "O'tmadi ✗"}
             </Badge>
 
-            {/* Show answers review */}
             <div className="text-left space-y-3 mt-6 max-h-80 overflow-y-auto">
               {questions.map((q, i) => {
                 const userAns = answers[q.id];
@@ -322,8 +377,10 @@ export default function ExamInterfacePage() {
 
   const question = questions[currentQ];
   const currentPassage = passages.length > 0 ? passages[0] : null;
-  const isReading = exam?.skill === 'reading';
-  const isListening = exam?.skill === 'listening';
+  const config = skillConfig[exam?.skill || ''] || skillConfig.reading;
+  const SkillIcon = config.icon;
+
+  const wordCount = (text: string) => text.trim().split(/\s+/).filter(Boolean).length;
 
   return (
     <div ref={containerRef} className="min-h-screen bg-muted/30 flex flex-col">
@@ -332,9 +389,11 @@ export default function ExamInterfacePage() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-2">
+              <SkillIcon className="w-5 h-5 text-primary" />
               <span className="font-semibold text-primary">{exam?.level}</span>
               <span className="text-muted-foreground">•</span>
-              <span className="text-sm truncate max-w-[200px]">{exam?.title}</span>
+              <Badge variant="secondary" className="text-xs">{config.label}</Badge>
+              <span className="text-sm truncate max-w-[150px] hidden sm:inline">{exam?.title}</span>
             </div>
             <div className={`flex items-center gap-2 font-mono text-lg ${timeLeft < 300 ? 'text-destructive animate-pulse' : ''}`}>
               <Clock className="w-5 h-5" />
@@ -343,18 +402,19 @@ export default function ExamInterfacePage() {
             <Button size="sm" variant="destructive" onClick={() => {
               if (confirm("Examni tugatmoqchimisiz?")) handleFinish();
             }}>
-              <Flag className="w-4 h-4 mr-1" />Tugatish
+              <Flag className="w-4 h-4 mr-1" />
+              <span className="hidden sm:inline">Tugatish</span>
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col lg:flex-row">
-        {/* Reading passage */}
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        {/* Reading: Left side passage */}
         {isReading && currentPassage && (
           <div className="lg:w-1/2 bg-card border-r border-border">
-            <div className="p-6 h-[calc(100vh-8rem)] overflow-y-auto">
+            <div className="p-6 h-[calc(100vh-3.5rem)] overflow-y-auto">
               <h2 className="text-xl font-bold mb-4">{currentPassage.title}</h2>
               {currentPassage.paragraphs ? (
                 currentPassage.paragraphs.map((p, i) => (
@@ -371,14 +431,33 @@ export default function ExamInterfacePage() {
         )}
 
         {/* Questions side */}
-        <div className={`flex-1 flex flex-col ${isReading ? '' : 'max-w-3xl mx-auto w-full'}`}>
-          {/* Listening audio */}
+        <div className={`flex-1 flex flex-col ${isReading ? '' : isVocabOrGrammar ? 'max-w-2xl mx-auto w-full' : 'max-w-3xl mx-auto w-full'}`}>
+          {/* Listening: Audio player */}
           {isListening && audioFiles.length > 0 && (
             <div className="bg-card border-b border-border p-4">
-              <div className="max-w-2xl mx-auto">
+              <div className="max-w-2xl mx-auto space-y-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Headphones className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-medium">Audio tinglang</span>
+                </div>
                 <audio controls className="w-full" src={audioFiles[0].file_url}>
                   Your browser does not support audio.
                 </audio>
+                {audioFiles[0].transcript && (
+                  <div className="mt-2">
+                    <button
+                      onClick={() => setShowTranscript(!showTranscript)}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      {showTranscript ? 'Transkriptni yashirish' : 'Transkriptni ko\'rish'}
+                    </button>
+                    {showTranscript && (
+                      <p className="text-sm text-muted-foreground mt-2 p-3 bg-muted rounded-lg whitespace-pre-line">
+                        {audioFiles[0].transcript}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -387,39 +466,64 @@ export default function ExamInterfacePage() {
             {question && (
               <>
                 <div className="mb-6">
-                  <Badge variant="secondary" className="mb-2">
-                    Savol {currentQ + 1} / {questions.length}
-                  </Badge>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="secondary">
+                      Savol {currentQ + 1} / {questions.length}
+                    </Badge>
+                    {!isWritingSkill && (
+                      <Badge variant="outline" className="text-xs">
+                        {question.points} ball
+                      </Badge>
+                    )}
+                  </div>
                   <h3 className="text-lg font-semibold mt-2">{question.question_text}</h3>
                   {question.image_url && (
                     <img src={question.image_url} alt="" className="mt-3 max-h-64 rounded-lg border border-border object-contain" />
                   )}
                 </div>
 
-                {question.question_type === 'list-selection' && (
-                  <p className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />2 ta javobni tanlang
-                  </p>
-                )}
+                {/* Writing: Textarea */}
+                {isWritingSkill ? (
+                  <div className="space-y-3 mb-6">
+                    <Textarea
+                      placeholder="Javobingizni bu yerga yozing..."
+                      className="min-h-[300px] text-base leading-relaxed resize-y"
+                      value={writingAnswers[question.id] || ''}
+                      onChange={e => setWritingAnswers(prev => ({ ...prev, [question.id]: e.target.value }))}
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{wordCount(writingAnswers[question.id] || '')} so'z</span>
+                      <span>Kamida 150 so'z tavsiya etiladi</span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {question.question_type === 'list-selection' && (
+                      <p className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />2 ta javobni tanlang
+                      </p>
+                    )}
 
-                <div className="space-y-3 mb-6">
-                  {question.options?.map((opt, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleAnswer(opt)}
-                      className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${
-                        isSelected(opt)
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-muted font-semibold text-sm shrink-0">
-                        {String.fromCharCode(65 + i)}
-                      </span>
-                      <span>{opt}</span>
-                    </button>
-                  ))}
-                </div>
+                    <div className="space-y-3 mb-6">
+                      {question.options?.map((opt, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handleAnswer(opt)}
+                          className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${
+                            isSelected(opt)
+                              ? 'border-primary bg-primary/10'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-muted font-semibold text-sm shrink-0">
+                            {String.fromCharCode(65 + i)}
+                          </span>
+                          <span>{opt}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </>
             )}
 
@@ -428,25 +532,33 @@ export default function ExamInterfacePage() {
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm font-medium">Savollar</h4>
                 <span className="text-xs text-muted-foreground">
-                  {Object.keys(answers).length}/{questions.length} javob
+                  {isWritingSkill
+                    ? `${Object.keys(writingAnswers).filter(k => writingAnswers[k]?.trim()).length}/${questions.length} yozildi`
+                    : `${Object.keys(answers).length}/${questions.length} javob`
+                  }
                 </span>
               </div>
               <div className="flex gap-2 flex-wrap">
-                {questions.map((q, i) => (
-                  <button
-                    key={q.id}
-                    onClick={() => setCurrentQ(i)}
-                    className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
-                      i === currentQ
-                        ? 'bg-primary text-primary-foreground'
-                        : answers[q.id]
-                        ? 'bg-primary/20 text-primary'
-                        : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
+                {questions.map((q, i) => {
+                  const hasAnswer = isWritingSkill
+                    ? !!writingAnswers[q.id]?.trim()
+                    : !!answers[q.id];
+                  return (
+                    <button
+                      key={q.id}
+                      onClick={() => setCurrentQ(i)}
+                      className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                        i === currentQ
+                          ? 'bg-primary text-primary-foreground'
+                          : hasAnswer
+                          ? 'bg-primary/20 text-primary'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
