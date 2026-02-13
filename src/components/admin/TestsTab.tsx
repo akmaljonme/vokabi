@@ -111,6 +111,8 @@ export const TestsTab = () => {
             time_limit: data.time_limit,
             is_active: data.is_active,
             randomize_questions: data.randomize_questions,
+            book_number: data.book_number,
+            unit_number: data.unit_number,
           })
           .eq('id', data.id) as any);
 
@@ -128,6 +130,8 @@ export const TestsTab = () => {
             time_limit: data.time_limit,
             is_active: data.is_active,
             randomize_questions: data.randomize_questions,
+            book_number: data.book_number,
+            unit_number: data.unit_number,
           }) as any);
 
         if (error) throw error;
