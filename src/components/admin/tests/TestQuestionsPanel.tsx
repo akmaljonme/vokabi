@@ -56,6 +56,7 @@ interface Question {
   explanation: string | null;
   points: number;
   order_index: number;
+  image_url?: string | null;
 }
 
 interface ReadingPassage {
@@ -180,6 +181,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
             explanation: data.explanation,
             points: data.points,
             order_index: data.order_index,
+            image_url: data.image_url || null,
           })
           .eq('id', data.id) as any);
         if (error) throw error;
@@ -197,6 +199,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
             explanation: data.explanation,
             points: data.points,
             order_index: data.order_index,
+            image_url: data.image_url || null,
           }) as any);
         if (error) throw error;
         toast.success("Savol qo'shildi");

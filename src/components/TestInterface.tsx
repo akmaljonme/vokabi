@@ -391,6 +391,15 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
               </div>
               {!isNoParts && <p className="text-sm text-muted-foreground mb-4">{part?.instruction}</p>}
               <h3 className="text-lg font-semibold">{question?.question}</h3>
+              {question?.imageUrl && (
+                <div className="mt-3">
+                  <img 
+                    src={question.imageUrl} 
+                    alt="Savol rasmi" 
+                    className="max-h-64 rounded-lg border border-border object-contain"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Options */}

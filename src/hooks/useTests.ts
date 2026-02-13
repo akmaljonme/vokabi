@@ -14,18 +14,19 @@
    created_at: string;
  }
  
- interface DBQuestion {
-   id: string;
-   test_id: string;
-   question_text: string;
-   question_type: string;
-   category: string;
-   options: string[] | null;
-   correct_answer: string;
-   explanation: string | null;
-   points: number;
-   order_index: number;
- }
+interface DBQuestion {
+  id: string;
+  test_id: string;
+  question_text: string;
+  question_type: string;
+  category: string;
+  options: string[] | null;
+  correct_answer: string;
+  explanation: string | null;
+  points: number;
+  order_index: number;
+  image_url?: string | null;
+}
  
 interface DBReadingPassage {
   id: string;
@@ -227,6 +228,7 @@ export interface TestInfo {
                 question: q.question_text,
                 options: q.options || [],
                 correctAnswer: parseCorrectAnswer(q.correct_answer),
+                imageUrl: q.image_url || undefined,
               })),
               questionType: mapQuestionType(partQuestions[0]?.question_type || 'multiple-choice'),
               audioUrl: partAudio?.file_url,

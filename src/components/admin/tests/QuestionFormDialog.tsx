@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Plus, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Loader2, Upload, ImageIcon, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Question {
   id: string;
@@ -19,6 +21,7 @@ interface Question {
   explanation: string | null;
   points: number;
   order_index: number;
+  image_url?: string | null;
 }
 
 interface QuestionFormDialogProps {
@@ -65,7 +68,12 @@ export const QuestionFormDialog = ({
     explanation: '',
     points: 1,
     order_index: questionCount,
+    image_url: '' as string | null,
   });
+  const [uploading, setUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (question) {
@@ -78,7 +86,9 @@ export const QuestionFormDialog = ({
         explanation: question.explanation || '',
         points: question.points,
         order_index: question.order_index,
+        image_url: question.image_url || null,
       });
+      setImagePreview(question.image_url || null);
     } else {
       setFormData({
         question_text: '',
@@ -89,8 +99,11 @@ export const QuestionFormDialog = ({
         explanation: '',
         points: 1,
         order_index: questionCount,
+        image_url: null,
       });
+      setImagePreview(null);
     }
+    setSelectedImage(null);
   }, [question, open, questionCount]);
 
   // Update options when question type changes
@@ -145,9 +158,55 @@ export const QuestionFormDialog = ({
     }));
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Faqat rasm fayllar qabul qilinadi');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Rasm hajmi 5MB dan oshmasligi kerak');
+        return;
+      }
+      setSelectedImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `questions/${testId}/${Date.now()}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage.from('audio').upload(fileName, file);
+    if (uploadError) throw uploadError;
+    const { data } = supabase.storage.from('audio').getPublicUrl(fileName);
+    return data.publicUrl;
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    setFormData(prev => ({ ...prev, image_url: null }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    let imageUrl = formData.image_url;
+
+    if (selectedImage) {
+      setUploading(true);
+      try {
+        imageUrl = await uploadImage(selectedImage);
+      } catch (error) {
+        console.error('Upload error:', error);
+        toast.error('Rasmni yuklashda xatolik');
+        setUploading(false);
+        return;
+      }
+      setUploading(false);
+    }
+
     const filteredOptions = formData.question_type === 'fill-blank' 
       ? null 
       : formData.options.filter(opt => opt.trim() !== '');
@@ -163,6 +222,7 @@ export const QuestionFormDialog = ({
       explanation: formData.explanation || null,
       points: formData.points,
       order_index: formData.order_index,
+      image_url: imageUrl,
     });
   };
 
@@ -186,6 +246,40 @@ export const QuestionFormDialog = ({
               rows={3}
               required
             />
+          </div>
+
+          {/* Image upload */}
+          <div className="space-y-2">
+            <Label>Savol rasmi (ixtiyoriy)</Label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageSelect}
+              className="hidden"
+            />
+            {imagePreview ? (
+              <div className="relative inline-block">
+                <img src={imagePreview} alt="Savol rasmi" className="max-h-40 rounded-lg border" />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                  onClick={removeImage}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            ) : (
+              <div
+                className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <ImageIcon className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
+                <p className="text-xs text-muted-foreground">Rasm yuklash uchun bosing (max 5MB)</p>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -336,10 +430,10 @@ export const QuestionFormDialog = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={loading || !formData.question_text || (!formData.correct_answer && formData.question_type !== 'fill-blank')}
+              disabled={loading || uploading || !formData.question_text || (!formData.correct_answer && formData.question_type !== 'fill-blank')}
             >
-              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {question ? 'Saqlash' : "Qo'shish"}
+              {(loading || uploading) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {uploading ? 'Yuklanmoqda...' : question ? 'Saqlash' : "Qo'shish"}
             </Button>
           </DialogFooter>
         </form>
