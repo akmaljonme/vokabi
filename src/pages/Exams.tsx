@@ -158,13 +158,13 @@ export default function ExamsPage() {
                     </div>
                     {bestScore !== null && (
                       <div className="text-sm">
-                        Eng yaxshi natija: <span className={`font-bold ${bestScore >= 60 ? 'text-green-500' : 'text-destructive'}`}>{bestScore}%</span>
+                        Eng yaxshi natija: <span className={`font-bold ${bestScore >= 60 ? 'text-primary' : 'text-destructive'}`}>{bestScore}%</span>
                       </div>
                     )}
                     <Button
                       className="w-full"
                       disabled={!canTry}
-                      onClick={() => toast.info("Exam interfeysi tez orada qo'shiladi")}
+                      onClick={() => navigate(`/exams/${exam.id}`)}
                     >
                       {canTry ? 'Examni Boshlash' : "Urinishlar tugadi"}
                     </Button>
