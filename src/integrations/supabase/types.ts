@@ -21,6 +21,7 @@ export type Database = {
           file_name: string
           file_url: string
           id: string
+          order_index: number
           question_id: string | null
           test_id: string | null
           transcript: string | null
@@ -31,6 +32,7 @@ export type Database = {
           file_name: string
           file_url: string
           id?: string
+          order_index?: number
           question_id?: string | null
           test_id?: string | null
           transcript?: string | null
@@ -41,6 +43,7 @@ export type Database = {
           file_name?: string
           file_url?: string
           id?: string
+          order_index?: number
           question_id?: string | null
           test_id?: string | null
           transcript?: string | null

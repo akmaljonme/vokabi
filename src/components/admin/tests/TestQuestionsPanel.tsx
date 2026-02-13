@@ -75,6 +75,7 @@ interface AudioFile {
   file_url: string;
   duration: number | null;
   transcript: string | null;
+  order_index: number;
 }
 
 interface TestQuestionsPanelProps {
@@ -306,7 +307,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
         .from('audio_files' as any)
         .select('*')
         .eq('test_id', test.id)
-        .order('created_at', { ascending: true }) as any);
+        .order('order_index', { ascending: true }) as any);
       if (error) throw error;
       setAudioFiles((data as AudioFile[]) || []);
     } catch (error) {
@@ -328,6 +329,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
             file_url: data.file_url,
             duration: data.duration,
             transcript: data.transcript,
+            order_index: data.order_index ?? 0,
           })
           .eq('id', data.id) as any);
         if (error) throw error;
@@ -341,6 +343,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
             file_url: data.file_url,
             duration: data.duration,
             transcript: data.transcript,
+            order_index: data.order_index ?? 0,
           }) as any);
         if (error) throw error;
         toast.success("Audio qo'shildi");
@@ -489,6 +492,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
         testId={test.id}
         onSave={handleSaveAudio}
         loading={saving}
+        audioCount={audioFiles.length}
       />
 
       {/* Delete Passage Confirmation */}
@@ -658,7 +662,9 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-sm">#{index + 1}</span>
+                        <Badge variant="outline" className="text-xs">
+                          Part {audio.order_index + 1}
+                        </Badge>
                         <h3 className="font-medium">{audio.file_name}</h3>
                         {audio.duration && (
                           <Badge variant="secondary" className="text-xs">

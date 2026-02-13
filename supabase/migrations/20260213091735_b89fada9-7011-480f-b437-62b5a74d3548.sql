@@ -1,0 +1,1 @@
+ALTER TABLE public.audio_files ADD COLUMN order_index integer NOT NULL DEFAULT 0;
