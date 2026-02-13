@@ -16,6 +16,7 @@ interface AudioFile {
   file_url: string;
   duration?: number | null;
   transcript?: string | null;
+  order_index?: number;
 }
 
 interface AudioFileDialogProps {
@@ -25,6 +26,7 @@ interface AudioFileDialogProps {
   testId: string;
   onSave: (data: AudioFile) => Promise<void>;
   loading: boolean;
+  audioCount?: number;
 }
 
 export const AudioFileDialog = ({
@@ -34,6 +36,7 @@ export const AudioFileDialog = ({
   testId,
   onSave,
   loading,
+  audioCount = 0,
 }: AudioFileDialogProps) => {
   const [formData, setFormData] = useState<AudioFile>({
     test_id: testId,
@@ -41,6 +44,7 @@ export const AudioFileDialog = ({
     file_url: '',
     duration: null,
     transcript: null,
+    order_index: 0,
   });
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -55,6 +59,7 @@ export const AudioFileDialog = ({
         file_url: audioFile.file_url,
         duration: audioFile.duration,
         transcript: audioFile.transcript,
+        order_index: audioFile.order_index ?? 0,
       });
     } else {
       setFormData({
@@ -63,10 +68,11 @@ export const AudioFileDialog = ({
         file_url: '',
         duration: null,
         transcript: null,
+        order_index: audioCount,
       });
     }
     setSelectedFile(null);
-  }, [audioFile, testId, open]);
+  }, [audioFile, testId, open, audioCount]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -197,6 +203,21 @@ export const AudioFileDialog = ({
               onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || null })}
               placeholder="120"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="order_index">Part raqami (0 dan boshlanadi)</Label>
+            <Input
+              id="order_index"
+              type="number"
+              min={0}
+              value={formData.order_index ?? 0}
+              onChange={(e) => setFormData({ ...formData, order_index: parseInt(e.target.value) || 0 })}
+              placeholder="0 = Part 1, 1 = Part 2..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Har bir part uchun alohida audio qo'shing (0 = Part 1, 1 = Part 2, ...)
+            </p>
           </div>
 
           <div className="space-y-2">

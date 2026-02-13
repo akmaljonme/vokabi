@@ -34,6 +34,8 @@ export interface Part {
   passage: ReadingPassage;
   questions: Question[];
   questionType: QuestionType;
+  audioUrl?: string;
+  audioTranscript?: string;
 }
 
 export interface MockTest {

@@ -27,14 +27,24 @@
    order_index: number;
  }
  
- interface DBReadingPassage {
-   id: string;
-   test_id: string;
-   title: string;
-   content: string;
-   paragraphs: { label: string; text: string }[] | null;
-   order_index: number;
- }
+interface DBReadingPassage {
+  id: string;
+  test_id: string;
+  title: string;
+  content: string;
+  paragraphs: { label: string; text: string }[] | null;
+  order_index: number;
+}
+
+interface DBAudioFile {
+  id: string;
+  test_id: string;
+  file_name: string;
+  file_url: string;
+  duration: number | null;
+  transcript: string | null;
+  order_index: number;
+}
  
 export interface TestInfo {
     id: string;
@@ -155,18 +165,31 @@ export interface TestInfo {
  
          if (questionsError) throw questionsError;
  
-         // Fetch reading passages if it's a reading test
-         let passagesData: DBReadingPassage[] = [];
-         if (dbTest.skill === 'reading') {
-           const { data, error: passagesError } = await supabase
-             .from('reading_passages')
-             .select('*')
-             .eq('test_id', testId)
-             .order('order_index', { ascending: true });
- 
-           if (passagesError) throw passagesError;
-           passagesData = ((data || []) as unknown as DBReadingPassage[]);
-         }
+          // Fetch reading passages if it's a reading test
+          let passagesData: DBReadingPassage[] = [];
+          if (dbTest.skill === 'reading') {
+            const { data, error: passagesError } = await supabase
+              .from('reading_passages')
+              .select('*')
+              .eq('test_id', testId)
+              .order('order_index', { ascending: true });
+
+            if (passagesError) throw passagesError;
+            passagesData = ((data || []) as unknown as DBReadingPassage[]);
+          }
+
+          // Fetch audio files if it's a listening test
+          let audioData: DBAudioFile[] = [];
+          if (dbTest.skill === 'listening') {
+            const { data, error: audioError } = await (supabase
+              .from('audio_files' as any)
+              .select('*')
+              .eq('test_id', testId)
+              .order('order_index', { ascending: true }) as any);
+
+            if (audioError) throw audioError;
+            audioData = ((data || []) as DBAudioFile[]);
+          }
  
          // Transform to MockTest format
          const questions = (questionsData as DBQuestion[]) || [];
@@ -178,32 +201,37 @@ export interface TestInfo {
          const parts: Part[] = [];
          for (let i = 0; i < numParts; i++) {
            const partQuestions = questions.slice(i * questionsPerPart, (i + 1) * questionsPerPart);
-           const passage = passagesData[i] || {
-             id: `part-${i + 1}`,
-             title: `Part ${i + 1}`,
-             content: dbTest.skill === 'listening' ? 'Audio content' : '',
-             paragraphs: null,
-           };
- 
-           parts.push({
-             id: i + 1,
-             title: `Part ${i + 1}`,
-             instruction: getInstructionForType(partQuestions[0]?.question_type || 'multiple-choice'),
-             passage: {
-               id: i + 1,
-               title: passage.title,
-               content: passage.content,
-               paragraphs: passage.paragraphs || undefined,
-             },
-             questions: partQuestions.map((q, idx) => ({
-               id: i * questionsPerPart + idx + 1,
-               type: mapQuestionType(q.question_type),
-               question: q.question_text,
-               options: q.options || [],
-               correctAnswer: parseCorrectAnswer(q.correct_answer),
-             })),
-             questionType: mapQuestionType(partQuestions[0]?.question_type || 'multiple-choice'),
-           });
+            const passage = passagesData[i] || {
+              id: `part-${i + 1}`,
+              title: `Part ${i + 1}`,
+              content: dbTest.skill === 'listening' ? 'Audio content' : '',
+              paragraphs: null,
+            };
+
+            // Find audio for this part
+            const partAudio = audioData.find(a => a.order_index === i);
+
+            parts.push({
+              id: i + 1,
+              title: `Part ${i + 1}`,
+              instruction: getInstructionForType(partQuestions[0]?.question_type || 'multiple-choice'),
+              passage: {
+                id: i + 1,
+                title: passage.title,
+                content: passage.content,
+                paragraphs: passage.paragraphs || undefined,
+              },
+              questions: partQuestions.map((q, idx) => ({
+                id: i * questionsPerPart + idx + 1,
+                type: mapQuestionType(q.question_type),
+                question: q.question_text,
+                options: q.options || [],
+                correctAnswer: parseCorrectAnswer(q.correct_answer),
+              })),
+              questionType: mapQuestionType(partQuestions[0]?.question_type || 'multiple-choice'),
+              audioUrl: partAudio?.file_url,
+              audioTranscript: partAudio?.transcript || undefined,
+            });
          }
  
          // If no questions, create empty parts

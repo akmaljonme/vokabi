@@ -4,7 +4,7 @@ import { MockTest, UserAnswer, Part, TestResult, Question } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { useTestWithQuestions } from '@/hooks/useTests';
 import { CEFRLevel, SkillType } from '@/types/cefr';
-import AudioPlayer from '@/components/AudioPlayer';
+import { PartAudioPlayer } from '@/components/PartAudioPlayer';
 
 interface TestInterfaceProps {
   level: CEFRLevel;
@@ -363,11 +363,17 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
           {skill === 'listening' && part && (
             <div className="bg-card border-b border-border p-4">
               <div className="max-w-2xl mx-auto space-y-4">
-                <AudioPlayer 
-                  text={part.passage.content}
-                  label={`Part ${currentPart} Audio`}
-                  showTranscript={true}
-                />
+                {part.audioUrl ? (
+                  <PartAudioPlayer
+                    audioUrl={part.audioUrl}
+                    label={`Part ${currentPart} Audio`}
+                    transcript={part.audioTranscript}
+                  />
+                ) : (
+                  <div className="text-center text-muted-foreground text-sm py-4">
+                    Bu part uchun audio fayl mavjud emas
+                  </div>
+                )}
               </div>
             </div>
           )}
