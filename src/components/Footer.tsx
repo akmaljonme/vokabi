@@ -1,4 +1,4 @@
-import { MapPin, Mail, Phone, Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import { Mail, Phone, Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
 
 export const Footer = () => {
   return (
@@ -8,16 +8,12 @@ export const Footer = () => {
           {/* Brand Info */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-xl font-display font-bold text-white">
-                CEFR
-              </span>
-              <MapPin className="w-5 h-5 text-primary" />
               <span className="text-xl font-display font-bold text-primary">
-                TEST HUB
+                IELTSify
               </span>
             </div>
             <p className="text-secondary-foreground/70 mb-6 leading-relaxed">
-              Your comprehensive platform for CEFR English proficiency testing. Practice, learn, and achieve your language goals.
+              Your comprehensive platform for IELTS English proficiency testing. Practice, learn, and achieve your language goals.
             </p>
             <div className="flex gap-4">
               <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-primary transition-colors">
@@ -80,8 +76,8 @@ export const Footer = () => {
         </div>
 
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-secondary-foreground/50 text-sm">© 2026 CEFR Test Hub. All rights reserved. 
-Created by Akmal KArimboyev
+          <p className="text-secondary-foreground/50 text-sm">© 2026 IELTSify. All rights reserved. 
+Created by Akmal Karimboyev
           </p>
           <div className="flex gap-6 text-sm">
             <a href="#" className="text-secondary-foreground/50 hover:text-primary transition-colors">
