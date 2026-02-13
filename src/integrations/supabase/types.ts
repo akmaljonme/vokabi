@@ -65,6 +65,322 @@ export type Database = {
           },
         ]
       }
+      exam_attempts: {
+        Row: {
+          answers: Json | null
+          completed_at: string | null
+          exam_id: string
+          id: string
+          passed: boolean | null
+          percentage: number | null
+          score: number | null
+          started_at: string
+          time_taken: number | null
+          total_questions: number | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          completed_at?: string | null
+          exam_id: string
+          id?: string
+          passed?: boolean | null
+          percentage?: number | null
+          score?: number | null
+          started_at?: string
+          time_taken?: number | null
+          total_questions?: number | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          completed_at?: string | null
+          exam_id?: string
+          id?: string
+          passed?: boolean | null
+          percentage?: number | null
+          score?: number | null
+          started_at?: string
+          time_taken?: number | null
+          total_questions?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_attempts_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_audio_files: {
+        Row: {
+          created_at: string
+          duration: number | null
+          exam_id: string
+          file_name: string
+          file_url: string
+          id: string
+          order_index: number
+          transcript: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration?: number | null
+          exam_id: string
+          file_name: string
+          file_url: string
+          id?: string
+          order_index?: number
+          transcript?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration?: number | null
+          exam_id?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          order_index?: number
+          transcript?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_audio_files_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_group_members: {
+        Row: {
+          added_at: string
+          group_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          added_at?: string
+          group_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          added_at?: string
+          group_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "exam_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_group_permissions: {
+        Row: {
+          exam_id: string
+          granted_at: string
+          group_id: string
+          id: string
+        }
+        Insert: {
+          exam_id: string
+          granted_at?: string
+          group_id: string
+          id?: string
+        }
+        Update: {
+          exam_id?: string
+          granted_at?: string
+          group_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_group_permissions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_group_permissions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "exam_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_groups: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      exam_questions: {
+        Row: {
+          correct_answer: string
+          created_at: string
+          exam_id: string
+          explanation: string | null
+          id: string
+          image_url: string | null
+          options: Json | null
+          order_index: number
+          points: number
+          question_text: string
+          question_type: string
+          updated_at: string
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string
+          exam_id: string
+          explanation?: string | null
+          id?: string
+          image_url?: string | null
+          options?: Json | null
+          order_index?: number
+          points?: number
+          question_text: string
+          question_type: string
+          updated_at?: string
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string
+          exam_id?: string
+          explanation?: string | null
+          id?: string
+          image_url?: string | null
+          options?: Json | null
+          order_index?: number
+          points?: number
+          question_text?: string
+          question_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_questions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_reading_passages: {
+        Row: {
+          content: string
+          created_at: string
+          exam_id: string
+          id: string
+          order_index: number
+          paragraphs: Json | null
+          title: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          exam_id: string
+          id?: string
+          order_index?: number
+          paragraphs?: Json | null
+          title: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          exam_id?: string
+          id?: string
+          order_index?: number
+          paragraphs?: Json | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_reading_passages_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exams: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          level: string
+          max_attempts: number
+          skill: string
+          time_limit: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          level: string
+          max_attempts?: number
+          skill: string
+          time_limit?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          level?: string
+          max_attempts?: number
+          skill?: string
+          time_limit?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

@@ -9,9 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, Camera, Loader2, User, Bell, Mail, TrendingUp, Save } from 'lucide-react';
+import { ArrowLeft, Camera, Loader2, User, Bell, Mail, TrendingUp, Save, BookOpen, Headphones, Award, Download } from 'lucide-react';
 import { Header } from '@/components/Header';
+import { CertificateDownload } from '@/components/CertificateDownload';
 
 interface ProfileData {
   full_name: string | null;
@@ -36,6 +39,7 @@ export default function ProfileSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [testResults, setTestResults] = useState<any[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -46,6 +50,7 @@ export default function ProfileSettings() {
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchTestResults();
     }
   }, [user]);
 
@@ -74,6 +79,26 @@ export default function ProfileSettings() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const fetchTestResults = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('test_results')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setTestResults(data || []);
+    } catch (error) {
+      console.error('Error fetching test results:', error);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}m ${secs}s`;
   };
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,203 +203,192 @@ export default function ProfileSettings() {
     <div className="min-h-screen bg-background">
       <Header onNavigate={() => navigate('/')} />
       
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <main className="container mx-auto px-4 py-8 max-w-3xl">
         <div className="flex items-center gap-4 mb-8">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Profile Settings</h1>
-            <p className="text-muted-foreground">Manage your account preferences</p>
+            <h1 className="text-3xl font-bold">Profil</h1>
+            <p className="text-muted-foreground">Shaxsiy ma'lumotlar va natijalar</p>
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Avatar Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Profile Picture
-              </CardTitle>
-              <CardDescription>
-                Upload a photo to personalize your account
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-6">
-                <div className="relative group">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={profile.avatar_url || undefined} alt="Profile" />
-                    <AvatarFallback className="text-2xl bg-primary/10 text-primary">
-                      {getInitials(profile.full_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading}
-                    className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                  >
-                    {isUploading ? (
-                      <Loader2 className="h-6 w-6 text-white animate-spin" />
-                    ) : (
-                      <Camera className="h-6 w-6 text-white" />
-                    )}
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                    className="hidden"
-                  />
+        <Tabs defaultValue="settings" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="settings">Sozlamalar</TabsTrigger>
+            <TabsTrigger value="results">Natijalar</TabsTrigger>
+            <TabsTrigger value="certificates">Sertifikatlar</TabsTrigger>
+          </TabsList>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            {/* Avatar Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Profil rasmi
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-6">
+                  <div className="relative group">
+                    <Avatar className="h-24 w-24">
+                      <AvatarImage src={profile.avatar_url || undefined} alt="Profile" />
+                      <AvatarFallback className="text-2xl bg-primary/10 text-primary">
+                        {getInitials(profile.full_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading}
+                      className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    >
+                      {isUploading ? <Loader2 className="h-6 w-6 text-white animate-spin" /> : <Camera className="h-6 w-6 text-white" />}
+                    </button>
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">Rasmni o'zgartirish uchun bosing</p>
+                    <p className="text-xs text-muted-foreground">Max 5MB, kvadrat rasm tavsiya etiladi</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Click on the avatar to upload a new photo
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle>Shaxsiy ma'lumotlar</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" value={user?.email || ''} disabled className="bg-muted" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">To'liq ism</Label>
+                  <Input id="fullName" type="text" placeholder="Ismingizni kiriting" value={profile.full_name || ''} onChange={(e) => setProfile(prev => ({ ...prev, full_name: e.target.value }))} />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5" />Bildirishnomalar</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg"><Mail className="h-4 w-4 text-primary" /></div>
+                    <div><p className="font-medium">Email</p><p className="text-sm text-muted-foreground">Muhim yangilanishlar</p></div>
+                  </div>
+                  <Switch checked={profile.email_notifications} onCheckedChange={(c) => setProfile(p => ({ ...p, email_notifications: c }))} />
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg"><Bell className="h-4 w-4 text-primary" /></div>
+                    <div><p className="font-medium">Eslatmalar</p><p className="text-sm text-muted-foreground">Mashq qilish eslatmalari</p></div>
+                  </div>
+                  <Switch checked={profile.test_reminders} onCheckedChange={(c) => setProfile(p => ({ ...p, test_reminders: c }))} />
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg"><TrendingUp className="h-4 w-4 text-primary" /></div>
+                    <div><p className="font-medium">Progress</p><p className="text-sm text-muted-foreground">Haftalik hisobot</p></div>
+                  </div>
+                  <Switch checked={profile.progress_updates} onCheckedChange={(c) => setProfile(p => ({ ...p, progress_updates: c }))} />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Button onClick={handleSaveProfile} disabled={isSaving} className="w-full" size="lg">
+              {isSaving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saqlanmoqda...</> : <><Save className="h-4 w-4 mr-2" />Saqlash</>}
+            </Button>
+          </TabsContent>
+
+          {/* Results Tab */}
+          <TabsContent value="results" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Award className="h-5 w-5" />Test Natijalari</CardTitle>
+                <CardDescription>Barcha ishlangan testlar tarixi</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {testResults.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">Hali test ishlanmagan</p>
+                ) : (
+                  <div className="space-y-3">
+                    {testResults.map((r: any) => (
+                      <div key={r.id} className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${r.skill === 'reading' ? 'bg-primary/10' : r.skill === 'listening' ? 'bg-cyan-500/10' : 'bg-purple-500/10'}`}>
+                            {r.skill === 'reading' ? <BookOpen className="h-5 w-5 text-primary" /> : <Headphones className="h-5 w-5 text-cyan-500" />}
+                          </div>
+                          <div>
+                            <p className="font-medium capitalize">{r.skill} - {r.level}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(r.created_at).toLocaleDateString('uz')} • {formatTime(r.time_taken)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`text-lg font-bold ${r.percentage >= 60 ? 'text-green-500' : 'text-destructive'}`}>
+                            {r.percentage}%
+                          </p>
+                          <p className="text-sm text-muted-foreground">{r.correct_answers}/{r.total_questions}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Certificates Tab */}
+          <TabsContent value="certificates" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Download className="h-5 w-5" />Sertifikatlar</CardTitle>
+                <CardDescription>O'tgan testlar uchun sertifikat yuklab olish</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {testResults.filter((r: any) => r.percentage >= 60).length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    60% dan yuqori natija olgan testlaringiz uchun sertifikat yuklab olishingiz mumkin
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    Recommended: Square image, at least 200x200 pixels, max 5MB
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Personal Info Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>
-                Update your display name and account details
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={user?.email || ''}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Email cannot be changed
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Display Name</Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="Enter your name"
-                  value={profile.full_name || ''}
-                  onChange={(e) => setProfile(prev => ({ ...prev, full_name: e.target.value }))}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Notification Preferences */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Notification Preferences
-              </CardTitle>
-              <CardDescription>
-                Choose what notifications you'd like to receive
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Mail className="h-4 w-4 text-primary" />
+                ) : (
+                  <div className="space-y-4">
+                    {testResults.filter((r: any) => r.percentage >= 60).map((r: any) => (
+                      <div key={r.id} className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                          <p className="font-medium capitalize">{r.skill} - {r.level}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {r.percentage}% • {new Date(r.created_at).toLocaleDateString('uz')}
+                          </p>
+                        </div>
+                        <CertificateDownload
+                          result={{
+                            mockId: r.mock_id,
+                            level: r.level,
+                            skill: r.skill,
+                            totalQuestions: r.total_questions,
+                            correctAnswers: r.correct_answers,
+                            percentage: r.percentage,
+                            passed: r.passed,
+                            answers: [],
+                            timeTaken: r.time_taken,
+                          }}
+                        />
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <p className="font-medium">Email Notifications</p>
-                    <p className="text-sm text-muted-foreground">
-                      Receive important updates via email
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={profile.email_notifications}
-                  onCheckedChange={(checked) => 
-                    setProfile(prev => ({ ...prev, email_notifications: checked }))
-                  }
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Bell className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Test Reminders</p>
-                    <p className="text-sm text-muted-foreground">
-                      Get reminded to practice regularly
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={profile.test_reminders}
-                  onCheckedChange={(checked) => 
-                    setProfile(prev => ({ ...prev, test_reminders: checked }))
-                  }
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Progress Updates</p>
-                    <p className="text-sm text-muted-foreground">
-                      Weekly summary of your learning progress
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={profile.progress_updates}
-                  onCheckedChange={(checked) => 
-                    setProfile(prev => ({ ...prev, progress_updates: checked }))
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Save Button */}
-          <Button 
-            onClick={handleSaveProfile} 
-            disabled={isSaving}
-            className="w-full"
-            size="lg"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Changes
-              </>
-            )}
-          </Button>
-        </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

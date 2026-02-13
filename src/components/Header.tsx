@@ -73,12 +73,20 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
               Study Materials
             </a>
             {user && (
-              <button 
-                onClick={() => navigate('/dashboard')}
-                className="text-foreground hover:text-primary transition-colors font-medium"
-              >
-                Dashboard
-              </button>
+              <>
+                <button 
+                  onClick={() => navigate('/exams')}
+                  className="text-foreground hover:text-primary transition-colors font-medium"
+                >
+                  Examlar
+                </button>
+                <button 
+                  onClick={() => navigate('/dashboard')}
+                  className="text-foreground hover:text-primary transition-colors font-medium"
+                >
+                  Dashboard
+                </button>
+              </>
             )}
             <a href="#pricing" className="text-foreground hover:text-primary transition-colors font-medium">
               Pricing
