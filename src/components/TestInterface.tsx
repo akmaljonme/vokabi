@@ -16,6 +16,8 @@ interface TestInterfaceProps {
 }
 
 export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }: TestInterfaceProps) => {
+  const testStorageKey = `test_progress_${testId || `${level}_${skill}_${mockId}`}`;
+
   const [mockTest, setMockTest] = useState<MockTest | null>(null);
   const [currentPart, setCurrentPart] = useState(1);
   const [currentQuestion, setCurrentQuestion] = useState(1);
@@ -30,16 +32,33 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   // Fetch from database if testId is provided
   const { test: dbTest, loading: dbLoading } = useTestWithQuestions(testId);
 
+  // Load saved progress from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(testStorageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.answers) setAnswers(parsed.answers);
+        if (parsed.currentPart) setCurrentPart(parsed.currentPart);
+        if (parsed.currentQuestion) setCurrentQuestion(parsed.currentQuestion);
+        if (parsed.timeLeft) setTimeLeft(parsed.timeLeft);
+      }
+    } catch {}
+  }, [testStorageKey]);
+
   useEffect(() => {
     if (testId && dbTest) {
       setMockTest(dbTest);
-      setTimeLeft(dbTest.timeLimit);
+      // Only set timeLeft from test if no saved progress
+      const saved = localStorage.getItem(testStorageKey);
+      if (!saved) setTimeLeft(dbTest.timeLimit);
     } else if (!testId) {
       const test = generateMockTest(mockId, level, skill);
       setMockTest(test);
-      setTimeLeft(test.timeLimit);
+      const saved = localStorage.getItem(testStorageKey);
+      if (!saved) setTimeLeft(test.timeLimit);
     }
-  }, [mockId, level, skill, testId, dbTest]);
+  }, [mockId, level, skill, testId, dbTest, testStorageKey]);
 
   // Fullscreen + prevent exit
   useEffect(() => {
@@ -94,6 +113,13 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
 
     return () => clearInterval(timer);
   }, []);
+
+  // Auto-save progress to localStorage
+  useEffect(() => {
+    if (!mockTest) return;
+    const data = { answers, currentPart, currentQuestion, timeLeft };
+    localStorage.setItem(testStorageKey, JSON.stringify(data));
+  }, [answers, currentPart, currentQuestion, timeLeft, testStorageKey, mockTest]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -226,6 +252,8 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
 
   const handleFinishTest = () => {
     if (!mockTest) return;
+    // Clear saved progress
+    localStorage.removeItem(testStorageKey);
 
     const results: TestResult['answers'] = [];
     let correctCount = 0;
