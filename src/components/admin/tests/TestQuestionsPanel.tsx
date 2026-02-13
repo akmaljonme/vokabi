@@ -16,10 +16,12 @@ import {
   FileText,
   Headphones,
   BookOpen,
-  MessageSquare
+  MessageSquare,
+  Music
 } from 'lucide-react';
 import { QuestionFormDialog } from './QuestionFormDialog';
 import { ReadingPassageDialog } from './ReadingPassageDialog';
+import { AudioFileDialog } from './AudioFileDialog';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -65,6 +67,16 @@ interface ReadingPassage {
   order_index: number;
 }
 
+interface AudioFile {
+  id: string;
+  test_id: string;
+  question_id: string | null;
+  file_name: string;
+  file_url: string;
+  duration: number | null;
+  transcript: string | null;
+}
+
 interface TestQuestionsPanelProps {
   test: Test;
   onBack: () => void;
@@ -96,8 +108,10 @@ const typeLabels: Record<string, string> = {
 export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [passages, setPassages] = useState<ReadingPassage[]>([]);
+  const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [passagesLoading, setPassagesLoading] = useState(true);
+  const [audioLoading, setAudioLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
@@ -107,6 +121,10 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
   const [selectedPassage, setSelectedPassage] = useState<ReadingPassage | null>(null);
   const [deletePassageDialogOpen, setDeletePassageDialogOpen] = useState(false);
   const [passageToDelete, setPassageToDelete] = useState<ReadingPassage | null>(null);
+  const [audioDialogOpen, setAudioDialogOpen] = useState(false);
+  const [selectedAudio, setSelectedAudio] = useState<AudioFile | null>(null);
+  const [deleteAudioDialogOpen, setDeleteAudioDialogOpen] = useState(false);
+  const [audioToDelete, setAudioToDelete] = useState<AudioFile | null>(null);
 
   useEffect(() => {
     fetchQuestions();
@@ -114,6 +132,11 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
       fetchPassages();
     } else {
       setPassagesLoading(false);
+    }
+    if (test.skill === 'listening') {
+      fetchAudioFiles();
+    } else {
+      setAudioLoading(false);
     }
   }, [test.id]);
 
@@ -127,7 +150,6 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
 
       if (error) throw error;
       
-      // Parse options from JSON if needed
       const parsedQuestions = ((data as any[]) || []).map(q => ({
         ...q,
         options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options
@@ -146,7 +168,6 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
     setSaving(true);
     try {
       if (data.id) {
-        // Update existing question
         const { error } = await (supabase
           .from('questions' as any)
           .update({
@@ -160,11 +181,9 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
             order_index: data.order_index,
           })
           .eq('id', data.id) as any);
-
         if (error) throw error;
         toast.success('Savol yangilandi');
       } else {
-        // Create new question
         const { error } = await (supabase
           .from('questions' as any)
           .insert({
@@ -178,11 +197,9 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
             points: data.points,
             order_index: data.order_index,
           }) as any);
-
         if (error) throw error;
         toast.success("Savol qo'shildi");
       }
-
       setDialogOpen(false);
       setSelectedQuestion(null);
       fetchQuestions();
@@ -196,13 +213,11 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
 
   const handleDeleteQuestion = async () => {
     if (!questionToDelete) return;
-
     try {
       const { error } = await (supabase
         .from('questions' as any)
         .delete()
         .eq('id', questionToDelete.id) as any);
-
       if (error) throw error;
       toast.success("Savol o'chirildi");
       fetchQuestions();
@@ -215,16 +230,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
     }
   };
 
-  const openEditDialog = (question: Question) => {
-    setSelectedQuestion(question);
-    setDialogOpen(true);
-  };
-
-  const openDeleteDialog = (question: Question) => {
-    setQuestionToDelete(question);
-    setDeleteDialogOpen(true);
-  };
-
+  // Reading passages
   const fetchPassages = async () => {
     try {
       const { data, error } = await supabase
@@ -232,14 +238,11 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
         .select('*')
         .eq('test_id', test.id)
         .order('order_index', { ascending: true });
-
       if (error) throw error;
-      
       const parsedPassages = ((data || []) as any[]).map(p => ({
         ...p,
         paragraphs: typeof p.paragraphs === 'string' ? JSON.parse(p.paragraphs) : p.paragraphs
       })) as ReadingPassage[];
-      
       setPassages(parsedPassages);
     } catch (error) {
       console.error('Error fetching passages:', error);
@@ -255,31 +258,17 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
       if (data.id) {
         const { error } = await supabase
           .from('reading_passages')
-          .update({
-            title: data.title,
-            content: data.content,
-            paragraphs: data.paragraphs,
-            order_index: data.order_index,
-          })
+          .update({ title: data.title, content: data.content, paragraphs: data.paragraphs, order_index: data.order_index })
           .eq('id', data.id);
-
         if (error) throw error;
         toast.success('Matn yangilandi');
       } else {
         const { error } = await supabase
           .from('reading_passages')
-          .insert({
-            test_id: data.test_id,
-            title: data.title,
-            content: data.content,
-            paragraphs: data.paragraphs,
-            order_index: data.order_index,
-          });
-
+          .insert({ test_id: data.test_id, title: data.title, content: data.content, paragraphs: data.paragraphs, order_index: data.order_index });
         if (error) throw error;
         toast.success("Matn qo'shildi");
       }
-
       setPassageDialogOpen(false);
       setSelectedPassage(null);
       fetchPassages();
@@ -293,13 +282,11 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
 
   const handleDeletePassage = async () => {
     if (!passageToDelete) return;
-
     try {
       const { error } = await supabase
         .from('reading_passages')
         .delete()
         .eq('id', passageToDelete.id);
-
       if (error) throw error;
       toast.success("Matn o'chirildi");
       fetchPassages();
@@ -312,7 +299,93 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
     }
   };
 
+  // Audio files
+  const fetchAudioFiles = async () => {
+    try {
+      const { data, error } = await (supabase
+        .from('audio_files' as any)
+        .select('*')
+        .eq('test_id', test.id)
+        .order('created_at', { ascending: true }) as any);
+      if (error) throw error;
+      setAudioFiles((data as AudioFile[]) || []);
+    } catch (error) {
+      console.error('Error fetching audio files:', error);
+      toast.error('Audio fayllarni yuklashda xatolik');
+    } finally {
+      setAudioLoading(false);
+    }
+  };
+
+  const handleSaveAudio = async (data: any) => {
+    setSaving(true);
+    try {
+      if (data.id) {
+        const { error } = await (supabase
+          .from('audio_files' as any)
+          .update({
+            file_name: data.file_name,
+            file_url: data.file_url,
+            duration: data.duration,
+            transcript: data.transcript,
+          })
+          .eq('id', data.id) as any);
+        if (error) throw error;
+        toast.success('Audio yangilandi');
+      } else {
+        const { error } = await (supabase
+          .from('audio_files' as any)
+          .insert({
+            test_id: data.test_id,
+            file_name: data.file_name,
+            file_url: data.file_url,
+            duration: data.duration,
+            transcript: data.transcript,
+          }) as any);
+        if (error) throw error;
+        toast.success("Audio qo'shildi");
+      }
+      setAudioDialogOpen(false);
+      setSelectedAudio(null);
+      fetchAudioFiles();
+    } catch (error) {
+      console.error('Error saving audio:', error);
+      toast.error('Audioni saqlashda xatolik');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteAudio = async () => {
+    if (!audioToDelete) return;
+    try {
+      // Delete from storage if possible
+      try {
+        const url = new URL(audioToDelete.file_url);
+        const path = url.pathname.split('/storage/v1/object/public/audio/')[1];
+        if (path) {
+          await supabase.storage.from('audio').remove([path]);
+        }
+      } catch {}
+
+      const { error } = await (supabase
+        .from('audio_files' as any)
+        .delete()
+        .eq('id', audioToDelete.id) as any);
+      if (error) throw error;
+      toast.success("Audio o'chirildi");
+      fetchAudioFiles();
+    } catch (error) {
+      console.error('Error deleting audio:', error);
+      toast.error("Audioni o'chirishda xatolik");
+    } finally {
+      setDeleteAudioDialogOpen(false);
+      setAudioToDelete(null);
+    }
+  };
+
   const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
+  const hasMediaTab = test.skill === 'reading' || test.skill === 'listening';
 
   return (
     <div className="space-y-6">
@@ -330,6 +403,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
               <span className="text-sm text-muted-foreground">
                 {questions.length} ta savol • {totalPoints} ball
                 {test.skill === 'reading' && ` • ${passages.length} ta matn`}
+                {test.skill === 'listening' && ` • ${audioFiles.length} ta audio`}
               </span>
             </div>
           </div>
@@ -341,6 +415,12 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
               Matn qo'shish
             </Button>
           )}
+          {test.skill === 'listening' && (
+            <Button variant="outline" onClick={() => { setSelectedAudio(null); setAudioDialogOpen(true); }}>
+              <Music className="w-4 h-4 mr-2" />
+              Audio qo'shish
+            </Button>
+          )}
           <Button onClick={() => { setSelectedQuestion(null); setDialogOpen(true); }}>
             <Plus className="w-4 h-4 mr-2" />
             Savol qo'shish
@@ -348,91 +428,39 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
         </div>
       </div>
 
-      {/* Tabs for Reading Tests */}
-      {test.skill === 'reading' ? (
-        <Tabs defaultValue="passages" className="w-full">
+      {/* Content */}
+      {hasMediaTab ? (
+        <Tabs defaultValue={test.skill === 'reading' ? 'passages' : 'audio'} className="w-full">
           <TabsList>
-            <TabsTrigger value="passages">
-              <BookOpen className="w-4 h-4 mr-2" />
-              Matnlar ({passages.length})
-            </TabsTrigger>
+            {test.skill === 'reading' && (
+              <TabsTrigger value="passages">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Matnlar ({passages.length})
+              </TabsTrigger>
+            )}
+            {test.skill === 'listening' && (
+              <TabsTrigger value="audio">
+                <Headphones className="w-4 h-4 mr-2" />
+                Audiolar ({audioFiles.length})
+              </TabsTrigger>
+            )}
             <TabsTrigger value="questions">
               <FileText className="w-4 h-4 mr-2" />
               Savollar ({questions.length})
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="passages" className="mt-4">
-            {passagesLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-              </div>
-            ) : passages.length === 0 ? (
-              <Card className="p-12 text-center">
-                <div className="text-muted-foreground">
-                  <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="font-semibold text-lg mb-2">Matnlar yo'q</h3>
-                  <p className="text-sm mb-4">Ushbu testga hali reading matn qo'shilmagan</p>
-                  <Button onClick={() => setPassageDialogOpen(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Birinchi matnni qo'shing
-                  </Button>
-                </div>
-              </Card>
-            ) : (
-              <ScrollArea className="h-[calc(100vh-350px)]">
-                <div className="space-y-3 pr-4">
-                  {passages.map((passage, index) => (
-                    <Card key={passage.id} className="p-4 hover:shadow-md transition-shadow">
-                      <div className="flex gap-3">
-                        <div className="flex items-center text-muted-foreground cursor-move">
-                          <GripVertical className="w-5 h-5" />
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="font-semibold text-sm">#{index + 1}</span>
-                                <h3 className="font-medium">{passage.title}</h3>
-                                {passage.paragraphs && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    {passage.paragraphs.length} paragraf
-                                  </Badge>
-                                )}
-                              </div>
-                              
-                              <p className="text-sm text-muted-foreground line-clamp-3">
-                                {passage.content}
-                              </p>
-                            </div>
-                            
-                            <div className="flex gap-1">
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => { setSelectedPassage(passage); setPassageDialogOpen(true); }}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                onClick={() => { setPassageToDelete(passage); setDeletePassageDialogOpen(true); }}
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
-          </TabsContent>
+          {test.skill === 'reading' && (
+            <TabsContent value="passages" className="mt-4">
+              {renderPassagesList()}
+            </TabsContent>
+          )}
+
+          {test.skill === 'listening' && (
+            <TabsContent value="audio" className="mt-4">
+              {renderAudioList()}
+            </TabsContent>
+          )}
 
           <TabsContent value="questions" className="mt-4">
             {renderQuestionsList()}
@@ -453,7 +481,17 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
         passageCount={passages.length}
       />
 
-      {/* Delete Passage Confirmation Dialog */}
+      {/* Audio File Dialog */}
+      <AudioFileDialog
+        open={audioDialogOpen}
+        onOpenChange={setAudioDialogOpen}
+        audioFile={selectedAudio}
+        testId={test.id}
+        onSave={handleSaveAudio}
+        loading={saving}
+      />
+
+      {/* Delete Passage Confirmation */}
       <AlertDialog open={deletePassageDialogOpen} onOpenChange={setDeletePassageDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -471,6 +509,24 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Delete Audio Confirmation */}
+      <AlertDialog open={deleteAudioDialogOpen} onOpenChange={setDeleteAudioDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Audioni o'chirish</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{audioToDelete?.file_name}" audio faylini o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Bekor qilish</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteAudio} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              O'chirish
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Question Form Dialog */}
       <QuestionFormDialog
         open={dialogOpen}
@@ -482,7 +538,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
         questionCount={questions.length}
       />
 
-      {/* Delete Question Confirmation Dialog */}
+      {/* Delete Question Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -501,6 +557,139 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
       </AlertDialog>
     </div>
   );
+
+  function renderPassagesList() {
+    if (passagesLoading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      );
+    }
+    if (passages.length === 0) {
+      return (
+        <Card className="p-12 text-center">
+          <div className="text-muted-foreground">
+            <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <h3 className="font-semibold text-lg mb-2">Matnlar yo'q</h3>
+            <p className="text-sm mb-4">Ushbu testga hali reading matn qo'shilmagan</p>
+            <Button onClick={() => setPassageDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Birinchi matnni qo'shing
+            </Button>
+          </div>
+        </Card>
+      );
+    }
+    return (
+      <ScrollArea className="h-[calc(100vh-350px)]">
+        <div className="space-y-3 pr-4">
+          {passages.map((passage, index) => (
+            <Card key={passage.id} className="p-4 hover:shadow-md transition-shadow">
+              <div className="flex gap-3">
+                <div className="flex items-center text-muted-foreground cursor-move">
+                  <GripVertical className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-semibold text-sm">#{index + 1}</span>
+                        <h3 className="font-medium">{passage.title}</h3>
+                        {passage.paragraphs && (
+                          <Badge variant="secondary" className="text-xs">
+                            {passage.paragraphs.length} paragraf
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-3">{passage.content}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => { setSelectedPassage(passage); setPassageDialogOpen(true); }}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => { setPassageToDelete(passage); setDeletePassageDialogOpen(true); }} className="text-destructive hover:text-destructive">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </ScrollArea>
+    );
+  }
+
+  function renderAudioList() {
+    if (audioLoading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      );
+    }
+    if (audioFiles.length === 0) {
+      return (
+        <Card className="p-12 text-center">
+          <div className="text-muted-foreground">
+            <Headphones className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <h3 className="font-semibold text-lg mb-2">Audiolar yo'q</h3>
+            <p className="text-sm mb-4">Ushbu testga hali audio fayl qo'shilmagan</p>
+            <Button onClick={() => setAudioDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Birinchi audioni qo'shing
+            </Button>
+          </div>
+        </Card>
+      );
+    }
+    return (
+      <ScrollArea className="h-[calc(100vh-350px)]">
+        <div className="space-y-3 pr-4">
+          {audioFiles.map((audio, index) => (
+            <Card key={audio.id} className="p-4 hover:shadow-md transition-shadow">
+              <div className="flex gap-3">
+                <div className="flex items-center text-muted-foreground">
+                  <Music className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-semibold text-sm">#{index + 1}</span>
+                        <h3 className="font-medium">{audio.file_name}</h3>
+                        {audio.duration && (
+                          <Badge variant="secondary" className="text-xs">
+                            {Math.floor(audio.duration / 60)}:{String(audio.duration % 60).padStart(2, '0')}
+                          </Badge>
+                        )}
+                      </div>
+                      <audio controls className="w-full max-w-md h-8">
+                        <source src={audio.file_url} />
+                      </audio>
+                      {audio.transcript && (
+                        <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{audio.transcript}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => { setSelectedAudio(audio); setAudioDialogOpen(true); }}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => { setAudioToDelete(audio); setDeleteAudioDialogOpen(true); }} className="text-destructive hover:text-destructive">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </ScrollArea>
+    );
+  }
 
   function renderQuestionsList() {
     return loading ? (
@@ -528,7 +717,6 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
                   <div className="flex items-center text-muted-foreground cursor-move">
                     <GripVertical className="w-5 h-5" />
                   </div>
-                  
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
@@ -545,17 +733,15 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
                             {question.points} ball
                           </Badge>
                         </div>
-                        
                         <p className="text-sm line-clamp-2">{question.question_text}</p>
-                        
                         {question.options && question.options.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2">
                             {question.options.slice(0, 4).map((opt, i) => (
-                              <span 
-                                key={i} 
+                              <span
+                                key={i}
                                 className={`text-xs px-2 py-1 rounded ${
-                                  opt === question.correct_answer 
-                                    ? 'bg-green-500/10 text-green-600 font-medium' 
+                                  opt === question.correct_answer
+                                    ? 'bg-green-500/10 text-green-600 font-medium'
                                     : 'bg-muted'
                                 }`}
                               >
@@ -573,21 +759,11 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
                           </div>
                         )}
                       </div>
-                      
                       <div className="flex gap-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => openEditDialog(question)}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => { setSelectedQuestion(question); setDialogOpen(true); }}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => openDeleteDialog(question)}
-                          className="text-destructive hover:text-destructive"
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => { setQuestionToDelete(question); setDeleteDialogOpen(true); }} className="text-destructive hover:text-destructive">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
