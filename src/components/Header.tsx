@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Menu, X, MapPin, LogOut, User, Shield, Moon, Sun } from 'lucide-react';
+import { ChevronDown, Menu, X, LogOut, User, Shield, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,12 +37,8 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => onNavigate('landing')}
           >
-            <span className="text-xl lg:text-2xl font-display font-bold text-secondary">
-              CEFR
-            </span>
-            <MapPin className="w-5 h-5 text-primary" />
             <span className="text-xl lg:text-2xl font-display font-bold text-primary">
-              TEST HUB
+              IELTSify
             </span>
           </div>
 
