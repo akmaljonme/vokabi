@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, Trophy, RotateCcw, Save } from 'lucide-react';
+import { CertificateDownload } from '@/components/CertificateDownload';
 import { TestResult } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -145,6 +146,7 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
             <RotateCcw className="w-5 h-5" />
             Retry This Test
           </button>
+          <CertificateDownload result={result} />
           <button onClick={onBack} className="btn-outline">
             Choose Another Test
           </button>
