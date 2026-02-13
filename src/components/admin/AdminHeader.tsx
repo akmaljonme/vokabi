@@ -2,7 +2,7 @@ import { Bell, Search, Moon, Sun, ArrowLeft } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface AdminHeaderProps {
   sidebarCollapsed: boolean;
@@ -11,16 +11,13 @@ interface AdminHeaderProps {
 
 export const AdminHeader = ({ sidebarCollapsed, onExitAdmin }: AdminHeaderProps) => {
   const { user } = useAuth();
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const isDarkMode = document.documentElement.classList.contains('dark');
-    setIsDark(isDarkMode);
-  }, []);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
 
   const toggleTheme = () => {
-    document.documentElement.classList.toggle('dark');
-    setIsDark(!isDark);
+    const next = !isDark;
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+    setIsDark(next);
   };
 
   return (
