@@ -18,6 +18,7 @@ export interface Question {
   options: string[];
   correctAnswer: string | string[];
   paragraph?: string;
+  imageUrl?: string;
 }
 
 export interface ReadingPassage {

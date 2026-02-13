@@ -1,0 +1,1 @@
+ALTER TABLE public.questions ADD COLUMN image_url text DEFAULT NULL;

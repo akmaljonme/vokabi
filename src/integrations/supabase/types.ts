@@ -108,6 +108,7 @@ export type Database = {
           created_at: string
           explanation: string | null
           id: string
+          image_url: string | null
           options: Json | null
           order_index: number
           points: number
@@ -122,6 +123,7 @@ export type Database = {
           created_at?: string
           explanation?: string | null
           id?: string
+          image_url?: string | null
           options?: Json | null
           order_index?: number
           points?: number
@@ -136,6 +138,7 @@ export type Database = {
           created_at?: string
           explanation?: string | null
           id?: string
+          image_url?: string | null
           options?: Json | null
           order_index?: number
           points?: number
