@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { ArrowLeft, BookOpen, Headphones, Brain, Lightbulb, ChevronRight, BookMarked } from 'lucide-react';
+import { ArrowLeft, BookOpen, Headphones, Brain, Lightbulb, ChevronRight, BookMarked, FileDown } from 'lucide-react';
 import { CEFRLevel, SkillType } from '@/types/cefr';
 import { useActiveTests, TestInfo } from '@/hooks/useTests';
 import { Loader2 } from 'lucide-react';
+import { generateMockTest } from '@/data/mockData';
+import { generateTestPDF } from '@/utils/pdfGenerator';
 
 interface SkillSelectionProps {
   level: CEFRLevel;
@@ -59,6 +61,12 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
       ? allTabs.filter(t => t.key !== 'vocabulary')
       : allTabs;
 
+  const handleDownloadPDF = (e: React.MouseEvent, skill: SkillType, index: number) => {
+    e.stopPropagation();
+    const test = generateMockTest(index + 1, level, skill);
+    generateTestPDF(test);
+  };
+
   const renderUnitList = (tests: TestInfo[], skill: SkillType) => {
     if (tests.length === 0) {
       return (
@@ -70,14 +78,22 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
         {tests.map((test, index) => (
-          <button
-            key={test.id}
-            onClick={() => onSelectMock(skill, index + 1, test.id)}
-            className="mock-grid-item hover:border-primary hover:bg-primary/5 text-left p-4"
-          >
-            <div className="font-semibold text-sm">Unit {test.unitNumber || index + 1}</div>
-            <div className="text-xs text-muted-foreground mt-1">{test.questionCount} ta savol</div>
-          </button>
+          <div key={test.id} className="relative group">
+            <button
+              onClick={() => onSelectMock(skill, index + 1, test.id)}
+              className="mock-grid-item hover:border-primary hover:bg-primary/5 text-left p-4 w-full"
+            >
+              <div className="font-semibold text-sm">Unit {test.unitNumber || index + 1}</div>
+              <div className="text-xs text-muted-foreground mt-1">{test.questionCount} ta savol</div>
+            </button>
+            <button
+              onClick={(e) => handleDownloadPDF(e, skill, index)}
+              className="absolute top-2 right-2 p-1.5 rounded-lg bg-muted/80 hover:bg-primary/10 text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
+              title="PDF yuklab olish"
+            >
+              <FileDown className="w-3.5 h-3.5" />
+            </button>
+          </div>
         ))}
       </div>
     );
@@ -181,16 +197,24 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
               {readingTests.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3">
                   {readingTests.map((test, index) => (
-                    <button
-                      key={test.id}
-                      onClick={() => onSelectMock('reading', index + 1, test.id)}
-                      className="mock-grid-item hover:border-primary text-left p-4"
-                    >
-                      <div className="font-medium">{test.title}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
-                      </div>
-                    </button>
+                    <div key={test.id} className="relative group">
+                      <button
+                        onClick={() => onSelectMock('reading', index + 1, test.id)}
+                        className="mock-grid-item hover:border-primary text-left p-4 w-full"
+                      >
+                        <div className="font-medium">{test.title}</div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
+                        </div>
+                      </button>
+                      <button
+                        onClick={(e) => handleDownloadPDF(e, 'reading', index)}
+                        className="absolute top-3 right-3 p-1.5 rounded-lg bg-muted/80 hover:bg-primary/10 text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
+                        title="PDF yuklab olish"
+                      >
+                        <FileDown className="w-4 h-4" />
+                      </button>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -207,16 +231,24 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
               {listeningTests.length > 0 ? (
                 <div className="grid grid-cols-1 gap-3">
                   {listeningTests.map((test, index) => (
-                    <button
-                      key={test.id}
-                      onClick={() => onSelectMock('listening', index + 1, test.id)}
-                      className="mock-grid-item hover:border-primary text-left p-4"
-                    >
-                      <div className="font-medium">{test.title}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
-                      </div>
-                    </button>
+                    <div key={test.id} className="relative group">
+                      <button
+                        onClick={() => onSelectMock('listening', index + 1, test.id)}
+                        className="mock-grid-item hover:border-primary text-left p-4 w-full"
+                      >
+                        <div className="font-medium">{test.title}</div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa
+                        </div>
+                      </button>
+                      <button
+                        onClick={(e) => handleDownloadPDF(e, 'listening', index)}
+                        className="absolute top-3 right-3 p-1.5 rounded-lg bg-muted/80 hover:bg-primary/10 text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
+                        title="PDF yuklab olish"
+                      >
+                        <FileDown className="w-4 h-4" />
+                      </button>
+                    </div>
                   ))}
                 </div>
               ) : (
