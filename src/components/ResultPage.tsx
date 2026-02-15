@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, Trophy, RotateCcw, Save } from 'lucide-react';
 import { CertificateDownload } from '@/components/CertificateDownload';
+import { VideoRecommendations } from '@/components/AIResultsSection';
 import { TestResult } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -151,6 +152,26 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
             Choose Another Test
           </button>
         </div>
+
+        {/* AI Video Recommendations */}
+        {result.percentage < 100 && (
+          <div className="max-w-4xl mx-auto mb-8">
+            <VideoRecommendations
+              wrongQuestions={result.answers
+                .filter(a => !a.isCorrect)
+                .map(a => {
+                  const q = mockTest.parts.flatMap(p => p.questions).find(q => q.id === a.questionId);
+                  return {
+                    question: q?.question || '',
+                    correct: a.correctAnswer,
+                    userAnswer: a.userAnswer,
+                  };
+                })}
+              level={result.level}
+              skill={result.skill}
+            />
+          </div>
+        )}
 
         {/* Detailed Review */}
         <div className="max-w-4xl mx-auto">
