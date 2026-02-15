@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Clock, Flag, ArrowLeft, ArrowRight, AlertCircle, CheckCircle, XCircle, BookOpen, Headphones, Pen, BookA } from 'lucide-react';
+import { Clock, Flag, ArrowLeft, ArrowRight, AlertCircle, CheckCircle, XCircle, BookOpen, Headphones, Pen, BookA, Mic, MicOff, Loader2, Play, ExternalLink, Video, Star, MessageSquare } from 'lucide-react';
 
 interface ExamQuestion {
   id: string;
@@ -46,12 +46,43 @@ interface AudioFile {
   order_index: number;
 }
 
+interface WritingEvaluation {
+  overallBand: number;
+  criteria: {
+    taskAchievement: { score: number; feedback: string };
+    coherenceAndCohesion: { score: number; feedback: string };
+    lexicalResource: { score: number; feedback: string };
+    grammaticalRange: { score: number; feedback: string };
+  };
+  overallFeedback: string;
+  correctedEssay: string;
+}
+
+interface SpeakingEvaluation {
+  overallBand: number;
+  criteria: {
+    fluencyAndCoherence: { score: number; feedback: string };
+    lexicalResource: { score: number; feedback: string };
+    grammaticalRange: { score: number; feedback: string };
+    pronunciation: { score: number; feedback: string };
+  };
+  overallFeedback: string;
+  suggestedResponse: string;
+}
+
+interface VideoSuggestion {
+  weakTopics: string[];
+  videos: { title: string; channel: string; url: string; description: string; topic: string }[];
+  overallAdvice: string;
+}
+
 const skillConfig: Record<string, { label: string; icon: any; color: string }> = {
   vocabulary: { label: "Lug'at", icon: BookA, color: 'text-purple-500' },
   grammar: { label: 'Grammatika', icon: BookOpen, color: 'text-amber-500' },
   reading: { label: 'Reading', icon: BookOpen, color: 'text-primary' },
   listening: { label: 'Listening', icon: Headphones, color: 'text-primary' },
   writing: { label: 'Writing', icon: Pen, color: 'text-primary' },
+  speaking: { label: 'Speaking', icon: Mic, color: 'text-primary' },
 };
 
 export default function ExamInterfacePage() {
@@ -66,6 +97,8 @@ export default function ExamInterfacePage() {
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [writingAnswers, setWritingAnswers] = useState<Record<string, string>>({});
+  const [speakingRecordings, setSpeakingRecordings] = useState<Record<string, Blob>>({});
+  const [speakingTranscripts, setSpeakingTranscripts] = useState<Record<string, string>>({});
   const [timeLeft, setTimeLeft] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isFinished, setIsFinished] = useState(false);
@@ -74,6 +107,17 @@ export default function ExamInterfacePage() {
   const [showTranscript, setShowTranscript] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const storageKey = `exam_progress_${examId}`;
+
+  // AI states
+  const [writingEval, setWritingEval] = useState<Record<string, WritingEvaluation>>({});
+  const [speakingEval, setSpeakingEval] = useState<Record<string, SpeakingEvaluation>>({});
+  const [videoSuggestions, setVideoSuggestions] = useState<VideoSuggestion | null>(null);
+  const [aiLoading, setAiLoading] = useState<string | null>(null);
+
+  // Recording states
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth');
@@ -106,12 +150,12 @@ export default function ExamInterfacePage() {
       })));
       setAudioFiles(audioRes.data || []);
 
-      // Load saved progress
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.answers) setAnswers(parsed.answers);
         if (parsed.writingAnswers) setWritingAnswers(parsed.writingAnswers);
+        if (parsed.speakingTranscripts) setSpeakingTranscripts(parsed.speakingTranscripts);
         if (parsed.currentQ !== undefined) setCurrentQ(parsed.currentQ);
         if (parsed.timeLeft) setTimeLeft(parsed.timeLeft);
         if (parsed.attemptId) setAttemptId(parsed.attemptId);
@@ -119,7 +163,6 @@ export default function ExamInterfacePage() {
         setTimeLeft(examRes.data.time_limit);
       }
 
-      // Create attempt if not resuming
       if (!saved || !JSON.parse(saved).attemptId) {
         const { data: attempt, error } = await supabase.from('exam_attempts').insert({
           exam_id: examId!,
@@ -143,11 +186,7 @@ export default function ExamInterfacePage() {
     if (isFinished || isLoading) return;
     const timer = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleFinish();
-          return 0;
-        }
+        if (prev <= 1) { clearInterval(timer); handleFinish(); return 0; }
         return prev - 1;
       });
     }, 1000);
@@ -157,8 +196,8 @@ export default function ExamInterfacePage() {
   // Auto-save
   useEffect(() => {
     if (isFinished || isLoading) return;
-    localStorage.setItem(storageKey, JSON.stringify({ answers, writingAnswers, currentQ, timeLeft, attemptId }));
-  }, [answers, writingAnswers, currentQ, timeLeft, attemptId, isFinished, isLoading]);
+    localStorage.setItem(storageKey, JSON.stringify({ answers, writingAnswers, speakingTranscripts, currentQ, timeLeft, attemptId }));
+  }, [answers, writingAnswers, speakingTranscripts, currentQ, timeLeft, attemptId, isFinished, isLoading]);
 
   // Fullscreen
   useEffect(() => {
@@ -171,17 +210,12 @@ export default function ExamInterfacePage() {
       } catch {}
     };
     enterFs();
-
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = '';
-    };
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
     const handleFsChange = () => {
       if (!document.fullscreenElement && !isFinished) {
         try { containerRef.current?.requestFullscreen(); } catch {}
       }
     };
-
     window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('fullscreenchange', handleFsChange);
     return () => {
@@ -221,9 +255,128 @@ export default function ExamInterfacePage() {
   };
 
   const isWritingSkill = exam?.skill === 'writing';
+  const isSpeakingSkill = exam?.skill === 'speaking';
   const isReading = exam?.skill === 'reading';
   const isListening = exam?.skill === 'listening';
   const isVocabOrGrammar = exam?.skill === 'vocabulary' || exam?.skill === 'grammar';
+
+  // === Recording ===
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const q = questions[currentQ];
+        if (q) {
+          setSpeakingRecordings(prev => ({ ...prev, [q.id]: blob }));
+          // Use Web Speech API for transcription
+          transcribeWithWebSpeech(blob, q.id);
+        }
+        stream.getTracks().forEach(t => t.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      toast.error("Mikrofonga ruxsat berilmadi");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const transcribeWithWebSpeech = (blob: Blob, questionId: string) => {
+    // Use SpeechRecognition API if available, otherwise prompt for manual transcript
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      // Fallback: let user type their transcript
+      toast.info("Ovozni matn sifatida yozing");
+      return;
+    }
+    // For now, we'll use a simple approach - play back and use recognition
+    toast.success("Ovoz yozildi! Transkript qo'lda kiritishingiz mumkin.");
+  };
+
+  // === AI Functions ===
+  const checkWritingWithAI = async (questionId: string) => {
+    const q = questions.find(q => q.id === questionId);
+    const essay = writingAnswers[questionId];
+    if (!q || !essay?.trim()) { toast.error("Avval javob yozing"); return; }
+
+    setAiLoading(`writing_${questionId}`);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-writing', {
+        body: { essay, question: q.question_text, level: exam?.level || 'B2' },
+      });
+      if (error) throw error;
+      if (data?.result) {
+        setWritingEval(prev => ({ ...prev, [questionId]: data.result }));
+        toast.success("AI baholash tayyor!");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "AI tekshirishda xatolik");
+    } finally {
+      setAiLoading(null);
+    }
+  };
+
+  const checkSpeakingWithAI = async (questionId: string) => {
+    const q = questions.find(q => q.id === questionId);
+    const transcript = speakingTranscripts[questionId];
+    if (!q || !transcript?.trim()) { toast.error("Avval gapiring yoki transkript kiriting"); return; }
+
+    setAiLoading(`speaking_${questionId}`);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-speaking', {
+        body: { transcript, question: q.question_text, level: exam?.level || 'B2' },
+      });
+      if (error) throw error;
+      if (data?.result) {
+        setSpeakingEval(prev => ({ ...prev, [questionId]: data.result }));
+        toast.success("AI baholash tayyor!");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "AI tekshirishda xatolik");
+    } finally {
+      setAiLoading(null);
+    }
+  };
+
+  const loadVideoRecommendations = async () => {
+    const wrongQuestions = questions.filter(q => {
+      const userAns = answers[q.id];
+      return userAns !== q.correct_answer;
+    }).map(q => ({ question: q.question_text, correct: q.correct_answer, userAnswer: answers[q.id] || 'javob berilmagan' }));
+
+    if (wrongQuestions.length === 0) { toast.info("Barcha javoblar to'g'ri!"); return; }
+
+    setAiLoading('videos');
+    try {
+      const { data, error } = await supabase.functions.invoke('recommend-videos', {
+        body: { wrongQuestions, level: exam?.level || 'B2', skill: exam?.skill || 'grammar' },
+      });
+      if (error) throw error;
+      if (data?.result) {
+        setVideoSuggestions(data.result);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Video tavsiyalarni yuklashda xatolik");
+    } finally {
+      setAiLoading(null);
+    }
+  };
 
   const handleFinish = useCallback(async () => {
     if (isFinished) return;
@@ -235,7 +388,7 @@ export default function ExamInterfacePage() {
     }
 
     let score = 0;
-    if (!isWritingSkill) {
+    if (!isWritingSkill && !isSpeakingSkill) {
       questions.forEach(q => {
         const userAns = answers[q.id];
         if (Array.isArray(q.correct_answer)) {
@@ -250,18 +403,17 @@ export default function ExamInterfacePage() {
     }
 
     const totalPoints = questions.reduce((a, q) => a + q.points, 0);
-    const percentage = isWritingSkill ? 0 : (totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0);
+    const percentage = (isWritingSkill || isSpeakingSkill) ? 0 : (totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0);
     setResults({ score, total: totalPoints, percentage });
 
-    // Save to DB
-    const allAnswers = isWritingSkill ? writingAnswers : answers;
+    const allAnswers = isWritingSkill ? writingAnswers : isSpeakingSkill ? speakingTranscripts : answers;
     if (attemptId) {
       try {
         await supabase.from('exam_attempts').update({
-          score: isWritingSkill ? null : score,
+          score: (isWritingSkill || isSpeakingSkill) ? null : score,
           total_questions: questions.length,
-          percentage: isWritingSkill ? null : percentage,
-          passed: isWritingSkill ? null : percentage >= 60,
+          percentage: (isWritingSkill || isSpeakingSkill) ? null : percentage,
+          passed: (isWritingSkill || isSpeakingSkill) ? null : percentage >= 60,
           answers: allAnswers as any,
           time_taken: exam ? exam.time_limit - timeLeft : 0,
           completed_at: new Date().toISOString(),
@@ -270,7 +422,7 @@ export default function ExamInterfacePage() {
         console.error('Error saving result:', error);
       }
     }
-  }, [isFinished, questions, answers, writingAnswers, attemptId, exam, timeLeft, storageKey, isWritingSkill]);
+  }, [isFinished, questions, answers, writingAnswers, speakingTranscripts, attemptId, exam, timeLeft, storageKey, isWritingSkill, isSpeakingSkill]);
 
   if (authLoading || isLoading) {
     return (
@@ -280,106 +432,343 @@ export default function ExamInterfacePage() {
     );
   }
 
-  // Results screen
+  // === RESULTS SCREEN ===
   if (isFinished && results) {
     const config = skillConfig[exam?.skill || ''] || skillConfig.reading;
 
+    // Writing results with AI evaluation
     if (isWritingSkill) {
       return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-          <Card className="max-w-lg w-full">
-            <CardContent className="pt-8 text-center space-y-6">
-              <CheckCircle className="h-20 w-20 text-primary mx-auto" />
-              <h1 className="text-3xl font-bold">{exam?.title}</h1>
-              <p className="text-lg text-muted-foreground">
-                Writing javoblaringiz yuborildi!
-              </p>
-              <Badge variant="secondary" className="text-lg px-4 py-1">
-                Admin tekshirgandan so'ng natijangiz ko'rinadi
-              </Badge>
+        <div className="min-h-screen bg-background p-4">
+          <div className="max-w-3xl mx-auto space-y-6 py-8">
+            <Card>
+              <CardContent className="pt-8 text-center space-y-4">
+                <Pen className="h-16 w-16 text-primary mx-auto" />
+                <h1 className="text-2xl font-bold">{exam?.title} - Natijalar</h1>
+                <p className="text-muted-foreground">AI yordamida har bir javobingizni tekshirishingiz mumkin</p>
+              </CardContent>
+            </Card>
 
-              <div className="text-left space-y-3 mt-6 max-h-80 overflow-y-auto">
-                {questions.map((q, i) => (
-                  <div key={q.id} className="p-3 rounded-lg border border-border">
-                    <p className="text-sm font-medium mb-1">{i + 1}. {q.question_text}</p>
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {writingAnswers[q.id] || '— Javob berilmagan —'}
-                    </p>
-                  </div>
-                ))}
-              </div>
+            {questions.map((q, i) => {
+              const evaluation = writingEval[q.id];
+              return (
+                <Card key={q.id}>
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <Badge variant="secondary">{i + 1}-savol</Badge>
+                        <p className="font-medium mt-2">{q.question_text}</p>
+                      </div>
+                    </div>
 
-              <Button className="w-full" onClick={() => navigate('/exams')}>
-                Examlarga qaytish
-              </Button>
-            </CardContent>
-          </Card>
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <p className="text-sm whitespace-pre-wrap">{writingAnswers[q.id] || '— Javob berilmagan —'}</p>
+                    </div>
+
+                    {!evaluation && (
+                      <Button
+                        onClick={() => checkWritingWithAI(q.id)}
+                        disabled={aiLoading === `writing_${q.id}` || !writingAnswers[q.id]?.trim()}
+                        className="w-full"
+                      >
+                        {aiLoading === `writing_${q.id}` ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" />AI tekshirmoqda...</>
+                        ) : (
+                          <><Star className="w-4 h-4 mr-2" />AI bilan tekshirish</>
+                        )}
+                      </Button>
+                    )}
+
+                    {evaluation && (
+                      <div className="space-y-4 border-t border-border pt-4">
+                        <div className="flex items-center gap-3">
+                          <div className="text-3xl font-bold text-primary">{evaluation.overallBand}/9</div>
+                          <span className="text-sm text-muted-foreground">Umumiy baho</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            { key: 'taskAchievement', label: 'Task Achievement' },
+                            { key: 'coherenceAndCohesion', label: 'Coherence & Cohesion' },
+                            { key: 'lexicalResource', label: 'Lexical Resource' },
+                            { key: 'grammaticalRange', label: 'Grammar' },
+                          ].map(({ key, label }) => {
+                            const c = evaluation.criteria[key as keyof typeof evaluation.criteria];
+                            return (
+                              <div key={key} className="bg-muted/50 rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs font-medium">{label}</span>
+                                  <Badge variant="outline">{c.score}/9</Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground">{c.feedback}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="bg-primary/5 rounded-lg p-4">
+                          <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4" />Umumiy tavsiya
+                          </h4>
+                          <p className="text-sm text-muted-foreground">{evaluation.overallFeedback}</p>
+                        </div>
+
+                        {evaluation.correctedEssay && (
+                          <details className="bg-muted/30 rounded-lg p-4">
+                            <summary className="text-sm font-medium cursor-pointer">To'g'rilangan versiya</summary>
+                            <p className="text-sm mt-2 whitespace-pre-wrap">{evaluation.correctedEssay}</p>
+                          </details>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+
+            <Button className="w-full" variant="outline" onClick={() => navigate('/exams')}>
+              Examlarga qaytish
+            </Button>
+          </div>
         </div>
       );
     }
 
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="max-w-lg w-full">
-          <CardContent className="pt-8 text-center space-y-6">
-            {results.percentage >= 60 ? (
-              <CheckCircle className="h-20 w-20 text-primary mx-auto" />
-            ) : (
-              <XCircle className="h-20 w-20 text-destructive mx-auto" />
-            )}
-            <h1 className="text-3xl font-bold">{exam?.title}</h1>
-            <div className="text-6xl font-bold text-primary">{results.percentage}%</div>
-            <p className="text-muted-foreground">
-              {results.score} / {results.total} ball
-            </p>
-            <Badge variant={results.percentage >= 60 ? 'default' : 'destructive'} className="text-lg px-4 py-1">
-              {results.percentage >= 60 ? "O'tdi ✓" : "O'tmadi ✗"}
-            </Badge>
+    // Speaking results with AI evaluation
+    if (isSpeakingSkill) {
+      return (
+        <div className="min-h-screen bg-background p-4">
+          <div className="max-w-3xl mx-auto space-y-6 py-8">
+            <Card>
+              <CardContent className="pt-8 text-center space-y-4">
+                <Mic className="h-16 w-16 text-primary mx-auto" />
+                <h1 className="text-2xl font-bold">{exam?.title} - Natijalar</h1>
+                <p className="text-muted-foreground">AI yordamida speaking javoblaringizni baholang</p>
+              </CardContent>
+            </Card>
 
-            <div className="text-left space-y-3 mt-6 max-h-80 overflow-y-auto">
-              {questions.map((q, i) => {
-                const userAns = answers[q.id];
-                const isCorrect = userAns === q.correct_answer;
-                return (
-                  <div key={q.id} className={`p-3 rounded-lg border ${isCorrect ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
-                    <div className="flex items-start gap-2">
-                      <span className="text-xs font-bold mt-1">{i + 1}.</span>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{q.question_text}</p>
-                        <p className="text-xs mt-1">
-                          <span className="text-muted-foreground">Javobingiz: </span>
-                          <span className={isCorrect ? 'text-primary' : 'text-destructive'}>{String(userAns || '—')}</span>
-                        </p>
-                        {!isCorrect && (
-                          <p className="text-xs">
-                            <span className="text-muted-foreground">To'g'ri javob: </span>
-                            <span className="text-primary">{q.correct_answer}</span>
-                          </p>
+            {questions.map((q, i) => {
+              const evaluation = speakingEval[q.id];
+              const transcript = speakingTranscripts[q.id];
+              return (
+                <Card key={q.id}>
+                  <CardContent className="pt-6 space-y-4">
+                    <Badge variant="secondary">{i + 1}-savol</Badge>
+                    <p className="font-medium">{q.question_text}</p>
+
+                    {transcript && (
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <p className="text-xs text-muted-foreground mb-1">Sizning javobingiz:</p>
+                        <p className="text-sm">{transcript}</p>
+                      </div>
+                    )}
+
+                    {speakingRecordings[q.id] && (
+                      <audio controls className="w-full" src={URL.createObjectURL(speakingRecordings[q.id])} />
+                    )}
+
+                    {!evaluation && (
+                      <Button
+                        onClick={() => checkSpeakingWithAI(q.id)}
+                        disabled={aiLoading === `speaking_${q.id}` || !transcript?.trim()}
+                        className="w-full"
+                      >
+                        {aiLoading === `speaking_${q.id}` ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" />AI tekshirmoqda...</>
+                        ) : (
+                          <><Star className="w-4 h-4 mr-2" />AI bilan baholash</>
                         )}
-                        {q.explanation && !isCorrect && (
-                          <p className="text-xs text-muted-foreground mt-1">{q.explanation}</p>
+                      </Button>
+                    )}
+
+                    {evaluation && (
+                      <div className="space-y-4 border-t border-border pt-4">
+                        <div className="flex items-center gap-3">
+                          <div className="text-3xl font-bold text-primary">{evaluation.overallBand}/9</div>
+                          <span className="text-sm text-muted-foreground">Umumiy baho</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            { key: 'fluencyAndCoherence', label: 'Fluency & Coherence' },
+                            { key: 'lexicalResource', label: 'Lexical Resource' },
+                            { key: 'grammaticalRange', label: 'Grammar' },
+                            { key: 'pronunciation', label: 'Pronunciation' },
+                          ].map(({ key, label }) => {
+                            const c = evaluation.criteria[key as keyof typeof evaluation.criteria];
+                            return (
+                              <div key={key} className="bg-muted/50 rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs font-medium">{label}</span>
+                                  <Badge variant="outline">{c.score}/9</Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground">{c.feedback}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="bg-primary/5 rounded-lg p-4">
+                          <h4 className="text-sm font-medium mb-2">Umumiy tavsiya</h4>
+                          <p className="text-sm text-muted-foreground">{evaluation.overallFeedback}</p>
+                        </div>
+
+                        {evaluation.suggestedResponse && (
+                          <details className="bg-muted/30 rounded-lg p-4">
+                            <summary className="text-sm font-medium cursor-pointer">Namuna javob</summary>
+                            <p className="text-sm mt-2 whitespace-pre-wrap">{evaluation.suggestedResponse}</p>
+                          </details>
                         )}
                       </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
 
-            <Button className="w-full" onClick={() => navigate('/exams')}>
+            <Button className="w-full" variant="outline" onClick={() => navigate('/exams')}>
               Examlarga qaytish
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      );
+    }
+
+    // Regular results (MCQ) with video recommendations
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-3xl mx-auto space-y-6 py-8">
+          <Card>
+            <CardContent className="pt-8 text-center space-y-4">
+              {results.percentage >= 60 ? (
+                <CheckCircle className="h-20 w-20 text-primary mx-auto" />
+              ) : (
+                <XCircle className="h-20 w-20 text-destructive mx-auto" />
+              )}
+              <h1 className="text-3xl font-bold">{exam?.title}</h1>
+              <div className="text-6xl font-bold text-primary">{results.percentage}%</div>
+              <p className="text-muted-foreground">{results.score} / {results.total} ball</p>
+              <Badge variant={results.percentage >= 60 ? 'default' : 'destructive'} className="text-lg px-4 py-1">
+                {results.percentage >= 60 ? "O'tdi ✓" : "O'tmadi ✗"}
+              </Badge>
+            </CardContent>
+          </Card>
+
+          {/* Video Recommendations */}
+          {results.percentage < 100 && (
+            <Card>
+              <CardContent className="pt-6 space-y-4">
+                {!videoSuggestions ? (
+                  <Button
+                    onClick={loadVideoRecommendations}
+                    disabled={aiLoading === 'videos'}
+                    className="w-full"
+                    variant="secondary"
+                  >
+                    {aiLoading === 'videos' ? (
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Video darslar qidirilmoqda...</>
+                    ) : (
+                      <><Video className="w-4 h-4 mr-2" />Xatolar bo'yicha video darslar tavsiyasi</>
+                    )}
+                  </Button>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Video className="w-5 h-5 text-primary" />
+                      <h3 className="font-semibold">Tavsiya etilgan video darslar</h3>
+                    </div>
+
+                    {videoSuggestions.weakTopics.length > 0 && (
+                      <div className="flex gap-2 flex-wrap">
+                        {videoSuggestions.weakTopics.map((topic, i) => (
+                          <Badge key={i} variant="destructive" className="text-xs">{topic}</Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
+                      {videoSuggestions.videos.map((video, i) => (
+                        <a
+                          key={i}
+                          href={video.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block p-4 rounded-lg border border-border hover:border-primary/50 transition-colors"
+                        >
+                          <div className="flex items-start gap-3">
+                            <Play className="w-8 h-8 text-primary shrink-0 mt-1" />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-sm flex items-center gap-1">
+                                {video.title}
+                                <ExternalLink className="w-3 h-3" />
+                              </h4>
+                              <p className="text-xs text-primary">{video.channel}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{video.description}</p>
+                              <Badge variant="outline" className="text-xs mt-2">{video.topic}</Badge>
+                            </div>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+
+                    <div className="bg-primary/5 rounded-lg p-4">
+                      <p className="text-sm text-muted-foreground">{videoSuggestions.overallAdvice}</p>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Answer review */}
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="font-semibold mb-4">Javoblar tahlili</h3>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {questions.map((q, i) => {
+                  const userAns = answers[q.id];
+                  const isCorrect = userAns === q.correct_answer;
+                  return (
+                    <div key={q.id} className={`p-3 rounded-lg border ${isCorrect ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
+                      <div className="flex items-start gap-2">
+                        <span className="text-xs font-bold mt-1">{i + 1}.</span>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{q.question_text}</p>
+                          <p className="text-xs mt-1">
+                            <span className="text-muted-foreground">Javobingiz: </span>
+                            <span className={isCorrect ? 'text-primary' : 'text-destructive'}>{String(userAns || '—')}</span>
+                          </p>
+                          {!isCorrect && (
+                            <p className="text-xs">
+                              <span className="text-muted-foreground">To'g'ri javob: </span>
+                              <span className="text-primary">{q.correct_answer}</span>
+                            </p>
+                          )}
+                          {q.explanation && !isCorrect && (
+                            <p className="text-xs text-muted-foreground mt-1">{q.explanation}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Button className="w-full" variant="outline" onClick={() => navigate('/exams')}>
+            Examlarga qaytish
+          </Button>
+        </div>
       </div>
     );
   }
 
+  // === EXAM INTERFACE ===
   const question = questions[currentQ];
   const currentPassage = passages.length > 0 ? passages[0] : null;
   const config = skillConfig[exam?.skill || ''] || skillConfig.reading;
   const SkillIcon = config.icon;
-
   const wordCount = (text: string) => text.trim().split(/\s+/).filter(Boolean).length;
 
   return (
@@ -470,7 +859,7 @@ export default function ExamInterfacePage() {
                     <Badge variant="secondary">
                       Savol {currentQ + 1} / {questions.length}
                     </Badge>
-                    {!isWritingSkill && (
+                    {!isWritingSkill && !isSpeakingSkill && (
                       <Badge variant="outline" className="text-xs">
                         {question.points} ball
                       </Badge>
@@ -496,14 +885,53 @@ export default function ExamInterfacePage() {
                       <span>Kamida 150 so'z tavsiya etiladi</span>
                     </div>
                   </div>
+                ) : isSpeakingSkill ? (
+                  /* Speaking: Record + Transcript */
+                  <div className="space-y-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      {!isRecording ? (
+                        <Button onClick={startRecording} variant="outline" size="lg" className="gap-2">
+                          <Mic className="w-5 h-5 text-primary" />
+                          Yozishni boshlash
+                        </Button>
+                      ) : (
+                        <Button onClick={stopRecording} variant="destructive" size="lg" className="gap-2 animate-pulse">
+                          <MicOff className="w-5 h-5" />
+                          To'xtatish
+                        </Button>
+                      )}
+                      {speakingRecordings[question.id] && (
+                        <Badge variant="secondary" className="gap-1">
+                          <CheckCircle className="w-3 h-3" /> Yozildi
+                        </Badge>
+                      )}
+                    </div>
+
+                    {speakingRecordings[question.id] && (
+                      <audio controls className="w-full" src={URL.createObjectURL(speakingRecordings[question.id])} />
+                    )}
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Transkript (gapirganingizni yozing):</label>
+                      <Textarea
+                        placeholder="Gapirgan javobingizni matn sifatida yozing..."
+                        className="min-h-[150px] text-base resize-y"
+                        value={speakingTranscripts[question.id] || ''}
+                        onChange={e => setSpeakingTranscripts(prev => ({ ...prev, [question.id]: e.target.value }))}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {wordCount(speakingTranscripts[question.id] || '')} so'z
+                      </p>
+                    </div>
+                  </div>
                 ) : (
+                  /* MCQ options */
                   <>
                     {question.question_type === 'list-selection' && (
                       <p className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
                         <AlertCircle className="w-4 h-4" />2 ta javobni tanlang
                       </p>
                     )}
-
                     <div className="space-y-3 mb-6">
                       {question.options?.map((opt, i) => (
                         <button
@@ -534,6 +962,8 @@ export default function ExamInterfacePage() {
                 <span className="text-xs text-muted-foreground">
                   {isWritingSkill
                     ? `${Object.keys(writingAnswers).filter(k => writingAnswers[k]?.trim()).length}/${questions.length} yozildi`
+                    : isSpeakingSkill
+                    ? `${Object.keys(speakingTranscripts).filter(k => speakingTranscripts[k]?.trim()).length}/${questions.length} gapirdi`
                     : `${Object.keys(answers).length}/${questions.length} javob`
                   }
                 </span>
@@ -542,6 +972,8 @@ export default function ExamInterfacePage() {
                 {questions.map((q, i) => {
                   const hasAnswer = isWritingSkill
                     ? !!writingAnswers[q.id]?.trim()
+                    : isSpeakingSkill
+                    ? !!speakingTranscripts[q.id]?.trim()
                     : !!answers[q.id];
                   return (
                     <button
