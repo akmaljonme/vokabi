@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, Trophy, RotateCcw, Save } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, Trophy, RotateCcw, Save, FileDown } from 'lucide-react';
 import { CertificateDownload } from '@/components/CertificateDownload';
 import { VideoRecommendations } from '@/components/AIResultsSection';
 import { TestResult } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTestResults } from '@/hooks/useTestResults';
+import { generateTestPDF, generateResultPDF } from '@/utils/pdfGenerator';
 
 interface ResultPageProps {
   result: TestResult;
@@ -148,6 +149,20 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
             Retry This Test
           </button>
           <CertificateDownload result={result} />
+          <button 
+            onClick={() => generateTestPDF(mockTest)}
+            className="btn-outline flex items-center gap-2"
+          >
+            <FileDown className="w-5 h-5" />
+            Test PDF
+          </button>
+          <button 
+            onClick={() => generateResultPDF(result, mockTest)}
+            className="btn-outline flex items-center gap-2"
+          >
+            <FileDown className="w-5 h-5" />
+            Natijalar PDF
+          </button>
           <button onClick={onBack} className="btn-outline">
             Choose Another Test
           </button>
