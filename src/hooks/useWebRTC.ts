@@ -59,9 +59,18 @@ export const useWebRTC = (userId: string | undefined) => {
     };
 
     pc.ontrack = (e) => {
-      const audio = new Audio();
-      audio.srcObject = e.streams[0];
-      audio.play().catch(() => {});
+      console.log('[WebRTC] Remote track received', e.streams.length);
+      // Create persistent audio element attached to DOM
+      if (!remoteAudioRef.current) {
+        const audio = document.createElement('audio');
+        audio.autoplay = true;
+        audio.playsInline = true;
+        audio.id = 'webrtc-remote-audio';
+        document.body.appendChild(audio);
+        remoteAudioRef.current = audio;
+      }
+      remoteAudioRef.current.srcObject = e.streams[0];
+      remoteAudioRef.current.play().catch(err => console.error('[WebRTC] Audio play error:', err));
     };
 
     pc.onconnectionstatechange = () => {
