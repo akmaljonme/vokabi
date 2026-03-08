@@ -48,6 +48,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [results, setResults] = useState<TestResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { progress, achievements, userAchievements, leaderboard, newAchievement, dismissAchievement, xpProgress, xpToNextLevel, userRank, loading: gamLoading } = useGamification();
 
   useEffect(() => {
     if (!loading && !user) navigate('/auth');
