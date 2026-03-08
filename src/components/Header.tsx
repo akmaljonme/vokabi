@@ -167,7 +167,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                     <User className="w-3.5 h-3.5 text-primary" />
                   </div>
                   <span className="text-sm font-medium truncate max-w-28">
-                    {user.email}
+                    {displayName || user.email}
                   </span>
                 </button>
                 <button
