@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Clock, Flag, AlertCircle, ArrowLeft, ArrowRight, BookOpen, Headphones, BookA, Mic, MicOff, CheckCircle } from 'lucide-react';
+import { Clock, Flag, AlertCircle, ArrowLeft, ArrowRight, BookOpen, Headphones, BookA, Mic, MicOff, CheckCircle, PenTool, Send, Loader2 as Loader2Icon } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { MockTest, UserAnswer, Part, TestResult, Question } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { useTestWithQuestions } from '@/hooks/useTests';
@@ -22,6 +23,8 @@ const skillConfig: Record<string, { label: string; icon: any; color: string }> =
   grammar: { label: 'Grammatika', icon: BookOpen, color: 'text-amber-500' },
   reading: { label: 'Reading', icon: BookOpen, color: 'text-primary' },
   listening: { label: 'Listening', icon: Headphones, color: 'text-primary' },
+  writing: { label: 'Writing', icon: PenTool, color: 'text-emerald-500' },
+  speaking: { label: 'Speaking', icon: Mic, color: 'text-rose-500' },
 };
 
 export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }: TestInterfaceProps) => {
@@ -37,6 +40,20 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isNoParts = skill === 'vocabulary' || skill === 'grammar';
+  const isWriting = skill === 'writing';
+  const isSpeaking = skill === 'speaking';
+  const isOpenEnded = isWriting || isSpeaking;
+
+  // Writing state
+  const [writingText, setWritingText] = useState('');
+  
+  // Speaking state
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [speakingSubmitting, setSpeakingSubmitting] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   const { test: dbTest, loading: dbLoading } = useTestWithQuestions(testId);
 
@@ -203,6 +220,47 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
     if (!mockTest) return;
     localStorage.removeItem(testStorageKey);
 
+    // For writing/speaking, submit to AI for evaluation
+    if (isWriting || isSpeaking) {
+      const submitOpenEnded = async () => {
+        setSpeakingSubmitting(true);
+        try {
+          const functionName = isWriting ? 'check-writing' : 'check-speaking';
+          const body = isWriting
+            ? { essay: writingText, question: part?.questions[0]?.question || part?.passage.content || '', level }
+            : { transcript: '[Audio submitted]', question: part?.questions[0]?.question || part?.passage.content || '', level };
+
+          const { data } = await import('@/integrations/supabase/client').then(m => 
+            m.supabase.functions.invoke(functionName, { body })
+          );
+
+          onFinish({
+            mockId, level, skill, totalQuestions: 1,
+            correctAnswers: 0, percentage: 0,
+            passed: false,
+            answers: [{
+              questionId: 1, partId: 1,
+              userAnswer: isWriting ? writingText : '[Audio]',
+              correctAnswer: '', isCorrect: false,
+            }],
+            timeTaken: mockTest.timeLimit - timeLeft,
+            mockTest,
+            aiResult: data?.result,
+          } as any);
+        } catch {
+          onFinish({
+            mockId, level, skill, totalQuestions: 1,
+            correctAnswers: 0, percentage: 0, passed: false,
+            answers: [], timeTaken: mockTest.timeLimit - timeLeft, mockTest,
+          });
+        } finally {
+          setSpeakingSubmitting(false);
+        }
+      };
+      submitOpenEnded();
+      return;
+    }
+
     const results: TestResult['answers'] = [];
     let correctCount = 0;
 
@@ -347,7 +405,92 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
           )}
 
           <div className="p-6 flex-1 overflow-y-auto">
-            {question && (
+            {/* Writing Interface */}
+            {isWriting && part && (
+              <div className="max-w-3xl mx-auto">
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-2">{part.passage.title || 'Writing Task'}</h3>
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{part.passage.content}</p>
+                  {part.questions[0] && (
+                    <div className="mt-4 p-4 bg-muted/50 rounded-xl border border-border">
+                      <p className="font-medium">{part.questions[0].question}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Javobingiz</span>
+                    <span className="text-xs text-muted-foreground">{writingText.split(/\s+/).filter(Boolean).length} so'z</span>
+                  </div>
+                  <Textarea
+                    value={writingText}
+                    onChange={(e) => setWritingText(e.target.value)}
+                    placeholder="Javobingizni shu yerga yozing..."
+                    className="min-h-[300px] text-base leading-relaxed"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Speaking Interface */}
+            {isSpeaking && part && (
+              <div className="max-w-2xl mx-auto text-center">
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold mb-2">{part.passage.title || 'Speaking Task'}</h3>
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{part.passage.content}</p>
+                  {part.questions[0] && (
+                    <div className="mt-4 p-4 bg-muted/50 rounded-xl border border-border">
+                      <p className="font-medium">{part.questions[0].question}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col items-center gap-6">
+                  <button
+                    onClick={async () => {
+                      if (isRecording) {
+                        mediaRecorderRef.current?.stop();
+                        setIsRecording(false);
+                      } else {
+                        try {
+                          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                          const recorder = new MediaRecorder(stream);
+                          mediaRecorderRef.current = recorder;
+                          chunksRef.current = [];
+                          recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
+                          recorder.onstop = () => {
+                            const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+                            setAudioBlob(blob);
+                            setAudioUrl(URL.createObjectURL(blob));
+                            stream.getTracks().forEach(t => t.stop());
+                          };
+                          recorder.start();
+                          setIsRecording(true);
+                        } catch { /* mic permission denied */ }
+                      }
+                    }}
+                    className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
+                      isRecording
+                        ? 'bg-destructive text-destructive-foreground animate-pulse'
+                        : 'bg-primary text-primary-foreground hover:opacity-90'
+                    }`}
+                  >
+                    {isRecording ? <MicOff className="w-10 h-10" /> : <Mic className="w-10 h-10" />}
+                  </button>
+                  <p className="text-sm text-muted-foreground">
+                    {isRecording ? 'Yozib olinmoqda... To\'xtatish uchun bosing' : 'Gapirish uchun bosing'}
+                  </p>
+                  {audioUrl && (
+                    <div className="w-full space-y-3">
+                      <audio src={audioUrl} controls className="w-full" />
+                      <p className="text-xs text-muted-foreground">Qayta yozish uchun yana mikrofon tugmasini bosing</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Standard question-based interface */}
+            {!isOpenEnded && question && (
               <>
                 {/* Question header */}
                 <div className="mb-6">
@@ -368,7 +511,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
                   )}
                 </div>
 
-                {/* Options - same style as ExamInterface */}
+                {/* Options */}
                 {question.type === 'list-selection' && (
                   <p className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" />2 ta javobni tanlang
@@ -395,81 +538,101 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
               </>
             )}
 
-            {/* Question navigator - same style as ExamInterface */}
-            <div className="bg-muted/50 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-medium">
-                  {isNoParts ? 'Savollar' : `Part ${currentPart} Savollar`}
-                </h4>
-                <span className="text-xs text-muted-foreground">
-                  {answers.length}/{totalQ} javob berildi
-                </span>
+            {/* Question navigator */}
+            {!isOpenEnded && (
+              <div className="bg-muted/50 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium">
+                    {isNoParts ? 'Savollar' : `Part ${currentPart} Savollar`}
+                  </h4>
+                  <span className="text-xs text-muted-foreground">
+                    {answers.length}/{totalQ} javob berildi
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {isNoParts ? (
+                    Array.from({ length: totalQ }, (_, i) => {
+                      const isAnswered = answers.some(a => a.questionId === i + 1);
+                      const isCurrent = i + 1 === currentQuestion;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setCurrentQuestion(i + 1)}
+                          className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                            isCurrent
+                              ? 'bg-primary text-primary-foreground'
+                              : isAnswered
+                              ? 'bg-primary/20 text-primary'
+                              : 'bg-muted text-muted-foreground'
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      );
+                    })
+                  ) : (
+                    Array.from({ length: part?.questions.length || 10 }, (_, i) => {
+                      const isAnswered = isQuestionAnswered(currentPart, i);
+                      const isCurrent = i + 1 === currentQuestion;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setCurrentQuestion(i + 1)}
+                          className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                            isCurrent
+                              ? 'bg-primary text-primary-foreground'
+                              : isAnswered
+                              ? 'bg-primary/20 text-primary'
+                              : 'bg-muted text-muted-foreground'
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                {isNoParts ? (
-                  Array.from({ length: totalQ }, (_, i) => {
-                    const isAnswered = answers.some(a => a.questionId === i + 1);
-                    const isCurrent = i + 1 === currentQuestion;
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentQuestion(i + 1)}
-                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
-                          isCurrent
-                            ? 'bg-primary text-primary-foreground'
-                            : isAnswered
-                            ? 'bg-primary/20 text-primary'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    );
-                  })
-                ) : (
-                  Array.from({ length: part?.questions.length || 10 }, (_, i) => {
-                    const isAnswered = isQuestionAnswered(currentPart, i);
-                    const isCurrent = i + 1 === currentQuestion;
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentQuestion(i + 1)}
-                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
-                          isCurrent
-                            ? 'bg-primary text-primary-foreground'
-                            : isAnswered
-                            ? 'bg-primary/20 text-primary'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    );
-                  })
-                )}
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* Bottom navigation - same style as ExamInterface */}
+          {/* Bottom navigation */}
           <div className="bg-card border-t border-border p-4">
             <div className="flex items-center justify-between max-w-3xl mx-auto">
-              <Button
-                variant="outline"
-                disabled={isNoParts ? currentQuestion === 1 : (currentPart === 1 && currentQuestion === 1)}
-                onClick={() => handleNavigate('prev')}
-              >
-                <ArrowLeft className="w-4 h-4 mr-1" />Oldingi
-              </Button>
-              <span className="text-sm text-muted-foreground">{answers.length}/{totalQ} javob</span>
-              {(isNoParts ? currentQuestion === totalQ : (currentPart === (mockTest?.parts.length || 4) && currentQuestion === (part?.questions.length || 10))) ? (
-                <Button onClick={() => setShowConfirmFinish(true)}>
-                  <Flag className="w-4 h-4 mr-1" />Tugatish
-                </Button>
+              {isOpenEnded ? (
+                <>
+                  <div />
+                  <Button 
+                    onClick={() => setShowConfirmFinish(true)} 
+                    disabled={speakingSubmitting || (isWriting && !writingText.trim()) || (isSpeaking && !audioBlob)}
+                  >
+                    {speakingSubmitting ? (
+                      <><Loader2Icon className="w-4 h-4 mr-1 animate-spin" />Tekshirilmoqda...</>
+                    ) : (
+                      <><Send className="w-4 h-4 mr-1" />AI baholash uchun yuborish</>
+                    )}
+                  </Button>
+                </>
               ) : (
-                <Button onClick={() => handleNavigate('next')}>
-                  Keyingi<ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    disabled={isNoParts ? currentQuestion === 1 : (currentPart === 1 && currentQuestion === 1)}
+                    onClick={() => handleNavigate('prev')}
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-1" />Oldingi
+                  </Button>
+                  <span className="text-sm text-muted-foreground">{answers.length}/{totalQ} javob</span>
+                  {(isNoParts ? currentQuestion === totalQ : (currentPart === (mockTest?.parts.length || 4) && currentQuestion === (part?.questions.length || 10))) ? (
+                    <Button onClick={() => setShowConfirmFinish(true)}>
+                      <Flag className="w-4 h-4 mr-1" />Tugatish
+                    </Button>
+                  ) : (
+                    <Button onClick={() => handleNavigate('next')}>
+                      Keyingi<ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           </div>

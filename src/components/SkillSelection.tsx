@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, BookOpen, Headphones, Brain, Lightbulb, BookMarked, FileDown } from 'lucide-react';
+import { ArrowLeft, BookOpen, Headphones, Brain, Lightbulb, BookMarked, FileDown, Mic, PenTool } from 'lucide-react';
 import { CEFRLevel, SkillType } from '@/types/cefr';
 import { useActiveTests, TestInfo } from '@/hooks/useTests';
 import { Loader2 } from 'lucide-react';
@@ -18,7 +18,7 @@ interface SkillSelectionProps {
 const BOOK_NAMES = ["1-Kitob", "2-Kitob", "3-Kitob", "4-Kitob", "5-Kitob", "6-Kitob"];
 
 export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vocabularyOnly }: SkillSelectionProps) => {
-  const { readingTests, listeningTests, vocabularyTests, grammarTests, loading } = useActiveTests(vocabularyOnly ? undefined : level);
+  const { readingTests, listeningTests, vocabularyTests, grammarTests, speakingTests, writingTests, loading } = useActiveTests(vocabularyOnly ? undefined : level);
   const [selectedVocabBook, setSelectedVocabBook] = useState<number | null>(null);
   const defaultTab = vocabularyOnly ? 'vocabulary' : (hideVocabulary ? 'grammar' : 'vocabulary');
   const [activeTab, setActiveTab] = useState<SkillType>(defaultTab as SkillType);
@@ -41,6 +41,8 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
     { key: 'grammar' as SkillType, label: 'Grammatika', icon: Brain },
     { key: 'reading' as SkillType, label: 'Reading', icon: BookOpen },
     { key: 'listening' as SkillType, label: 'Listening', icon: Headphones },
+    { key: 'writing' as SkillType, label: 'Writing', icon: PenTool },
+    { key: 'speaking' as SkillType, label: 'Speaking', icon: Mic },
   ];
 
   const tabs = vocabularyOnly
@@ -238,6 +240,20 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
             <div>
               <h2 className="text-lg font-display font-bold mb-6 text-center tracking-tight">Listening Testlari</h2>
               {renderTestList(listeningTests, 'listening')}
+            </div>
+          )}
+
+          {activeTab === 'writing' && (
+            <div>
+              <h2 className="text-lg font-display font-bold mb-6 text-center tracking-tight">Writing Testlari</h2>
+              {renderTestList(writingTests, 'writing')}
+            </div>
+          )}
+
+          {activeTab === 'speaking' && (
+            <div>
+              <h2 className="text-lg font-display font-bold mb-6 text-center tracking-tight">Speaking Testlari</h2>
+              {renderTestList(speakingTests, 'speaking')}
             </div>
           )}
         </div>

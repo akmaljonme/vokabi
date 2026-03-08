@@ -118,13 +118,15 @@ export interface TestInfo {
      fetchTests();
    }, [level]);
  
-    // Group tests by skill
-    const readingTests = tests.filter(t => t.skill === 'reading');
-    const listeningTests = tests.filter(t => t.skill === 'listening');
-    const vocabularyTests = tests.filter(t => t.skill === 'vocabulary');
-    const grammarTests = tests.filter(t => t.skill === 'grammar');
-  
-    return { tests, readingTests, listeningTests, vocabularyTests, grammarTests, loading, error };
+     // Group tests by skill
+     const readingTests = tests.filter(t => t.skill === 'reading');
+     const listeningTests = tests.filter(t => t.skill === 'listening');
+     const vocabularyTests = tests.filter(t => t.skill === 'vocabulary');
+     const grammarTests = tests.filter(t => t.skill === 'grammar');
+     const speakingTests = tests.filter(t => t.skill === 'speaking');
+     const writingTests = tests.filter(t => t.skill === 'writing');
+   
+     return { tests, readingTests, listeningTests, vocabularyTests, grammarTests, speakingTests, writingTests, loading, error };
   };
  
  // Fetch a single test with all its questions and passages
