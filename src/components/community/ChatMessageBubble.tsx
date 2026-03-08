@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Pencil, Trash2, X, Check, MoreVertical, Reply, Forward, Smile } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Pencil, Trash2, X, Check, Reply, Forward, Smile } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export interface ReplyInfo {
   id: string;
@@ -49,11 +50,13 @@ export const ChatMessageBubble = ({
 }: ChatMessageBubbleProps) => {
   const { user } = useAuth();
   const [imgOpen, setImgOpen] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
   const [showEmojis, setShowEmojis] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(content);
   const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [longPressMenu, setLongPressMenu] = useState(false);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const bubbleRef = useRef<HTMLDivElement>(null);
 
   const hasImage = !!image_url;
   const hasAudio = !!audio_url;
@@ -94,86 +97,186 @@ export const ChatMessageBubble = ({
       await (supabase.from('message_reactions') as any).insert({ message_id: id, user_id: user.id, emoji, message_type: messageType });
     }
     setShowEmojis(false);
+    setLongPressMenu(false);
   };
 
   const handleEdit = () => {
     if (id && onEdit && editText.trim()) { onEdit(id, editText.trim()); setIsEditing(false); }
-    setShowMenu(false);
+    setLongPressMenu(false);
   };
 
-  const handleDelete = () => { if (id && onDelete) onDelete(id); setShowMenu(false); };
+  const handleDelete = () => { if (id && onDelete) onDelete(id); setLongPressMenu(false); };
 
   const handleReply = () => {
     if (id && onReply) onReply({ id, content: hasImage ? '📷 Rasm' : hasAudio ? '🎤 Ovozli xabar' : content, senderName: isMe ? 'Siz' : senderName });
-    setShowMenu(false);
+    setLongPressMenu(false);
   };
 
   const handleForward = () => {
     if (onForward) onForward({ content, image_url, audio_url, originalSender: isMe ? 'Siz' : (senderName || 'Foydalanuvchi') });
-    setShowMenu(false);
+    setLongPressMenu(false);
+  };
+
+  // Long press / double tap for context menu (Telegram-style)
+  const onPointerDown = () => {
+    longPressTimer.current = setTimeout(() => {
+      setLongPressMenu(true);
+    }, 500);
+  };
+
+  const onPointerUp = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  // Double click for quick ❤️ reaction (Instagram-style)
+  const lastTap = useRef(0);
+  const onDoubleTap = () => {
+    const now = Date.now();
+    if (now - lastTap.current < 300) {
+      toggleReaction('❤️');
+    }
+    lastTap.current = now;
   };
 
   return (
     <>
       <div className={`group flex ${isMe ? 'justify-end' : ''}`}>
         <div className="relative max-w-[80%]">
-          {id && !isEditing && (
-            <button onClick={() => setShowMenu(!showMenu)}
-              className={`absolute ${isMe ? '-left-8' : '-right-8'} top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg hover:bg-muted`}>
-              <MoreVertical className="w-4 h-4 text-muted-foreground" />
-            </button>
-          )}
 
-          {showMenu && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-              <div className={`absolute z-50 ${isMe ? 'right-0' : 'left-0'} -top-2 -translate-y-full bg-popover border border-border rounded-xl shadow-lg p-1 min-w-[160px]`}>
-                <button onClick={() => { setShowEmojis(true); setShowMenu(false); }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-muted transition-colors">
-                  <Smile className="w-3.5 h-3.5" /> Reaksiya
-                </button>
-                {onReply && (
-                  <button onClick={handleReply} className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-muted transition-colors">
-                    <Reply className="w-3.5 h-3.5" /> Javob berish
-                  </button>
-                )}
-                {onForward && (
-                  <button onClick={handleForward} className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-muted transition-colors">
-                    <Forward className="w-3.5 h-3.5" /> Yo'naltirish
-                  </button>
-                )}
-                {isMe && onEdit && !hasAudio && !hasImage && (
-                  <button onClick={() => { setIsEditing(true); setShowMenu(false); }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-muted transition-colors">
-                    <Pencil className="w-3.5 h-3.5" /> Tahrirlash
-                  </button>
-                )}
-                {isMe && onDelete && (
-                  <button onClick={handleDelete}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-destructive/10 text-destructive transition-colors">
-                    <Trash2 className="w-3.5 h-3.5" /> O'chirish
-                  </button>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* Emoji picker */}
-          {showEmojis && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowEmojis(false)} />
-              <div className={`absolute z-50 ${isMe ? 'right-0' : 'left-0'} -top-2 -translate-y-full bg-popover border border-border rounded-xl shadow-lg p-2 flex gap-1`}>
-                {EMOJI_OPTIONS.map(emoji => (
+          {/* Quick emoji bar on hover (desktop) - Telegram style */}
+          <AnimatePresence>
+            {!longPressMenu && !isEditing && id && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: 4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className={`absolute ${isMe ? 'right-0' : 'left-0'} -top-1 -translate-y-full hidden group-hover:flex items-center gap-0.5 bg-popover border border-border rounded-full shadow-lg px-1.5 py-1 z-30`}
+              >
+                {['❤️', '👍', '😂', '🔥'].map(emoji => (
                   <button key={emoji} onClick={() => toggleReaction(emoji)}
-                    className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center text-lg transition-colors hover:scale-110">
+                    className="w-7 h-7 rounded-full hover:bg-muted flex items-center justify-center text-sm transition-all hover:scale-125">
                     {emoji}
                   </button>
                 ))}
-              </div>
-            </>
-          )}
+                <button onClick={() => setShowEmojis(true)}
+                  className="w-7 h-7 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
+                  <Smile className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
+                {onReply && (
+                  <button onClick={handleReply}
+                    className="w-7 h-7 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
+                    <Reply className="w-3.5 h-3.5 text-muted-foreground" />
+                  </button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <div className={`rounded-2xl px-4 py-2.5 text-sm ${isMe ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-muted rounded-bl-md'}`}>
+          {/* Full emoji picker */}
+          <AnimatePresence>
+            {showEmojis && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowEmojis(false)} />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, y: 8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className={`absolute z-50 ${isMe ? 'right-0' : 'left-0'} -top-2 -translate-y-full bg-popover border border-border rounded-2xl shadow-xl p-2.5 flex gap-1.5`}
+                >
+                  {EMOJI_OPTIONS.map(emoji => (
+                    <motion.button key={emoji} onClick={() => toggleReaction(emoji)}
+                      whileHover={{ scale: 1.3 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center text-xl transition-colors">
+                      {emoji}
+                    </motion.button>
+                  ))}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+
+          {/* Long press context menu (Telegram-style) */}
+          <AnimatePresence>
+            {longPressMenu && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px]"
+                  onClick={() => setLongPressMenu(false)}
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.85, y: 10 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+                  className={`absolute z-50 ${isMe ? 'right-0' : 'left-0'} -top-3 -translate-y-full space-y-2`}
+                >
+                  {/* Quick emoji row */}
+                  <div className="bg-popover border border-border rounded-2xl shadow-xl p-2 flex gap-1">
+                    {EMOJI_OPTIONS.map(emoji => (
+                      <motion.button key={emoji} onClick={() => toggleReaction(emoji)}
+                        whileHover={{ scale: 1.25 }}
+                        whileTap={{ scale: 0.85 }}
+                        className="w-8 h-8 rounded-xl hover:bg-muted flex items-center justify-center text-lg transition-colors">
+                        {emoji}
+                      </motion.button>
+                    ))}
+                  </div>
+
+                  {/* Action menu */}
+                  <div className="bg-popover border border-border rounded-2xl shadow-xl p-1.5 min-w-[180px]">
+                    {onReply && (
+                      <button onClick={handleReply}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-sm rounded-xl hover:bg-muted transition-colors">
+                        <Reply className="w-4 h-4 text-muted-foreground" />
+                        <span>Javob berish</span>
+                      </button>
+                    )}
+                    {onForward && (
+                      <button onClick={handleForward}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-sm rounded-xl hover:bg-muted transition-colors">
+                        <Forward className="w-4 h-4 text-muted-foreground" />
+                        <span>Yo'naltirish</span>
+                      </button>
+                    )}
+                    {isMe && onEdit && !hasAudio && !hasImage && (
+                      <button onClick={() => { setIsEditing(true); setLongPressMenu(false); }}
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 text-sm rounded-xl hover:bg-muted transition-colors">
+                        <Pencil className="w-4 h-4 text-muted-foreground" />
+                        <span>Tahrirlash</span>
+                      </button>
+                    )}
+                    {isMe && onDelete && (
+                      <>
+                        <div className="h-px bg-border mx-2 my-1" />
+                        <button onClick={handleDelete}
+                          className="w-full flex items-center gap-3 px-3.5 py-2.5 text-sm rounded-xl hover:bg-destructive/10 text-destructive transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                          <span>O'chirish</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+
+          {/* Message bubble */}
+          <div
+            ref={bubbleRef}
+            onPointerDown={onPointerDown}
+            onPointerUp={onPointerUp}
+            onPointerLeave={onPointerUp}
+            onClick={onDoubleTap}
+            className={`rounded-2xl px-4 py-2.5 text-sm select-none ${isMe ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-muted rounded-bl-md'} ${longPressMenu ? 'ring-2 ring-primary/30 scale-[1.02]' : ''} transition-transform`}
+          >
             {senderName && !isMe && <p className="text-xs font-semibold mb-1 opacity-70">{senderName}</p>}
 
             {/* Forwarded label */}
@@ -218,19 +321,36 @@ export const ChatMessageBubble = ({
             </p>
           </div>
 
-          {/* Reactions display */}
+          {/* Reactions display - Telegram style pills */}
           {reactions.length > 0 && (
-            <div className={`flex flex-wrap gap-1 mt-1 ${isMe ? 'justify-end' : ''}`}>
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`flex flex-wrap gap-1 mt-1 ${isMe ? 'justify-end' : ''}`}
+            >
               {reactions.map(r => (
-                <button key={r.emoji} onClick={() => toggleReaction(r.emoji)}
-                  className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs border transition-colors ${
-                    r.hasReacted ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-muted/50 border-border hover:bg-muted'
-                  }`}>
-                  <span>{r.emoji}</span>
-                  <span className="text-[10px] font-medium">{r.count}</span>
-                </button>
+                <motion.button
+                  key={r.emoji}
+                  onClick={() => toggleReaction(r.emoji)}
+                  whileTap={{ scale: 0.85 }}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border transition-all ${
+                    r.hasReacted
+                      ? 'bg-primary/15 border-primary/40 text-primary shadow-sm'
+                      : 'bg-muted/50 border-border hover:bg-muted hover:border-muted-foreground/20'
+                  }`}
+                >
+                  <motion.span
+                    key={`${r.emoji}-${r.count}`}
+                    initial={{ scale: 1.4 }}
+                    animate={{ scale: 1 }}
+                    className="text-sm"
+                  >
+                    {r.emoji}
+                  </motion.span>
+                  <span className="text-[11px] font-semibold tabular-nums">{r.count}</span>
+                </motion.button>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
