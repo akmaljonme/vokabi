@@ -25,7 +25,7 @@ const formatTime = (dateStr: string) => {
   return d.toLocaleDateString('uz', { day: '2-digit', month: '2-digit' });
 };
 
-export const DirectMessages = () => {
+export const DirectMessages = ({ openUserId }: { openUserId?: string | null }) => {
   const { user } = useAuth();
   const call = useCall();
   const [chatPreviews, setChatPreviews] = useState<ChatPreview[]>([]);
