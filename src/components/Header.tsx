@@ -22,6 +22,15 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
   const navigate = useNavigate();
   const unreadCount = useUnreadDMCount();
   const call = useCall();
+  const [displayName, setDisplayName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    (supabase.from('profiles') as any).select('username, full_name').eq('user_id', user.id).maybeSingle()
+      .then(({ data }: any) => {
+        if (data) setDisplayName(data.username ? `@${data.username}` : data.full_name || user.email);
+      });
+  }, [user]);
 
   const toggleTheme = () => {
     const next = !isDark;
