@@ -31,8 +31,9 @@ export default function ProfileSettings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState<ProfileData>({
-    full_name: '', avatar_url: null, email_notifications: true, test_reminders: true, progress_updates: true,
+    full_name: '', username: null, avatar_url: null, email_notifications: true, test_reminders: true, progress_updates: true,
   });
+  const [usernameError, setUsernameError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
