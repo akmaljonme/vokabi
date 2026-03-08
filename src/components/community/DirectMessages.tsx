@@ -85,6 +85,19 @@ export const DirectMessages = ({ openUserId }: { openUserId?: string | null }) =
     return () => { supabase.removeChannel(channel); };
   }, [user, loadChatPreviews]);
 
+  // Auto-open chat from notification
+  useEffect(() => {
+    if (!openUserId || !user || activeContact) return;
+    const openChat = async () => {
+      const { data } = await (supabase.from('profiles') as any)
+        .select('user_id, full_name, username, avatar_url')
+        .eq('user_id', openUserId)
+        .maybeSingle();
+      if (data) setActiveContact(data);
+    };
+    openChat();
+  }, [openUserId, user]);
+
   const loadAllUsers = async () => {
     if (!user) return;
     const { data } = await (supabase.from('profiles') as any).select('user_id, full_name, username, avatar_url').neq('user_id', user.id).limit(50);
