@@ -3,6 +3,8 @@ import { ChevronDown, Menu, X, LogOut, User, Shield, Moon, Sun, Sparkles, Gamepa
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUnreadDMCount } from '@/hooks/useUnreadDMCount';
+import { Badge } from '@/components/ui/badge';
 
 interface HeaderProps {
   onNavigate: (view: 'landing' | 'levels') => void;
@@ -16,6 +18,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const unreadCount = useUnreadDMCount();
 
   const toggleTheme = () => {
     const next = !isDark;
@@ -103,9 +106,14 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 </button>
                 <button
                   onClick={() => navigate('/community')}
-                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
+                  className="relative px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
                 >
                   <Users className="w-3.5 h-3.5" /> Hamjamiyat
+                  {unreadCount > 0 && (
+                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Badge>
+                  )}
                 </button>
               </>
             )}
@@ -198,8 +206,13 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                   <button onClick={() => { navigate('/games'); setIsMenuOpen(false); }} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
                     <Gamepad2 className="w-4 h-4" /> O'yinlar
                   </button>
-                  <button onClick={() => { navigate('/community'); setIsMenuOpen(false); }} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
+                  <button onClick={() => { navigate('/community'); setIsMenuOpen(false); }} className="relative flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
                     <Users className="w-4 h-4" /> Hamjamiyat
+                    {unreadCount > 0 && (
+                      <Badge variant="destructive" className="h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </Badge>
+                    )}
                   </button>
                 </>
               )}
