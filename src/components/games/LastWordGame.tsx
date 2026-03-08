@@ -419,39 +419,27 @@ export const LastWordGame = ({ onBack }: Props) => {
     );
   }
 
-  // === ONLINE LOBBY ===
+  // === ONLINE LOBBY (fallback — show waiting with join option) ===
   if (mode === 'online' && gameState === 'lobby') {
     return (
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="text-center mb-6">
-          <Wifi className="w-10 h-10 text-primary mx-auto mb-3" />
-          <h2 className="text-xl font-display font-bold">Online o'yin</h2>
-          <p className="text-sm text-muted-foreground">Boshqa talaba bilan o'ynang!</p>
-        </div>
-        <div className="max-w-md mx-auto space-y-4">
-          <Button className="w-full h-12" onClick={findRoom}>
-            <Users className="w-4 h-4 mr-2" /> Raqib topish (avtomatik)
-          </Button>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto text-center py-10">
+        <Loader2 className="w-12 h-12 text-primary mx-auto mb-4 animate-spin" />
+        <h2 className="text-xl font-display font-bold mb-2">Raqib qidirilmoqda...</h2>
+        <p className="text-sm text-muted-foreground mb-6">Saytdagi online foydalanuvchilar orasidan raqib topilmoqda</p>
 
+        <div className="space-y-4">
           <div className="relative">
             <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">yoki</span></div>
+            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">yoki do'stingiz ID bergan bo'lsa</span></div>
           </div>
-
           <div className="flex gap-2">
-            <Input
-              value={joinId}
-              onChange={e => setJoinId(e.target.value)}
-              placeholder="Xona ID kiriting..."
-              className="flex-1"
-            />
-            <Button onClick={() => joinId.trim() && joinRoom(joinId.trim())} disabled={!joinId.trim()}>
-              Qo'shilish
-            </Button>
+            <Input value={joinId} onChange={e => setJoinId(e.target.value)} placeholder="Xona ID kiriting..." className="flex-1" />
+            <Button onClick={() => joinId.trim() && joinRoom(joinId.trim())} disabled={!joinId.trim()}>Qo'shilish</Button>
           </div>
         </div>
-        <div className="text-center mt-6">
-          <Button variant="ghost" onClick={() => setMode('select')}>← Orqaga</Button>
+
+        <div className="mt-6">
+          <Button variant="ghost" onClick={() => { leaveRoom(); setMode('select'); }}>← Bekor qilish</Button>
         </div>
       </motion.div>
     );
