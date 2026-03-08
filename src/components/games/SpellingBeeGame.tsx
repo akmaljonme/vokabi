@@ -87,6 +87,7 @@ export const SpellingBeeGame = ({ onBack }: Props) => {
   }
 
   const word = words[currentIdx];
+  if (!word) return null;
   const maskedWord = word.word.split('').map((c, i) => (i === 0 || i === word.word.length - 1) ? c : '_').join(' ');
 
   return (
