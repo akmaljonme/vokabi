@@ -101,6 +101,33 @@ export type Database = {
           },
         ]
       }
+      call_signals: {
+        Row: {
+          callee_id: string
+          caller_id: string
+          created_at: string
+          id: string
+          signal_data: Json | null
+          signal_type: string
+        }
+        Insert: {
+          callee_id: string
+          caller_id: string
+          created_at?: string
+          id?: string
+          signal_data?: Json | null
+          signal_type: string
+        }
+        Update: {
+          callee_id?: string
+          caller_id?: string
+          created_at?: string
+          id?: string
+          signal_data?: Json | null
+          signal_type?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           audio_url: string | null
