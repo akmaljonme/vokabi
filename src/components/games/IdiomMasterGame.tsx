@@ -88,7 +88,9 @@ export const IdiomMasterGame = ({ onBack }: Props) => {
           <p className="text-muted-foreground">Ingliz tili iboralarining ma'nosini toping!</p>
         </div>
         <div className="max-w-md mx-auto text-center">
-          <Button className="h-16 px-8 text-lg" onClick={startGame}>🎮 O'yinni boshlash</Button>
+          <Button className="h-16 px-8 text-lg" onClick={startGame} disabled={ai.loading}>
+            {ai.loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Tayyorlanmoqda...</> : "🎮 O'yinni boshlash"}
+          </Button>
         </div>
         <div className="text-center mt-6">
           <Button variant="ghost" onClick={onBack}>← Orqaga</Button>
