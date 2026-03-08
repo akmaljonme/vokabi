@@ -41,6 +41,8 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
     { key: 'grammar' as SkillType, label: 'Grammatika', icon: Brain },
     { key: 'reading' as SkillType, label: 'Reading', icon: BookOpen },
     { key: 'listening' as SkillType, label: 'Listening', icon: Headphones },
+    { key: 'writing' as SkillType, label: 'Writing', icon: PenTool },
+    { key: 'speaking' as SkillType, label: 'Speaking', icon: Mic },
   ];
 
   const tabs = vocabularyOnly
