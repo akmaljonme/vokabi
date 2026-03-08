@@ -6,10 +6,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChatRooms } from '@/components/community/ChatRooms';
 import { DirectMessages } from '@/components/community/DirectMessages';
+import { useWebRTC } from '@/hooks/useWebRTC';
+import { IncomingCallOverlay } from '@/components/community/IncomingCallOverlay';
 
 export default function Community() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { callState, remoteCallerId, remoteCallerName, acceptCall, rejectCall, isMuted, duration, toggleMute, endCall } = useWebRTC(user?.id);
 
   if (!user) { navigate('/auth'); return null; }
 
@@ -39,6 +42,15 @@ export default function Community() {
           <TabsContent value="dm"><DirectMessages /></TabsContent>
         </Tabs>
       </main>
+
+      {/* Incoming call overlay */}
+      {callState === 'ringing' && remoteCallerId && remoteCallerName && (
+        <IncomingCallOverlay
+          callerName={remoteCallerName}
+          onAccept={() => acceptCall(remoteCallerId)}
+          onReject={() => rejectCall(remoteCallerId)}
+        />
+      )}
     </div>
   );
 }
