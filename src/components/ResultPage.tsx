@@ -19,6 +19,17 @@ interface ResultPageProps {
 }
 
 export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
+  const isAISkill = result.skill === 'writing' || result.skill === 'speaking';
+  
+  // For Writing/Speaking, show AI result display
+  if (isAISkill) {
+    return <AIResultDisplay result={result} onRetry={onRetry} onBack={onBack} />;
+  }
+
+  return <StandardResultPage result={result} onRetry={onRetry} onBack={onBack} />;
+};
+
+const StandardResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
   const mockTest = result.mockTest || generateMockTest(result.mockId, result.level, result.skill);
   const { user } = useAuth();
   const { saveResult } = useTestResults();
