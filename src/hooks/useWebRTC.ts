@@ -9,6 +9,8 @@ const ICE_SERVERS = [
 type CallState = 'idle' | 'calling' | 'ringing' | 'connected' | 'ended';
 type CallMode = 'audio' | 'video';
 
+// Use a module-level variable won't work with multiple instances, so we use ref
+
 export const useWebRTC = (userId: string | undefined) => {
   const [callState, setCallState] = useState<CallState>('idle');
   const [callMode, setCallMode] = useState<CallMode>('audio');
