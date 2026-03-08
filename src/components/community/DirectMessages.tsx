@@ -40,7 +40,7 @@ export const DirectMessages = () => {
 
   const loadAllUsers = async () => {
     if (!user) return;
-    const { data } = await supabase.from('profiles').select('user_id, full_name, username, avatar_url').neq('user_id', user.id).limit(50);
+    const { data } = await (supabase.from('profiles') as any).select('user_id, full_name, username, avatar_url').neq('user_id', user.id).limit(50);
     if (data) setAllUsers(data);
   };
 
