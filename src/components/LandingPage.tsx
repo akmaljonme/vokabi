@@ -182,9 +182,9 @@ export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps)
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
             {[
-              { value: 50000, suffix: '+', label: 'Foydalanuvchilar' },
-              { value: 2000, suffix: '+', label: 'Testlar' },
-              { value: 95, suffix: '%', label: 'Muvaffaqiyat' },
+              { value: liveStats.users, suffix: '+', label: 'Foydalanuvchilar' },
+              { value: liveStats.tests, suffix: '+', label: 'Testlar' },
+              { value: liveStats.avgPass, suffix: '%', label: 'Muvaffaqiyat' },
               { value: 4, suffix: '.9', label: 'Reyting' },
             ].map((stat, i) => (
               <FadeUp key={i} delay={i * 0.1} className="text-center">
