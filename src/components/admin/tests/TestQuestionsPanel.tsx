@@ -89,6 +89,8 @@ const categoryIcons: Record<string, React.ReactNode> = {
   listening: <Headphones className="w-4 h-4" />,
   grammar: <BookOpen className="w-4 h-4" />,
   vocabulary: <MessageSquare className="w-4 h-4" />,
+  writing: <FileText className="w-4 h-4" />,
+  speaking: <Headphones className="w-4 h-4" />,
 };
 
 const categoryColors: Record<string, string> = {
@@ -96,6 +98,8 @@ const categoryColors: Record<string, string> = {
   listening: 'bg-purple-500/10 text-purple-500',
   grammar: 'bg-green-500/10 text-green-500',
   vocabulary: 'bg-orange-500/10 text-orange-500',
+  writing: 'bg-emerald-500/10 text-emerald-500',
+  speaking: 'bg-rose-500/10 text-rose-500',
 };
 
 const typeLabels: Record<string, string> = {
@@ -392,6 +396,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
 
   const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
   const hasMediaTab = test.skill === 'reading' || test.skill === 'listening';
+  const isAIEvaluated = test.skill === 'writing' || test.skill === 'speaking';
 
   return (
     <div className="space-y-6">
@@ -406,8 +411,14 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="outline">{test.level}</Badge>
               <Badge variant="secondary">{test.skill}</Badge>
+              {isAIEvaluated && (
+                <Badge variant="default" className="bg-emerald-500/10 text-emerald-600 border-emerald-200">
+                  🤖 AI baholaydi
+                </Badge>
+              )}
               <span className="text-sm text-muted-foreground">
-                {questions.length} ta savol • {totalPoints} ball
+                {questions.length} ta {isAIEvaluated ? 'topshiriq' : 'savol'}
+                {!isAIEvaluated && ` • ${totalPoints} ball`}
                 {test.skill === 'reading' && ` • ${passages.length} ta matn`}
                 {test.skill === 'listening' && ` • ${audioFiles.length} ta audio`}
               </span>
@@ -429,7 +440,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
           )}
           <Button onClick={() => { setSelectedQuestion(null); setDialogOpen(true); }}>
             <Plus className="w-4 h-4 mr-2" />
-            Savol qo'shish
+            {isAIEvaluated ? 'Topshiriq qo\'shish' : 'Savol qo\'shish'}
           </Button>
         </div>
       </div>
@@ -540,6 +551,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
         onOpenChange={setDialogOpen}
         question={selectedQuestion}
         testId={test.id}
+        testSkill={test.skill}
         onSave={handleSaveQuestion}
         loading={saving}
         questionCount={questions.length}
@@ -709,11 +721,16 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
         <Card className="p-12 text-center">
           <div className="text-muted-foreground">
             <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <h3 className="font-semibold text-lg mb-2">Savollar yo'q</h3>
-            <p className="text-sm mb-4">Ushbu testga hali savol qo'shilmagan</p>
+            <h3 className="font-semibold text-lg mb-2">{isAIEvaluated ? 'Topshiriqlar yo\'q' : 'Savollar yo\'q'}</h3>
+            <p className="text-sm mb-4">
+              {isAIEvaluated 
+                ? `Ushbu testga hali topshiriq qo'shilmagan. ${test.skill === 'writing' ? 'Writing uchun 2 ta task (prompt) qo\'shing.' : 'Speaking uchun 5 ta savol qo\'shing.'} AI talabalar javobini baholaydi.`
+                : 'Ushbu testga hali savol qo\'shilmagan'
+              }
+            </p>
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Birinchi savolni qo'shing
+              {isAIEvaluated ? 'Birinchi topshiriqni qo\'shing' : 'Birinchi savolni qo\'shing'}
             </Button>
           </div>
         </Card>
@@ -731,19 +748,27 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="font-semibold text-sm">#{index + 1}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {typeLabels[question.question_type] || question.question_type}
-                          </Badge>
-                          <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs ${categoryColors[question.category]}`}>
-                            {categoryIcons[question.category]}
-                            <span className="capitalize">{question.category}</span>
-                          </div>
-                          <Badge variant="secondary" className="text-xs">
-                            {question.points} ball
-                          </Badge>
+                          {isAIEvaluated ? (
+                            <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600">
+                              🤖 AI baholaydi
+                            </Badge>
+                          ) : (
+                            <>
+                              <Badge variant="outline" className="text-xs">
+                                {typeLabels[question.question_type] || question.question_type}
+                              </Badge>
+                              <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs ${categoryColors[question.category]}`}>
+                                {categoryIcons[question.category]}
+                                <span className="capitalize">{question.category}</span>
+                              </div>
+                              <Badge variant="secondary" className="text-xs">
+                                {question.points} ball
+                              </Badge>
+                            </>
+                          )}
                         </div>
                         <p className="text-sm line-clamp-2">{question.question_text}</p>
-                        {question.options && question.options.length > 0 && (
+                        {!isAIEvaluated && question.options && question.options.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2">
                             {question.options.slice(0, 4).map((opt, i) => (
                               <span
