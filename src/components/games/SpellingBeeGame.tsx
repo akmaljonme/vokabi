@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { spellingWords } from '@/data/gameData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,7 @@ export const SpellingBeeGame = ({ onBack }: Props) => {
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [gameOver, setGameOver] = useState(false);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const ai = useAIGameQuestions<{ word: string; hint: string }>('spelling_bee');
 
@@ -27,13 +28,20 @@ export const SpellingBeeGame = ({ onBack }: Props) => {
 
   const startGame = async (lvl: string) => {
     setLevel(lvl);
-    const aiWords = await ai.generate(lvl);
-    if (aiWords && aiWords.length >= 4) {
-      setWords(aiWords.map(w => ({ ...w, level: lvl })));
-    } else {
-      setWords([...(spellingWords[lvl] || spellingWords['A1'])].sort(() => Math.random() - 0.5));
-    }
+    setIsLoadingQuestions(true);
     setCurrentIdx(0); setScore(0); setGameOver(false); setInput(''); setFeedback(null);
+    try {
+      const aiWords = await ai.generate(lvl);
+      if (aiWords && aiWords.length >= 4) {
+        setWords(aiWords.map(w => ({ ...w, level: lvl })));
+      } else {
+        setWords([...(spellingWords[lvl] || spellingWords['A1'])].sort(() => Math.random() - 0.5));
+      }
+    } catch {
+      setWords([...(spellingWords[lvl] || spellingWords['A1'])].sort(() => Math.random() - 0.5));
+    } finally {
+      setIsLoadingQuestions(false);
+    }
   };
 
   const checkAnswer = () => {
@@ -68,6 +76,39 @@ export const SpellingBeeGame = ({ onBack }: Props) => {
             <Button key={l} variant="outline" size="lg" onClick={() => startGame(l)} className="text-lg">{l}</Button>
           ))}
         </div>
+      </motion.div>
+    );
+  }
+
+  if (isLoadingQuestions) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-md mx-auto text-center py-16">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+          className="inline-block mb-6"
+        >
+          <div className="w-16 h-16 rounded-full border-4 border-muted border-t-primary" />
+        </motion.div>
+        <h3 className="text-lg font-semibold mb-2">Savollar tayyorlanmoqda...</h3>
+        <p className="text-sm text-muted-foreground">AI yangi so'zlarni generatsiya qilmoqda</p>
+        <motion.div
+          className="flex justify-center gap-1 mt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          {['🐝', '📝', '✨'].map((emoji, i) => (
+            <motion.span
+              key={i}
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.2 }}
+              className="text-2xl"
+            >
+              {emoji}
+            </motion.span>
+          ))}
+        </motion.div>
       </motion.div>
     );
   }
