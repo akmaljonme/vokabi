@@ -538,60 +538,62 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
               </>
             )}
 
-            {/* Question navigator - same style as ExamInterface */}
-            <div className="bg-muted/50 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-medium">
-                  {isNoParts ? 'Savollar' : `Part ${currentPart} Savollar`}
-                </h4>
-                <span className="text-xs text-muted-foreground">
-                  {answers.length}/{totalQ} javob berildi
-                </span>
+            {/* Question navigator */}
+            {!isOpenEnded && (
+              <div className="bg-muted/50 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium">
+                    {isNoParts ? 'Savollar' : `Part ${currentPart} Savollar`}
+                  </h4>
+                  <span className="text-xs text-muted-foreground">
+                    {answers.length}/{totalQ} javob berildi
+                  </span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {isNoParts ? (
+                    Array.from({ length: totalQ }, (_, i) => {
+                      const isAnswered = answers.some(a => a.questionId === i + 1);
+                      const isCurrent = i + 1 === currentQuestion;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setCurrentQuestion(i + 1)}
+                          className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                            isCurrent
+                              ? 'bg-primary text-primary-foreground'
+                              : isAnswered
+                              ? 'bg-primary/20 text-primary'
+                              : 'bg-muted text-muted-foreground'
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      );
+                    })
+                  ) : (
+                    Array.from({ length: part?.questions.length || 10 }, (_, i) => {
+                      const isAnswered = isQuestionAnswered(currentPart, i);
+                      const isCurrent = i + 1 === currentQuestion;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setCurrentQuestion(i + 1)}
+                          className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                            isCurrent
+                              ? 'bg-primary text-primary-foreground'
+                              : isAnswered
+                              ? 'bg-primary/20 text-primary'
+                              : 'bg-muted text-muted-foreground'
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                {isNoParts ? (
-                  Array.from({ length: totalQ }, (_, i) => {
-                    const isAnswered = answers.some(a => a.questionId === i + 1);
-                    const isCurrent = i + 1 === currentQuestion;
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentQuestion(i + 1)}
-                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
-                          isCurrent
-                            ? 'bg-primary text-primary-foreground'
-                            : isAnswered
-                            ? 'bg-primary/20 text-primary'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    );
-                  })
-                ) : (
-                  Array.from({ length: part?.questions.length || 10 }, (_, i) => {
-                    const isAnswered = isQuestionAnswered(currentPart, i);
-                    const isCurrent = i + 1 === currentQuestion;
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentQuestion(i + 1)}
-                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
-                          isCurrent
-                            ? 'bg-primary text-primary-foreground'
-                            : isAnswered
-                            ? 'bg-primary/20 text-primary'
-                            : 'bg-muted text-muted-foreground'
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    );
-                  })
-                )}
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Bottom navigation - same style as ExamInterface */}
