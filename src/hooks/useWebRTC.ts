@@ -57,6 +57,27 @@ export const useWebRTC = (userId: string | undefined) => {
     }
   }, []);
 
+  const formatDuration = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  const saveCallMessage = useCallback(async (remoteId: string, wasConnected: boolean, dur: number) => {
+    if (!userId) return;
+    const mode = callModeRef.current;
+    const icon = mode === 'video' ? '📹' : '📞';
+    const content = wasConnected
+      ? `${icon} ${mode === 'video' ? 'Video' : 'Audio'} qo'ng'iroq · ${formatDuration(dur)}`
+      : `${icon} Javobsiz qo'ng'iroq`;
+    
+    await supabase.from('direct_messages').insert({
+      sender_id: userId,
+      receiver_id: remoteId,
+      content,
+    } as any);
+  }, [userId]);
+
   const cleanup = useCallback(() => {
     localStreamRef.current?.getTracks().forEach(t => t.stop());
     localStreamRef.current = null;
@@ -72,9 +93,11 @@ export const useWebRTC = (userId: string | undefined) => {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = null;
     setDuration(0);
+    durationRef.current = 0;
     setIsMuted(false);
     setIsCameraOff(false);
     currentCalleeRef.current = null;
+    callConnectedRef.current = false;
     stopRingtone();
   }, [stopRingtone]);
 
