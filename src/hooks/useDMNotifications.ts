@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const useDMNotifications = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const channelRef = useRef<any>(null);
 
   useEffect(() => {
