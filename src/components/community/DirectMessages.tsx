@@ -178,11 +178,14 @@ export const DirectMessages = () => {
         <ChatMediaInput onSend={handleSend} />
       </div>
 
-      {showCall && activeContact && (
+      {callState !== 'idle' && activeContact && (
         <AudioCallDialog
           contactName={activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}
-          contactId={activeContact.user_id}
-          onClose={() => setShowCall(false)}
+          callState={callState as any}
+          isMuted={isMuted}
+          duration={duration}
+          onToggleMute={toggleMute}
+          onEnd={() => endCall(activeContact.user_id)}
         />
       )}
     </>
