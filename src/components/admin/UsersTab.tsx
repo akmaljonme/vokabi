@@ -120,6 +120,27 @@ export const UsersTab = () => {
     }
   };
 
+  const toggleProStatus = async (userId: string, isCurrentlyPro: boolean) => {
+    try {
+      if (isCurrentlyPro) {
+        await supabase
+          .from('subscriptions')
+          .delete()
+          .eq('user_id', userId);
+        toast.success('Pro status olib tashlandi');
+      } else {
+        await supabase
+          .from('subscriptions')
+          .upsert({ user_id: userId, plan: 'pro' }, { onConflict: 'user_id' });
+        toast.success('Pro status berildi');
+      }
+      fetchUsers();
+    } catch (error) {
+      console.error('Error updating pro status:', error);
+      toast.error('Pro statusni yangilashda xatolik');
+    }
+  };
+
   const viewUserDetails = async (user: UserProfile) => {
     setSelectedUser(user);
     
