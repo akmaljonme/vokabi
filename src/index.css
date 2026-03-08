@@ -168,23 +168,8 @@
            transition-all duration-300 hover:bg-primary hover:text-primary-foreground;
   }
 
-  .card-elevated {
-    @apply bg-card rounded-2xl p-6 transition-all duration-300 border border-border/50;
-    box-shadow: var(--shadow-card);
-  }
 
-  .card-elevated:hover {
-    box-shadow: var(--shadow-card-hover);
-    transform: translateY(-2px);
-  }
 
-  .card-glass {
-    @apply rounded-2xl p-6 transition-all duration-300;
-    background: var(--gradient-glass);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
 
   .level-card {
     @apply relative overflow-hidden rounded-2xl p-8 cursor-pointer transition-all duration-500 border border-border/50;
