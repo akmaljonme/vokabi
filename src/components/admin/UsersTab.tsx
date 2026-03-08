@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MoreVertical, Shield, ShieldOff, Trash2, Eye } from 'lucide-react';
+import { Search, MoreVertical, Shield, ShieldOff, Trash2, Eye, Crown, CrownIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
