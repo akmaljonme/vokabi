@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface Profile { user_id: string; full_name: string | null; username: string | null; avatar_url: string | null; }
-interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; image_url?: string | null; audio_url?: string | null; }
+interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; image_url?: string | null; audio_url?: string | null; reply_to_id?: string | null; }
+interface ReplyInfo { id: string; content: string; senderName?: string; }
 interface ChatPreview { profile: Profile; lastMessage: string; lastMessageAt: string; unreadCount: number; }
 
 const formatTime = (dateStr: string) => {
@@ -33,6 +34,7 @@ export const DirectMessages = () => {
   const [messages, setMessages] = useState<DM[]>([]);
   const [search, setSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
+  const [replyTo, setReplyTo] = useState<ReplyInfo | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const loadChatPreviews = useCallback(async () => {
@@ -137,7 +139,7 @@ export const DirectMessages = () => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = async (data: { content: string; image_url?: string; audio_url?: string }) => {
+  const handleSend = async (data: { content: string; image_url?: string; audio_url?: string; reply_to_id?: string }) => {
     if (!activeContact || !user) return;
     await supabase.from('direct_messages').insert({
       sender_id: user.id,
@@ -145,7 +147,9 @@ export const DirectMessages = () => {
       content: data.content,
       ...(data.image_url && { image_url: data.image_url }),
       ...(data.audio_url && { audio_url: data.audio_url }),
+      ...(data.reply_to_id && { reply_to_id: data.reply_to_id }),
     } as any);
+    setReplyTo(null);
   };
 
   const handleEdit = async (id: string, newContent: string) => {
@@ -252,24 +256,34 @@ export const DirectMessages = () => {
 
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3">
-          {messages.map(msg => (
-            <ChatMessageBubble
-              key={msg.id}
-              id={msg.id}
-              isMe={msg.sender_id === user?.id}
-              content={msg.content}
-              image_url={msg.image_url}
-              audio_url={msg.audio_url}
-              created_at={msg.created_at}
-              onEdit={msg.sender_id === user?.id ? handleEdit : undefined}
-              onDelete={msg.sender_id === user?.id ? handleDelete : undefined}
-            />
-          ))}
+          {messages.map(msg => {
+            const replyMsg = msg.reply_to_id ? messages.find(m => m.id === msg.reply_to_id) : null;
+            const replyInfo = replyMsg ? {
+              id: replyMsg.id,
+              content: replyMsg.image_url ? '📷 Rasm' : replyMsg.audio_url ? '🎤 Ovozli xabar' : replyMsg.content,
+              senderName: replyMsg.sender_id === user?.id ? 'Siz' : (activeContact?.username ? `@${activeContact.username}` : activeContact?.full_name || 'Foydalanuvchi'),
+            } : null;
+            return (
+              <ChatMessageBubble
+                key={msg.id}
+                id={msg.id}
+                isMe={msg.sender_id === user?.id}
+                content={msg.content}
+                image_url={msg.image_url}
+                audio_url={msg.audio_url}
+                created_at={msg.created_at}
+                replyTo={replyInfo}
+                onEdit={msg.sender_id === user?.id ? handleEdit : undefined}
+                onDelete={msg.sender_id === user?.id ? handleDelete : undefined}
+                onReply={(info) => setReplyTo(info)}
+              />
+            );
+          })}
           <div ref={scrollRef} />
         </div>
       </ScrollArea>
 
-      <ChatMediaInput onSend={handleSend} />
+      <ChatMediaInput onSend={handleSend} replyTo={replyTo} onCancelReply={() => setReplyTo(null)} />
     </div>
   );
 };

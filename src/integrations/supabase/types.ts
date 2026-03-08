@@ -135,6 +135,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          reply_to_id: string | null
           room_id: string
           user_id: string
         }
@@ -144,6 +145,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          reply_to_id?: string | null
           room_id: string
           user_id: string
         }
@@ -153,10 +155,18 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          reply_to_id?: string | null
           room_id?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "chat_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chat_messages_room_id_fkey"
             columns: ["room_id"]
@@ -199,6 +209,7 @@ export type Database = {
           image_url: string | null
           is_read: boolean
           receiver_id: string
+          reply_to_id: string | null
           sender_id: string
         }
         Insert: {
@@ -209,6 +220,7 @@ export type Database = {
           image_url?: string | null
           is_read?: boolean
           receiver_id: string
+          reply_to_id?: string | null
           sender_id: string
         }
         Update: {
@@ -219,9 +231,18 @@ export type Database = {
           image_url?: string | null
           is_read?: boolean
           receiver_id?: string
+          reply_to_id?: string | null
           sender_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "direct_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "direct_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       exam_attempts: {
         Row: {

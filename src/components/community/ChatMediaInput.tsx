@@ -1,16 +1,24 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Image, Mic, Square, X } from 'lucide-react';
+import { Send, Image, Mic, Square, X, Reply } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-interface ChatMediaInputProps {
-  onSend: (data: { content: string; image_url?: string; audio_url?: string }) => Promise<void>;
+interface ReplyInfo {
+  id: string;
+  content: string;
+  senderName?: string;
 }
 
-export const ChatMediaInput = ({ onSend }: ChatMediaInputProps) => {
+interface ChatMediaInputProps {
+  onSend: (data: { content: string; image_url?: string; audio_url?: string; reply_to_id?: string }) => Promise<void>;
+  replyTo?: ReplyInfo | null;
+  onCancelReply?: () => void;
+}
+
+export const ChatMediaInput = ({ onSend, replyTo, onCancelReply }: ChatMediaInputProps) => {
   const { user } = useAuth();
   const [input, setInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -22,6 +30,7 @@ export const ChatMediaInput = ({ onSend }: ChatMediaInputProps) => {
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const uploadFile = async (file: Blob, ext: string, folder: string): Promise<string | null> => {
     if (!user) return null;
@@ -52,8 +61,9 @@ export const ChatMediaInput = ({ onSend }: ChatMediaInputProps) => {
         if (blob.size < 1000) return;
         setIsSending(true);
         const url = await uploadFile(blob, 'webm', 'voice');
-        if (url) await onSend({ content: '🎤 Ovozli xabar', audio_url: url });
+        if (url) await onSend({ content: '🎤 Ovozli xabar', audio_url: url, reply_to_id: replyTo?.id });
         setIsSending(false);
+        onCancelReply?.();
       };
       recorder.start();
       mediaRecorderRef.current = recorder;
@@ -80,11 +90,12 @@ export const ChatMediaInput = ({ onSend }: ChatMediaInputProps) => {
       const url = await uploadFile(imageFile, ext, 'images');
       if (url) image_url = url;
     }
-    await onSend({ content: input.trim() || (image_url ? '📷 Rasm' : ''), image_url });
+    await onSend({ content: input.trim() || (image_url ? '📷 Rasm' : ''), image_url, reply_to_id: replyTo?.id });
     setInput('');
     setImageFile(null);
     setPreviewImage(null);
     setIsSending(false);
+    onCancelReply?.();
   };
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
@@ -107,6 +118,19 @@ export const ChatMediaInput = ({ onSend }: ChatMediaInputProps) => {
 
   return (
     <div className="border-t border-border">
+      {/* Reply preview bar */}
+      {replyTo && (
+        <div className="px-4 pt-2.5 flex items-center gap-2">
+          <Reply className="w-4 h-4 text-primary shrink-0" />
+          <div className="flex-1 min-w-0 pl-2 border-l-2 border-primary py-1">
+            <p className="text-xs font-semibold text-primary">{replyTo.senderName || 'Foydalanuvchi'}</p>
+            <p className="text-xs text-muted-foreground truncate">{replyTo.content}</p>
+          </div>
+          <button onClick={onCancelReply} className="p-1 rounded-lg hover:bg-muted shrink-0">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+      )}
       {previewImage && (
         <div className="px-4 pt-3 flex items-start gap-2">
           <div className="relative">
@@ -127,7 +151,7 @@ export const ChatMediaInput = ({ onSend }: ChatMediaInputProps) => {
           <Button type="button" size="icon" variant="ghost" onClick={startRecording} className="rounded-xl shrink-0" disabled={isSending}>
             <Mic className="w-4 h-4" />
           </Button>
-          <Input value={input} onChange={e => setInput(e.target.value)} placeholder="Xabar yozing..." className="rounded-xl" disabled={isSending} />
+          <Input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} placeholder="Xabar yozing..." className="rounded-xl" disabled={isSending} />
           <Button type="submit" size="icon" disabled={(!input.trim() && !imageFile) || isSending} className="rounded-xl shrink-0">
             <Send className="w-4 h-4" />
           </Button>
