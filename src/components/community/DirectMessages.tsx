@@ -34,7 +34,7 @@ export const DirectMessages = () => {
     if (!dms) return;
     const ids = [...new Set(dms.flatMap(d => [d.sender_id, d.receiver_id]).filter(id => id !== user.id))];
     if (ids.length === 0) return;
-    const { data: profiles } = await supabase.from('profiles').select('user_id, full_name, username, avatar_url').in('user_id', ids);
+    const { data: profiles } = await (supabase.from('profiles') as any).select('user_id, full_name, username, avatar_url').in('user_id', ids);
     if (profiles) setContacts(profiles);
   };
 
