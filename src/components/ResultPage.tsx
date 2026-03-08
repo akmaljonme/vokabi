@@ -186,8 +186,8 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
           <button onClick={onBack} className="btn-outline text-sm">Boshqa test</button>
         </motion.div>
 
-        {/* AI Video Recommendations */}
-        {result.percentage < 100 && (
+        {/* AI Video Recommendations - Pro Only */}
+        {result.percentage < 100 && isPro && (
           <div className="max-w-4xl mx-auto mb-8">
             <VideoRecommendations
               wrongQuestions={result.answers
@@ -200,6 +200,23 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
               skill={result.skill}
             />
           </div>
+        )}
+
+        {/* Pro Upsell Banner */}
+        {!isPro && result.percentage < 100 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="max-w-2xl mx-auto mb-8 p-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 text-center"
+          >
+            <Crown className="w-8 h-8 text-amber-500 mx-auto mb-3" />
+            <h3 className="font-display font-bold text-lg mb-2">Pro versiyaga o'ting</h3>
+            <p className="text-sm text-muted-foreground mb-1">
+              AI tahlil, video tavsiyalar, sertifikat yuklab olish va cheksiz testlar
+            </p>
+            <p className="text-xs text-muted-foreground">Admin bilan bog'laning Pro olish uchun</p>
+          </motion.div>
         )}
 
         {/* Detailed Review */}
