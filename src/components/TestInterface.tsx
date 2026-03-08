@@ -225,24 +225,32 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
       const submitOpenEnded = async () => {
         setSpeakingSubmitting(true);
         try {
+          const allWritingText = Object.values(writingTexts).join('\n\n---\n\n');
           const functionName = isWriting ? 'check-writing' : 'check-speaking';
           const body = isWriting
-            ? { essay: writingText, question: part?.questions[0]?.question || part?.passage.content || '', level }
-            : { transcript: '[Audio submitted]', question: part?.questions[0]?.question || part?.passage.content || '', level };
+            ? { essay: allWritingText, question: mockTest.parts.map(p => p.passage.content).join(' | '), level }
+            : { transcript: '[Audio submitted]', question: mockTest.parts[0]?.questions.map(q => q.question).join(' | ') || '', level };
 
           const { data } = await import('@/integrations/supabase/client').then(m => 
             m.supabase.functions.invoke(functionName, { body })
           );
 
+          const totalParts = isWriting ? mockTest.parts.length : mockTest.parts[0]?.questions.length || 0;
           onFinish({
-            mockId, level, skill, totalQuestions: 1,
+            mockId, level, skill, totalQuestions: totalParts,
             correctAnswers: 0, percentage: 0,
             passed: false,
-            answers: [{
-              questionId: 1, partId: 1,
-              userAnswer: isWriting ? writingText : '[Audio]',
-              correctAnswer: '', isCorrect: false,
-            }],
+            answers: isWriting 
+              ? mockTest.parts.map((p, i) => ({
+                  questionId: i + 1, partId: p.id,
+                  userAnswer: writingTexts[p.id] || '',
+                  correctAnswer: '', isCorrect: false,
+                }))
+              : mockTest.parts[0]?.questions.map((q, i) => ({
+                  questionId: q.id, partId: 1,
+                  userAnswer: speakingRecordings[i] ? '[Audio]' : '',
+                  correctAnswer: '', isCorrect: false,
+                })) || [],
             timeTaken: mockTest.timeLimit - timeLeft,
             mockTest,
             aiResult: data?.result,
