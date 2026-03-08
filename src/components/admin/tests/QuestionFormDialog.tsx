@@ -254,24 +254,49 @@ export const QuestionFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{question ? 'Savolni tahrirlash' : 'Yangi savol qo\'shish'}</DialogTitle>
+          <DialogTitle>
+            {isAIEvaluated 
+              ? (question ? 'Topshiriqni tahrirlash' : 'Yangi topshiriq qo\'shish')
+              : (question ? 'Savolni tahrirlash' : 'Yangi savol qo\'shish')
+            }
+          </DialogTitle>
         </DialogHeader>
+
+        {isAIEvaluated && (
+          <div className="bg-emerald-500/10 border border-emerald-200 rounded-lg p-3 text-sm text-emerald-700">
+            🤖 {testSkill === 'writing' 
+              ? 'Writing topshiriq: Talaba bu topshiriq bo\'yicha insho/matn yozadi. AI javobni baholaydi.'
+              : 'Speaking savol: Talaba bu savolga ovozli javob beradi. AI javobni baholaydi.'
+            }
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="question_text">Savol matni *</Label>
+            <Label htmlFor="question_text">
+              {isAIEvaluated 
+                ? (testSkill === 'writing' ? 'Topshiriq matni (prompt) *' : 'Savol matni *')
+                : 'Savol matni *'
+              }
+            </Label>
             <Textarea
               id="question_text"
               value={formData.question_text}
               onChange={(e) => setFormData({ ...formData, question_text: e.target.value })}
-              placeholder="Savolni kiriting..."
-              rows={3}
+              placeholder={isAIEvaluated 
+                ? (testSkill === 'writing' 
+                  ? 'Masalan: "Some people believe that technology has made our lives easier. To what extent do you agree or disagree?"'
+                  : 'Masalan: "Tell me about your hometown. What do you like about it?"')
+                : 'Savolni kiriting...'
+              }
+              rows={isAIEvaluated ? 5 : 3}
               required
             />
           </div>
 
           {/* Image upload */}
           <div className="space-y-2">
-            <Label>Savol rasmi (ixtiyoriy)</Label>
+            <Label>{isAIEvaluated ? 'Topshiriq rasmi (ixtiyoriy)' : 'Savol rasmi (ixtiyoriy)'}</Label>
             <input
               ref={fileInputRef}
               type="file"
@@ -303,125 +328,132 @@ export const QuestionFormDialog = ({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Savol turi *</Label>
-              <Select
-                value={formData.question_type}
-                onValueChange={(value) => setFormData({ ...formData, question_type: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {questionTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Standard question fields - only for non-AI-evaluated */}
+          {!isAIEvaluated && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Savol turi *</Label>
+                  <Select
+                    value={formData.question_type}
+                    onValueChange={(value) => setFormData({ ...formData, question_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {questionTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2">
-              <Label>Kategoriya *</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {showOptions && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Javob variantlari *</Label>
-                {!isTrueFalse && formData.options.length < 8 && (
-                  <Button type="button" variant="outline" size="sm" onClick={handleAddOption}>
-                    <Plus className="w-3 h-3 mr-1" />
-                    Variant qo'shish
-                  </Button>
-                )}
+                <div className="space-y-2">
+                  <Label>Kategoriya *</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              
-              <RadioGroup
-                value={formData.correct_answer}
-                onValueChange={(value) => setFormData({ ...formData, correct_answer: value })}
-                className="space-y-2"
-              >
-                {formData.options.map((option, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <RadioGroupItem 
-                      value={option} 
-                      id={`option-${index}`}
-                      disabled={!option.trim()}
-                    />
-                    <Input
-                      value={option}
-                      onChange={(e) => handleOptionChange(index, e.target.value)}
-                      placeholder={`Variant ${String.fromCharCode(65 + index)}`}
-                      className="flex-1"
-                      disabled={isTrueFalse}
-                    />
-                    {!isTrueFalse && formData.options.length > 2 && (
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => handleRemoveOption(index)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
+
+              {showOptions && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>Javob variantlari *</Label>
+                    {!isTrueFalse && formData.options.length < 8 && (
+                      <Button type="button" variant="outline" size="sm" onClick={handleAddOption}>
+                        <Plus className="w-3 h-3 mr-1" />
+                        Variant qo'shish
                       </Button>
                     )}
                   </div>
-                ))}
-              </RadioGroup>
-              <p className="text-xs text-muted-foreground">
-                To'g'ri javobni tanlash uchun radio tugmasini bosing
-              </p>
-            </div>
-          )}
+                  
+                  <RadioGroup
+                    value={formData.correct_answer}
+                    onValueChange={(value) => setFormData({ ...formData, correct_answer: value })}
+                    className="space-y-2"
+                  >
+                    {formData.options.map((option, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <RadioGroupItem 
+                          value={option} 
+                          id={`option-${index}`}
+                          disabled={!option.trim()}
+                        />
+                        <Input
+                          value={option}
+                          onChange={(e) => handleOptionChange(index, e.target.value)}
+                          placeholder={`Variant ${String.fromCharCode(65 + index)}`}
+                          className="flex-1"
+                          disabled={isTrueFalse}
+                        />
+                        {!isTrueFalse && formData.options.length > 2 && (
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleRemoveOption(index)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </RadioGroup>
+                  <p className="text-xs text-muted-foreground">
+                    To'g'ri javobni tanlash uchun radio tugmasini bosing
+                  </p>
+                </div>
+              )}
 
-          {formData.question_type === 'fill-blank' && (
-            <div className="space-y-2">
-              <Label htmlFor="correct_answer">To'g'ri javob *</Label>
-              <Input
-                id="correct_answer"
-                value={formData.correct_answer}
-                onChange={(e) => setFormData({ ...formData, correct_answer: e.target.value })}
-                placeholder="To'g'ri javobni kiriting..."
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Savol matnida bo'sh joyni ___ bilan belgilang
-              </p>
-            </div>
+              {formData.question_type === 'fill-blank' && (
+                <div className="space-y-2">
+                  <Label htmlFor="correct_answer">To'g'ri javob *</Label>
+                  <Input
+                    id="correct_answer"
+                    value={formData.correct_answer}
+                    onChange={(e) => setFormData({ ...formData, correct_answer: e.target.value })}
+                    placeholder="To'g'ri javobni kiriting..."
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Savol matnida bo'sh joyni ___ bilan belgilang
+                  </p>
+                </div>
+              )}
+            </>
           )}
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="points">Ball</Label>
-              <Input
-                id="points"
-                type="number"
-                min={1}
-                max={10}
-                value={formData.points}
-                onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) || 1 })}
-              />
-            </div>
+            {!isAIEvaluated && (
+              <div className="space-y-2">
+                <Label htmlFor="points">Ball</Label>
+                <Input
+                  id="points"
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={formData.points}
+                  onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="order_index">Tartib raqami</Label>
               <Input
@@ -435,12 +467,17 @@ export const QuestionFormDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="explanation">Tushuntirish (ixtiyoriy)</Label>
+            <Label htmlFor="explanation">
+              {isAIEvaluated ? 'Qo\'shimcha ko\'rsatma (ixtiyoriy)' : 'Tushuntirish (ixtiyoriy)'}
+            </Label>
             <Textarea
               id="explanation"
               value={formData.explanation}
               onChange={(e) => setFormData({ ...formData, explanation: e.target.value })}
-              placeholder="Javob uchun tushuntirish..."
+              placeholder={isAIEvaluated 
+                ? 'Masalan: "Kamida 250 so\'z yozing" yoki "1-2 daqiqa gapiring"'
+                : 'Javob uchun tushuntirish...'
+              }
               rows={2}
             />
           </div>
@@ -451,7 +488,7 @@ export const QuestionFormDialog = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={loading || uploading || !formData.question_text || (!formData.correct_answer && formData.question_type !== 'fill-blank')}
+              disabled={loading || uploading || !formData.question_text}
             >
               {(loading || uploading) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {uploading ? 'Yuklanmoqda...' : question ? 'Saqlash' : "Qo'shish"}
