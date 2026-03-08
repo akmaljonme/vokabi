@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LandingPageProps {
   onStartTest: () => void;
@@ -47,6 +48,25 @@ const AnimatedCounter = ({ value, suffix = '', duration = 2 }: { value: number; 
 export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [liveStats, setLiveStats] = useState({ users: 0, tests: 0, avgPass: 0 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const { data } = await supabase.rpc('get_public_stats');
+      if (data) {
+        const stats = data as any;
+        const passRate = stats.total_results > 0
+          ? Math.round((stats.passed_results / stats.total_results) * 100)
+          : 95;
+        setLiveStats({
+          users: stats.user_count || 0,
+          tests: stats.test_count || 0,
+          avgPass: passRate,
+        });
+      }
+    };
+    fetchStats();
+  }, []);
 
   const handleStartTest = () => {
     if (user) onStartTest();
@@ -160,9 +180,9 @@ export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps)
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
             {[
-              { value: 50000, suffix: '+', label: 'Foydalanuvchilar' },
-              { value: 2000, suffix: '+', label: 'Testlar' },
-              { value: 95, suffix: '%', label: 'Muvaffaqiyat' },
+              { value: liveStats.users, suffix: '+', label: 'Foydalanuvchilar' },
+              { value: liveStats.tests, suffix: '+', label: 'Testlar' },
+              { value: liveStats.avgPass, suffix: '%', label: 'Muvaffaqiyat' },
               { value: 4, suffix: '.9', label: 'Reyting' },
             ].map((stat, i) => (
               <FadeUp key={i} delay={i * 0.1} className="text-center">
@@ -555,7 +575,7 @@ export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps)
               Kelajagingizga invest qiling
             </h2>
             <p className="text-white/75 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-              50,000+ o'quvchi bilan birga IELTS va CEFR sertifikatiga tayyorlaning
+              Minglab o'quvchilar bilan birga IELTS va CEFR sertifikatiga tayyorlaning
             </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
