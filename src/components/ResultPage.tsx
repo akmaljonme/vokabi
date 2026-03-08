@@ -164,7 +164,19 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
           <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={onRetry} className="btn-primary flex items-center gap-2 text-sm">
             <RotateCcw className="w-4 h-4" /> Qayta ishlash
           </motion.button>
-          <CertificateDownload result={result} />
+          {isPro ? (
+            <CertificateDownload result={result} />
+          ) : (
+            <div className="relative group">
+              <button disabled className="btn-outline flex items-center gap-2 text-sm opacity-50 cursor-not-allowed">
+                <Lock className="w-4 h-4" /> Sertifikat
+                <Crown className="w-3 h-3 text-amber-500" />
+              </button>
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Pro versiya kerak
+              </div>
+            </div>
+          )}
           <button onClick={() => generateTestPDF(mockTest)} className="btn-outline flex items-center gap-2 text-sm">
             <FileDown className="w-4 h-4" /> Test PDF
           </button>
