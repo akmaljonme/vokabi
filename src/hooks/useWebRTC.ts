@@ -276,23 +276,33 @@ export const useWebRTC = (userId: string | undefined) => {
             break;
           }
           case 'offer': {
-            const pc = pcRef.current || createPeerConnection(caller_id);
-            if (localStreamRef.current) {
-              localStreamRef.current.getTracks().forEach(t => {
-                if (!pc.getSenders().find(s => s.track === t)) {
-                  pc.addTrack(t, localStreamRef.current!);
-                }
-              });
+            try {
+              const pc = pcRef.current || createPeerConnection(caller_id);
+              if (localStreamRef.current) {
+                localStreamRef.current.getTracks().forEach(t => {
+                  if (!pc.getSenders().find(s => s.track === t)) {
+                    pc.addTrack(t, localStreamRef.current!);
+                  }
+                });
+              }
+              if (pc.signalingState === 'stable' || pc.signalingState === 'have-local-offer') {
+                await pc.setRemoteDescription(new RTCSessionDescription(signal_data.sdp));
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+                await sendSignal(caller_id, 'answer', { sdp: answer });
+              }
+            } catch (err) {
+              console.error('[WebRTC] Offer handling error:', err);
             }
-            await pc.setRemoteDescription(new RTCSessionDescription(signal_data.sdp));
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            await sendSignal(caller_id, 'answer', { sdp: answer });
             break;
           }
           case 'answer': {
-            if (pcRef.current) {
-              await pcRef.current.setRemoteDescription(new RTCSessionDescription(signal_data.sdp));
+            if (pcRef.current && pcRef.current.signalingState === 'have-local-offer') {
+              try {
+                await pcRef.current.setRemoteDescription(new RTCSessionDescription(signal_data.sdp));
+              } catch (err) {
+                console.error('[WebRTC] Answer handling error:', err);
+              }
             }
             break;
           }
