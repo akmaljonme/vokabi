@@ -72,7 +72,7 @@ export const ChatRooms = () => {
     }
   };
 
-  const handleSend = async (data: { content: string; image_url?: string; audio_url?: string }) => {
+  const handleSend = async (data: { content: string; image_url?: string; audio_url?: string; reply_to_id?: string }) => {
     if (!activeRoom || !user) return;
     await supabase.from('chat_messages').insert({
       room_id: activeRoom.id,
@@ -80,7 +80,9 @@ export const ChatRooms = () => {
       content: data.content,
       ...(data.image_url && { image_url: data.image_url }),
       ...(data.audio_url && { audio_url: data.audio_url }),
+      ...(data.reply_to_id && { reply_to_id: data.reply_to_id }),
     } as any);
+    setReplyTo(null);
   };
 
   const handleEdit = async (id: string, newContent: string) => {
