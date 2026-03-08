@@ -314,7 +314,7 @@ export const ChatRooms = () => {
           {onlineUsers.map(u => (
             <span key={u.user_id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-background border border-border text-xs">
               <Circle className="w-2 h-2 fill-green-500 text-green-500" />
-              {u.full_name}
+              {u.username ? `@${u.username}` : u.full_name || 'Foydalanuvchi'}
             </span>
           ))}
         </div>
