@@ -6,8 +6,10 @@ import { TestResult } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTestResults } from '@/hooks/useTestResults';
+import { useSubscription } from '@/hooks/useSubscription';
 import { generateTestPDF, generateResultPDF } from '@/utils/pdfGenerator';
 import { motion } from 'framer-motion';
+import { Crown, Lock } from 'lucide-react';
 
 interface ResultPageProps {
   result: TestResult;
