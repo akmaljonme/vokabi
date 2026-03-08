@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 function buildSearchUrl(query: string): string {
-  return `https://www.google.com/search?q=${encodeURIComponent(query + " site:youtube.com")}`;
+  return `https://yandex.com/search/?text=${encodeURIComponent(query + " site:youtube.com")}`;
 }
 
 serve(async (req) => {
