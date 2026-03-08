@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, Trophy, RotateCcw, Save, FileDown } from 'lucide-react';
 import { CertificateDownload } from '@/components/CertificateDownload';
 import { VideoRecommendations } from '@/components/AIResultsSection';
+import { AIResultDisplay } from '@/components/AIResultDisplay';
 import { TestResult } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
