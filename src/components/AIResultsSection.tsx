@@ -113,7 +113,7 @@ export const VideoRecommendations = ({ wrongQuestions, level, skill }: VideoReco
                       <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{video.description}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <Badge variant="outline" className="text-xs">{video.topic}</Badge>
-                        <span className="text-[10px] text-muted-foreground/60">YouTube'da qidirish →</span>
+                        <span className="text-[10px] text-muted-foreground/60">Google'da qidirish →</span>
                       </div>
                     </div>
                   </div>

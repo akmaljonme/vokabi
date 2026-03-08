@@ -89,7 +89,7 @@ CRITICAL RULES:
     if (result?.videos) {
       result.videos = result.videos.map((video: any) => ({
         ...video,
-        url: buildYouTubeSearchUrl(video.searchQuery || `${video.topic} ${video.channel} english lesson`),
+        url: buildSearchUrl(video.searchQuery || `${video.topic} ${video.channel} english lesson`),
       }));
     }
 
