@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const useDMNotifications = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const channelRef = useRef<any>(null);
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export const useDMNotifications = () => {
           action: {
             label: "Ko'rish",
             onClick: () => {
-              window.location.href = '/community';
+              navigate('/community');
             },
           },
           duration: 5000,
