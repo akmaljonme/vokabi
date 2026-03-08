@@ -103,23 +103,29 @@ export type Database = {
       }
       chat_messages: {
         Row: {
+          audio_url: string | null
           content: string
           created_at: string
           id: string
+          image_url: string | null
           room_id: string
           user_id: string
         }
         Insert: {
+          audio_url?: string | null
           content: string
           created_at?: string
           id?: string
+          image_url?: string | null
           room_id: string
           user_id: string
         }
         Update: {
+          audio_url?: string | null
           content?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           room_id?: string
           user_id?: string
         }
@@ -159,25 +165,31 @@ export type Database = {
       }
       direct_messages: {
         Row: {
+          audio_url: string | null
           content: string
           created_at: string
           id: string
+          image_url: string | null
           is_read: boolean
           receiver_id: string
           sender_id: string
         }
         Insert: {
+          audio_url?: string | null
           content: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           receiver_id: string
           sender_id: string
         }
         Update: {
+          audio_url?: string | null
           content?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           receiver_id?: string
           sender_id?: string

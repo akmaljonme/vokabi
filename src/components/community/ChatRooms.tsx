@@ -1,21 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, ArrowLeft, Hash } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Hash } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChatMediaInput } from './ChatMediaInput';
+import { ChatMessageBubble } from './ChatMessageBubble';
 
 interface Room { id: string; name: string; description: string | null; level: string; }
-interface Message { id: string; room_id: string; user_id: string; content: string; created_at: string; user_name?: string; }
+interface Message { id: string; room_id: string; user_id: string; content: string; created_at: string; image_url?: string | null; audio_url?: string | null; }
 
 export const ChatRooms = () => {
   const { user } = useAuth();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
   const [profiles, setProfiles] = useState<Record<string, string>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -25,16 +24,14 @@ export const ChatRooms = () => {
 
   useEffect(() => {
     if (!activeRoom) return;
-    // Load messages
     supabase.from('chat_messages').select('*').eq('room_id', activeRoom.id).order('created_at', { ascending: true }).limit(100)
       .then(({ data }) => {
         if (data) {
-          setMessages(data);
+          setMessages(data as Message[]);
           loadProfiles(data.map(m => m.user_id));
         }
       });
 
-    // Realtime subscription
     const channel = supabase.channel(`room-${activeRoom.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${activeRoom.id}` },
         (payload) => {
@@ -64,24 +61,24 @@ export const ChatRooms = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if (!input.trim() || !activeRoom || !user) return;
-    const content = input.trim();
-    setInput('');
-    await supabase.from('chat_messages').insert({ room_id: activeRoom.id, user_id: user.id, content });
+  const handleSend = async (data: { content: string; image_url?: string; audio_url?: string }) => {
+    if (!activeRoom || !user) return;
+    await supabase.from('chat_messages').insert({
+      room_id: activeRoom.id,
+      user_id: user.id,
+      content: data.content,
+      ...(data.image_url && { image_url: data.image_url }),
+      ...(data.audio_url && { audio_url: data.audio_url }),
+    } as any);
   };
 
   if (!activeRoom) {
     return (
       <div className="space-y-3">
         {rooms.map(room => (
-          <motion.button
-            key={room.id}
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
+          <motion.button key={room.id} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
             onClick={() => setActiveRoom(room)}
-            className="w-full p-4 rounded-xl border border-border bg-card hover:bg-muted/50 text-left transition-all flex items-center gap-4"
-          >
+            className="w-full p-4 rounded-xl border border-border bg-card hover:bg-muted/50 text-left transition-all flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Hash className="w-5 h-5 text-primary" />
             </div>
@@ -97,7 +94,6 @@ export const ChatRooms = () => {
 
   return (
     <div className="border border-border rounded-2xl overflow-hidden bg-card flex flex-col" style={{ height: 'calc(100vh - 220px)' }}>
-      {/* Room header */}
       <div className="px-4 py-3 border-b border-border flex items-center gap-3 bg-muted/30">
         <button onClick={() => setActiveRoom(null)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
           <ArrowLeft className="w-4 h-4" />
@@ -106,36 +102,24 @@ export const ChatRooms = () => {
         <span className="font-semibold text-sm">{activeRoom.name}</span>
       </div>
 
-      {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3">
-          {messages.map(msg => {
-            const isMe = msg.user_id === user?.id;
-            return (
-              <div key={msg.id} className={`flex ${isMe ? 'justify-end' : ''}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${isMe ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-muted rounded-bl-md'}`}>
-                  {!isMe && <p className="text-xs font-semibold mb-1 opacity-70">{profiles[msg.user_id] || 'Foydalanuvchi'}</p>}
-                  <p>{msg.content}</p>
-                  <p className={`text-[10px] mt-1 ${isMe ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
-                    {new Date(msg.created_at).toLocaleTimeString('uz', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+          {messages.map(msg => (
+            <ChatMessageBubble
+              key={msg.id}
+              isMe={msg.user_id === user?.id}
+              content={msg.content}
+              image_url={msg.image_url}
+              audio_url={msg.audio_url}
+              created_at={msg.created_at}
+              senderName={msg.user_id !== user?.id ? profiles[msg.user_id] : undefined}
+            />
+          ))}
           <div ref={scrollRef} />
         </div>
       </ScrollArea>
 
-      {/* Input */}
-      <div className="px-4 py-3 border-t border-border">
-        <form onSubmit={e => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
-          <Input value={input} onChange={e => setInput(e.target.value)} placeholder="Xabar yozing..." className="rounded-xl" />
-          <Button type="submit" size="icon" disabled={!input.trim()} className="rounded-xl shrink-0">
-            <Send className="w-4 h-4" />
-          </Button>
-        </form>
-      </div>
+      <ChatMediaInput onSend={handleSend} />
     </div>
   );
 };
