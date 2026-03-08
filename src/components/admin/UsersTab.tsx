@@ -409,6 +409,31 @@ export const UsersTab = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={() => !deleting && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Foydalanuvchini o'chirish
+            </DialogTitle>
+            <DialogDescription>
+              <strong>{deleteTarget?.full_name || 'Foydalanuvchi'}</strong> butunlay o'chiriladi. 
+              Barcha ma'lumotlari (testlar, natijalar, xabarlar) ham yo'q qilinadi. 
+              Bu amalni qaytarib bo'lmaydi!
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              Bekor qilish
+            </Button>
+            <Button variant="destructive" onClick={deleteUser} disabled={deleting}>
+              {deleting ? 'O\'chirilmoqda...' : 'Ha, o\'chirish'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
