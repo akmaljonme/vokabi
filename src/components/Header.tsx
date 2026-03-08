@@ -20,6 +20,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const unreadCount = useUnreadDMCount();
+  const call = useCall();
 
   const toggleTheme = () => {
     const next = !isDark;
