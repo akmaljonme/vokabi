@@ -1,25 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, ArrowLeft, Search, User } from 'lucide-react';
+import { ArrowLeft, Search, User, Phone } from 'lucide-react';
+import { ChatMediaInput } from './ChatMediaInput';
+import { ChatMessageBubble } from './ChatMessageBubble';
+import { AudioCallDialog } from './AudioCallDialog';
+import { Button } from '@/components/ui/button';
 
 interface Profile { user_id: string; full_name: string | null; username: string | null; avatar_url: string | null; }
-interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; }
+interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; image_url?: string | null; audio_url?: string | null; }
 
 export const DirectMessages = () => {
   const { user } = useAuth();
   const [contacts, setContacts] = useState<Profile[]>([]);
   const [activeContact, setActiveContact] = useState<Profile | null>(null);
   const [messages, setMessages] = useState<DM[]>([]);
-  const [input, setInput] = useState('');
   const [search, setSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
+  const [showCall, setShowCall] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Load contacts from DM history
   useEffect(() => {
     if (!user) return;
     loadContacts();
@@ -30,7 +32,6 @@ export const DirectMessages = () => {
     if (!user) return;
     const { data: dms } = await supabase.from('direct_messages').select('sender_id, receiver_id')
       .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at', { ascending: false });
-    
     if (!dms) return;
     const ids = [...new Set(dms.flatMap(d => [d.sender_id, d.receiver_id]).filter(id => id !== user.id))];
     if (ids.length === 0) return;
@@ -51,12 +52,10 @@ export const DirectMessages = () => {
     supabase.from('direct_messages').select('*')
       .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user.id})`)
       .order('created_at', { ascending: true }).limit(100)
-      .then(({ data }) => { if (data) setMessages(data); });
+      .then(({ data }) => { if (data) setMessages(data as DM[]); });
 
-    // Mark as read
     supabase.from('direct_messages').update({ is_read: true }).eq('sender_id', otherId).eq('receiver_id', user.id).eq('is_read', false).then(() => {});
 
-    // Realtime
     const channel = supabase.channel(`dm-${[user.id, otherId].sort().join('-')}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'direct_messages' },
         (payload) => {
@@ -74,11 +73,15 @@ export const DirectMessages = () => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || !activeContact || !user) return;
-    const content = input.trim();
-    setInput('');
-    await supabase.from('direct_messages').insert({ sender_id: user.id, receiver_id: activeContact.user_id, content });
+  const handleSend = async (data: { content: string; image_url?: string; audio_url?: string }) => {
+    if (!activeContact || !user) return;
+    await supabase.from('direct_messages').insert({
+      sender_id: user.id,
+      receiver_id: activeContact.user_id,
+      content: data.content,
+      ...(data.image_url && { image_url: data.image_url }),
+      ...(data.audio_url && { audio_url: data.audio_url }),
+    } as any);
   };
 
   const startChat = (profile: Profile) => {
@@ -96,12 +99,10 @@ export const DirectMessages = () => {
   if (!activeContact) {
     return (
       <div className="space-y-4">
-        {/* Search users */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Foydalanuvchi qidirish..." className="pl-10 rounded-xl" />
         </div>
-
         {search.trim() && (
           <div className="space-y-1">
             {filteredUsers.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Topilmadi</p>}
@@ -119,7 +120,6 @@ export const DirectMessages = () => {
             ))}
           </div>
         )}
-
         {!search.trim() && (
           <>
             <p className="text-sm text-muted-foreground">{contacts.length ? 'So\'nggi suhbatlar' : 'Hali suhbatlar yo\'q. Yuqoridan foydalanuvchi qidiring!'}</p>
@@ -142,44 +142,47 @@ export const DirectMessages = () => {
   }
 
   return (
-    <div className="border border-border rounded-2xl overflow-hidden bg-card flex flex-col" style={{ height: 'calc(100vh - 220px)' }}>
-      <div className="px-4 py-3 border-b border-border flex items-center gap-3 bg-muted/30">
-        <button onClick={() => setActiveContact(null)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-          <User className="w-4 h-4 text-primary" />
-        </div>
-        <span className="font-semibold text-sm">{activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}</span>
-      </div>
-
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-3">
-          {messages.map(msg => {
-            const isMe = msg.sender_id === user?.id;
-            return (
-              <div key={msg.id} className={`flex ${isMe ? 'justify-end' : ''}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${isMe ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-muted rounded-bl-md'}`}>
-                  <p>{msg.content}</p>
-                  <p className={`text-[10px] mt-1 ${isMe ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
-                    {new Date(msg.created_at).toLocaleTimeString('uz', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-          <div ref={scrollRef} />
-        </div>
-      </ScrollArea>
-
-      <div className="px-4 py-3 border-t border-border">
-        <form onSubmit={e => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
-          <Input value={input} onChange={e => setInput(e.target.value)} placeholder="Xabar yozing..." className="rounded-xl" />
-          <Button type="submit" size="icon" disabled={!input.trim()} className="rounded-xl shrink-0">
-            <Send className="w-4 h-4" />
+    <>
+      <div className="border border-border rounded-2xl overflow-hidden bg-card flex flex-col" style={{ height: 'calc(100vh - 220px)' }}>
+        <div className="px-4 py-3 border-b border-border flex items-center gap-3 bg-muted/30">
+          <button onClick={() => setActiveContact(null)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <User className="w-4 h-4 text-primary" />
+          </div>
+          <span className="font-semibold text-sm flex-1">{activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}</span>
+          <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => setShowCall(true)}>
+            <Phone className="w-4 h-4" />
           </Button>
-        </form>
+        </div>
+
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-3">
+            {messages.map(msg => (
+              <ChatMessageBubble
+                key={msg.id}
+                isMe={msg.sender_id === user?.id}
+                content={msg.content}
+                image_url={msg.image_url}
+                audio_url={msg.audio_url}
+                created_at={msg.created_at}
+              />
+            ))}
+            <div ref={scrollRef} />
+          </div>
+        </ScrollArea>
+
+        <ChatMediaInput onSend={handleSend} />
       </div>
-    </div>
+
+      {showCall && activeContact && (
+        <AudioCallDialog
+          contactName={activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}
+          contactId={activeContact.user_id}
+          onClose={() => setShowCall(false)}
+        />
+      )}
+    </>
   );
 };
