@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, FileText, Headphones, BookOpen, MessageSquare, Search, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, Headphones, BookOpen, MessageSquare, Search, Loader2, Eye, EyeOff, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { TestFormDialog } from './tests/TestFormDialog';
 import { TestQuestionsPanel } from './tests/TestQuestionsPanel';
+import { PDFImportDialog } from './tests/PDFImportDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,6 +60,7 @@ export const TestsTab = () => {
   const [viewingTest, setViewingTest] = useState<Test | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [testToDelete, setTestToDelete] = useState<Test | null>(null);
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
 
   const levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
@@ -212,10 +214,16 @@ export const TestsTab = () => {
           <h2 className="text-2xl font-bold">Testlar boshqaruvi</h2>
           <p className="text-muted-foreground">Mock testlarni yarating va boshqaring</p>
         </div>
-        <Button onClick={() => { setSelectedTest(null); setDialogOpen(true); }}>
-          <Plus className="w-4 h-4 mr-2" />
-          Yangi test
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setPdfDialogOpen(true)}>
+            <Upload className="w-4 h-4 mr-2" />
+            PDF dan import
+          </Button>
+          <Button onClick={() => { setSelectedTest(null); setDialogOpen(true); }}>
+            <Plus className="w-4 h-4 mr-2" />
+            Yangi test
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -400,6 +408,13 @@ export const TestsTab = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* PDF Import Dialog */}
+      <PDFImportDialog
+        open={pdfDialogOpen}
+        onOpenChange={setPdfDialogOpen}
+        onSuccess={fetchTests}
+      />
     </div>
   );
 };
