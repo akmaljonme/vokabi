@@ -60,6 +60,7 @@ export const DirectMessages = () => {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'direct_messages' },
         (payload) => {
           const msg = payload.new as DM;
+          console.log('[DM Realtime] New message:', JSON.stringify(msg));
           if ((msg.sender_id === user.id && msg.receiver_id === otherId) || (msg.sender_id === otherId && msg.receiver_id === user.id)) {
             setMessages(prev => [...prev, msg]);
           }
