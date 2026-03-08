@@ -197,17 +197,71 @@ export const ChatRooms = () => {
   if (!activeRoom) {
     return (
       <div className="space-y-3">
+        {isAdmin && (
+          <Button onClick={openCreateRoom} className="w-full gap-2 rounded-xl">
+            <Plus className="w-4 h-4" /> Yangi xona yaratish
+          </Button>
+        )}
         {rooms.map(room => (
           <motion.button key={room.id} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
             onClick={() => setActiveRoom(room)}
             className="w-full p-4 rounded-xl border border-border bg-card hover:bg-muted/50 text-left transition-all flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Hash className="w-5 h-5 text-primary" /></div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h3 className="font-semibold">{room.name}</h3>
               <p className="text-sm text-muted-foreground">{room.description}</p>
             </div>
+            {isAdmin && (
+              <div className="flex items-center gap-1 shrink-0">
+                <button onClick={(e) => openEditRoom(room, e)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                  <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
+                <button onClick={(e) => handleDeleteRoom(room.id, e)} className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                </button>
+              </div>
+            )}
           </motion.button>
         ))}
+
+        {/* Room create/edit dialog */}
+        <Dialog open={showRoomDialog} onOpenChange={setShowRoomDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingRoom ? "Xonani tahrirlash" : "Yangi xona yaratish"}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label>Xona nomi</Label>
+                <Input value={roomForm.name} onChange={e => setRoomForm(f => ({ ...f, name: e.target.value }))} placeholder="Masalan: English Beginners" />
+              </div>
+              <div className="space-y-2">
+                <Label>Tavsif</Label>
+                <Input value={roomForm.description} onChange={e => setRoomForm(f => ({ ...f, description: e.target.value }))} placeholder="Xona haqida qisqacha..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Daraja</Label>
+                <Select value={roomForm.level} onValueChange={v => setRoomForm(f => ({ ...f, level: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">Umumiy</SelectItem>
+                    <SelectItem value="A1">A1</SelectItem>
+                    <SelectItem value="A2">A2</SelectItem>
+                    <SelectItem value="B1">B1</SelectItem>
+                    <SelectItem value="B2">B2</SelectItem>
+                    <SelectItem value="C1">C1</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRoomDialog(false)}>Bekor qilish</Button>
+              <Button onClick={handleSaveRoom} disabled={!roomForm.name.trim()}>
+                {editingRoom ? "Saqlash" : "Yaratish"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
