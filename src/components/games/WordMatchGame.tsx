@@ -19,6 +19,7 @@ export const WordMatchGame = ({ onBack }: Props) => {
   const [moves, setMoves] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [timer, setTimer] = useState(0);
+  const ai = useAIGameQuestions<{ en: string; uz: string }>('word_match');
 
   useEffect(() => {
     if (!level || gameOver) return;
