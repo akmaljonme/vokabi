@@ -364,7 +364,92 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
           )}
 
           <div className="p-6 flex-1 overflow-y-auto">
-            {question && (
+            {/* Writing Interface */}
+            {isWriting && part && (
+              <div className="max-w-3xl mx-auto">
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-2">{part.passage.title || 'Writing Task'}</h3>
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{part.passage.content}</p>
+                  {part.questions[0] && (
+                    <div className="mt-4 p-4 bg-muted/50 rounded-xl border border-border">
+                      <p className="font-medium">{part.questions[0].question}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Javobingiz</span>
+                    <span className="text-xs text-muted-foreground">{writingText.split(/\s+/).filter(Boolean).length} so'z</span>
+                  </div>
+                  <Textarea
+                    value={writingText}
+                    onChange={(e) => setWritingText(e.target.value)}
+                    placeholder="Javobingizni shu yerga yozing..."
+                    className="min-h-[300px] text-base leading-relaxed"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Speaking Interface */}
+            {isSpeaking && part && (
+              <div className="max-w-2xl mx-auto text-center">
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold mb-2">{part.passage.title || 'Speaking Task'}</h3>
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{part.passage.content}</p>
+                  {part.questions[0] && (
+                    <div className="mt-4 p-4 bg-muted/50 rounded-xl border border-border">
+                      <p className="font-medium">{part.questions[0].question}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col items-center gap-6">
+                  <button
+                    onClick={async () => {
+                      if (isRecording) {
+                        mediaRecorderRef.current?.stop();
+                        setIsRecording(false);
+                      } else {
+                        try {
+                          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                          const recorder = new MediaRecorder(stream);
+                          mediaRecorderRef.current = recorder;
+                          chunksRef.current = [];
+                          recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
+                          recorder.onstop = () => {
+                            const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+                            setAudioBlob(blob);
+                            setAudioUrl(URL.createObjectURL(blob));
+                            stream.getTracks().forEach(t => t.stop());
+                          };
+                          recorder.start();
+                          setIsRecording(true);
+                        } catch { /* mic permission denied */ }
+                      }
+                    }}
+                    className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
+                      isRecording
+                        ? 'bg-destructive text-destructive-foreground animate-pulse'
+                        : 'bg-primary text-primary-foreground hover:opacity-90'
+                    }`}
+                  >
+                    {isRecording ? <MicOff className="w-10 h-10" /> : <Mic className="w-10 h-10" />}
+                  </button>
+                  <p className="text-sm text-muted-foreground">
+                    {isRecording ? 'Yozib olinmoqda... To\'xtatish uchun bosing' : 'Gapirish uchun bosing'}
+                  </p>
+                  {audioUrl && (
+                    <div className="w-full space-y-3">
+                      <audio src={audioUrl} controls className="w-full" />
+                      <p className="text-xs text-muted-foreground">Qayta yozish uchun yana mikrofon tugmasini bosing</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Standard question-based interface */}
+            {!isOpenEnded && question && (
               <>
                 {/* Question header */}
                 <div className="mb-6">
@@ -385,7 +470,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
                   )}
                 </div>
 
-                {/* Options - same style as ExamInterface */}
+                {/* Options */}
                 {question.type === 'list-selection' && (
                   <p className="mb-4 text-sm text-muted-foreground flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" />2 ta javobni tanlang
@@ -409,6 +494,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
                     </button>
                   ))}
                 </div>
+              </>
               </>
             )}
 
