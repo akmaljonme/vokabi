@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MoreVertical, Shield, ShieldOff, Trash2, Eye, Crown, CrownIcon } from 'lucide-react';
+import { Search, MoreVertical, Shield, ShieldOff, Trash2, Eye, Crown, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,7 +14,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -36,6 +39,8 @@ export const UsersTab = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [userTests, setUserTests] = useState<any[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<UserProfile | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -138,6 +143,28 @@ export const UsersTab = () => {
     } catch (error) {
       console.error('Error updating pro status:', error);
       toast.error('Pro statusni yangilashda xatolik');
+    }
+  };
+
+  const deleteUser = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke('delete-user', {
+        body: { user_id: deleteTarget.user_id },
+      });
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || 'Xatolik');
+      }
+      toast.success(`${deleteTarget.full_name || 'Foydalanuvchi'} o'chirildi`);
+      setDeleteTarget(null);
+      fetchUsers();
+    } catch (error: any) {
+      console.error('Delete error:', error);
+      toast.error(error.message || 'Foydalanuvchini o\'chirishda xatolik');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -289,6 +316,13 @@ export const UsersTab = () => {
                               </>
                             )}
                           </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setDeleteTarget(user)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Foydalanuvchini o'chirish
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -373,6 +407,31 @@ export const UsersTab = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={() => !deleting && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Foydalanuvchini o'chirish
+            </DialogTitle>
+            <DialogDescription>
+              <strong>{deleteTarget?.full_name || 'Foydalanuvchi'}</strong> butunlay o'chiriladi. 
+              Barcha ma'lumotlari (testlar, natijalar, xabarlar) ham yo'q qilinadi. 
+              Bu amalni qaytarib bo'lmaydi!
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              Bekor qilish
+            </Button>
+            <Button variant="destructive" onClick={deleteUser} disabled={deleting}>
+              {deleting ? 'O\'chirilmoqda...' : 'Ha, o\'chirish'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
