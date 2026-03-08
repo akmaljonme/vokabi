@@ -51,6 +51,8 @@ export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps)
   const { user } = useAuth();
   const navigate = useNavigate();
   const [liveStats, setLiveStats] = useState({ users: 0, tests: 0, avgPass: 0 });
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -67,7 +69,17 @@ export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps)
         });
       }
     };
+    const fetchFeedbacks = async () => {
+      const { data } = await supabase
+        .from('feedbacks' as any)
+        .select('*')
+        .eq('is_approved', true)
+        .order('created_at', { ascending: false })
+        .limit(6);
+      if (data) setFeedbacks(data as any[]);
+    };
     fetchStats();
+    fetchFeedbacks();
   }, []);
 
   const handleStartTest = () => {
