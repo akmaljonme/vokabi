@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUnreadDMCount } from '@/hooks/useUnreadDMCount';
+import { useCall } from '@/contexts/CallContext';
 import { Badge } from '@/components/ui/badge';
 
 interface HeaderProps {
