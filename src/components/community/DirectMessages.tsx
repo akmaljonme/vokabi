@@ -88,7 +88,10 @@ export const DirectMessages = () => {
     }
   };
 
-  const filteredUsers = search.trim() ? allUsers.filter(u => u.full_name?.toLowerCase().includes(search.toLowerCase())) : [];
+  const filteredUsers = search.trim() ? allUsers.filter(u => {
+    const q = search.toLowerCase();
+    return u.full_name?.toLowerCase().includes(q) || u.username?.toLowerCase().includes(q);
+  }) : [];
 
   if (!activeContact) {
     return (
