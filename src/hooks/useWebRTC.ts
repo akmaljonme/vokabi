@@ -286,6 +286,7 @@ export const useWebRTC = (userId: string | undefined) => {
           case 'call-accept': {
             stopRingtone();
             updateCallState('connected');
+            callConnectedRef.current = true;
             // Caller side: create PC and add tracks now
             if (localStreamRef.current && !pcRef.current) {
               const remoteId = currentCalleeRef.current || caller_id;
@@ -293,11 +294,17 @@ export const useWebRTC = (userId: string | undefined) => {
               localStreamRef.current.getTracks().forEach(t => pc.addTrack(t, localStreamRef.current!));
             }
             if (timerRef.current) clearInterval(timerRef.current);
-            timerRef.current = setInterval(() => setDuration(d => d + 1), 1000);
+            timerRef.current = setInterval(() => {
+              durationRef.current++;
+              setDuration(d => d + 1);
+            }, 1000);
             break;
           }
           case 'call-reject': {
             stopRingtone();
+            // Save as missed call
+            const rejectTarget = currentCalleeRef.current || caller_id;
+            saveCallMessage(rejectTarget, false, 0);
             updateCallState('ended');
             cleanup();
             setTimeout(() => updateCallState('idle'), 1500);
