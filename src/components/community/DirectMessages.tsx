@@ -8,6 +8,7 @@ import { ChatMediaInput } from './ChatMediaInput';
 import { ChatMessageBubble } from './ChatMessageBubble';
 import { AudioCallDialog } from './AudioCallDialog';
 import { Button } from '@/components/ui/button';
+import { useWebRTC } from '@/hooks/useWebRTC';
 
 interface Profile { user_id: string; full_name: string | null; username: string | null; avatar_url: string | null; }
 interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; image_url?: string | null; audio_url?: string | null; }
@@ -19,8 +20,8 @@ export const DirectMessages = () => {
   const [messages, setMessages] = useState<DM[]>([]);
   const [search, setSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
-  const [showCall, setShowCall] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { callState, isMuted, duration, startCall, endCall, toggleMute } = useWebRTC(user?.id);
 
   useEffect(() => {
     if (!user) return;
@@ -153,7 +154,7 @@ export const DirectMessages = () => {
             <User className="w-4 h-4 text-primary" />
           </div>
           <span className="font-semibold text-sm flex-1">{activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}</span>
-          <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => setShowCall(true)}>
+          <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => startCall(activeContact.user_id)} disabled={callState !== 'idle'}>
             <Phone className="w-4 h-4" />
           </Button>
         </div>
@@ -177,11 +178,14 @@ export const DirectMessages = () => {
         <ChatMediaInput onSend={handleSend} />
       </div>
 
-      {showCall && activeContact && (
+      {callState !== 'idle' && activeContact && (
         <AudioCallDialog
           contactName={activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}
-          contactId={activeContact.user_id}
-          onClose={() => setShowCall(false)}
+          callState={callState as any}
+          isMuted={isMuted}
+          duration={duration}
+          onToggleMute={toggleMute}
+          onEnd={() => endCall(activeContact.user_id)}
         />
       )}
     </>
