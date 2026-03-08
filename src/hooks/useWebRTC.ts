@@ -20,6 +20,7 @@ export const useWebRTC = (userId: string | undefined) => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const currentCalleeRef = useRef<string | null>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const cleanup = useCallback(() => {
     localStreamRef.current?.getTracks().forEach(t => t.stop());
