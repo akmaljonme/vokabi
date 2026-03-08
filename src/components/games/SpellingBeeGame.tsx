@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { Check, X } from 'lucide-react';
+import { Check, X, Loader2 } from 'lucide-react';
+import { useAIGameQuestions } from '@/hooks/useAIGameQuestions';
 
 interface Props { onBack: () => void; }
 
@@ -20,12 +21,19 @@ export const SpellingBeeGame = ({ onBack }: Props) => {
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const ai = useAIGameQuestions<{ word: string; hint: string }>('spelling_bee');
 
   useEffect(() => { inputRef.current?.focus(); }, [currentIdx, level]);
 
-  const startGame = (lvl: string) => {
-    const w = [...(spellingWords[lvl] || spellingWords['A1'])].sort(() => Math.random() - 0.5);
-    setWords(w); setLevel(lvl); setCurrentIdx(0); setScore(0); setGameOver(false); setInput(''); setFeedback(null);
+  const startGame = async (lvl: string) => {
+    setLevel(lvl);
+    const aiWords = await ai.generate(lvl);
+    if (aiWords && aiWords.length >= 4) {
+      setWords(aiWords.map(w => ({ ...w, level: lvl })));
+    } else {
+      setWords([...(spellingWords[lvl] || spellingWords['A1'])].sort(() => Math.random() - 0.5));
+    }
+    setCurrentIdx(0); setScore(0); setGameOver(false); setInput(''); setFeedback(null);
   };
 
   const checkAnswer = () => {
