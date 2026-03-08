@@ -48,6 +48,27 @@ const AnimatedCounter = ({ value, suffix = '', duration = 2 }: { value: number; 
 export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [liveStats, setLiveStats] = useState({ users: 0, tests: 0, avgPass: 0 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const [profilesRes, testsRes, resultsRes] = await Promise.all([
+        supabase.from('profiles').select('id', { count: 'exact', head: true }),
+        supabase.from('tests').select('id', { count: 'exact', head: true }),
+        supabase.from('test_results').select('passed', { count: 'exact', head: true }).eq('passed', true),
+      ]);
+      const totalResults = await supabase.from('test_results').select('id', { count: 'exact', head: true });
+      const passRate = totalResults.count && totalResults.count > 0
+        ? Math.round(((resultsRes.count || 0) / totalResults.count) * 100)
+        : 95;
+      setLiveStats({
+        users: profilesRes.count || 0,
+        tests: testsRes.count || 0,
+        avgPass: passRate,
+      });
+    };
+    fetchStats();
+  }, []);
 
   const handleStartTest = () => {
     if (user) onStartTest();
