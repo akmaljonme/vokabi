@@ -66,6 +66,15 @@ export const UsersTab = () => {
             .select('percentage')
             .eq('user_id', profile.user_id);
 
+          // Fetch subscription
+          const { data: sub } = await supabase
+            .from('subscriptions')
+            .select('plan, expires_at')
+            .eq('user_id', profile.user_id)
+            .maybeSingle();
+
+          const isPro = sub?.plan === 'pro' && (!sub.expires_at || new Date(sub.expires_at) > new Date());
+
           const avgScore = tests?.length 
             ? Math.round(tests.reduce((acc, t) => acc + t.percentage, 0) / tests.length)
             : 0;
@@ -74,7 +83,8 @@ export const UsersTab = () => {
             ...profile,
             roles: rolesData?.map(r => r.role) || [],
             test_count: tests?.length || 0,
-            avg_score: avgScore
+            avg_score: avgScore,
+            is_pro: isPro
           };
         })
       );
