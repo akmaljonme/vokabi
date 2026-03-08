@@ -16,7 +16,7 @@ interface ResultPageProps {
 }
 
 export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
-  const mockTest = generateMockTest(result.mockId, result.level, result.skill);
+  const mockTest = result.mockTest || generateMockTest(result.mockId, result.level, result.skill);
   const { user } = useAuth();
   const { saveResult } = useTestResults();
   const [saved, setSaved] = useState(false);
