@@ -396,6 +396,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
 
   const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
   const hasMediaTab = test.skill === 'reading' || test.skill === 'listening';
+  const isAIEvaluated = test.skill === 'writing' || test.skill === 'speaking';
 
   return (
     <div className="space-y-6">
