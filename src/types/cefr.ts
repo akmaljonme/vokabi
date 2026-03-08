@@ -70,6 +70,7 @@ export interface TestResult {
     isCorrect: boolean;
   }[];
   timeTaken: number;
+  mockTest?: MockTest;
 }
 
 export type ViewType = 'landing' | 'levels' | 'skills' | 'vocabulary' | 'test' | 'result';
