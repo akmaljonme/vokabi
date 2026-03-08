@@ -267,7 +267,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 <>
                   <button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors">
                     <User className="w-4 h-4 text-primary" />
-                    <span className="text-sm">{user.email}</span>
+                    <span className="text-sm">{displayName || user.email}</span>
                   </button>
                   <button onClick={handleSignOut} className="btn-outline w-full flex items-center justify-center gap-2 mt-2">
                     <LogOut className="w-4 h-4" /> Sign Out
