@@ -9,6 +9,8 @@ const ICE_SERVERS = [
 type CallState = 'idle' | 'calling' | 'ringing' | 'connected' | 'ended';
 type CallMode = 'audio' | 'video';
 
+// Use a module-level variable won't work with multiple instances, so we use ref
+
 export const useWebRTC = (userId: string | undefined) => {
   const [callState, setCallState] = useState<CallState>('idle');
   const [callMode, setCallMode] = useState<CallMode>('audio');
@@ -28,6 +30,12 @@ export const useWebRTC = (userId: string | undefined) => {
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const ringtoneRef = useRef<HTMLAudioElement | null>(null);
   const callModeRef = useRef<CallMode>('audio');
+  const callStateRef = useRef<CallState>('idle');
+
+  const updateCallState = useCallback((state: CallState) => {
+    callStateRef.current = state;
+    setCallState(state);
+  }, []);
 
   const playRingtone = useCallback(() => {
     try {
@@ -139,13 +147,13 @@ export const useWebRTC = (userId: string | undefined) => {
       setRemoteCallerName(profile?.username ? `@${profile.username}` : profile?.full_name || 'Foydalanuvchi');
       setRemoteCallerId(calleeId);
       
-      setCallState('calling');
+      updateCallState('calling');
       playRingtone();
       await sendSignal(calleeId, 'call-invite', { mode });
     } catch {
-      setCallState('idle');
+      updateCallState('idle');
     }
-  }, [userId, playRingtone]);
+  }, [userId, playRingtone, updateCallState]);
 
   const acceptCall = useCallback(async (callerId: string) => {
     if (!userId) return;
@@ -158,7 +166,7 @@ export const useWebRTC = (userId: string | undefined) => {
         setLocalStream(stream);
       }
       currentCalleeRef.current = callerId;
-      setCallState('connected');
+      updateCallState('connected');
 
       await sendSignal(callerId, 'call-accept');
 
@@ -171,19 +179,19 @@ export const useWebRTC = (userId: string | undefined) => {
 
       timerRef.current = setInterval(() => setDuration(d => d + 1), 1000);
     } catch {
-      setCallState('idle');
+      updateCallState('idle');
       cleanup();
     }
-  }, [userId, createPeerConnection, cleanup, stopRingtone]);
+  }, [userId, createPeerConnection, cleanup, stopRingtone, updateCallState]);
 
   const rejectCall = useCallback(async (callerId: string) => {
     if (!userId) return;
     stopRingtone();
     await sendSignal(callerId, 'call-reject');
-    setCallState('idle');
+    updateCallState('idle');
     setRemoteCallerId(null);
     cleanup();
-  }, [userId, cleanup, stopRingtone]);
+  }, [userId, cleanup, stopRingtone, updateCallState]);
 
   const endCall = useCallback(async (remoteId?: string) => {
     const targetId = remoteId || currentCalleeRef.current;
@@ -191,10 +199,10 @@ export const useWebRTC = (userId: string | undefined) => {
       await sendSignal(targetId, 'call-end');
     }
     stopRingtone();
-    setCallState('ended');
+    updateCallState('ended');
     cleanup();
-    setTimeout(() => setCallState('idle'), 1500);
-  }, [userId, cleanup, stopRingtone]);
+    setTimeout(() => updateCallState('idle'), 1500);
+  }, [userId, cleanup, stopRingtone, updateCallState]);
 
   const toggleMute = useCallback(() => {
     if (localStreamRef.current) {
@@ -210,7 +218,7 @@ export const useWebRTC = (userId: string | undefined) => {
     }
   }, []);
 
-  // Listen for incoming signals
+  // Listen for incoming signals — NO callState dependency to avoid channel recreation
   useEffect(() => {
     if (!userId) return;
 
@@ -226,11 +234,10 @@ export const useWebRTC = (userId: string | undefined) => {
 
         switch (signal_type) {
           case 'call-invite': {
-            if (callState !== 'idle') {
+            if (callStateRef.current !== 'idle') {
               await sendSignal(caller_id, 'call-reject');
               return;
             }
-            // Set call mode from invite
             const mode = signal_data?.mode || 'audio';
             callModeRef.current = mode;
             setCallMode(mode);
@@ -238,28 +245,34 @@ export const useWebRTC = (userId: string | undefined) => {
             const { data: profile } = await supabase.from('profiles').select('full_name, username').eq('user_id', caller_id).single();
             setRemoteCallerId(caller_id);
             setRemoteCallerName(profile?.username ? `@${profile.username}` : profile?.full_name || 'Foydalanuvchi');
-            setCallState('ringing');
+            updateCallState('ringing');
             playRingtone();
             break;
           }
           case 'call-accept': {
             stopRingtone();
-            setCallState('connected');
+            updateCallState('connected');
+            // Caller side: create PC and add tracks now
+            if (localStreamRef.current && !pcRef.current) {
+              const remoteId = currentCalleeRef.current || caller_id;
+              const pc = createPeerConnection(remoteId);
+              localStreamRef.current.getTracks().forEach(t => pc.addTrack(t, localStreamRef.current!));
+            }
             timerRef.current = setInterval(() => setDuration(d => d + 1), 1000);
             break;
           }
           case 'call-reject': {
             stopRingtone();
-            setCallState('ended');
+            updateCallState('ended');
             cleanup();
-            setTimeout(() => setCallState('idle'), 1500);
+            setTimeout(() => updateCallState('idle'), 1500);
             break;
           }
           case 'call-end': {
             stopRingtone();
-            setCallState('ended');
+            updateCallState('ended');
             cleanup();
-            setTimeout(() => setCallState('idle'), 1500);
+            setTimeout(() => updateCallState('idle'), 1500);
             break;
           }
           case 'offer': {
@@ -296,7 +309,7 @@ export const useWebRTC = (userId: string | undefined) => {
 
     channelRef.current = channel;
     return () => { supabase.removeChannel(channel); };
-  }, [userId, callState]);
+  }, [userId]);
 
   return {
     callState,
