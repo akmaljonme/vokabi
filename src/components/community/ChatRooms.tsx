@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Hash, X, Forward, Search, User, Plus, Trash2, Pencil } from 'lucide-react';
+import { ArrowLeft, Hash, X, Forward, Search, User, Plus, Trash2, Pencil, Users, Circle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { ChatMediaInput } from './ChatMediaInput';
