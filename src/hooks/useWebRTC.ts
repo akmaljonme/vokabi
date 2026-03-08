@@ -27,6 +27,11 @@ export const useWebRTC = (userId: string | undefined) => {
     localStreamRef.current = null;
     pcRef.current?.close();
     pcRef.current = null;
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = null;
+      remoteAudioRef.current.remove();
+      remoteAudioRef.current = null;
+    }
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = null;
     setDuration(0);
