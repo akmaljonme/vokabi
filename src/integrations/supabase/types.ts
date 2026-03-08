@@ -562,6 +562,60 @@ export type Database = {
         }
         Relationships: []
       }
+      game_rooms: {
+        Row: {
+          created_at: string
+          current_turn: string | null
+          current_word: string | null
+          id: string
+          last_move_at: string | null
+          player1_id: string
+          player1_name: string
+          player1_score: number
+          player2_id: string | null
+          player2_name: string | null
+          player2_score: number
+          round: number
+          status: string
+          used_words: Json
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_turn?: string | null
+          current_word?: string | null
+          id?: string
+          last_move_at?: string | null
+          player1_id: string
+          player1_name?: string
+          player1_score?: number
+          player2_id?: string | null
+          player2_name?: string | null
+          player2_score?: number
+          round?: number
+          status?: string
+          used_words?: Json
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_turn?: string | null
+          current_word?: string | null
+          id?: string
+          last_move_at?: string | null
+          player1_id?: string
+          player1_name?: string
+          player1_score?: number
+          player2_id?: string | null
+          player2_name?: string | null
+          player2_score?: number
+          round?: number
+          status?: string
+          used_words?: Json
+          winner_id?: string | null
+        }
+        Relationships: []
+      }
       game_scores: {
         Row: {
           created_at: string
