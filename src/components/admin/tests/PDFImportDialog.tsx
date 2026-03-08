@@ -48,10 +48,22 @@ export const PDFImportDialog = ({ open, onOpenChange, onSuccess }: PDFImportDial
     setExtracting(true);
 
     try {
-      // Use pdf.js to extract text client-side
       const arrayBuffer = await file.arrayBuffer();
-      const pdfjsLib = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+      
+      // Load pdf.js dynamically
+      const pdfjsScript = document.createElement('script');
+      pdfjsScript.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs';
+      
+      // Use global pdfjsLib
+      const pdfjsLib = await new Promise<any>((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.js';
+        script.onload = () => resolve((window as any).pdfjsLib);
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.js';
 
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let fullText = '';
