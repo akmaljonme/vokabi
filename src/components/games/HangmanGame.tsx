@@ -71,12 +71,29 @@ export const HangmanGame = ({ onBack }: Props) => {
   const [round, setRound] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
+  const [aiWordList, setAiWordList] = useState<{ word: string; hint: string }[]>([]);
+  const ai = useAIGameQuestions<{ word: string; hint: string }>('hangman');
 
-  const startGame = (lvl: string) => {
+  const startGame = async (lvl: string) => {
     setLevel(lvl);
     setScore(0);
     setRound(0);
-    nextWord(lvl, 0);
+    const aiWords = await ai.generate(lvl);
+    if (aiWords && aiWords.length >= 4) {
+      setAiWordList(aiWords);
+      nextWordFromList(aiWords, 0);
+    } else {
+      setAiWordList([]);
+      nextWord(lvl, 0);
+    }
+  };
+
+  const nextWordFromList = (list: { word: string; hint: string }[], currentRound: number) => {
+    if (currentRound >= list.length) { setGameOver(true); return; }
+    const item = list[currentRound];
+    setWord(item.word.toUpperCase());
+    setHint(item.hint);
+    setGuessed([]); setWrongCount(0); setWon(false);
   };
 
   const nextWord = (lvl: string, currentRound: number) => {
