@@ -139,7 +139,7 @@ export const DirectMessages = () => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = async (data: { content: string; image_url?: string; audio_url?: string }) => {
+  const handleSend = async (data: { content: string; image_url?: string; audio_url?: string; reply_to_id?: string }) => {
     if (!activeContact || !user) return;
     await supabase.from('direct_messages').insert({
       sender_id: user.id,
@@ -147,7 +147,9 @@ export const DirectMessages = () => {
       content: data.content,
       ...(data.image_url && { image_url: data.image_url }),
       ...(data.audio_url && { audio_url: data.audio_url }),
+      ...(data.reply_to_id && { reply_to_id: data.reply_to_id }),
     } as any);
+    setReplyTo(null);
   };
 
   const handleEdit = async (id: string, newContent: string) => {
