@@ -300,8 +300,24 @@ export const ChatRooms = () => {
       <div className="px-4 py-3 border-b border-border flex items-center gap-3 bg-muted/30">
         <button onClick={() => setActiveRoom(null)} className="p-1.5 rounded-lg hover:bg-muted transition-colors"><ArrowLeft className="w-4 h-4" /></button>
         <Hash className="w-4 h-4 text-primary" />
-        <span className="font-semibold text-sm">{activeRoom.name}</span>
+        <span className="font-semibold text-sm flex-1">{activeRoom.name}</span>
+        <button onClick={() => setShowOnline(!showOnline)} className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-muted transition-colors text-xs text-muted-foreground">
+          <Circle className="w-2.5 h-2.5 fill-green-500 text-green-500" />
+          {onlineUsers.length} onlayn
+        </button>
       </div>
+
+      {/* Online users panel */}
+      {showOnline && onlineUsers.length > 0 && (
+        <div className="px-4 py-2 border-b border-border bg-muted/20 flex flex-wrap gap-2">
+          {onlineUsers.map(u => (
+            <span key={u.user_id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-background border border-border text-xs">
+              <Circle className="w-2 h-2 fill-green-500 text-green-500" />
+              {u.full_name}
+            </span>
+          ))}
+        </div>
+      )}
 
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3">
