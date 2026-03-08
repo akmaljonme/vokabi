@@ -121,14 +121,15 @@ export const ChatRooms = () => {
         const state = presenceChannel.presenceState();
         const users = Object.values(state).flat().map((p: any) => ({
           user_id: p.user_id,
-          full_name: p.full_name || 'Foydalanuvchi',
+          username: p.username || null,
+          full_name: p.full_name || null,
         }));
         setOnlineUsers(users);
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', user.id).single();
-          await presenceChannel.track({ user_id: user.id, full_name: profile?.full_name || 'Foydalanuvchi' });
+          const { data: profile } = await (supabase.from('profiles') as any).select('full_name, username').eq('user_id', user.id).single();
+          await presenceChannel.track({ user_id: user.id, username: profile?.username || null, full_name: profile?.full_name || null });
         }
       });
 
