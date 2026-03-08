@@ -173,7 +173,7 @@ export const ChatRooms = () => {
     } as any);
     setForwardMsg(null);
     setForwardSearch('');
-    toast.success(`Xabar ${targetProfile.username ? `@${targetProfile.username}` : targetProfile.full_name}ga yo'naltirildi`);
+    toast.success(`Xabar ${targetProfile.username ? `@${targetProfile.username}` : targetProfile.full_name || 'Foydalanuvchi'}ga yo'naltirildi`);
   };
 
   const handleEdit = async (id: string, newContent: string) => {
