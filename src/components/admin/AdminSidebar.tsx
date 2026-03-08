@@ -7,7 +7,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
-  GraduationCap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
