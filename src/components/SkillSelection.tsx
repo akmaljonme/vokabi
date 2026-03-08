@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, BookOpen, Headphones, Brain, Lightbulb, BookMarked, FileDown } from 'lucide-react';
+import { ArrowLeft, BookOpen, Headphones, Brain, Lightbulb, BookMarked, FileDown, Mic, PenTool } from 'lucide-react';
 import { CEFRLevel, SkillType } from '@/types/cefr';
 import { useActiveTests, TestInfo } from '@/hooks/useTests';
 import { Loader2 } from 'lucide-react';
