@@ -164,6 +164,35 @@ const Auth = () => {
                 </div>
               )}
 
+              {!isLogin && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">Username</label>
+                  <div className="relative">
+                    <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                      placeholder="masalan: ali_123"
+                      required
+                      className="w-full pl-10 pr-10 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                    />
+                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                      {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />}
+                      {usernameStatus === 'available' && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                      {usernameStatus === 'taken' && <XCircle className="w-4 h-4 text-destructive" />}
+                      {usernameStatus === 'invalid' && <XCircle className="w-4 h-4 text-destructive" />}
+                    </div>
+                  </div>
+                  {usernameStatus === 'taken' && (
+                    <p className="text-xs text-destructive mt-1">Bu username band. Boshqasini tanlang.</p>
+                  )}
+                  {usernameStatus === 'available' && (
+                    <p className="text-xs text-emerald-500 mt-1">Username bo'sh ✓</p>
+                  )}
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <div className="relative">
