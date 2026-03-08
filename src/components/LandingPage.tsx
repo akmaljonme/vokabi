@@ -52,20 +52,18 @@ export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps)
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [profilesRes, testsRes, resultsRes] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('tests').select('id', { count: 'exact', head: true }),
-        supabase.from('test_results').select('passed', { count: 'exact', head: true }).eq('passed', true),
-      ]);
-      const totalResults = await supabase.from('test_results').select('id', { count: 'exact', head: true });
-      const passRate = totalResults.count && totalResults.count > 0
-        ? Math.round(((resultsRes.count || 0) / totalResults.count) * 100)
-        : 95;
-      setLiveStats({
-        users: profilesRes.count || 0,
-        tests: testsRes.count || 0,
-        avgPass: passRate,
-      });
+      const { data } = await supabase.rpc('get_public_stats');
+      if (data) {
+        const stats = data as any;
+        const passRate = stats.total_results > 0
+          ? Math.round((stats.passed_results / stats.total_results) * 100)
+          : 95;
+        setLiveStats({
+          users: stats.user_count || 0,
+          tests: stats.test_count || 0,
+          avgPass: passRate,
+        });
+      }
     };
     fetchStats();
   }, []);
