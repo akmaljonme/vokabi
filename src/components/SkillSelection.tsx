@@ -18,7 +18,7 @@ interface SkillSelectionProps {
 const BOOK_NAMES = ["1-Kitob", "2-Kitob", "3-Kitob", "4-Kitob", "5-Kitob", "6-Kitob"];
 
 export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vocabularyOnly }: SkillSelectionProps) => {
-  const { readingTests, listeningTests, vocabularyTests, grammarTests, loading } = useActiveTests(vocabularyOnly ? undefined : level);
+  const { readingTests, listeningTests, vocabularyTests, grammarTests, speakingTests, writingTests, loading } = useActiveTests(vocabularyOnly ? undefined : level);
   const [selectedVocabBook, setSelectedVocabBook] = useState<number | null>(null);
   const defaultTab = vocabularyOnly ? 'vocabulary' : (hideVocabulary ? 'grammar' : 'vocabulary');
   const [activeTab, setActiveTab] = useState<SkillType>(defaultTab as SkillType);
