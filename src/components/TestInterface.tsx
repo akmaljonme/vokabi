@@ -220,6 +220,47 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
     if (!mockTest) return;
     localStorage.removeItem(testStorageKey);
 
+    // For writing/speaking, submit to AI for evaluation
+    if (isWriting || isSpeaking) {
+      const submitOpenEnded = async () => {
+        setSpeakingSubmitting(true);
+        try {
+          const functionName = isWriting ? 'check-writing' : 'check-speaking';
+          const body = isWriting
+            ? { essay: writingText, question: part?.questions[0]?.question || part?.passage.content || '', level }
+            : { transcript: '[Audio submitted]', question: part?.questions[0]?.question || part?.passage.content || '', level };
+
+          const { data } = await import('@/integrations/supabase/client').then(m => 
+            m.supabase.functions.invoke(functionName, { body })
+          );
+
+          onFinish({
+            mockId, level, skill, totalQuestions: 1,
+            correctAnswers: 0, percentage: 0,
+            passed: false,
+            answers: [{
+              questionId: 1, partId: 1,
+              userAnswer: isWriting ? writingText : '[Audio]',
+              correctAnswer: '', isCorrect: false,
+            }],
+            timeTaken: mockTest.timeLimit - timeLeft,
+            mockTest,
+            aiResult: data?.result,
+          } as any);
+        } catch {
+          onFinish({
+            mockId, level, skill, totalQuestions: 1,
+            correctAnswers: 0, percentage: 0, passed: false,
+            answers: [], timeTaken: mockTest.timeLimit - timeLeft, mockTest,
+          });
+        } finally {
+          setSpeakingSubmitting(false);
+        }
+      };
+      submitOpenEnded();
+      return;
+    }
+
     const results: TestResult['answers'] = [];
     let correctCount = 0;
 
