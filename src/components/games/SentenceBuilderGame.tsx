@@ -113,7 +113,7 @@ export const SentenceBuilderGame = ({ onBack }: Props) => {
           <p className="text-muted-foreground">So'zlarni to'g'ri tartibga qo'yib gap yasang!</p>
         </div>
         <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-          {Object.keys(sentencesByLevel).map(lvl => (
+          {['A1', 'A2', 'B1', 'B2'].map(lvl => (
             <Button key={lvl} variant="outline" className="h-16 text-lg font-bold" onClick={() => startGame(lvl)}>{lvl}</Button>
           ))}
         </div>

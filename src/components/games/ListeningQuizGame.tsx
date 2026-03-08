@@ -101,7 +101,7 @@ export const ListeningQuizGame = ({ onBack }: Props) => {
           <p className="text-muted-foreground">Eshiting va savolga javob bering!</p>
         </div>
         <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-          {Object.keys(questions).map(lvl => (
+          {Object.keys(fallbackQuestions).map(lvl => (
             <Button key={lvl} variant="outline" className="h-16 text-lg font-bold" onClick={() => startGame(lvl)}>{lvl}</Button>
           ))}
         </div>
