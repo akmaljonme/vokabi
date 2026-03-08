@@ -56,10 +56,12 @@ export const QuestionFormDialog = ({
   onOpenChange, 
   question, 
   testId, 
+  testSkill,
   onSave, 
   loading,
   questionCount 
 }: QuestionFormDialogProps) => {
+  const isAIEvaluated = testSkill === 'writing' || testSkill === 'speaking';
   const [formData, setFormData] = useState({
     question_text: '',
     question_type: 'multiple-choice',
