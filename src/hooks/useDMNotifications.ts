@@ -42,7 +42,7 @@ export const useDMNotifications = () => {
           action: {
             label: "Ko'rish",
             onClick: () => {
-              navigate('/community');
+              navigate(`/community?dm=${msg.sender_id}`);
             },
           },
           duration: 5000,

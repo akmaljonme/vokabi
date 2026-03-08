@@ -1,5 +1,5 @@
 import { ArrowLeft, MessageCircle, Users } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChatRooms } from '@/components/community/ChatRooms';
@@ -8,6 +8,9 @@ import { DirectMessages } from '@/components/community/DirectMessages';
 export default function Community() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const dmUserId = searchParams.get('dm');
+  const defaultTab = dmUserId ? 'dm' : 'rooms';
 
   if (!user) { navigate('/auth'); return null; }
 
@@ -24,7 +27,7 @@ export default function Community() {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-4xl">
-        <Tabs defaultValue="rooms">
+        <Tabs defaultValue={defaultTab}>
           <TabsList className="w-full mb-6">
             <TabsTrigger value="rooms" className="flex-1 gap-2">
               <MessageCircle className="w-4 h-4" /> Chat xonalari
@@ -34,7 +37,7 @@ export default function Community() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="rooms"><ChatRooms /></TabsContent>
-          <TabsContent value="dm"><DirectMessages /></TabsContent>
+          <TabsContent value="dm"><DirectMessages openUserId={dmUserId} /></TabsContent>
         </Tabs>
       </main>
     </div>
