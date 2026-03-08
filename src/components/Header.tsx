@@ -193,6 +193,16 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
               >
                 Practice Tests
               </button>
+              {user && (
+                <>
+                  <button onClick={() => { navigate('/games'); setIsMenuOpen(false); }} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
+                    <Gamepad2 className="w-4 h-4" /> O'yinlar
+                  </button>
+                  <button onClick={() => { navigate('/community'); setIsMenuOpen(false); }} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
+                    <Users className="w-4 h-4" /> Hamjamiyat
+                  </button>
+                </>
+              )}
               <a href="#pricing" className="py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">Pricing</a>
               <a href="#faq" className="py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">FAQ</a>
 
