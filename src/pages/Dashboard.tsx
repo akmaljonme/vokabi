@@ -137,7 +137,24 @@ export default function Dashboard() {
   const getSkillDistribution = () => [
     { name: 'Reading', value: results.filter(r => r.skill === 'reading').length },
     { name: 'Listening', value: results.filter(r => r.skill === 'listening').length },
+    { name: 'Vocabulary', value: results.filter(r => r.skill === 'vocabulary').length },
+    { name: 'Grammar', value: results.filter(r => r.skill === 'grammar').length },
+    { name: 'Writing', value: results.filter(r => r.skill === 'writing').length },
+    { name: 'Speaking', value: results.filter(r => r.skill === 'speaking').length },
   ].filter(d => d.value > 0);
+
+  const getRadarData = () => {
+    const skills = ['reading', 'listening', 'vocabulary', 'grammar', 'writing', 'speaking'];
+    const labels: Record<string, string> = {
+      reading: 'Reading', listening: 'Listening', vocabulary: "Lug'at",
+      grammar: 'Grammatika', writing: 'Writing', speaking: 'Speaking',
+    };
+    return skills.map(skill => {
+      const skillResults = results.filter(r => r.skill === skill);
+      const avg = skillResults.length > 0 ? Math.round(skillResults.reduce((s, r) => s + r.percentage, 0) / skillResults.length) : 0;
+      return { skill: labels[skill] || skill, score: avg, fullMark: 100 };
+    });
+  };
 
   const getLevelDistribution = () => {
     const levels: CEFRLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1'];
