@@ -6,14 +6,20 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, Search, User, Phone } from 'lucide-react';
 import { ChatMediaInput } from './ChatMediaInput';
 import { ChatMessageBubble } from './ChatMessageBubble';
-import { AudioCallDialog } from './AudioCallDialog';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { useWebRTC } from '@/hooks/useWebRTC';
 
 interface Profile { user_id: string; full_name: string | null; username: string | null; avatar_url: string | null; }
 interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; image_url?: string | null; audio_url?: string | null; }
 
-export const DirectMessages = () => {
+type WebRTCReturn = ReturnType<typeof useWebRTC>;
+
+interface DirectMessagesProps {
+  webrtc: WebRTCReturn;
+}
+
+export const DirectMessages = ({ webrtc }: DirectMessagesProps) => {
   const { user } = useAuth();
   const [contacts, setContacts] = useState<Profile[]>([]);
   const [activeContact, setActiveContact] = useState<Profile | null>(null);
@@ -21,7 +27,6 @@ export const DirectMessages = () => {
   const [search, setSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { callState, isMuted, duration, startCall, endCall, toggleMute } = useWebRTC(user?.id);
 
   useEffect(() => {
     if (!user) return;
@@ -58,12 +63,19 @@ export const DirectMessages = () => {
     supabase.from('direct_messages').update({ is_read: true }).eq('sender_id', otherId).eq('receiver_id', user.id).eq('is_read', false).then(() => {});
 
     const channel = supabase.channel(`dm-${[user.id, otherId].sort().join('-')}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'direct_messages' },
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'direct_messages' },
         (payload) => {
-          const msg = payload.new as DM;
-          console.log('[DM Realtime] New message:', JSON.stringify(msg));
-          if ((msg.sender_id === user.id && msg.receiver_id === otherId) || (msg.sender_id === otherId && msg.receiver_id === user.id)) {
-            setMessages(prev => [...prev, msg]);
+          if (payload.eventType === 'INSERT') {
+            const msg = payload.new as DM;
+            if ((msg.sender_id === user.id && msg.receiver_id === otherId) || (msg.sender_id === otherId && msg.receiver_id === user.id)) {
+              setMessages(prev => [...prev, msg]);
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const msg = payload.new as DM;
+            setMessages(prev => prev.map(m => m.id === msg.id ? msg : m));
+          } else if (payload.eventType === 'DELETE') {
+            const old = payload.old as { id: string };
+            if (old?.id) setMessages(prev => prev.filter(m => m.id !== old.id));
           }
         }
       ).subscribe();
@@ -86,11 +98,28 @@ export const DirectMessages = () => {
     } as any);
   };
 
+  const handleEdit = async (id: string, newContent: string) => {
+    await supabase.from('direct_messages').update({ content: newContent } as any).eq('id', id);
+    setMessages(prev => prev.map(m => m.id === id ? { ...m, content: newContent } : m));
+  };
+
+  const handleDelete = async (id: string) => {
+    await supabase.from('direct_messages').delete().eq('id', id);
+    setMessages(prev => prev.filter(m => m.id !== id));
+    toast.success("Xabar o'chirildi");
+  };
+
   const startChat = (profile: Profile) => {
     setActiveContact(profile);
     if (!contacts.find(c => c.user_id === profile.user_id)) {
       setContacts(prev => [profile, ...prev]);
     }
+  };
+
+  const handleStartCall = (contact: Profile) => {
+    const name = contact.username ? `@${contact.username}` : contact.full_name || 'Foydalanuvchi';
+    // Set the caller name on the webrtc hook before starting
+    webrtc.startCall(contact.user_id);
   };
 
   const filteredUsers = search.trim() ? allUsers.filter(u => {
@@ -144,50 +173,40 @@ export const DirectMessages = () => {
   }
 
   return (
-    <>
-      <div className="border border-border rounded-2xl overflow-hidden bg-card flex flex-col" style={{ height: 'calc(100vh - 220px)' }}>
-        <div className="px-4 py-3 border-b border-border flex items-center gap-3 bg-muted/30">
-          <button onClick={() => setActiveContact(null)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <User className="w-4 h-4 text-primary" />
-          </div>
-          <span className="font-semibold text-sm flex-1">{activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}</span>
-          <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => startCall(activeContact.user_id)} disabled={callState !== 'idle'}>
-            <Phone className="w-4 h-4" />
-          </Button>
+    <div className="border border-border rounded-2xl overflow-hidden bg-card flex flex-col" style={{ height: 'calc(100vh - 220px)' }}>
+      <div className="px-4 py-3 border-b border-border flex items-center gap-3 bg-muted/30">
+        <button onClick={() => setActiveContact(null)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+          <User className="w-4 h-4 text-primary" />
         </div>
-
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-3">
-            {messages.map(msg => (
-              <ChatMessageBubble
-                key={msg.id}
-                isMe={msg.sender_id === user?.id}
-                content={msg.content}
-                image_url={msg.image_url}
-                audio_url={msg.audio_url}
-                created_at={msg.created_at}
-              />
-            ))}
-            <div ref={scrollRef} />
-          </div>
-        </ScrollArea>
-
-        <ChatMediaInput onSend={handleSend} />
+        <span className="font-semibold text-sm flex-1">{activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}</span>
+        <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => handleStartCall(activeContact)} disabled={webrtc.callState !== 'idle'}>
+          <Phone className="w-4 h-4" />
+        </Button>
       </div>
 
-      {callState !== 'idle' && activeContact && (
-        <AudioCallDialog
-          contactName={activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}
-          callState={callState as any}
-          isMuted={isMuted}
-          duration={duration}
-          onToggleMute={toggleMute}
-          onEnd={() => endCall(activeContact.user_id)}
-        />
-      )}
-    </>
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-3">
+          {messages.map(msg => (
+            <ChatMessageBubble
+              key={msg.id}
+              id={msg.id}
+              isMe={msg.sender_id === user?.id}
+              content={msg.content}
+              image_url={msg.image_url}
+              audio_url={msg.audio_url}
+              created_at={msg.created_at}
+              onEdit={msg.sender_id === user?.id ? handleEdit : undefined}
+              onDelete={msg.sender_id === user?.id ? handleDelete : undefined}
+            />
+          ))}
+          <div ref={scrollRef} />
+        </div>
+      </ScrollArea>
+
+      <ChatMediaInput onSend={handleSend} />
+    </div>
   );
 };

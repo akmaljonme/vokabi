@@ -75,6 +75,11 @@ export const useWebRTC = (userId: string | undefined) => {
       localStreamRef.current = stream;
       currentCalleeRef.current = calleeId;
       
+      // Fetch callee name for display
+      const { data: profile } = await supabase.from('profiles').select('full_name, username').eq('user_id', calleeId).single();
+      setRemoteCallerName(profile?.username ? `@${profile.username}` : profile?.full_name || 'Foydalanuvchi');
+      setRemoteCallerId(calleeId);
+      
       setCallState('calling');
       await sendSignal(calleeId, 'call-invite');
     } catch {

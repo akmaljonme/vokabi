@@ -6,6 +6,7 @@ import { ArrowLeft, Hash } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ChatMediaInput } from './ChatMediaInput';
 import { ChatMessageBubble } from './ChatMessageBubble';
+import { toast } from 'sonner';
 
 interface Room { id: string; name: string; description: string | null; level: string; }
 interface Message { id: string; room_id: string; user_id: string; content: string; created_at: string; image_url?: string | null; audio_url?: string | null; }
@@ -33,11 +34,19 @@ export const ChatRooms = () => {
       });
 
     const channel = supabase.channel(`room-${activeRoom.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${activeRoom.id}` },
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${activeRoom.id}` },
         (payload) => {
-          const msg = payload.new as Message;
-          setMessages(prev => [...prev, msg]);
-          loadProfiles([msg.user_id]);
+          if (payload.eventType === 'INSERT') {
+            const msg = payload.new as Message;
+            setMessages(prev => [...prev, msg]);
+            loadProfiles([msg.user_id]);
+          } else if (payload.eventType === 'UPDATE') {
+            const msg = payload.new as Message;
+            setMessages(prev => prev.map(m => m.id === msg.id ? msg : m));
+          } else if (payload.eventType === 'DELETE') {
+            const old = payload.old as { id: string };
+            if (old?.id) setMessages(prev => prev.filter(m => m.id !== old.id));
+          }
         }
       ).subscribe();
 
@@ -70,6 +79,17 @@ export const ChatRooms = () => {
       ...(data.image_url && { image_url: data.image_url }),
       ...(data.audio_url && { audio_url: data.audio_url }),
     } as any);
+  };
+
+  const handleEdit = async (id: string, newContent: string) => {
+    await supabase.from('chat_messages').update({ content: newContent } as any).eq('id', id);
+    setMessages(prev => prev.map(m => m.id === id ? { ...m, content: newContent } : m));
+  };
+
+  const handleDelete = async (id: string) => {
+    await supabase.from('chat_messages').delete().eq('id', id);
+    setMessages(prev => prev.filter(m => m.id !== id));
+    toast.success("Xabar o'chirildi");
   };
 
   if (!activeRoom) {
@@ -107,12 +127,15 @@ export const ChatRooms = () => {
           {messages.map(msg => (
             <ChatMessageBubble
               key={msg.id}
+              id={msg.id}
               isMe={msg.user_id === user?.id}
               content={msg.content}
               image_url={msg.image_url}
               audio_url={msg.audio_url}
               created_at={msg.created_at}
               senderName={msg.user_id !== user?.id ? profiles[msg.user_id] : undefined}
+              onEdit={msg.user_id === user?.id ? handleEdit : undefined}
+              onDelete={msg.user_id === user?.id ? handleDelete : undefined}
             />
           ))}
           <div ref={scrollRef} />
