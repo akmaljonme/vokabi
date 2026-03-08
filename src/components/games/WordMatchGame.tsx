@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { useAIGameQuestions } from '@/hooks/useAIGameQuestions';
+import { Loader2 } from 'lucide-react';
 
 interface Props { onBack: () => void; }
 
@@ -17,6 +19,7 @@ export const WordMatchGame = ({ onBack }: Props) => {
   const [moves, setMoves] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [timer, setTimer] = useState(0);
+  const ai = useAIGameQuestions<{ en: string; uz: string }>('word_match');
 
   useEffect(() => {
     if (!level || gameOver) return;
@@ -24,15 +27,24 @@ export const WordMatchGame = ({ onBack }: Props) => {
     return () => clearInterval(interval);
   }, [level, gameOver]);
 
-  const startGame = (lvl: string) => {
-    setLevel(lvl);
-    const pairs = wordPairs[lvl]?.slice(0, 6) || [];
-    const allCards = pairs.flatMap((p, i) => [
+  const buildCards = (pairs: { en: string; uz: string }[]) => {
+    const allCards = pairs.slice(0, 6).flatMap((p, i) => [
       { id: i * 2, text: p.en, pairId: i, matched: false, selected: false },
       { id: i * 2 + 1, text: p.uz, pairId: i, matched: false, selected: false },
     ]);
     setCards(allCards.sort(() => Math.random() - 0.5));
     setMatches(0); setMoves(0); setTimer(0); setGameOver(false); setSelected([]);
+  };
+
+  const startGame = async (lvl: string) => {
+    setLevel(lvl);
+    // Try AI first, fallback to static
+    const aiPairs = await ai.generate(lvl);
+    if (aiPairs && aiPairs.length >= 6) {
+      buildCards(aiPairs);
+    } else {
+      buildCards(wordPairs[lvl]?.slice(0, 6) || []);
+    }
   };
 
   const handleSelect = useCallback((id: number) => {

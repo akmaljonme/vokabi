@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { flashcards } from '@/data/gameData';
+import { flashcards, FlashCard } from '@/data/gameData';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCcw, Loader2 } from 'lucide-react';
+import { useAIGameQuestions } from '@/hooks/useAIGameQuestions';
 
 interface Props { onBack: () => void; }
 
@@ -11,8 +12,39 @@ export const FlashcardsGame = ({ onBack }: Props) => {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [known, setKnown] = useState<Set<number>>(new Set());
+  const [aiCards, setAiCards] = useState<FlashCard[]>([]);
+  const ai = useAIGameQuestions<FlashCard>('flashcards');
 
-  const cards = level ? flashcards[level] || [] : [];
+  const cards = aiCards.length > 0 ? aiCards : (level ? flashcards[level] || [] : []);
+
+  const startLevel = async (l: string) => {
+    setLevel(l);
+    setCurrentIdx(0);
+    setKnown(new Set());
+    setIsFlipped(false);
+    const generated = await ai.generate(l);
+    if (generated && generated.length >= 3) {
+      setAiCards(generated);
+    } else {
+      setAiCards([]);
+    }
+  };
+
+  if (!level) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-md mx-auto text-center">
+        <h2 className="text-2xl font-bold mb-6">🃏 Flashcards</h2>
+        <p className="text-muted-foreground mb-6">Daraja tanlang:</p>
+        <div className="grid grid-cols-2 gap-3">
+          {Object.keys(flashcards).map(l => (
+            <Button key={l} variant="outline" size="lg" onClick={() => startLevel(l)} disabled={ai.loading} className="text-lg">
+              {ai.loading ? <Loader2 className="w-4 h-4 animate-spin" /> : l}
+            </Button>
+          ))}
+        </div>
+      </motion.div>
+    );
+  }
 
   if (!level) {
     return (

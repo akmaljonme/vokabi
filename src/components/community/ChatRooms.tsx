@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Hash, X, Forward, Search, User, Plus, Trash2, Pencil } from 'lucide-react';
+import { ArrowLeft, Hash, X, Forward, Search, User, Plus, Trash2, Pencil, Users, Circle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { ChatMediaInput } from './ChatMediaInput';
@@ -30,6 +30,8 @@ export const ChatRooms = () => {
   const [forwardSearch, setForwardSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [onlineUsers, setOnlineUsers] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [showOnline, setShowOnline] = useState(false);
   const [showRoomDialog, setShowRoomDialog] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
   const [roomForm, setRoomForm] = useState({ name: '', description: '', level: 'general' });
@@ -105,6 +107,33 @@ export const ChatRooms = () => {
       ).subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [activeRoom]);
+
+  // Presence: track online users in room
+  useEffect(() => {
+    if (!activeRoom || !user) { setOnlineUsers([]); return; }
+
+    const presenceChannel = supabase.channel(`presence-room-${activeRoom.id}`, {
+      config: { presence: { key: user.id } },
+    });
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        const users = Object.values(state).flat().map((p: any) => ({
+          user_id: p.user_id,
+          full_name: p.full_name || 'Foydalanuvchi',
+        }));
+        setOnlineUsers(users);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', user.id).single();
+          await presenceChannel.track({ user_id: user.id, full_name: profile?.full_name || 'Foydalanuvchi' });
+        }
+      });
+
+    return () => { supabase.removeChannel(presenceChannel); };
+  }, [activeRoom, user]);
 
   useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
@@ -271,8 +300,24 @@ export const ChatRooms = () => {
       <div className="px-4 py-3 border-b border-border flex items-center gap-3 bg-muted/30">
         <button onClick={() => setActiveRoom(null)} className="p-1.5 rounded-lg hover:bg-muted transition-colors"><ArrowLeft className="w-4 h-4" /></button>
         <Hash className="w-4 h-4 text-primary" />
-        <span className="font-semibold text-sm">{activeRoom.name}</span>
+        <span className="font-semibold text-sm flex-1">{activeRoom.name}</span>
+        <button onClick={() => setShowOnline(!showOnline)} className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-muted transition-colors text-xs text-muted-foreground">
+          <Circle className="w-2.5 h-2.5 fill-green-500 text-green-500" />
+          {onlineUsers.length} onlayn
+        </button>
       </div>
+
+      {/* Online users panel */}
+      {showOnline && onlineUsers.length > 0 && (
+        <div className="px-4 py-2 border-b border-border bg-muted/20 flex flex-wrap gap-2">
+          {onlineUsers.map(u => (
+            <span key={u.user_id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-background border border-border text-xs">
+              <Circle className="w-2 h-2 fill-green-500 text-green-500" />
+              {u.full_name}
+            </span>
+          ))}
+        </div>
+      )}
 
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3">

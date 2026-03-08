@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { useAIGameQuestions } from '@/hooks/useAIGameQuestions';
 
 interface Props { onBack: () => void; }
 
@@ -14,37 +15,19 @@ interface Sentence {
   translation: string;
 }
 
-const sentencesByLevel: Record<string, Sentence[]> = {
+const fallbackSentences: Record<string, Sentence[]> = {
   A1: [
     { words: ['I', 'am', 'a', 'student'], correct: 'I am a student', translation: "Men talabaman" },
     { words: ['She', 'likes', 'reading', 'books'], correct: 'She likes reading books', translation: "U kitob o'qishni yaxshi ko'radi" },
     { words: ['We', 'go', 'to', 'school', 'every', 'day'], correct: 'We go to school every day', translation: "Biz har kuni maktabga boramiz" },
     { words: ['My', 'name', 'is', 'Ali'], correct: 'My name is Ali', translation: "Mening ismim Ali" },
     { words: ['The', 'cat', 'is', 'on', 'the', 'table'], correct: 'The cat is on the table', translation: "Mushuk stol ustida" },
-    { words: ['Do', 'you', 'like', 'pizza'], correct: 'Do you like pizza', translation: "Siz pitsa yoqtirasizmi" },
-    { words: ['He', 'has', 'two', 'brothers'], correct: 'He has two brothers', translation: "Uning ikki akasi bor" },
-    { words: ['They', 'are', 'playing', 'football'], correct: 'They are playing football', translation: "Ular futbol o'ynayapti" },
-  ],
-  A2: [
-    { words: ['I', 'have', 'been', 'waiting', 'for', 'you'], correct: 'I have been waiting for you', translation: "Men sizni kutib turuvdim" },
-    { words: ['She', 'usually', 'goes', 'shopping', 'on', 'weekends'], correct: 'She usually goes shopping on weekends', translation: "U odatda dam olish kunlari xarid qiladi" },
-    { words: ['Could', 'you', 'please', 'help', 'me'], correct: 'Could you please help me', translation: "Iltimos, menga yordam bera olasizmi" },
-    { words: ['The', 'weather', 'is', 'getting', 'colder'], correct: 'The weather is getting colder', translation: "Ob-havo sovuqlashmoqda" },
-    { words: ['I', 'would', 'like', 'a', 'cup', 'of', 'tea'], correct: 'I would like a cup of tea', translation: "Men bir piyola choy ichmoqchiman" },
-    { words: ['He', 'finished', 'his', 'homework', 'yesterday'], correct: 'He finished his homework yesterday', translation: "U kecha vazifasini tugatdi" },
   ],
   B1: [
     { words: ['If', 'I', 'had', 'money', 'I', 'would', 'travel'], correct: 'If I had money I would travel', translation: "Agar pulim bo'lganida sayohat qilardim" },
     { words: ['The', 'book', 'which', 'I', 'read', 'was', 'interesting'], correct: 'The book which I read was interesting', translation: "Men o'qigan kitob qiziqarli edi" },
     { words: ['She', 'has', 'been', 'studying', 'English', 'for', 'three', 'years'], correct: 'She has been studying English for three years', translation: "U uch yildan beri ingliz tili o'qiyapti" },
-    { words: ['Not', 'only', 'is', 'he', 'smart', 'but', 'also', 'hardworking'], correct: 'Not only is he smart but also hardworking', translation: "U nafaqat aqlli balki mehnatkash ham" },
     { words: ['The', 'more', 'you', 'practice', 'the', 'better', 'you', 'get'], correct: 'The more you practice the better you get', translation: "Qancha ko'p mashq qilsangiz shuncha yaxshi bo'ladi" },
-  ],
-  B2: [
-    { words: ['Had', 'I', 'known', 'earlier', 'I', 'would', 'have', 'acted', 'differently'], correct: 'Had I known earlier I would have acted differently', translation: "Oldinroq bilganimda boshqacha qilgan bo'lardim" },
-    { words: ['It', 'is', 'essential', 'that', 'everyone', 'contributes', 'to', 'the', 'discussion'], correct: 'It is essential that everyone contributes to the discussion', translation: "Hamma muhokamada ishtirok etishi muhim" },
-    { words: ['Despite', 'the', 'challenges', 'she', 'managed', 'to', 'succeed'], correct: 'Despite the challenges she managed to succeed', translation: "Qiyinchiliklarga qaramay u muvaffaqiyatga erishdi" },
-    { words: ['The', 'research', 'suggests', 'that', 'climate', 'change', 'is', 'accelerating'], correct: 'The research suggests that climate change is accelerating', translation: "Tadqiqot iqlim o'zgarishi tezlashayotganini ko'rsatmoqda" },
   ],
 };
 
@@ -58,10 +41,17 @@ export const SentenceBuilderGame = ({ onBack }: Props) => {
   const [checked, setChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [sentences, setSentences] = useState<Sentence[]>([]);
+  const ai = useAIGameQuestions<Sentence>('sentence_builder');
 
-  const startGame = (lvl: string) => {
+  const startGame = async (lvl: string) => {
     setLevel(lvl);
-    const s = [...(sentencesByLevel[lvl] || sentencesByLevel.A1)].sort(() => Math.random() - 0.5).slice(0, 5);
+    const aiSentences = await ai.generate(lvl);
+    let s: Sentence[];
+    if (aiSentences && aiSentences.length >= 3) {
+      s = aiSentences.slice(0, 5);
+    } else {
+      s = [...(fallbackSentences[lvl] || fallbackSentences.A1)].sort(() => Math.random() - 0.5).slice(0, 5);
+    }
     setSentences(s);
     setRound(0);
     setScore(0);
@@ -123,7 +113,7 @@ export const SentenceBuilderGame = ({ onBack }: Props) => {
           <p className="text-muted-foreground">So'zlarni to'g'ri tartibga qo'yib gap yasang!</p>
         </div>
         <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-          {Object.keys(sentencesByLevel).map(lvl => (
+          {['A1', 'A2', 'B1', 'B2'].map(lvl => (
             <Button key={lvl} variant="outline" className="h-16 text-lg font-bold" onClick={() => startGame(lvl)}>{lvl}</Button>
           ))}
         </div>
