@@ -141,11 +141,11 @@ export const ChatRooms = () => {
   const loadProfiles = async (userIds: string[]) => {
     const newIds = userIds.filter(id => !profiles[id]);
     if (newIds.length === 0) return;
-    const { data } = await supabase.from('profiles').select('user_id, full_name').in('user_id', newIds);
+    const { data } = await (supabase.from('profiles') as any).select('user_id, full_name, username').in('user_id', newIds);
     if (data) {
       setProfiles(prev => {
         const updated = { ...prev };
-        data.forEach(p => { updated[p.user_id] = p.full_name || 'Foydalanuvchi'; });
+        data.forEach((p: any) => { updated[p.user_id] = p.username ? `@${p.username}` : p.full_name || 'Foydalanuvchi'; });
         return updated;
       });
     }
