@@ -259,6 +259,7 @@ export const useWebRTC = (userId: string | undefined) => {
               const pc = createPeerConnection(remoteId);
               localStreamRef.current.getTracks().forEach(t => pc.addTrack(t, localStreamRef.current!));
             }
+            if (timerRef.current) clearInterval(timerRef.current);
             timerRef.current = setInterval(() => setDuration(d => d + 1), 1000);
             break;
           }
