@@ -83,7 +83,18 @@ export default function ProfileSettings() {
     if (!user) return;
     setIsSaving(true);
     try {
-      const { error } = await supabase.from('profiles').update({ full_name: profile.full_name, email_notifications: profile.email_notifications, test_reminders: profile.test_reminders, progress_updates: profile.progress_updates, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+      // Validate username
+      const uname = profile.username?.trim().toLowerCase() || null;
+      if (uname) {
+        if (uname.length < 3) { setUsernameError('Username kamida 3 ta belgi bo\'lishi kerak'); setIsSaving(false); return; }
+        if (uname.length > 30) { setUsernameError('Username 30 ta belgidan oshmasligi kerak'); setIsSaving(false); return; }
+        if (!/^[a-z0-9_]+$/.test(uname)) { setUsernameError('Faqat kichik harflar, raqamlar va _ ishlatiladi'); setIsSaving(false); return; }
+        // Check uniqueness
+        const { data: existing } = await supabase.from('profiles').select('user_id').eq('username' as any, uname).neq('user_id', user.id).maybeSingle();
+        if (existing) { setUsernameError('Bu username allaqachon band'); setIsSaving(false); return; }
+      }
+      setUsernameError('');
+      const { error } = await supabase.from('profiles').update({ full_name: profile.full_name, username: uname, email_notifications: profile.email_notifications, test_reminders: profile.test_reminders, progress_updates: profile.progress_updates, updated_at: new Date().toISOString() } as any).eq('user_id', user.id);
       if (error) throw error;
       toast.success('Profil saqlandi');
     } catch (error) { console.error('Error:', error); toast.error('Saqlashda xatolik'); } finally { setIsSaving(false); }
