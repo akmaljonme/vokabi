@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { ChevronDown, Menu, X, LogOut, User, Shield, Moon, Sun, Sparkles, Gamepad2, Users } from 'lucide-react';
+import { ChevronDown, Menu, X, LogOut, User, Shield, Moon, Sun, Sparkles, Gamepad2, Users, MessageCircle, Phone } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUnreadDMCount } from '@/hooks/useUnreadDMCount';
+import { useCall } from '@/contexts/CallContext';
 import { Badge } from '@/components/ui/badge';
 
 interface HeaderProps {
@@ -19,6 +20,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const unreadCount = useUnreadDMCount();
+  const call = useCall();
 
   const toggleTheme = () => {
     const next = !isDark;
@@ -178,9 +180,35 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="lg:hidden p-2 rounded-xl hover:bg-muted transition-colors" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="lg:hidden flex items-center gap-1">
+            {user && (
+              <>
+                {/* Mobile DM badge */}
+                <button
+                  onClick={() => navigate('/community')}
+                  className="relative p-2 rounded-xl hover:bg-muted transition-colors"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+                {/* Mobile call indicator */}
+                {(call.callState === 'ringing' || call.callState === 'calling' || call.callState === 'connected') && (
+                  <button
+                    className="relative p-2 rounded-xl hover:bg-muted transition-colors"
+                  >
+                    <Phone className="w-5 h-5 text-green-500 animate-pulse" />
+                  </button>
+                )}
+              </>
+            )}
+            <button className="p-2 rounded-xl hover:bg-muted transition-colors" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </div>
 
