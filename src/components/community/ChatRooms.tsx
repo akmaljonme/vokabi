@@ -108,6 +108,33 @@ export const ChatRooms = () => {
     return () => { supabase.removeChannel(channel); };
   }, [activeRoom]);
 
+  // Presence: track online users in room
+  useEffect(() => {
+    if (!activeRoom || !user) { setOnlineUsers([]); return; }
+
+    const presenceChannel = supabase.channel(`presence-room-${activeRoom.id}`, {
+      config: { presence: { key: user.id } },
+    });
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        const users = Object.values(state).flat().map((p: any) => ({
+          user_id: p.user_id,
+          full_name: p.full_name || 'Foydalanuvchi',
+        }));
+        setOnlineUsers(users);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', user.id).single();
+          await presenceChannel.track({ user_id: user.id, full_name: profile?.full_name || 'Foydalanuvchi' });
+        }
+      });
+
+    return () => { supabase.removeChannel(presenceChannel); };
+  }, [activeRoom, user]);
+
   useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   const loadProfiles = async (userIds: string[]) => {
