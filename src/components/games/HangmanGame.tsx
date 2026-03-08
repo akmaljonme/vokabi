@@ -141,7 +141,11 @@ export const HangmanGame = ({ onBack }: Props) => {
       toast({ title: `O'yin tugadi! Ball: ${score}` });
       setLevel(null);
     } else {
-      nextWord(level!, next);
+      if (aiWordList.length > 0) {
+        nextWordFromList(aiWordList, next);
+      } else {
+        nextWord(level!, next);
+      }
     }
   };
 
