@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, Menu, X, LogOut, User, Shield, Moon, Sun, Sparkles, Gamepad2, Users, MessageCircle, Phone } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUnreadDMCount } from '@/hooks/useUnreadDMCount';
 import { useCall } from '@/contexts/CallContext';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
   onNavigate: (view: 'landing' | 'levels') => void;
