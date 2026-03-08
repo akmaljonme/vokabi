@@ -54,6 +54,30 @@ export interface UserAnswer {
   answer: string | string[];
 }
 
+export interface AIWritingResult {
+  overallBand: number;
+  criteria: {
+    taskAchievement: { score: number; feedback: string };
+    coherenceAndCohesion: { score: number; feedback: string };
+    lexicalResource: { score: number; feedback: string };
+    grammaticalRange: { score: number; feedback: string };
+  };
+  overallFeedback: string;
+  correctedEssay: string;
+}
+
+export interface AISpeakingResult {
+  overallBand: number;
+  criteria: {
+    fluencyAndCoherence: { score: number; feedback: string };
+    lexicalResource: { score: number; feedback: string };
+    grammaticalRange: { score: number; feedback: string };
+    pronunciation: { score: number; feedback: string };
+  };
+  overallFeedback: string;
+  suggestedResponse: string;
+}
+
 export interface TestResult {
   mockId: number;
   level: CEFRLevel;
@@ -71,6 +95,7 @@ export interface TestResult {
   }[];
   timeTaken: number;
   mockTest?: MockTest;
+  aiResult?: AIWritingResult | AISpeakingResult;
 }
 
 export type ViewType = 'landing' | 'levels' | 'skills' | 'vocabulary' | 'test' | 'result';
