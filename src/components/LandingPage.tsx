@@ -1,404 +1,413 @@
-import { ArrowRight, BookOpen, Headphones, Award, Users, CheckCircle2, Star, ChevronDown, Zap, Globe, TrendingUp, Shield } from 'lucide-react';
+import { ArrowRight, BookOpen, Headphones, Award, Users, CheckCircle2, Star, ChevronDown, Zap, Globe, TrendingUp, Shield, Play, Sparkles } from 'lucide-react';
 import { levels } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
 
 interface LandingPageProps {
   onStartTest: () => void;
   onGoToVocabulary?: () => void;
 }
 
+const FadeUp = ({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-60px' });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 32 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
 export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleStartTest = () => {
-    if (user) {
-      onStartTest();
-    } else {
-      navigate('/auth');
-    }
+    if (user) onStartTest();
+    else navigate('/auth');
   };
 
   return (
-    <div className="animate-fade-in">
+    <div>
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-background to-muted/50">
-        {/* Background Elements */}
-        <div className="absolute inset-0 dot-pattern opacity-50" />
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-level-a2/5 rounded-full blur-3xl" />
+      <section className="relative min-h-[92vh] flex items-center overflow-hidden">
+        {/* Ambient background */}
+        <div className="absolute inset-0 mesh-gradient" />
+        <div className="absolute inset-0 dot-pattern opacity-30" />
         
+        {/* Animated gradient orbs */}
+        <motion.div
+          className="absolute top-1/4 -left-32 w-[500px] h-[500px] rounded-full opacity-[0.07]"
+          style={{ background: 'radial-gradient(circle, hsl(var(--primary)), transparent 70%)' }}
+          animate={{ x: [0, 40, 0], y: [0, -30, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute bottom-1/4 -right-32 w-[600px] h-[600px] rounded-full opacity-[0.05]"
+          style={{ background: 'radial-gradient(circle, hsl(270 60% 55%), transparent 70%)' }}
+          animate={{ x: [0, -40, 0], y: [0, 30, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+        />
+
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left Content */}
             <div className="text-left">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6 animate-slide-up">
-                <Star className="w-4 h-4 fill-primary" />
-                <span className="font-medium text-sm">5+ foydalanuvchi ishonchini qozongan</span>
-              </div>
-              
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-6 leading-tight animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                Ingliz Tilini Mukammal
-                <br />
-                <span className="text-gradient">O'rganing va Sinang</span>
-              </h1>
-              
-              <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                Lug'at, grammatika, reading va listening testlari bilan bilimingizni sinang. 
-                Natijalaringizni kuzating va CEFR sertifikatingizga tayyorlaning.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-start gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-                <button
-                  onClick={handleStartTest}
-                  className="btn-primary flex items-center gap-2 text-lg px-8 py-4">
-                   {user ? 'Testni Boshlash' : 'Bepul Test Boshlash'}
-                   <ArrowRight className="w-5 h-5" />
-                </button>
-                {onGoToVocabulary && (
-                  <button
-                    onClick={() => user ? onGoToVocabulary() : navigate('/auth')}
-                    className="btn-outline flex items-center gap-2 text-lg px-8 py-4"
-                  >
-                    📚 Lug'at Testlari
-                  </button>
-                )}
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="premium-badge mb-8"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>5+ foydalanuvchi ishonchini qozongan</span>
+              </motion.div>
 
-              <div className="flex items-center gap-6 mt-8 animate-slide-up" style={{ animationDelay: '0.4s' }}>
-                <div className="flex items-center gap-2">
-                   <CheckCircle2 className="w-5 h-5 text-level-a1" />
-                   <span className="text-muted-foreground">Kredit karta shart emas</span>
-                 </div>
-                 <div className="flex items-center gap-2">
-                   <CheckCircle2 className="w-5 h-5 text-level-a1" />
-                   <span className="text-muted-foreground">Tezkor natijalar</span>
-                </div>
-              </div>
+              <motion.h1
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="text-4xl md:text-5xl lg:text-[3.5rem] xl:text-6xl font-display font-bold mb-6 leading-[1.1] tracking-tight"
+              >
+                Ingliz Tilini
+                <br />
+                Mukammal{' '}
+                <span className="text-gradient">O'rganing</span>
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="text-lg text-muted-foreground mb-10 max-w-lg leading-relaxed"
+              >
+                Lug'at, grammatika, reading va listening testlari bilan bilimingizni sinang.
+                CEFR sertifikatingizga professional tayyorlaning.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-col sm:flex-row items-start gap-3"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleStartTest}
+                  className="btn-primary flex items-center gap-2.5 text-base px-7 py-3.5 shadow-glow"
+                >
+                  {user ? 'Testni Boshlash' : 'Bepul Boshlash'}
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+                {onGoToVocabulary && (
+                  <motion.button
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => user ? onGoToVocabulary() : navigate('/auth')}
+                    className="btn-outline flex items-center gap-2.5 text-base px-7 py-3.5"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    Lug'at Testlari
+                  </motion.button>
+                )}
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+                className="flex items-center gap-6 mt-8"
+              >
+                {['Kredit karta shart emas', 'Tezkor natijalar'].map((text) => (
+                  <div key={text} className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-level-a1" />
+                    <span className="text-sm text-muted-foreground">{text}</span>
+                  </div>
+                ))}
+              </motion.div>
             </div>
 
-            {/* Right Content - Stats Cards */}
-            <div className="hidden lg:grid grid-cols-2 gap-4">
-              {[
-              { icon: BookOpen, value: '500+', label: 'Testlar', color: 'from-emerald-400 to-teal-500' },
-              { icon: Users, value: '50K+', label: 'Foydalanuvchilar', color: 'from-blue-400 to-indigo-500' },
-              { icon: Award, value: '95%', label: "Muvaffaqiyat", color: 'from-amber-400 to-orange-500' },
-              { icon: Globe, value: '4', label: 'Test Turi', color: 'from-primary to-red-600' }].
-              map((stat, index) =>
-              <div
-                key={index}
-                className="card-elevated p-6 animate-slide-up"
-                style={{ animationDelay: `${0.3 + index * 0.1}s` }}>
-
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4`}>
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="text-3xl font-display font-bold mb-1">{stat.value}</div>
-                  <div className="text-muted-foreground text-sm">{stat.label}</div>
-                </div>
-              )}
+            {/* Right Content - Premium Stats */}
+            <div className="hidden lg:block">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { icon: BookOpen, value: '500+', label: 'Testlar', gradient: 'from-emerald-500 to-teal-600' },
+                  { icon: Users, value: '50K+', label: 'Foydalanuvchilar', gradient: 'from-blue-500 to-indigo-600' },
+                  { icon: Award, value: '95%', label: 'Muvaffaqiyat', gradient: 'from-amber-500 to-orange-600' },
+                  { icon: Globe, value: '4', label: 'Test Turi', gradient: 'from-primary to-pink-600' },
+                ].map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 32 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                    whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                    className="card-elevated p-6 group"
+                  >
+                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                      <stat.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="text-3xl font-display font-bold mb-0.5 tracking-tight">{stat.value}</div>
+                    <div className="text-muted-foreground text-sm">{stat.label}</div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        <a href="#features" className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <ChevronDown className="w-8 h-8 text-muted-foreground" />
-        </a>
+        <motion.a
+          href="#features"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <ChevronDown className="w-6 h-6 text-muted-foreground/50" />
+        </motion.a>
       </section>
 
       {/* Trust Badges */}
-      <section className="py-12 border-b border-border">
+      <section className="py-10 border-b border-border/50">
         <div className="container mx-auto px-4">
-          <p className="text-center text-muted-foreground mb-8">Xalqaro til standartlariga mos</p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-60">
-            {['IELTS', 'TOEFL', 'Cambridge', 'Goethe', 'DELF'].map((brand) =>
-            <div key={brand} className="text-2xl font-display font-bold text-muted-foreground/50">
+          <p className="text-center text-xs uppercase tracking-[0.2em] text-muted-foreground/60 mb-6 font-medium">
+            Xalqaro til standartlariga mos
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-10 md:gap-16">
+            {['IELTS', 'TOEFL', 'Cambridge', 'Goethe', 'DELF'].map((brand) => (
+              <span key={brand} className="text-xl font-display font-bold text-muted-foreground/30 tracking-tight">
                 {brand}
-              </div>
-            )}
+              </span>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 lg:py-32">
+      <section id="features" className="py-24 lg:py-32">
         <div className="container mx-auto px-4">
-           <div className="text-center mb-16">
-             <span className="inline-block text-primary font-semibold mb-4">IMKONIYATLAR</span>
-             <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-4">
-               Muvaffaqiyat Uchun <span className="text-gradient">Barcha Kerakli</span> Vositalar
-             </h2>
-             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-               Ingliz tilini o'rganish va CEFR sertifikatiga tayyorgarlik ko'rish uchun to'liq vositalar
-             </p>
-           </div>
+          <FadeUp className="text-center mb-16">
+            <span className="premium-badge mb-4 inline-flex">IMKONIYATLAR</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-5 tracking-tight">
+              Muvaffaqiyat Uchun{' '}
+              <span className="text-gradient">Barcha Vositalar</span>
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              CEFR sertifikatiga tayyorgarlik ko'rish uchun to'liq vositalar to'plami
+            </p>
+          </FadeUp>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-             {[
-            {
-              icon: BookOpen,
-              title: "Lug'at Testlari",
-              description: "So'z boyligingizni sinab ko'ring. Har bir daraja uchun maxsus tayyorlangan so'z testlari bilan leksik bilimingizni oshiring.",
-              color: 'bg-emerald-500'
-            },
-            {
-              icon: Zap,
-              title: 'Grammatika Testlari',
-              description: "Grammatik qoidalarni mustahkamlang. Gap tuzilishi, fe'l zamonlari va boshqa mavzular bo'yicha testlar.",
-              color: 'bg-purple-500'
-            },
-            {
-              icon: BookOpen,
-              title: 'Reading Testlari',
-              description: "Haqiqiy CEFR formatidagi o'qish testlari. Matnlarni tahlil qilish va tushunish qobiliyatingizni sinang.",
-              color: 'bg-blue-500'
-            },
-            {
-              icon: Headphones,
-              title: 'Listening Testlari',
-              description: "Audio materiallar bilan tinglash qobiliyatingizni rivojlantiring. Real hayotiy vaziyatlarga asoslangan testlar.",
-              color: 'bg-amber-500'
-            },
-            {
-              icon: TrendingUp,
-              title: "Natijalar Tahlili",
-              description: "Har bir test bo'yicha batafsil natijalar va kamchiliklaringizni aniqlash imkoniyati.",
-              color: 'bg-pink-500'
-            },
-            {
-              icon: Shield,
-              title: 'Ekspert Kontent',
-              description: "Barcha testlar sertifikatlangan CEFR o'qituvchilari tomonidan tayyorlangan.",
-              color: 'bg-primary'
-            }].
-            map((feature, index) =>
-            <div key={index} className="card-elevated group p-8">
-                <div className={`w-14 h-14 rounded-2xl ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                  <feature.icon className="w-7 h-7 text-white" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              { icon: BookOpen, title: "Lug'at Testlari", description: "So'z boyligingizni sinab ko'ring. Har bir daraja uchun maxsus tayyorlangan testlar.", gradient: 'from-emerald-500 to-teal-600' },
+              { icon: Zap, title: 'Grammatika Testlari', description: "Grammatik qoidalarni mustahkamlang. Fe'l zamonlari va gap tuzilishi bo'yicha testlar.", gradient: 'from-violet-500 to-purple-600' },
+              { icon: BookOpen, title: 'Reading Testlari', description: "CEFR formatidagi o'qish testlari. Matnlarni tahlil qilish qobiliyatingizni sinang.", gradient: 'from-blue-500 to-indigo-600' },
+              { icon: Headphones, title: 'Listening Testlari', description: "Audio materiallar bilan tinglash qobiliyatingizni rivojlantiring.", gradient: 'from-amber-500 to-orange-600' },
+              { icon: TrendingUp, title: "Natijalar Tahlili", description: "Har bir test bo'yicha batafsil natijalar va kamchiliklarni aniqlash.", gradient: 'from-pink-500 to-rose-600' },
+              { icon: Shield, title: 'Ekspert Kontent', description: "Sertifikatlangan CEFR o'qituvchilari tomonidan tayyorlangan.", gradient: 'from-primary to-red-600' },
+            ].map((feature, index) => (
+              <FadeUp key={index} delay={index * 0.08}>
+                <div className="card-elevated group p-7 h-full">
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
+                    <feature.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-display font-semibold mb-2 tracking-tight">{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
                 </div>
-                <h3 className="text-xl font-display font-semibold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
-              </div>
-            )}
+              </FadeUp>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Levels Section */}
-      <section id="levels" className="py-20 lg:py-32 bg-gradient-to-b from-muted/50 to-background">
-        <div className="container mx-auto px-4">
-           <div className="text-center mb-16">
-             <span className="inline-block text-primary font-semibold mb-4">CEFR DARAJALAR</span>
-             <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-4">
-               O'z <span className="text-gradient">Darajangizni</span> Tanlang
-             </h2>
-             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-               Boshlang'ichdan ilg'orgacha — har bir daraja uchun maxsus testlar mavjud
-             </p>
-           </div>
+      <section id="levels" className="py-24 lg:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 mesh-gradient opacity-50" />
+        <div className="container mx-auto px-4 relative">
+          <FadeUp className="text-center mb-16">
+            <span className="premium-badge mb-4 inline-flex">CEFR DARAJALAR</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-5 tracking-tight">
+              O'z <span className="text-gradient">Darajangizni</span> Tanlang
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Boshlang'ichdan ilg'orgacha — har bir daraja uchun maxsus testlar
+            </p>
+          </FadeUp>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
             {levels.map((level, index) => {
-              const colors: Record<string, string> = {
+              const gradients: Record<string, string> = {
                 A1: 'from-emerald-400 to-emerald-600',
                 A2: 'from-teal-400 to-teal-600',
                 B1: 'from-amber-400 to-amber-600',
                 B2: 'from-orange-400 to-orange-600',
-                C1: 'from-red-400 to-red-600'
+                C1: 'from-red-400 to-red-600',
               };
-
               return (
-                <button
-                  key={level.level}
-                  onClick={handleStartTest}
-                  className="level-card text-center group"
-                  style={{ animationDelay: `${index * 0.1}s` }}>
-
-                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${colors[level.level]} text-white text-2xl font-display font-bold mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                    {level.level}
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{level.name}</h3>
-                  <p className="text-sm text-muted-foreground">{level.description}</p>
-                </button>);
-
+                <FadeUp key={level.level} delay={index * 0.08}>
+                  <motion.button
+                    whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                    onClick={handleStartTest}
+                    className="level-card text-center group w-full"
+                  >
+                    <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${gradients[level.level]} text-white text-xl font-display font-bold mb-3 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                      {level.level}
+                    </div>
+                    <h3 className="text-base font-semibold mb-1">{level.name}</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{level.description}</p>
+                  </motion.button>
+                </FadeUp>
+              );
             })}
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="py-20 lg:py-32">
+      <section className="py-24 lg:py-32">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-             <span className="inline-block text-primary font-semibold mb-4">QANDAY ISHLAYDI</span>
-             <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-4">
-               Uchta Oddiy <span className="text-gradient">Qadam</span>
-             </h2>
-           </div>
+          <FadeUp className="text-center mb-16">
+            <span className="premium-badge mb-4 inline-flex">QANDAY ISHLAYDI</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-5 tracking-tight">
+              Uchta Oddiy <span className="text-gradient">Qadam</span>
+            </h2>
+          </FadeUp>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
-            {
-              step: '01',
-              title: 'Darajangizni Tanlang',
-              description: "A1 dan C1 gacha o'z darajangizga mos testni tanlang",
-              icon: '🎯'
-            },
-            {
-              step: '02',
-              title: 'Testni Yeching',
-              description: "Lug'at, grammatika, reading yoki listening testini yeching",
-              icon: '📝'
-            },
-            {
-              step: '03',
-              title: "Natijani Ko'ring",
-              description: "Natijalaringizni tahlil qiling va kamchiliklaringiz ustida ishlang",
-              icon: '📈'
-            }].
-            map((item, index) =>
-            <div key={index} className="relative text-center p-8">
-                <div className="text-6xl mb-4">{item.icon}</div>
-                <div className="text-sm text-primary font-bold mb-2">STEP {item.step}</div>
-                <h3 className="text-xl font-display font-semibold mb-3">{item.title}</h3>
-                <p className="text-muted-foreground">{item.description}</p>
-                
-                {index < 2 &&
-              <ArrowRight className="hidden md:block absolute top-12 -right-4 w-8 h-8 text-primary/30" />
-              }
-              </div>
-            )}
+              { step: '01', title: 'Darajangizni Tanlang', description: "A1 dan C1 gacha o'z darajangizga mos testni tanlang", icon: '🎯' },
+              { step: '02', title: 'Testni Yeching', description: "Lug'at, grammatika, reading yoki listening testini yeching", icon: '📝' },
+              { step: '03', title: "Natijani Ko'ring", description: "Natijalaringizni tahlil qiling va kamchiliklaringiz ustida ishlang", icon: '📈' },
+            ].map((item, index) => (
+              <FadeUp key={index} delay={index * 0.1}>
+                <div className="relative text-center p-8 rounded-2xl bg-muted/30 border border-border/50">
+                  <div className="text-5xl mb-4">{item.icon}</div>
+                  <div className="text-xs text-primary font-bold mb-2 tracking-widest">STEP {item.step}</div>
+                  <h3 className="text-lg font-display font-semibold mb-2 tracking-tight">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm">{item.description}</p>
+                </div>
+              </FadeUp>
+            ))}
           </div>
 
-          <div className="text-center mt-12">
-             <button
+          <FadeUp delay={0.3} className="text-center mt-12">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={handleStartTest}
-              className="btn-primary inline-flex items-center gap-2 text-lg px-8 py-4">
-
-               Hozir Boshlang
-               <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
+              className="btn-primary inline-flex items-center gap-2.5 text-base px-7 py-3.5"
+            >
+              Hozir Boshlang
+              <ArrowRight className="w-4 h-4" />
+            </motion.button>
+          </FadeUp>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 lg:py-32 bg-secondary text-secondary-foreground">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-             <span className="inline-block text-primary font-semibold mb-4">IZOHLAR</span>
-             <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-4">
-               Foydalanuvchilar <span className="text-primary">Fikrlari</span>
-             </h2>
-           </div>
+      <section className="py-24 lg:py-32 bg-secondary text-secondary-foreground relative overflow-hidden noise-overlay">
+        <div className="container mx-auto px-4 relative z-10">
+          <FadeUp className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium bg-white/5 border border-white/10 text-primary mb-4">IZOHLAR</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-5 tracking-tight">
+              Foydalanuvchilar <span className="text-primary">Fikrlari</span>
+            </h2>
+          </FadeUp>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
             {[
-            {
-              name: 'Aziza Karimova',
-              level: 'B2 Sertifikat',
-              text: "Lug'at va grammatika testlari juda foydali bo'ldi. 3 oyda B2 imtihoniga to'liq tayyorlandim!",
-              avatar: 'AK'
-            },
-            {
-              name: 'Sardor Rahimov',
-              level: 'C1 Sertifikat',
-              text: "Tezkor natijalar va batafsil tushuntirishlar xatolarimni tushunishni osonlashtirdi. Juda tavsiya qilaman!",
-              avatar: 'SR'
-            },
-            {
-              name: 'Malika Usmanova',
-              level: 'B1 Sertifikat',
-              text: "Istalgan vaqtda, istalgan joyda mashq qilish mumkin. Mobil qurilmalar uchun qulay interfeys juda yoqdi.",
-              avatar: 'MU'
-            }].
-            map((testimonial, index) =>
-            <div key={index} className="bg-white/5 rounded-2xl p-8 backdrop-blur-sm border border-white/10">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-red-600 flex items-center justify-center font-semibold text-lg text-white">
-                    {testimonial.avatar}
+              { name: 'Aziza Karimova', level: 'B2 Sertifikat', text: "Lug'at va grammatika testlari juda foydali bo'ldi. 3 oyda B2 imtihoniga to'liq tayyorlandim!", avatar: 'AK' },
+              { name: 'Sardor Rahimov', level: 'C1 Sertifikat', text: "Tezkor natijalar va batafsil tushuntirishlar xatolarimni tushunishni osonlashtirdi. Juda tavsiya qilaman!", avatar: 'SR' },
+              { name: 'Malika Usmanova', level: 'B1 Sertifikat', text: "Istalgan vaqtda, istalgan joyda mashq qilish mumkin. Mobil qurilmalar uchun qulay interfeys juda yoqdi.", avatar: 'MU' },
+            ].map((testimonial, index) => (
+              <FadeUp key={index} delay={index * 0.1}>
+                <div className="rounded-2xl p-7 bg-white/[0.04] backdrop-blur-sm border border-white/[0.06] h-full">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-pink-600 flex items-center justify-center font-semibold text-sm text-white">
+                      {testimonial.avatar}
+                    </div>
+                    <div>
+                      <div className="font-semibold">{testimonial.name}</div>
+                      <div className="text-xs text-secondary-foreground/60">{testimonial.level}</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-semibold text-lg">{testimonial.name}</div>
-                    <div className="text-sm text-secondary-foreground/70">{testimonial.level}</div>
+                  <div className="flex gap-0.5 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                    ))}
                   </div>
+                  <p className="text-secondary-foreground/70 text-sm leading-relaxed">{testimonial.text}</p>
                 </div>
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, i) =>
-                <Star key={i} className="w-5 h-5 fill-primary text-primary" />
-                )}
-                </div>
-                <p className="text-secondary-foreground/80 leading-relaxed">{testimonial.text}</p>
-              </div>
-            )}
+              </FadeUp>
+            ))}
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 lg:py-32">
+      <section id="faq" className="py-24 lg:py-32">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-             <span className="inline-block text-primary font-semibold mb-4">SAVOL-JAVOB</span>
-             <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-4">
-               Ko'p Beriladigan <span className="text-gradient">Savollar</span>
-             </h2>
-           </div>
+          <FadeUp className="text-center mb-16">
+            <span className="premium-badge mb-4 inline-flex">SAVOL-JAVOB</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-5 tracking-tight">
+              Ko'p Beriladigan <span className="text-gradient">Savollar</span>
+            </h2>
+          </FadeUp>
 
-          <div className="max-w-3xl mx-auto space-y-4">
+          <div className="max-w-2xl mx-auto space-y-3">
             {[
-            {
-              q: 'CEFR nima?',
-              a: "CEFR (Common European Framework of Reference for Languages) — tillarni bilish darajasini belgilovchi xalqaro standart. A1 dan C2 gacha 6 ta daraja mavjud."
-            },
-            {
-              q: "Qanday turdagi testlar mavjud?",
-              a: "Platformamizda 4 xil test turi mavjud: Lug'at, Grammatika, Reading va Listening. Har bir test turi A1-C1 darajalar uchun tayyorlangan."
-            },
-            {
-              q: "Testlar haqiqiy CEFR imtihonlariga o'xshaydimi?",
-              a: "Ha! Testlarimiz rasmiy CEFR imtihonlarining formati va qiyinlik darajasiga mos ravishda tuzilgan."
-            },
-            {
-              q: "Natijalarimni kuzatib bora olamanmi?",
-              a: "Albatta! Bepul ro'yxatdan o'ting va barcha test natijalaringizni saqlang hamda rivojlanishingizni kuzating."
-            },
-            {
-              q: 'Har bir test qancha vaqt oladi?',
-              a: "Har bir test 30 daqiqaga mo'ljallangan — haqiqiy CEFR imtihon bo'limlari kabi."
-            }].
-            map((faq, index) =>
-            <details key={index} className="group card-elevated cursor-pointer p-6">
-                <summary className="flex items-center justify-between font-semibold text-lg list-none">
-                  {faq.q}
-                  <ChevronDown className="w-5 h-5 text-primary group-open:rotate-180 transition-transform" />
-                </summary>
-                <p className="mt-4 text-muted-foreground leading-relaxed">{faq.a}</p>
-              </details>
-            )}
+              { q: 'CEFR nima?', a: "CEFR — tillarni bilish darajasini belgilovchi xalqaro standart. A1 dan C2 gacha 6 ta daraja mavjud." },
+              { q: "Qanday turdagi testlar mavjud?", a: "Platformamizda 4 xil test turi mavjud: Lug'at, Grammatika, Reading va Listening. Har biri A1-C1 darajalar uchun tayyorlangan." },
+              { q: "Testlar haqiqiy CEFR imtihonlariga o'xshaydimi?", a: "Ha! Testlarimiz rasmiy CEFR imtihonlarining formati va qiyinlik darajasiga mos ravishda tuzilgan." },
+              { q: "Natijalarimni kuzatib bora olamanmi?", a: "Albatta! Bepul ro'yxatdan o'ting va barcha test natijalaringizni saqlang." },
+              { q: 'Har bir test qancha vaqt oladi?', a: "Har bir test 30 daqiqaga mo'ljallangan — haqiqiy CEFR imtihon bo'limlari kabi." },
+            ].map((faq, index) => (
+              <FadeUp key={index} delay={index * 0.05}>
+                <details className="group card-elevated cursor-pointer p-5">
+                  <summary className="flex items-center justify-between font-display font-semibold list-none">
+                    {faq.q}
+                    <ChevronDown className="w-5 h-5 text-muted-foreground group-open:rotate-180 transition-transform duration-300" />
+                  </summary>
+                  <p className="mt-3 text-muted-foreground text-sm leading-relaxed">{faq.a}</p>
+                </details>
+              </FadeUp>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 lg:py-32 bg-gradient-to-br from-primary to-red-600">
-        <div className="container mx-auto px-4 text-center">
-           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-white mb-6">
-             Sayohatingizni Boshlashga Tayyormisiz?
-           </h2>
-           <p className="text-white/80 text-lg mb-10 max-w-2xl mx-auto">
-             Minglab o'rganuvchilar qatoriga qo'shiling va ingliz tili bilimingizni yangi darajaga olib chiqing.
-           </p>
-           <button
-            onClick={handleStartTest}
-            className="bg-white text-primary px-10 py-5 rounded-xl font-semibold text-lg hover:bg-white/90 transition-colors inline-flex items-center gap-3 shadow-lg">
-
-             Bepul Testni Boshlang
-             <ArrowRight className="w-6 h-6" />
-           </button>
+      <section id="pricing" className="py-24 lg:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary to-rose-600" />
+        <div className="absolute inset-0 noise-overlay" />
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <FadeUp>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-white mb-5 tracking-tight">
+              Hoziroq Boshlang
+            </h2>
+            <p className="text-white/80 text-lg max-w-xl mx-auto mb-10">
+              Minglab o'quvchilar bilan birga CEFR sertifikatiga tayyorlaning
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleStartTest}
+              className="inline-flex items-center gap-2.5 bg-white text-secondary font-bold text-base px-8 py-4 rounded-xl hover:bg-white/95 transition-colors shadow-xl"
+            >
+              {user ? 'Testni Boshlash' : 'Bepul Ro\'yxatdan O\'tish'}
+              <ArrowRight className="w-4 h-4" />
+            </motion.button>
+          </FadeUp>
         </div>
       </section>
-    </div>);
-
+    </div>
+  );
 };
