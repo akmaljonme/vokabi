@@ -25,7 +25,7 @@ const formatTime = (dateStr: string) => {
   return d.toLocaleDateString('uz', { day: '2-digit', month: '2-digit' });
 };
 
-export const DirectMessages = () => {
+export const DirectMessages = ({ openUserId }: { openUserId?: string | null }) => {
   const { user } = useAuth();
   const call = useCall();
   const [chatPreviews, setChatPreviews] = useState<ChatPreview[]>([]);
@@ -84,6 +84,19 @@ export const DirectMessages = () => {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user, loadChatPreviews]);
+
+  // Auto-open chat from notification
+  useEffect(() => {
+    if (!openUserId || !user || activeContact) return;
+    const openChat = async () => {
+      const { data } = await (supabase.from('profiles') as any)
+        .select('user_id, full_name, username, avatar_url')
+        .eq('user_id', openUserId)
+        .maybeSingle();
+      if (data) setActiveContact(data);
+    };
+    openChat();
+  }, [openUserId, user]);
 
   const loadAllUsers = async () => {
     if (!user) return;
