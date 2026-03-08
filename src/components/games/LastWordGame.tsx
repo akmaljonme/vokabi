@@ -451,12 +451,12 @@ export const LastWordGame = ({ onBack }: Props) => {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto text-center py-10">
         <Loader2 className="w-12 h-12 text-primary mx-auto mb-4 animate-spin" />
         <h2 className="text-xl font-display font-bold mb-2">Raqib kutilmoqda...</h2>
-        <p className="text-sm text-muted-foreground mb-6">Do'stingizga xona ID ni yuboring:</p>
+        <p className="text-sm text-muted-foreground mb-4">Saytdagi biror foydalanuvchi online o'yinga kirishi bilan o'yin boshlanadi</p>
 
-        <div className="card-elevated p-4 mb-6">
-          <p className="text-xs text-muted-foreground mb-2">Xona ID:</p>
+        <div className="card-elevated p-4 mb-4">
+          <p className="text-xs text-muted-foreground mb-2">Do'stingizga ham yuborishingiz mumkin:</p>
           <div className="flex items-center gap-2 justify-center">
-            <code className="text-sm font-mono bg-muted px-3 py-1.5 rounded-lg break-all">{roomId}</code>
+            <code className="text-xs font-mono bg-muted px-3 py-1.5 rounded-lg break-all">{roomId}</code>
             <Button size="icon" variant="ghost" onClick={copyRoomId}>
               {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
             </Button>
