@@ -29,6 +29,7 @@ interface QuestionFormDialogProps {
   onOpenChange: (open: boolean) => void;
   question: Question | null;
   testId: string;
+  testSkill?: string;
   onSave: (data: Omit<Question, 'id'> & { id?: string }) => Promise<void>;
   loading: boolean;
   questionCount: number;
