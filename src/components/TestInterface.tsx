@@ -33,6 +33,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   const [answers, setAnswers] = useState<UserAnswer[]>([]);
   const [timeLeft, setTimeLeft] = useState(30 * 60);
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isNoParts = skill === 'vocabulary' || skill === 'grammar';
@@ -67,14 +68,16 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   }, [mockId, level, skill, testId, dbTest, testStorageKey]);
 
   // Fullscreen
+  const enterFullscreen = useCallback(async () => {
+    try {
+      if (containerRef.current && !document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
+        setIsPaused(false);
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
-    const enterFullscreen = async () => {
-      try {
-        if (containerRef.current && document.fullscreenElement === null) {
-          await containerRef.current.requestFullscreen();
-        }
-      } catch {}
-    };
     enterFullscreen();
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -83,7 +86,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
     };
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement && mockTest) {
-        try { containerRef.current?.requestFullscreen(); } catch {}
+        setIsPaused(true);
       }
     };
 
@@ -94,10 +97,11 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     };
-  }, [mockTest]);
+  }, [mockTest, enterFullscreen]);
 
   // Timer
   useEffect(() => {
+    if (isPaused) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 0) { clearInterval(timer); handleFinishTest(); return 0; }
@@ -105,7 +109,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isPaused]);
 
   // Auto-save
   useEffect(() => {
@@ -472,7 +476,33 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
         </div>
       </div>
 
-      {/* Confirm Finish Modal */}
+      {/* Pause Overlay */}
+      {isPaused && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-2xl p-8 max-w-md w-full text-center animate-slide-up shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-amber-500" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Test pauzalandi</h3>
+            <p className="text-muted-foreground mb-6">
+              Siz to'liq ekran rejimidan chiqdingiz. Davom etish uchun qayta to'liq ekranga o'ting.
+            </p>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowConfirmFinish(true);
+                setIsPaused(false);
+              }}>
+                <Flag className="w-4 h-4 mr-1" />Tugatish
+              </Button>
+              <Button className="flex-1" onClick={enterFullscreen}>
+                Davom etish
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       {showConfirmFinish && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-2xl p-6 max-w-md w-full animate-slide-up">
