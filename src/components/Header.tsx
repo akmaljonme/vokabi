@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Menu, X, LogOut, User, Shield, Moon, Sun, Sparkles } from 'lucide-react';
+import { ChevronDown, Menu, X, LogOut, User, Shield, Moon, Sun, Sparkles, Gamepad2, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
