@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { TestFormDialog } from './tests/TestFormDialog';
 import { TestQuestionsPanel } from './tests/TestQuestionsPanel';
+import { PDFImportDialog } from './tests/PDFImportDialog';
 import {
   AlertDialog,
   AlertDialogAction,
