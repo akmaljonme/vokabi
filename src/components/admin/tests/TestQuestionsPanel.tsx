@@ -89,6 +89,8 @@ const categoryIcons: Record<string, React.ReactNode> = {
   listening: <Headphones className="w-4 h-4" />,
   grammar: <BookOpen className="w-4 h-4" />,
   vocabulary: <MessageSquare className="w-4 h-4" />,
+  writing: <FileText className="w-4 h-4" />,
+  speaking: <Headphones className="w-4 h-4" />,
 };
 
 const categoryColors: Record<string, string> = {
@@ -96,6 +98,8 @@ const categoryColors: Record<string, string> = {
   listening: 'bg-purple-500/10 text-purple-500',
   grammar: 'bg-green-500/10 text-green-500',
   vocabulary: 'bg-orange-500/10 text-orange-500',
+  writing: 'bg-emerald-500/10 text-emerald-500',
+  speaking: 'bg-rose-500/10 text-rose-500',
 };
 
 const typeLabels: Record<string, string> = {
