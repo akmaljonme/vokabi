@@ -721,11 +721,16 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
         <Card className="p-12 text-center">
           <div className="text-muted-foreground">
             <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <h3 className="font-semibold text-lg mb-2">Savollar yo'q</h3>
-            <p className="text-sm mb-4">Ushbu testga hali savol qo'shilmagan</p>
+            <h3 className="font-semibold text-lg mb-2">{isAIEvaluated ? 'Topshiriqlar yo\'q' : 'Savollar yo\'q'}</h3>
+            <p className="text-sm mb-4">
+              {isAIEvaluated 
+                ? `Ushbu testga hali topshiriq qo'shilmagan. ${test.skill === 'writing' ? 'Writing uchun 2 ta task (prompt) qo\'shing.' : 'Speaking uchun 5 ta savol qo\'shing.'} AI talabalar javobini baholaydi.`
+                : 'Ushbu testga hali savol qo\'shilmagan'
+              }
+            </p>
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Birinchi savolni qo'shing
+              {isAIEvaluated ? 'Birinchi topshiriqni qo\'shing' : 'Birinchi savolni qo\'shing'}
             </Button>
           </div>
         </Card>
