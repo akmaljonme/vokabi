@@ -68,14 +68,16 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   }, [mockId, level, skill, testId, dbTest, testStorageKey]);
 
   // Fullscreen
+  const enterFullscreen = useCallback(async () => {
+    try {
+      if (containerRef.current && !document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
+        setIsPaused(false);
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
-    const enterFullscreen = async () => {
-      try {
-        if (containerRef.current && document.fullscreenElement === null) {
-          await containerRef.current.requestFullscreen();
-        }
-      } catch {}
-    };
     enterFullscreen();
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -84,7 +86,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
     };
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement && mockTest) {
-        try { containerRef.current?.requestFullscreen(); } catch {}
+        setIsPaused(true);
       }
     };
 
@@ -95,7 +97,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     };
-  }, [mockTest]);
+  }, [mockTest, enterFullscreen]);
 
   // Timer
   useEffect(() => {
