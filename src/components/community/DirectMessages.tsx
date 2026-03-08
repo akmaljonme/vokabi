@@ -34,6 +34,7 @@ export const DirectMessages = () => {
   const [messages, setMessages] = useState<DM[]>([]);
   const [search, setSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
+  const [replyTo, setReplyTo] = useState<ReplyInfo | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const loadChatPreviews = useCallback(async () => {
