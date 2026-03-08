@@ -42,7 +42,7 @@ export const useDMNotifications = () => {
           action: {
             label: "Ko'rish",
             onClick: () => {
-              window.location.href = '/community';
+              navigate('/community');
             },
           },
           duration: 5000,
