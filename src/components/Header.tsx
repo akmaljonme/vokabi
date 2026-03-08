@@ -90,12 +90,6 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
             {user && (
               <>
                 <button
-                  onClick={() => navigate('/exams')}
-                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
-                >
-                  Examlar
-                </button>
-                <button
                   onClick={() => navigate('/dashboard')}
                   className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
                 >

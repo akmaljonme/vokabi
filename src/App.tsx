@@ -24,8 +24,6 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<ProfileSettings />} />
-            <Route path="/exams" element={<Exams />} />
-            <Route path="/exams/:examId" element={<ExamInterface />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -22,7 +22,7 @@ const menuItems = [
   { id: 'users', label: 'Users', icon: Users },
   { id: 'results', label: 'Results & Analytics', icon: BarChart3 },
   { id: 'tests', label: 'Tests Management', icon: FileText },
-  { id: 'exams', label: 'Examlar', icon: GraduationCap },
+  
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
