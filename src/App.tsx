@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AITutorChat } from "@/components/AITutorChat";
+import { useDMNotifications } from "@/hooks/useDMNotifications";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -15,6 +16,11 @@ import NotFound from "./pages/NotFound";
 import Leaderboard from "./pages/Leaderboard";
 
 const queryClient = new QueryClient();
+
+const GlobalListeners = () => {
+  useDMNotifications();
+  return null;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -35,6 +41,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <AITutorChat />
+          <GlobalListeners />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
