@@ -206,8 +206,13 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                   <button onClick={() => { navigate('/games'); setIsMenuOpen(false); }} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
                     <Gamepad2 className="w-4 h-4" /> O'yinlar
                   </button>
-                  <button onClick={() => { navigate('/community'); setIsMenuOpen(false); }} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
+                  <button onClick={() => { navigate('/community'); setIsMenuOpen(false); }} className="relative flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
                     <Users className="w-4 h-4" /> Hamjamiyat
+                    {unreadCount > 0 && (
+                      <Badge variant="destructive" className="h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </Badge>
+                    )}
                   </button>
                 </>
               )}
