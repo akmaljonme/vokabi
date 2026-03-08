@@ -44,7 +44,7 @@ export default function ProfileSettings() {
 
   const fetchProfile = async () => {
     try {
-      const { data, error } = await supabase.from('profiles').select('full_name, username, avatar_url, email_notifications, test_reminders, progress_updates').eq('user_id', user?.id).maybeSingle();
+      const { data, error } = await (supabase.from('profiles') as any).select('full_name, username, avatar_url, email_notifications, test_reminders, progress_updates').eq('user_id', user?.id).maybeSingle();
       if (error) throw error;
       if (data) setProfile({ full_name: data.full_name || '', username: (data as any).username || '', avatar_url: data.avatar_url, email_notifications: data.email_notifications ?? true, test_reminders: data.test_reminders ?? true, progress_updates: data.progress_updates ?? true });
     } catch (error) { console.error('Error:', error); toast.error('Profil yuklanmadi'); } finally { setIsLoading(false); }
