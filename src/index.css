@@ -192,9 +192,40 @@
     box-shadow: var(--shadow-md);
   }
 
+  .dark .level-card {
+    border-color: hsl(225 15% 18%);
+  }
+
   .level-card:hover {
     transform: translateY(-6px);
     box-shadow: var(--shadow-xl);
+  }
+
+  .card-glass {
+    @apply rounded-2xl p-6 transition-all duration-300;
+    background: var(--gradient-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  .dark .card-glass {
+    border-color: hsl(225 15% 18%);
+  }
+
+  .card-elevated {
+    @apply bg-card rounded-2xl p-6 transition-all duration-300 border border-border/50;
+    box-shadow: var(--shadow-card);
+  }
+
+  .dark .card-elevated {
+    border-color: hsl(225 15% 16%);
+    background: hsl(225 25% 9%);
+  }
+
+  .card-elevated:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
   }
 
   .level-badge {
