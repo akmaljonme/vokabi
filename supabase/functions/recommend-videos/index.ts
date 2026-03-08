@@ -5,6 +5,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function buildYouTubeSearchUrl(query: string): string {
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -13,19 +17,16 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are a helpful English learning assistant. Based on the student's wrong answers, identify weak topics and suggest YouTube video searches.
+    const systemPrompt = `You are an English learning assistant. Analyze the student's wrong answers and identify weak topics.
+For each weak topic, create a YouTube search query that would find helpful tutorial videos.
 
-CRITICAL RULES FOR URLs:
-- You MUST generate YouTube SEARCH URLs in this exact format: https://www.youtube.com/results?search_query=ENCODED_SEARCH_TERM
-- The search query must be URL-encoded (spaces become +, special chars encoded)
-- Make search queries specific and useful, like: "english+grammar+present+perfect+tense+lesson" or "IELTS+reading+tips+for+beginners"
-- NEVER invent fake video IDs or direct video links like youtube.com/watch?v=...
-- Each URL must be a YouTube search URL that will show real results when clicked
-
-For the "channel" field, suggest a well-known English learning channel name that would likely appear in those search results (e.g., "BBC Learning English", "English with Lucy", "EngVid", "IELTS Liz").
-
-Write all descriptions in Uzbek language.
-Level: ${level}, Skill: ${skill}`;
+CRITICAL RULES:
+- Do NOT generate any URLs. Only generate search queries as plain text strings.
+- Search queries should be in English, specific, and designed to find educational content.
+- Examples of good search queries: "present perfect tense English lesson", "IELTS reading skimming techniques", "English vocabulary B1 level"
+- For the channel field, suggest real well-known channels: "BBC Learning English", "English with Lucy", "EngVid", "IELTS Liz", "Rachel's English", "Learn English with TV Series"
+- Write all descriptions in Uzbek language.
+- Level: ${level}, Skill: ${skill}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -34,7 +35,7 @@ Level: ${level}, Skill: ${skill}`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Wrong questions:\n${JSON.stringify(wrongQuestions, null, 2)}` },
@@ -43,27 +44,26 @@ Level: ${level}, Skill: ${skill}`;
           type: "function",
           function: {
             name: "suggest_videos",
-            description: "Return video suggestions for the student. URLs MUST be YouTube search URLs in format: https://www.youtube.com/results?search_query=...",
+            description: "Return video search suggestions. Do NOT include any URLs - only search query strings.",
             parameters: {
               type: "object",
               properties: {
-                weakTopics: { type: "array", items: { type: "string" }, description: "List of weak grammar/vocabulary topics identified" },
+                weakTopics: { type: "array", items: { type: "string" }, description: "List of weak topics identified" },
                 videos: {
                   type: "array",
                   items: {
                     type: "object",
                     properties: {
-                      title: { type: "string", description: "Descriptive title for this video search suggestion" },
-                      channel: { type: "string", description: "Name of a well-known English learning YouTube channel" },
-                      url: { type: "string", description: "YouTube search URL in format: https://www.youtube.com/results?search_query=encoded+search+terms" },
-                      description: { type: "string", description: "Description in Uzbek language of what this search will help with" },
-                      topic: { type: "string", description: "The specific grammar/vocabulary topic" },
-                      searchQuery: { type: "string", description: "The human-readable search query used" },
+                      title: { type: "string", description: "Descriptive title for this suggestion" },
+                      channel: { type: "string", description: "Real well-known English learning YouTube channel name" },
+                      searchQuery: { type: "string", description: "Plain text YouTube search query, e.g. 'present perfect tense English grammar lesson'" },
+                      description: { type: "string", description: "Description in Uzbek of what this will help with" },
+                      topic: { type: "string", description: "The specific topic this covers" },
                     },
-                    required: ["title", "channel", "url", "description", "topic"],
+                    required: ["title", "channel", "searchQuery", "description", "topic"],
                   },
                 },
-                overallAdvice: { type: "string", description: "Overall learning advice in Uzbek language" },
+                overallAdvice: { type: "string", description: "Overall learning advice in Uzbek" },
               },
               required: ["weakTopics", "videos", "overallAdvice"],
               additionalProperties: false,
@@ -85,17 +85,12 @@ Level: ${level}, Skill: ${skill}`;
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     let result = toolCall ? JSON.parse(toolCall.function.arguments) : null;
 
-    // Validate and fix URLs - ensure all are YouTube search URLs
+    // Build proper YouTube search URLs from the search queries
     if (result?.videos) {
-      result.videos = result.videos.map((video: any) => {
-        // If the URL is not a proper YouTube search URL, convert it
-        if (!video.url.includes('youtube.com/results?search_query=')) {
-          // Extract meaningful text from the title/topic for search
-          const searchTerm = `${video.topic} ${video.channel} english lesson`.replace(/\s+/g, '+');
-          video.url = `https://www.youtube.com/results?search_query=${encodeURIComponent(searchTerm).replace(/%20/g, '+')}`;
-        }
-        return video;
-      });
+      result.videos = result.videos.map((video: any) => ({
+        ...video,
+        url: buildYouTubeSearchUrl(video.searchQuery || `${video.topic} ${video.channel} english lesson`),
+      }));
     }
 
     return new Response(JSON.stringify({ result }), {
