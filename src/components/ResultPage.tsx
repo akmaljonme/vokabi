@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, Trophy, RotateCcw, Save, FileDown } from 'lucide-react';
 import { CertificateDownload } from '@/components/CertificateDownload';
 import { VideoRecommendations } from '@/components/AIResultsSection';
+import { AIResultDisplay } from '@/components/AIResultDisplay';
 import { TestResult } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +19,17 @@ interface ResultPageProps {
 }
 
 export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
+  const isAISkill = result.skill === 'writing' || result.skill === 'speaking';
+  
+  // For Writing/Speaking, show AI result display
+  if (isAISkill) {
+    return <AIResultDisplay result={result} onRetry={onRetry} onBack={onBack} />;
+  }
+
+  return <StandardResultPage result={result} onRetry={onRetry} onBack={onBack} />;
+};
+
+const StandardResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
   const mockTest = result.mockTest || generateMockTest(result.mockId, result.level, result.skill);
   const { user } = useAuth();
   const { saveResult } = useTestResults();
