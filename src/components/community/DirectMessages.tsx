@@ -154,7 +154,7 @@ export const DirectMessages = () => {
             <User className="w-4 h-4 text-primary" />
           </div>
           <span className="font-semibold text-sm flex-1">{activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}</span>
-          <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => setShowCall(true)}>
+          <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => startCall(activeContact.user_id)} disabled={callState !== 'idle'}>
             <Phone className="w-4 h-4" />
           </Button>
         </div>
