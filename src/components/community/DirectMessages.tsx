@@ -8,6 +8,7 @@ import { ChatMediaInput } from './ChatMediaInput';
 import { ChatMessageBubble } from './ChatMessageBubble';
 import { AudioCallDialog } from './AudioCallDialog';
 import { Button } from '@/components/ui/button';
+import { useWebRTC } from '@/hooks/useWebRTC';
 
 interface Profile { user_id: string; full_name: string | null; username: string | null; avatar_url: string | null; }
 interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; image_url?: string | null; audio_url?: string | null; }
