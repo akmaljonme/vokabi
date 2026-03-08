@@ -1,26 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCall } from '@/contexts/CallContext';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Search, User, Phone } from 'lucide-react';
+import { ArrowLeft, Search, User, Phone, Video } from 'lucide-react';
 import { ChatMediaInput } from './ChatMediaInput';
 import { ChatMessageBubble } from './ChatMessageBubble';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { useWebRTC } from '@/hooks/useWebRTC';
 
 interface Profile { user_id: string; full_name: string | null; username: string | null; avatar_url: string | null; }
 interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; image_url?: string | null; audio_url?: string | null; }
 
-type WebRTCReturn = ReturnType<typeof useWebRTC>;
-
-interface DirectMessagesProps {
-  webrtc: WebRTCReturn;
-}
-
-export const DirectMessages = ({ webrtc }: DirectMessagesProps) => {
+export const DirectMessages = () => {
   const { user } = useAuth();
+  const call = useCall();
   const [contacts, setContacts] = useState<Profile[]>([]);
   const [activeContact, setActiveContact] = useState<Profile | null>(null);
   const [messages, setMessages] = useState<DM[]>([]);
@@ -116,12 +111,6 @@ export const DirectMessages = ({ webrtc }: DirectMessagesProps) => {
     }
   };
 
-  const handleStartCall = (contact: Profile) => {
-    const name = contact.username ? `@${contact.username}` : contact.full_name || 'Foydalanuvchi';
-    // Set the caller name on the webrtc hook before starting
-    webrtc.startCall(contact.user_id);
-  };
-
   const filteredUsers = search.trim() ? allUsers.filter(u => {
     const q = search.toLowerCase();
     return u.full_name?.toLowerCase().includes(q) || u.username?.toLowerCase().includes(q);
@@ -182,8 +171,11 @@ export const DirectMessages = ({ webrtc }: DirectMessagesProps) => {
           <User className="w-4 h-4 text-primary" />
         </div>
         <span className="font-semibold text-sm flex-1">{activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}</span>
-        <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => handleStartCall(activeContact)} disabled={webrtc.callState !== 'idle'}>
+        <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => call.startCall(activeContact.user_id, 'audio')} disabled={call.callState !== 'idle'}>
           <Phone className="w-4 h-4" />
+        </Button>
+        <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => call.startCall(activeContact.user_id, 'video')} disabled={call.callState !== 'idle'}>
+          <Video className="w-4 h-4" />
         </Button>
       </div>
 

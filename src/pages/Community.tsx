@@ -1,22 +1,15 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { ArrowLeft, MessageCircle, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChatRooms } from '@/components/community/ChatRooms';
 import { DirectMessages } from '@/components/community/DirectMessages';
-import { useWebRTC } from '@/hooks/useWebRTC';
-import { AudioCallDialog } from '@/components/community/AudioCallDialog';
 
 export default function Community() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const webrtc = useWebRTC(user?.id);
 
   if (!user) { navigate('/auth'); return null; }
-
-  const showCallUI = webrtc.callState !== 'idle';
 
   return (
     <div className="min-h-screen bg-background">
@@ -41,23 +34,9 @@ export default function Community() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="rooms"><ChatRooms /></TabsContent>
-          <TabsContent value="dm"><DirectMessages webrtc={webrtc} /></TabsContent>
+          <TabsContent value="dm"><DirectMessages /></TabsContent>
         </Tabs>
       </main>
-
-      {/* Global call overlay for all states */}
-      {showCallUI && (
-        <AudioCallDialog
-          contactName={webrtc.remoteCallerName || 'Foydalanuvchi'}
-          callState={webrtc.callState as any}
-          isMuted={webrtc.isMuted}
-          duration={webrtc.duration}
-          onToggleMute={webrtc.toggleMute}
-          onEnd={() => webrtc.endCall(webrtc.remoteCallerId || undefined)}
-          onAccept={webrtc.remoteCallerId ? () => webrtc.acceptCall(webrtc.remoteCallerId!) : undefined}
-          onReject={webrtc.remoteCallerId ? () => webrtc.rejectCall(webrtc.remoteCallerId!) : undefined}
-        />
-      )}
     </div>
   );
 }
