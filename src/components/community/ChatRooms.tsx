@@ -128,25 +128,35 @@ export const ChatRooms = () => {
 
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3">
-          {messages.map(msg => (
-            <ChatMessageBubble
-              key={msg.id}
-              id={msg.id}
-              isMe={msg.user_id === user?.id}
-              content={msg.content}
-              image_url={msg.image_url}
-              audio_url={msg.audio_url}
-              created_at={msg.created_at}
-              senderName={msg.user_id !== user?.id ? profiles[msg.user_id] : undefined}
-              onEdit={msg.user_id === user?.id ? handleEdit : undefined}
-              onDelete={msg.user_id === user?.id ? handleDelete : undefined}
-            />
-          ))}
+          {messages.map(msg => {
+            const replyMsg = msg.reply_to_id ? messages.find(m => m.id === msg.reply_to_id) : null;
+            const replyInfo = replyMsg ? {
+              id: replyMsg.id,
+              content: replyMsg.image_url ? '📷 Rasm' : replyMsg.audio_url ? '🎤 Ovozli xabar' : replyMsg.content,
+              senderName: replyMsg.user_id === user?.id ? 'Siz' : (profiles[replyMsg.user_id] || 'Foydalanuvchi'),
+            } : null;
+            return (
+              <ChatMessageBubble
+                key={msg.id}
+                id={msg.id}
+                isMe={msg.user_id === user?.id}
+                content={msg.content}
+                image_url={msg.image_url}
+                audio_url={msg.audio_url}
+                created_at={msg.created_at}
+                senderName={msg.user_id !== user?.id ? profiles[msg.user_id] : undefined}
+                replyTo={replyInfo}
+                onEdit={msg.user_id === user?.id ? handleEdit : undefined}
+                onDelete={msg.user_id === user?.id ? handleDelete : undefined}
+                onReply={(info) => setReplyTo(info)}
+              />
+            );
+          })}
           <div ref={scrollRef} />
         </div>
       </ScrollArea>
 
-      <ChatMediaInput onSend={handleSend} />
+      <ChatMediaInput onSend={handleSend} replyTo={replyTo} onCancelReply={() => setReplyTo(null)} />
     </div>
   );
 };
