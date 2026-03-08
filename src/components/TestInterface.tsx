@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Clock, Flag, AlertCircle, ArrowLeft, ArrowRight, BookOpen, Headphones, BookA, Mic, MicOff, CheckCircle } from 'lucide-react';
+import { Clock, Flag, AlertCircle, ArrowLeft, ArrowRight, BookOpen, Headphones, BookA, Mic, MicOff, CheckCircle, PenTool, Send, Loader2 as Loader2Icon } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { MockTest, UserAnswer, Part, TestResult, Question } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { useTestWithQuestions } from '@/hooks/useTests';
