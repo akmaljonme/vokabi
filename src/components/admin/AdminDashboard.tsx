@@ -5,7 +5,7 @@ import { OverviewTab } from './OverviewTab';
 import { UsersTab } from './UsersTab';
 import { ResultsTab } from './ResultsTab';
 import { TestsTab } from './TestsTab';
-import { ExamsTab } from './ExamsTab';
+
 import { SettingsTab } from './SettingsTab';
 import { cn } from '@/lib/utils';
 
@@ -27,8 +27,6 @@ export const AdminDashboard = ({ onExitAdmin }: AdminDashboardProps) => {
         return <ResultsTab />;
       case 'tests':
         return <TestsTab />;
-      case 'exams':
-        return <ExamsTab />;
       case 'settings':
         return <SettingsTab />;
       default:
