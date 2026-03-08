@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -13,22 +13,19 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are a helpful English learning assistant. Based on the student's wrong answers, suggest relevant YouTube video lessons that would help them improve.
+    const systemPrompt = `You are a helpful English learning assistant. Based on the student's wrong answers, identify weak topics and suggest YouTube video searches.
 
-Analyze the wrong questions and identify the weak topics/areas. Then suggest 3-5 real, popular YouTube videos or channels for learning those specific topics at the ${level} level for ${skill} skill.
+CRITICAL RULES FOR URLs:
+- You MUST generate YouTube SEARCH URLs in this exact format: https://www.youtube.com/results?search_query=ENCODED_SEARCH_TERM
+- The search query must be URL-encoded (spaces become +, special chars encoded)
+- Make search queries specific and useful, like: "english+grammar+present+perfect+tense+lesson" or "IELTS+reading+tips+for+beginners"
+- NEVER invent fake video IDs or direct video links like youtube.com/watch?v=...
+- Each URL must be a YouTube search URL that will show real results when clicked
 
-Return your response using the suggest_videos tool.
+For the "channel" field, suggest a well-known English learning channel name that would likely appear in those search results (e.g., "BBC Learning English", "English with Lucy", "EngVid", "IELTS Liz").
 
-IMPORTANT: Suggest REAL popular YouTube channels and video types. Use realistic YouTube URLs based on well-known English learning channels like:
-- English with Lucy
-- BBC Learning English  
-- EngVid (engvid.com)
-- Rachel's English
-- Oxford Online English
-- IELTS Liz
-- E2 IELTS
-
-Write descriptions in Uzbek language.`;
+Write all descriptions in Uzbek language.
+Level: ${level}, Skill: ${skill}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -46,26 +43,27 @@ Write descriptions in Uzbek language.`;
           type: "function",
           function: {
             name: "suggest_videos",
-            description: "Return video suggestions for the student",
+            description: "Return video suggestions for the student. URLs MUST be YouTube search URLs in format: https://www.youtube.com/results?search_query=...",
             parameters: {
               type: "object",
               properties: {
-                weakTopics: { type: "array", items: { type: "string" } },
+                weakTopics: { type: "array", items: { type: "string" }, description: "List of weak grammar/vocabulary topics identified" },
                 videos: {
                   type: "array",
                   items: {
                     type: "object",
                     properties: {
-                      title: { type: "string" },
-                      channel: { type: "string" },
-                      url: { type: "string" },
-                      description: { type: "string" },
-                      topic: { type: "string" },
+                      title: { type: "string", description: "Descriptive title for this video search suggestion" },
+                      channel: { type: "string", description: "Name of a well-known English learning YouTube channel" },
+                      url: { type: "string", description: "YouTube search URL in format: https://www.youtube.com/results?search_query=encoded+search+terms" },
+                      description: { type: "string", description: "Description in Uzbek language of what this search will help with" },
+                      topic: { type: "string", description: "The specific grammar/vocabulary topic" },
+                      searchQuery: { type: "string", description: "The human-readable search query used" },
                     },
                     required: ["title", "channel", "url", "description", "topic"],
                   },
                 },
-                overallAdvice: { type: "string" },
+                overallAdvice: { type: "string", description: "Overall learning advice in Uzbek language" },
               },
               required: ["weakTopics", "videos", "overallAdvice"],
               additionalProperties: false,
@@ -77,14 +75,28 @@ Write descriptions in Uzbek language.`;
     });
 
     if (!response.ok) {
+      const errorBody = await response.text();
       if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       if (response.status === 402) return new Response(JSON.stringify({ error: "Kredit yetarli emas" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      throw new Error(`AI error: ${response.status}`);
+      throw new Error(`AI error [${response.status}]: ${errorBody}`);
     }
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    const result = toolCall ? JSON.parse(toolCall.function.arguments) : null;
+    let result = toolCall ? JSON.parse(toolCall.function.arguments) : null;
+
+    // Validate and fix URLs - ensure all are YouTube search URLs
+    if (result?.videos) {
+      result.videos = result.videos.map((video: any) => {
+        // If the URL is not a proper YouTube search URL, convert it
+        if (!video.url.includes('youtube.com/results?search_query=')) {
+          // Extract meaningful text from the title/topic for search
+          const searchTerm = `${video.topic} ${video.channel} english lesson`.replace(/\s+/g, '+');
+          video.url = `https://www.youtube.com/results?search_query=${encodeURIComponent(searchTerm).replace(/%20/g, '+')}`;
+        }
+        return video;
+      });
+    }
 
     return new Response(JSON.stringify({ result }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
