@@ -30,6 +30,7 @@ const App = () => (
             <Route path="/profile" element={<ProfileSettings />} />
             <Route path="/games" element={<Games />} />
             <Route path="/community" element={<Community />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

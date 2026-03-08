@@ -55,7 +55,10 @@ export default function Games() {
             <motion.div key="menu" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
               <div className="text-center mb-10">
                 <h2 className="text-3xl font-display font-bold mb-2">🎮 O'yin tanlang</h2>
-                <p className="text-muted-foreground">O'yin orqali ingliz tilini o'rganing!</p>
+                <p className="text-muted-foreground mb-4">O'yin orqali ingliz tilini o'rganing!</p>
+                <button onClick={() => navigate('/leaderboard')} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 transition-colors text-sm font-medium">
+                  <Trophy className="w-4 h-4" /> Leaderboard
+                </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
