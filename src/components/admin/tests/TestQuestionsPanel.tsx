@@ -748,19 +748,27 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="font-semibold text-sm">#{index + 1}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {typeLabels[question.question_type] || question.question_type}
-                          </Badge>
-                          <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs ${categoryColors[question.category]}`}>
-                            {categoryIcons[question.category]}
-                            <span className="capitalize">{question.category}</span>
-                          </div>
-                          <Badge variant="secondary" className="text-xs">
-                            {question.points} ball
-                          </Badge>
+                          {isAIEvaluated ? (
+                            <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600">
+                              🤖 AI baholaydi
+                            </Badge>
+                          ) : (
+                            <>
+                              <Badge variant="outline" className="text-xs">
+                                {typeLabels[question.question_type] || question.question_type}
+                              </Badge>
+                              <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-xs ${categoryColors[question.category]}`}>
+                                {categoryIcons[question.category]}
+                                <span className="capitalize">{question.category}</span>
+                              </div>
+                              <Badge variant="secondary" className="text-xs">
+                                {question.points} ball
+                              </Badge>
+                            </>
+                          )}
                         </div>
                         <p className="text-sm line-clamp-2">{question.question_text}</p>
-                        {question.options && question.options.length > 0 && (
+                        {!isAIEvaluated && question.options && question.options.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2">
                             {question.options.slice(0, 4).map((opt, i) => (
                               <span
