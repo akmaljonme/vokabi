@@ -197,62 +197,134 @@ export interface TestInfo {
          // Transform to MockTest format
          const questions = (questionsData as DBQuestion[]) || [];
          
-         // Group questions into parts (10 questions per part for standard tests)
-         const questionsPerPart = 10;
-         const numParts = Math.ceil(questions.length / questionsPerPart) || 1;
+         // Determine grouping based on skill
+         let parts: Part[] = [];
          
-         const parts: Part[] = [];
-         for (let i = 0; i < numParts; i++) {
-           const partQuestions = questions.slice(i * questionsPerPart, (i + 1) * questionsPerPart);
-            const passage = passagesData[i] || {
-              id: `part-${i + 1}`,
-              title: `Part ${i + 1}`,
-              content: dbTest.skill === 'listening' ? 'Audio content' : '',
-              paragraphs: null,
-            };
-
-            // Find audio for this part
-            const partAudio = audioData.find(a => a.order_index === i);
-
-            parts.push({
-              id: i + 1,
-              title: `Part ${i + 1}`,
-              instruction: getInstructionForType(partQuestions[0]?.question_type || 'multiple-choice'),
-              passage: {
-                id: i + 1,
-                title: passage.title,
-                content: passage.content,
-                paragraphs: passage.paragraphs || undefined,
-              },
-              questions: partQuestions.map((q, idx) => ({
-                id: i * questionsPerPart + idx + 1,
-                type: mapQuestionType(q.question_type),
-                question: q.question_text,
-                options: q.options || [],
-                correctAnswer: parseCorrectAnswer(q.correct_answer),
-                imageUrl: q.image_url || undefined,
-              })),
-              questionType: mapQuestionType(partQuestions[0]?.question_type || 'multiple-choice'),
-              audioUrl: partAudio?.file_url,
-              audioTranscript: partAudio?.transcript || undefined,
-            });
-         }
- 
-         // If no questions, create empty parts
-         if (parts.length === 0) {
-           for (let i = 0; i < 4; i++) {
+         if (dbTest.skill === 'writing') {
+           // Writing: group into 2 parts (Task 1 and Task 2)
+           const questionsPerPart = Math.ceil(questions.length / 2) || 1;
+           const numParts = Math.min(2, Math.ceil(questions.length / questionsPerPart) || 1);
+           
+           for (let i = 0; i < numParts; i++) {
+             const partQuestions = questions.slice(i * questionsPerPart, (i + 1) * questionsPerPart);
+             const passage = passagesData[i];
              parts.push({
                id: i + 1,
-               title: `Part ${i + 1}`,
-               instruction: 'No questions available',
+               title: i === 0 ? 'Task 1' : 'Task 2',
+               instruction: i === 0 
+                 ? 'Qisqa yozma topshiriq (xat, email, grafik tavsifi). Kamida 150 so\'z yozing.' 
+                 : 'Insho yozing. Kamida 250 so\'z yozing.',
                passage: {
                  id: i + 1,
-                 title: `Part ${i + 1}`,
-                 content: 'No content available',
+                 title: passage?.title || (i === 0 ? 'Writing Task 1' : 'Writing Task 2'),
+                 content: passage?.content || partQuestions[0]?.question_text || '',
+                 paragraphs: passage?.paragraphs || undefined,
                },
+               questions: partQuestions.map((q, idx) => ({
+                 id: i * questionsPerPart + idx + 1,
+                 type: mapQuestionType(q.question_type),
+                 question: q.question_text,
+                 options: q.options || [],
+                 correctAnswer: parseCorrectAnswer(q.correct_answer),
+                 imageUrl: q.image_url || undefined,
+               })),
+               questionType: 'multiple-choice',
+             });
+           }
+           
+           // Ensure at least 2 parts for writing
+           while (parts.length < 2) {
+             parts.push({
+               id: parts.length + 1,
+               title: parts.length === 0 ? 'Task 1' : 'Task 2',
+               instruction: parts.length === 0 
+                 ? 'Qisqa yozma topshiriq. Kamida 150 so\'z yozing.'
+                 : 'Insho yozing. Kamida 250 so\'z yozing.',
+               passage: { id: parts.length + 1, title: `Writing Task ${parts.length + 1}`, content: 'Topshiriq hali qo\'shilmagan' },
                questions: [],
                questionType: 'multiple-choice',
              });
+           }
+         } else if (dbTest.skill === 'speaking') {
+           // Speaking: all questions in one part, shown one at a time
+           parts.push({
+             id: 1,
+             title: 'Speaking Questions',
+             instruction: 'Har bir savolga ovozli javob bering. Mikrofon tugmasini bosib yozib oling.',
+             passage: { id: 1, title: 'Speaking Test', content: 'Quyidagi savollarga javob bering' },
+             questions: questions.map((q, idx) => ({
+               id: idx + 1,
+               type: mapQuestionType(q.question_type),
+               question: q.question_text,
+               options: q.options || [],
+               correctAnswer: parseCorrectAnswer(q.correct_answer),
+               imageUrl: q.image_url || undefined,
+             })),
+             questionType: 'multiple-choice',
+           });
+           
+           // Ensure at least 5 questions for speaking
+           if (parts[0].questions.length === 0) {
+             parts[0].questions = [
+               { id: 1, type: 'multiple-choice', question: 'Introduce yourself. What is your name and where are you from?', options: [], correctAnswer: '' },
+               { id: 2, type: 'multiple-choice', question: 'Describe your hometown. What do you like about it?', options: [], correctAnswer: '' },
+               { id: 3, type: 'multiple-choice', question: 'What are your hobbies and interests?', options: [], correctAnswer: '' },
+               { id: 4, type: 'multiple-choice', question: 'Talk about a memorable experience in your life.', options: [], correctAnswer: '' },
+               { id: 5, type: 'multiple-choice', question: 'What are your plans for the future?', options: [], correctAnswer: '' },
+             ];
+           }
+         } else {
+           // Standard: 10 questions per part
+           const questionsPerPart = dbTest.skill === 'vocabulary' || dbTest.skill === 'grammar' ? questions.length : 10;
+           const numParts = dbTest.skill === 'vocabulary' || dbTest.skill === 'grammar' ? 1 : (Math.ceil(questions.length / questionsPerPart) || 1);
+           
+           for (let i = 0; i < numParts; i++) {
+             const partQuestions = questions.slice(i * questionsPerPart, (i + 1) * questionsPerPart);
+             const passage = passagesData[i] || {
+               id: `part-${i + 1}`,
+               title: `Part ${i + 1}`,
+               content: dbTest.skill === 'listening' ? 'Audio content' : '',
+               paragraphs: null,
+             };
+             const partAudio = audioData.find(a => a.order_index === i);
+             
+             parts.push({
+               id: i + 1,
+               title: `Part ${i + 1}`,
+               instruction: getInstructionForType(partQuestions[0]?.question_type || 'multiple-choice'),
+               passage: {
+                 id: i + 1,
+                 title: passage.title,
+                 content: passage.content,
+                 paragraphs: passage.paragraphs || undefined,
+               },
+               questions: partQuestions.map((q, idx) => ({
+                 id: i * questionsPerPart + idx + 1,
+                 type: mapQuestionType(q.question_type),
+                 question: q.question_text,
+                 options: q.options || [],
+                 correctAnswer: parseCorrectAnswer(q.correct_answer),
+                 imageUrl: q.image_url || undefined,
+               })),
+               questionType: mapQuestionType(partQuestions[0]?.question_type || 'multiple-choice'),
+               audioUrl: partAudio?.file_url,
+               audioTranscript: partAudio?.transcript || undefined,
+             });
+           }
+           
+           // If no questions, create empty parts
+           if (parts.length === 0) {
+             const defaultParts = dbTest.skill === 'vocabulary' || dbTest.skill === 'grammar' ? 1 : 4;
+             for (let i = 0; i < defaultParts; i++) {
+               parts.push({
+                 id: i + 1,
+                 title: `Part ${i + 1}`,
+                 instruction: 'No questions available',
+                 passage: { id: i + 1, title: `Part ${i + 1}`, content: 'No content available' },
+                 questions: [],
+                 questionType: 'multiple-choice',
+               });
+             }
            }
          }
  
