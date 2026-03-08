@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import { ArrowLeft, TrendingUp, Target, Clock, Award, BookOpen, Headphones, AlertTriangle, CheckCircle, BarChart3 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { ArrowLeft, TrendingUp, Target, Clock, Award, BookOpen, Headphones, AlertTriangle, CheckCircle, BarChart3, Flame, Zap, Trophy, Star, Crown, Medal } from 'lucide-react';
 import { CEFRLevel } from '@/types/cefr';
 import { Header } from '@/components/Header';
 import { motion } from 'framer-motion';
+import { useGamification } from '@/hooks/useGamification';
+import { AchievementToast } from '@/components/AchievementToast';
 
 interface TestResult {
   id: string;
@@ -46,6 +48,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [results, setResults] = useState<TestResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { progress, achievements, userAchievements, leaderboard, newAchievement, dismissAchievement, xpProgress, xpToNextLevel, userRank, loading: gamLoading } = useGamification();
 
   useEffect(() => {
     if (!loading && !user) navigate('/auth');
@@ -85,7 +88,7 @@ export default function Dashboard() {
   };
 
   const getSkillAnalysis = (): SkillAnalysis[] => {
-    const skills = ['reading', 'listening'];
+    const skills = ['reading', 'listening', 'vocabulary', 'grammar', 'writing', 'speaking'];
     return skills.map(skill => {
       const skillResults = results.filter(r => r.skill === skill);
       const averageScore = skillResults.length > 0
@@ -134,7 +137,24 @@ export default function Dashboard() {
   const getSkillDistribution = () => [
     { name: 'Reading', value: results.filter(r => r.skill === 'reading').length },
     { name: 'Listening', value: results.filter(r => r.skill === 'listening').length },
+    { name: 'Vocabulary', value: results.filter(r => r.skill === 'vocabulary').length },
+    { name: 'Grammar', value: results.filter(r => r.skill === 'grammar').length },
+    { name: 'Writing', value: results.filter(r => r.skill === 'writing').length },
+    { name: 'Speaking', value: results.filter(r => r.skill === 'speaking').length },
   ].filter(d => d.value > 0);
+
+  const getRadarData = () => {
+    const skills = ['reading', 'listening', 'vocabulary', 'grammar', 'writing', 'speaking'];
+    const labels: Record<string, string> = {
+      reading: 'Reading', listening: 'Listening', vocabulary: "Lug'at",
+      grammar: 'Grammatika', writing: 'Writing', speaking: 'Speaking',
+    };
+    return skills.map(skill => {
+      const skillResults = results.filter(r => r.skill === skill);
+      const avg = skillResults.length > 0 ? Math.round(skillResults.reduce((s, r) => s + r.percentage, 0) / skillResults.length) : 0;
+      return { skill: labels[skill] || skill, score: avg, fullMark: 100 };
+    });
+  };
 
   const getLevelDistribution = () => {
     const levels: CEFRLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1'];
@@ -221,11 +241,88 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* Gamification Section */}
+        {progress && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+            {/* XP & Level */}
+            <Card className="border-border/50 lg:col-span-2">
+              <CardContent className="pt-5">
+                <div className="flex items-center gap-6">
+                  <div className="relative">
+                    <motion.div
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex flex-col items-center justify-center border border-primary/20"
+                    >
+                      <Crown className="w-5 h-5 text-primary mb-0.5" />
+                      <span className="text-2xl font-display font-bold">{progress.level}</span>
+                    </motion.div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-semibold flex items-center gap-1.5">
+                        <Zap className="w-4 h-4 text-primary" />
+                        {progress.xp.toLocaleString()} XP
+                      </span>
+                      <span className="text-xs text-muted-foreground">{xpToNextLevel} XP keyingi darajaga</span>
+                    </div>
+                    <Progress value={xpProgress} className="h-3 mb-3" />
+                    <div className="flex items-center gap-5">
+                      <div className="flex items-center gap-1.5">
+                        <Flame className={`w-4 h-4 ${progress.current_streak > 0 ? 'text-orange-500' : 'text-muted-foreground'}`} />
+                        <span className="text-sm font-semibold">{progress.current_streak} kun</span>
+                        <span className="text-xs text-muted-foreground">streak</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Trophy className="w-4 h-4 text-amber-500" />
+                        <span className="text-sm font-semibold">{userAchievements.length}/{achievements.length}</span>
+                        <span className="text-xs text-muted-foreground">yutuq</span>
+                      </div>
+                      {userRank > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <Medal className="w-4 h-4 text-primary" />
+                          <span className="text-sm font-semibold">#{userRank}</span>
+                          <span className="text-xs text-muted-foreground">reyting</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Streak Calendar */}
+            <Card className="border-border/50">
+              <CardContent className="pt-5">
+                <div className="text-center">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', delay: 0.2 }}
+                    className={`w-16 h-16 rounded-2xl mx-auto mb-3 flex items-center justify-center ${
+                      progress.current_streak > 0
+                        ? 'bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30'
+                        : 'bg-muted'
+                    }`}
+                  >
+                    <Flame className={`w-8 h-8 ${progress.current_streak > 0 ? 'text-orange-500' : 'text-muted-foreground'}`} />
+                  </motion.div>
+                  <p className="text-3xl font-display font-bold">{progress.current_streak}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">kunlik streak</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Eng yaxshi: {progress.longest_streak} kun</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="overview">Umumiy</TabsTrigger>
+            <TabsTrigger value="skills">Ko'nikmalar</TabsTrigger>
+            <TabsTrigger value="leaderboard">Reyting</TabsTrigger>
+            <TabsTrigger value="achievements">Yutuqlar</TabsTrigger>
             <TabsTrigger value="history">Tarix</TabsTrigger>
-            <TabsTrigger value="analysis">Tahlil</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -305,11 +402,132 @@ export default function Dashboard() {
             </div>
           </TabsContent>
 
+          {/* Skills Radar */}
+          <TabsContent value="skills" className="space-y-5">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <Card className="border-border/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Ko'nikmalar Radar</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <RadarChart data={getRadarData()}>
+                      <PolarGrid stroke="hsl(var(--border))" />
+                      <PolarAngleAxis dataKey="skill" tick={{ fontSize: 12 }} />
+                      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                      <Radar name="Natija" dataKey="score" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.2} strokeWidth={2} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              <Card className="border-border/50">
+                <CardHeader className="pb-2"><CardTitle className="text-base">Ko'nikmalar taqsimoti</CardTitle></CardHeader>
+                <CardContent>
+                  {skillDistribution.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie data={skillDistribution} cx="50%" cy="50%" innerRadius={55} outerRadius={100} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                          {skillDistribution.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">Ma'lumot yo'q</div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Leaderboard */}
+          <TabsContent value="leaderboard">
+            <Card className="border-border/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base"><Trophy className="h-4 w-4 text-amber-500" /> Reyting jadvali</CardTitle>
+                <CardDescription className="text-xs">Eng yaxshi o'quvchilar</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {leaderboard.length > 0 ? (
+                  <div className="space-y-2">
+                    {leaderboard.map((entry, i) => (
+                      <motion.div
+                        key={entry.user_id}
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                        className={`flex items-center gap-4 p-3.5 rounded-xl border transition-colors ${
+                          entry.user_id === user?.id ? 'border-primary/50 bg-primary/5' : 'border-border/50 hover:bg-muted/30'
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
+                          i === 0 ? 'bg-amber-500/20 text-amber-600' :
+                          i === 1 ? 'bg-gray-300/20 text-gray-500' :
+                          i === 2 ? 'bg-orange-400/20 text-orange-500' :
+                          'bg-muted text-muted-foreground'
+                        }`}>
+                          {i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
+                          {entry.full_name?.charAt(0)?.toUpperCase() || '?'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{entry.full_name || 'Foydalanuvchi'}</p>
+                          <p className="text-xs text-muted-foreground">Daraja {entry.level} • {entry.current_streak} kun streak</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-display font-bold text-sm">{entry.xp.toLocaleString()}</p>
+                          <p className="text-[10px] text-muted-foreground">XP</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground text-sm">Hali reyting mavjud emas</div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Achievements */}
+          <TabsContent value="achievements">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {achievements.map((ach, i) => {
+                const unlocked = userAchievements.some(ua => ua.achievement_id === ach.id);
+                return (
+                  <motion.div
+                    key={ach.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                  >
+                    <Card className={`border-border/50 transition-all ${unlocked ? 'ring-1 ring-primary/30' : 'opacity-60'}`}>
+                      <CardContent className="pt-5 flex items-start gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 ${
+                          unlocked ? 'bg-primary/10' : 'bg-muted grayscale'
+                        }`}>
+                          {ach.icon}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <h4 className="font-semibold text-sm">{ach.title}</h4>
+                            {unlocked && <CheckCircle className="w-4 h-4 text-primary shrink-0" />}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{ach.description}</p>
+                          <p className="text-xs font-medium text-primary mt-1">+{ach.xp_reward} XP</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </TabsContent>
+
           <TabsContent value="history">
             <Card className="border-border/50">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Test tarixi</CardTitle>
-                <CardDescription className="text-xs">Barcha ishlangan testlar</CardDescription>
               </CardHeader>
               <CardContent>
                 {results.length > 0 ? (
@@ -317,8 +535,8 @@ export default function Dashboard() {
                     {results.map(result => (
                       <div key={result.id} className="flex items-center justify-between p-3.5 rounded-xl border border-border/50 hover:bg-muted/30 transition-colors">
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-xl ${result.skill === 'reading' ? 'bg-primary/10' : 'bg-blue-500/10'}`}>
-                            {result.skill === 'reading' ? <BookOpen className="h-4 w-4 text-primary" /> : <Headphones className="h-4 w-4 text-blue-500" />}
+                          <div className="p-2 rounded-xl bg-primary/10">
+                            <BookOpen className="h-4 w-4 text-primary" />
                           </div>
                           <div>
                             <p className="font-medium text-sm capitalize">{result.skill} - {result.level}</p>
@@ -341,71 +559,10 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          <TabsContent value="analysis" className="space-y-5">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              <Card className="border-border/50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Ko'nikmalar taqsimoti</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {skillDistribution.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <PieChart>
-                        <Pie data={skillDistribution} cx="50%" cy="50%" innerRadius={55} outerRadius={90} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
-                          {skillDistribution.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="h-[240px] flex items-center justify-center text-muted-foreground text-sm">Ma'lumot yo'q</div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card className="border-border/50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Daraja bo'yicha natijalar</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {levelDistribution.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={levelDistribution}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis dataKey="level" fontSize={12} />
-                        <YAxis domain={[0, 100]} fontSize={12} />
-                        <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '13px' }} formatter={(value: number) => [`${value}%`, "O'rtacha"]} />
-                        <Bar dataKey="avgScore" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="h-[240px] flex items-center justify-center text-muted-foreground text-sm">Ma'lumot yo'q</div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="border-border/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Daraja bo'yicha progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {levelAnalysis.map(level => (
-                    <div key={level.level} className={`p-4 rounded-xl border text-center ${level.recommended ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-border/50'}`}>
-                      <p className="text-xl font-display font-bold mb-0.5">{level.level}</p>
-                      <p className="text-base font-semibold text-primary">{level.averageScore}%</p>
-                      <p className="text-[10px] text-muted-foreground">{level.testsCompleted} test</p>
-                      {level.recommended && <Badge variant="default" className="mt-2 text-[10px]">O'zlashtirilgan</Badge>}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </main>
+
+      <AchievementToast achievement={newAchievement} onDismiss={dismissAchievement} />
     </div>
   );
 }
