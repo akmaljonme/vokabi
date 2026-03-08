@@ -21,6 +21,7 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
   const mockTest = result.mockTest || generateMockTest(result.mockId, result.level, result.skill);
   const { user } = useAuth();
   const { saveResult } = useTestResults();
+  const { isPro } = useSubscription();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
