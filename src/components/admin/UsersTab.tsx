@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MoreVertical, Shield, ShieldOff, Trash2, Eye } from 'lucide-react';
+import { Search, MoreVertical, Shield, ShieldOff, Trash2, Eye, Crown, CrownIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,6 +27,7 @@ interface UserProfile {
   roles: string[];
   test_count: number;
   avg_score: number;
+  is_pro: boolean;
 }
 
 export const UsersTab = () => {
@@ -65,6 +66,15 @@ export const UsersTab = () => {
             .select('percentage')
             .eq('user_id', profile.user_id);
 
+          // Fetch subscription
+          const { data: sub } = await supabase
+            .from('subscriptions')
+            .select('plan, expires_at')
+            .eq('user_id', profile.user_id)
+            .maybeSingle();
+
+          const isPro = sub?.plan === 'pro' && (!sub.expires_at || new Date(sub.expires_at) > new Date());
+
           const avgScore = tests?.length 
             ? Math.round(tests.reduce((acc, t) => acc + t.percentage, 0) / tests.length)
             : 0;
@@ -73,7 +83,8 @@ export const UsersTab = () => {
             ...profile,
             roles: rolesData?.map(r => r.role) || [],
             test_count: tests?.length || 0,
-            avg_score: avgScore
+            avg_score: avgScore,
+            is_pro: isPro
           };
         })
       );
@@ -106,6 +117,27 @@ export const UsersTab = () => {
     } catch (error) {
       console.error('Error updating role:', error);
       toast.error('Failed to update role');
+    }
+  };
+
+  const toggleProStatus = async (userId: string, isCurrentlyPro: boolean) => {
+    try {
+      if (isCurrentlyPro) {
+        await supabase
+          .from('subscriptions')
+          .delete()
+          .eq('user_id', userId);
+        toast.success('Pro status olib tashlandi');
+      } else {
+        await supabase
+          .from('subscriptions')
+          .upsert({ user_id: userId, plan: 'pro' }, { onConflict: 'user_id' });
+        toast.success('Pro status berildi');
+      }
+      fetchUsers();
+    } catch (error) {
+      console.error('Error updating pro status:', error);
+      toast.error('Pro statusni yangilashda xatolik');
     }
   };
 
@@ -162,6 +194,7 @@ export const UsersTab = () => {
               <tr>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">User</th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Role</th>
+                <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Plan</th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Tests Taken</th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Avg Score</th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Joined</th>
@@ -199,6 +232,18 @@ export const UsersTab = () => {
                         </span>
                       )}
                     </td>
+                    <td className="py-4 px-4">
+                      {user.is_pro ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600">
+                          <Crown className="w-3 h-3" />
+                          Pro
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                          Free
+                        </span>
+                      )}
+                    </td>
                     <td className="py-4 px-4 text-sm">{user.test_count}</td>
                     <td className="py-4 px-4">
                       <span className={user.avg_score >= 60 ? 'text-green-500' : 'text-destructive'}>
@@ -231,6 +276,19 @@ export const UsersTab = () => {
                               </>
                             )}
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toggleProStatus(user.user_id, user.is_pro)}>
+                            {user.is_pro ? (
+                              <>
+                                <Crown className="w-4 h-4 mr-2 text-muted-foreground" />
+                                Remove Pro
+                              </>
+                            ) : (
+                              <>
+                                <Crown className="w-4 h-4 mr-2 text-amber-500" />
+                                Make Pro
+                              </>
+                            )}
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -239,7 +297,7 @@ export const UsersTab = () => {
               })}
               {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
                     No users found
                   </td>
                 </tr>

@@ -6,8 +6,10 @@ import { TestResult } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTestResults } from '@/hooks/useTestResults';
+import { useSubscription } from '@/hooks/useSubscription';
 import { generateTestPDF, generateResultPDF } from '@/utils/pdfGenerator';
 import { motion } from 'framer-motion';
+import { Crown, Lock } from 'lucide-react';
 
 interface ResultPageProps {
   result: TestResult;
@@ -19,6 +21,7 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
   const mockTest = result.mockTest || generateMockTest(result.mockId, result.level, result.skill);
   const { user } = useAuth();
   const { saveResult } = useTestResults();
+  const { isPro } = useSubscription();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -161,7 +164,19 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
           <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={onRetry} className="btn-primary flex items-center gap-2 text-sm">
             <RotateCcw className="w-4 h-4" /> Qayta ishlash
           </motion.button>
-          <CertificateDownload result={result} />
+          {isPro ? (
+            <CertificateDownload result={result} />
+          ) : (
+            <div className="relative group">
+              <button disabled className="btn-outline flex items-center gap-2 text-sm opacity-50 cursor-not-allowed">
+                <Lock className="w-4 h-4" /> Sertifikat
+                <Crown className="w-3 h-3 text-amber-500" />
+              </button>
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Pro versiya kerak
+              </div>
+            </div>
+          )}
           <button onClick={() => generateTestPDF(mockTest)} className="btn-outline flex items-center gap-2 text-sm">
             <FileDown className="w-4 h-4" /> Test PDF
           </button>
@@ -171,8 +186,8 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
           <button onClick={onBack} className="btn-outline text-sm">Boshqa test</button>
         </motion.div>
 
-        {/* AI Video Recommendations */}
-        {result.percentage < 100 && (
+        {/* AI Video Recommendations - Pro Only */}
+        {result.percentage < 100 && isPro && (
           <div className="max-w-4xl mx-auto mb-8">
             <VideoRecommendations
               wrongQuestions={result.answers
@@ -185,6 +200,23 @@ export const ResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
               skill={result.skill}
             />
           </div>
+        )}
+
+        {/* Pro Upsell Banner */}
+        {!isPro && result.percentage < 100 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="max-w-2xl mx-auto mb-8 p-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 text-center"
+          >
+            <Crown className="w-8 h-8 text-amber-500 mx-auto mb-3" />
+            <h3 className="font-display font-bold text-lg mb-2">Pro versiyaga o'ting</h3>
+            <p className="text-sm text-muted-foreground mb-1">
+              AI tahlil, video tavsiyalar, sertifikat yuklab olish va cheksiz testlar
+            </p>
+            <p className="text-xs text-muted-foreground">Admin bilan bog'laning Pro olish uchun</p>
+          </motion.div>
         )}
 
         {/* Detailed Review */}
