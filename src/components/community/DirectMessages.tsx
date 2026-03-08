@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCall } from '@/contexts/CallContext';
@@ -12,33 +12,85 @@ import { toast } from 'sonner';
 
 interface Profile { user_id: string; full_name: string | null; username: string | null; avatar_url: string | null; }
 interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; image_url?: string | null; audio_url?: string | null; }
+interface ChatPreview { profile: Profile; lastMessage: string; lastMessageAt: string; unreadCount: number; }
+
+const formatTime = (dateStr: string) => {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diff = now.getTime() - d.getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return d.toLocaleTimeString('uz', { hour: '2-digit', minute: '2-digit' });
+  if (days === 1) return 'Kecha';
+  if (days < 7) return d.toLocaleDateString('uz', { weekday: 'short' });
+  return d.toLocaleDateString('uz', { day: '2-digit', month: '2-digit' });
+};
 
 export const DirectMessages = () => {
   const { user } = useAuth();
   const call = useCall();
-  const [contacts, setContacts] = useState<Profile[]>([]);
+  const [chatPreviews, setChatPreviews] = useState<ChatPreview[]>([]);
   const [activeContact, setActiveContact] = useState<Profile | null>(null);
   const [messages, setMessages] = useState<DM[]>([]);
   const [search, setSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const loadChatPreviews = useCallback(async () => {
     if (!user) return;
-    loadContacts();
-    loadAllUsers();
+    // Get all DMs for user
+    const { data: dms } = await supabase.from('direct_messages').select('*')
+      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .order('created_at', { ascending: false });
+    if (!dms || dms.length === 0) { setChatPreviews([]); return; }
+
+    // Group by contact
+    const contactMap = new Map<string, { lastMsg: DM; unread: number }>();
+    for (const dm of dms as DM[]) {
+      const contactId = dm.sender_id === user.id ? dm.receiver_id : dm.sender_id;
+      if (!contactMap.has(contactId)) {
+        contactMap.set(contactId, { lastMsg: dm, unread: 0 });
+      }
+      if (dm.receiver_id === user.id && !dm.is_read) {
+        const entry = contactMap.get(contactId)!;
+        entry.unread++;
+      }
+    }
+
+    const ids = [...contactMap.keys()];
+    if (ids.length === 0) { setChatPreviews([]); return; }
+    const { data: profiles } = await (supabase.from('profiles') as any).select('user_id, full_name, username, avatar_url').in('user_id', ids);
+    if (!profiles) return;
+
+    const profileMap = new Map<string, Profile>();
+    for (const p of profiles) profileMap.set(p.user_id, p);
+
+    const previews: ChatPreview[] = [];
+    for (const [contactId, { lastMsg, unread }] of contactMap) {
+      const profile = profileMap.get(contactId);
+      if (!profile) continue;
+      let preview = lastMsg.content;
+      if (lastMsg.image_url) preview = '📷 Rasm';
+      if (lastMsg.audio_url) preview = '🎤 Ovozli xabar';
+      if (preview.length > 40) preview = preview.slice(0, 40) + '...';
+      if (lastMsg.sender_id === user.id) preview = `Siz: ${preview}`;
+      previews.push({ profile, lastMessage: preview, lastMessageAt: lastMsg.created_at, unreadCount: unread });
+    }
+    previews.sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
+    setChatPreviews(previews);
   }, [user]);
 
-  const loadContacts = async () => {
+  useEffect(() => {
     if (!user) return;
-    const { data: dms } = await supabase.from('direct_messages').select('sender_id, receiver_id')
-      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at', { ascending: false });
-    if (!dms) return;
-    const ids = [...new Set(dms.flatMap(d => [d.sender_id, d.receiver_id]).filter(id => id !== user.id))];
-    if (ids.length === 0) return;
-    const { data: profiles } = await (supabase.from('profiles') as any).select('user_id, full_name, username, avatar_url').in('user_id', ids);
-    if (profiles) setContacts(profiles);
-  };
+    loadChatPreviews();
+    loadAllUsers();
+
+    // Listen for new DMs to refresh previews
+    const channel = supabase.channel('dm-previews')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'direct_messages' }, () => {
+        loadChatPreviews();
+      }).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, loadChatPreviews]);
 
   const loadAllUsers = async () => {
     if (!user) return;
@@ -64,6 +116,9 @@ export const DirectMessages = () => {
             const msg = payload.new as DM;
             if ((msg.sender_id === user.id && msg.receiver_id === otherId) || (msg.sender_id === otherId && msg.receiver_id === user.id)) {
               setMessages(prev => [...prev, msg]);
+              if (msg.sender_id === otherId) {
+                supabase.from('direct_messages').update({ is_read: true }).eq('id', msg.id).then(() => {});
+              }
             }
           } else if (payload.eventType === 'UPDATE') {
             const msg = payload.new as DM;
@@ -106,9 +161,6 @@ export const DirectMessages = () => {
 
   const startChat = (profile: Profile) => {
     setActiveContact(profile);
-    if (!contacts.find(c => c.user_id === profile.user_id)) {
-      setContacts(prev => [profile, ...prev]);
-    }
   };
 
   const filteredUsers = search.trim() ? allUsers.filter(u => {
@@ -118,21 +170,21 @@ export const DirectMessages = () => {
 
   if (!activeContact) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-2">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Foydalanuvchi qidirish..." className="pl-10 rounded-xl" />
         </div>
         {search.trim() && (
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {filteredUsers.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Topilmadi</p>}
             {filteredUsers.map(u => (
               <button key={u.user_id} onClick={() => { startChat(u); setSearch(''); }}
                 className="w-full p-3 rounded-xl hover:bg-muted flex items-center gap-3 text-left transition-colors">
-                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="w-4 h-4 text-primary" />
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  {u.avatar_url ? <img src={u.avatar_url} className="w-10 h-10 rounded-full object-cover" /> : <User className="w-5 h-5 text-primary" />}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <span className="font-medium text-sm">{u.username ? `@${u.username}` : u.full_name || 'Foydalanuvchi'}</span>
                   {u.username && u.full_name && <p className="text-xs text-muted-foreground">{u.full_name}</p>}
                 </div>
@@ -142,19 +194,38 @@ export const DirectMessages = () => {
         )}
         {!search.trim() && (
           <>
-            <p className="text-sm text-muted-foreground">{contacts.length ? 'So\'nggi suhbatlar' : 'Hali suhbatlar yo\'q. Yuqoridan foydalanuvchi qidiring!'}</p>
-            {contacts.map(c => (
-              <button key={c.user_id} onClick={() => setActiveContact(c)}
-                className="w-full p-4 rounded-xl border border-border bg-card hover:bg-muted/50 flex items-center gap-4 text-left transition-all">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <span className="font-semibold">{c.username ? `@${c.username}` : c.full_name || 'Foydalanuvchi'}</span>
-                  {c.username && c.full_name && <p className="text-xs text-muted-foreground">{c.full_name}</p>}
-                </div>
-              </button>
-            ))}
+            {chatPreviews.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-8">Hali suhbatlar yo'q. Yuqoridan foydalanuvchi qidiring!</p>
+            )}
+            <div className="space-y-0.5">
+              {chatPreviews.map(chat => (
+                <button key={chat.profile.user_id} onClick={() => setActiveContact(chat.profile)}
+                  className="w-full px-3 py-3 rounded-xl hover:bg-muted/50 flex items-center gap-3 text-left transition-colors">
+                  <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0 relative">
+                    {chat.profile.avatar_url
+                      ? <img src={chat.profile.avatar_url} className="w-11 h-11 rounded-full object-cover" />
+                      : <User className="w-5 h-5 text-primary" />
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-sm truncate">
+                        {chat.profile.username ? `@${chat.profile.username}` : chat.profile.full_name || 'Foydalanuvchi'}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground shrink-0">{formatTime(chat.lastMessageAt)}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                      <p className="text-xs text-muted-foreground truncate">{chat.lastMessage}</p>
+                      {chat.unreadCount > 0 && (
+                        <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center justify-center">
+                          {chat.unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </>
         )}
       </div>
