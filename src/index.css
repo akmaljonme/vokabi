@@ -72,27 +72,51 @@
   }
 
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 10%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 10%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 358 84% 55%;
+    --background: 225 30% 5%;
+    --foreground: 210 40% 96%;
+    --card: 225 25% 8%;
+    --card-foreground: 210 40% 96%;
+    --popover: 225 25% 9%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 358 84% 58%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 358 84% 65%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 14%;
-    --muted-foreground: 215 20% 55%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 358 84% 55%;
+    --primary-glow: 358 84% 68%;
+    --secondary: 225 20% 12%;
+    --secondary-foreground: 210 30% 92%;
+    --muted: 225 20% 11%;
+    --muted-foreground: 215 15% 58%;
+    --accent: 225 20% 14%;
+    --accent-foreground: 210 40% 96%;
+    --border: 225 15% 15%;
+    --input: 225 15% 15%;
+    --ring: 358 84% 58%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.2), 0 4px 16px hsl(0 0% 0% / 0.15);
-    --shadow-card-hover: 0 8px 30px -6px hsl(358 84% 50% / 0.25), 0 2px 8px hsl(0 0% 0% / 0.15);
+    /* Dark mode gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(225 30% 5%) 0%, hsl(225 30% 3%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(225 25% 9%) 0%, hsl(225 25% 7%) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+    --gradient-mesh: radial-gradient(at 40% 20%, hsl(358 84% 50% / 0.12) 0px, transparent 50%),
+                     radial-gradient(at 80% 0%, hsl(222 47% 50% / 0.1) 0px, transparent 50%),
+                     radial-gradient(at 0% 50%, hsl(270 60% 50% / 0.08) 0px, transparent 50%);
+
+    /* Dark mode shadows */
+    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow-sm: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 8px 24px -8px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 20px 50px -12px hsl(0 0% 0% / 0.5);
+    --shadow-xl: 0 25px 65px -15px hsl(0 0% 0% / 0.6);
+    --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.25), 0 4px 16px hsl(0 0% 0% / 0.2);
+    --shadow-card-hover: 0 8px 30px -6px hsl(358 84% 50% / 0.3), 0 2px 8px hsl(0 0% 0% / 0.2);
+    --shadow-glow: 0 0 60px -12px hsl(358 84% 50% / 0.5);
+
+    /* Dark level colors - slightly brighter */
+    --level-a1: 142 76% 42%;
+    --level-a2: 173 80% 45%;
+    --level-b1: 45 93% 52%;
+    --level-b2: 25 95% 58%;
+    --level-c1: 358 84% 58%;
   }
 }
 
