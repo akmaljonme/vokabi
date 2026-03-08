@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, ArrowLeft, Search, User } from 'lucide-react';
 
-interface Profile { user_id: string; full_name: string | null; avatar_url: string | null; }
+interface Profile { user_id: string; full_name: string | null; username: string | null; avatar_url: string | null; }
 interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; }
 
 export const DirectMessages = () => {
@@ -34,13 +34,13 @@ export const DirectMessages = () => {
     if (!dms) return;
     const ids = [...new Set(dms.flatMap(d => [d.sender_id, d.receiver_id]).filter(id => id !== user.id))];
     if (ids.length === 0) return;
-    const { data: profiles } = await supabase.from('profiles').select('user_id, full_name, avatar_url').in('user_id', ids);
+    const { data: profiles } = await (supabase.from('profiles') as any).select('user_id, full_name, username, avatar_url').in('user_id', ids);
     if (profiles) setContacts(profiles);
   };
 
   const loadAllUsers = async () => {
     if (!user) return;
-    const { data } = await supabase.from('profiles').select('user_id, full_name, avatar_url').neq('user_id', user.id).limit(50);
+    const { data } = await (supabase.from('profiles') as any).select('user_id, full_name, username, avatar_url').neq('user_id', user.id).limit(50);
     if (data) setAllUsers(data);
   };
 
@@ -88,7 +88,10 @@ export const DirectMessages = () => {
     }
   };
 
-  const filteredUsers = search.trim() ? allUsers.filter(u => u.full_name?.toLowerCase().includes(search.toLowerCase())) : [];
+  const filteredUsers = search.trim() ? allUsers.filter(u => {
+    const q = search.toLowerCase();
+    return u.full_name?.toLowerCase().includes(q) || u.username?.toLowerCase().includes(q);
+  }) : [];
 
   if (!activeContact) {
     return (
@@ -108,7 +111,10 @@ export const DirectMessages = () => {
                 <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
                   <User className="w-4 h-4 text-primary" />
                 </div>
-                <span className="font-medium text-sm">{u.full_name || 'Foydalanuvchi'}</span>
+                <div>
+                  <span className="font-medium text-sm">{u.username ? `@${u.username}` : u.full_name || 'Foydalanuvchi'}</span>
+                  {u.username && u.full_name && <p className="text-xs text-muted-foreground">{u.full_name}</p>}
+                </div>
               </button>
             ))}
           </div>
@@ -123,7 +129,10 @@ export const DirectMessages = () => {
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <User className="w-5 h-5 text-primary" />
                 </div>
-                <span className="font-semibold">{c.full_name || 'Foydalanuvchi'}</span>
+                <div>
+                  <span className="font-semibold">{c.username ? `@${c.username}` : c.full_name || 'Foydalanuvchi'}</span>
+                  {c.username && c.full_name && <p className="text-xs text-muted-foreground">{c.full_name}</p>}
+                </div>
               </button>
             ))}
           </>
@@ -141,7 +150,7 @@ export const DirectMessages = () => {
         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
           <User className="w-4 h-4 text-primary" />
         </div>
-        <span className="font-semibold text-sm">{activeContact.full_name || 'Foydalanuvchi'}</span>
+        <span className="font-semibold text-sm">{activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}</span>
       </div>
 
       <ScrollArea className="flex-1 p-4">
