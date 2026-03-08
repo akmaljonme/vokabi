@@ -30,7 +30,7 @@ interface TestFormDialogProps {
 }
 
 const levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
-const skills = ['reading', 'listening', 'grammar', 'vocabulary'];
+const skills = ['reading', 'listening', 'grammar', 'vocabulary', 'speaking', 'writing'];
 
 export const TestFormDialog = ({ open, onOpenChange, test, onSave, loading }: TestFormDialogProps) => {
   const [formData, setFormData] = useState({

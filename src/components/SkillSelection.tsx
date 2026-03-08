@@ -242,6 +242,20 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
               {renderTestList(listeningTests, 'listening')}
             </div>
           )}
+
+          {activeTab === 'writing' && (
+            <div>
+              <h2 className="text-lg font-display font-bold mb-6 text-center tracking-tight">Writing Testlari</h2>
+              {renderTestList(writingTests, 'writing')}
+            </div>
+          )}
+
+          {activeTab === 'speaking' && (
+            <div>
+              <h2 className="text-lg font-display font-bold mb-6 text-center tracking-tight">Speaking Testlari</h2>
+              {renderTestList(speakingTests, 'speaking')}
+            </div>
+          )}
         </div>
       </div>
     </div>

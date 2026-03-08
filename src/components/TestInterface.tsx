@@ -40,6 +40,20 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isNoParts = skill === 'vocabulary' || skill === 'grammar';
+  const isWriting = skill === 'writing';
+  const isSpeaking = skill === 'speaking';
+  const isOpenEnded = isWriting || isSpeaking;
+
+  // Writing state
+  const [writingText, setWritingText] = useState('');
+  
+  // Speaking state
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [speakingSubmitting, setSpeakingSubmitting] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   const { test: dbTest, loading: dbLoading } = useTestWithQuestions(testId);
 
