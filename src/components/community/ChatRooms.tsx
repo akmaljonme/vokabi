@@ -1,13 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Hash, X, Forward, Search, User } from 'lucide-react';
+import { ArrowLeft, Hash, X, Forward, Search, User, Plus, Trash2, Pencil } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { ChatMediaInput } from './ChatMediaInput';
 import { ChatMessageBubble, ReplyInfo, ForwardInfo } from './ChatMessageBubble';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Room { id: string; name: string; description: string | null; level: string; }
 interface Message { id: string; room_id: string; user_id: string; content: string; created_at: string; image_url?: string | null; audio_url?: string | null; reply_to_id?: string | null; forwarded_from?: string | null; }
@@ -15,6 +20,7 @@ interface Profile { user_id: string; full_name: string | null; username: string 
 
 export const ChatRooms = () => {
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
