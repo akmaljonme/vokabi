@@ -402,11 +402,132 @@ export default function Dashboard() {
             </div>
           </TabsContent>
 
+          {/* Skills Radar */}
+          <TabsContent value="skills" className="space-y-5">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <Card className="border-border/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Ko'nikmalar Radar</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <RadarChart data={getRadarData()}>
+                      <PolarGrid stroke="hsl(var(--border))" />
+                      <PolarAngleAxis dataKey="skill" tick={{ fontSize: 12 }} />
+                      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                      <Radar name="Natija" dataKey="score" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.2} strokeWidth={2} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              <Card className="border-border/50">
+                <CardHeader className="pb-2"><CardTitle className="text-base">Ko'nikmalar taqsimoti</CardTitle></CardHeader>
+                <CardContent>
+                  {skillDistribution.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie data={skillDistribution} cx="50%" cy="50%" innerRadius={55} outerRadius={100} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                          {skillDistribution.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">Ma'lumot yo'q</div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Leaderboard */}
+          <TabsContent value="leaderboard">
+            <Card className="border-border/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base"><Trophy className="h-4 w-4 text-amber-500" /> Reyting jadvali</CardTitle>
+                <CardDescription className="text-xs">Eng yaxshi o'quvchilar</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {leaderboard.length > 0 ? (
+                  <div className="space-y-2">
+                    {leaderboard.map((entry, i) => (
+                      <motion.div
+                        key={entry.user_id}
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                        className={`flex items-center gap-4 p-3.5 rounded-xl border transition-colors ${
+                          entry.user_id === user?.id ? 'border-primary/50 bg-primary/5' : 'border-border/50 hover:bg-muted/30'
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
+                          i === 0 ? 'bg-amber-500/20 text-amber-600' :
+                          i === 1 ? 'bg-gray-300/20 text-gray-500' :
+                          i === 2 ? 'bg-orange-400/20 text-orange-500' :
+                          'bg-muted text-muted-foreground'
+                        }`}>
+                          {i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
+                          {entry.full_name?.charAt(0)?.toUpperCase() || '?'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{entry.full_name || 'Foydalanuvchi'}</p>
+                          <p className="text-xs text-muted-foreground">Daraja {entry.level} • {entry.current_streak} kun streak</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-display font-bold text-sm">{entry.xp.toLocaleString()}</p>
+                          <p className="text-[10px] text-muted-foreground">XP</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground text-sm">Hali reyting mavjud emas</div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Achievements */}
+          <TabsContent value="achievements">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {achievements.map((ach, i) => {
+                const unlocked = userAchievements.some(ua => ua.achievement_id === ach.id);
+                return (
+                  <motion.div
+                    key={ach.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                  >
+                    <Card className={`border-border/50 transition-all ${unlocked ? 'ring-1 ring-primary/30' : 'opacity-60'}`}>
+                      <CardContent className="pt-5 flex items-start gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 ${
+                          unlocked ? 'bg-primary/10' : 'bg-muted grayscale'
+                        }`}>
+                          {ach.icon}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <h4 className="font-semibold text-sm">{ach.title}</h4>
+                            {unlocked && <CheckCircle className="w-4 h-4 text-primary shrink-0" />}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{ach.description}</p>
+                          <p className="text-xs font-medium text-primary mt-1">+{ach.xp_reward} XP</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </TabsContent>
+
           <TabsContent value="history">
             <Card className="border-border/50">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Test tarixi</CardTitle>
-                <CardDescription className="text-xs">Barcha ishlangan testlar</CardDescription>
               </CardHeader>
               <CardContent>
                 {results.length > 0 ? (
@@ -414,8 +535,8 @@ export default function Dashboard() {
                     {results.map(result => (
                       <div key={result.id} className="flex items-center justify-between p-3.5 rounded-xl border border-border/50 hover:bg-muted/30 transition-colors">
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-xl ${result.skill === 'reading' ? 'bg-primary/10' : 'bg-blue-500/10'}`}>
-                            {result.skill === 'reading' ? <BookOpen className="h-4 w-4 text-primary" /> : <Headphones className="h-4 w-4 text-blue-500" />}
+                          <div className="p-2 rounded-xl bg-primary/10">
+                            <BookOpen className="h-4 w-4 text-primary" />
                           </div>
                           <div>
                             <p className="font-medium text-sm capitalize">{result.skill} - {result.level}</p>
@@ -438,71 +559,10 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          <TabsContent value="analysis" className="space-y-5">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              <Card className="border-border/50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Ko'nikmalar taqsimoti</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {skillDistribution.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <PieChart>
-                        <Pie data={skillDistribution} cx="50%" cy="50%" innerRadius={55} outerRadius={90} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
-                          {skillDistribution.map((_, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="h-[240px] flex items-center justify-center text-muted-foreground text-sm">Ma'lumot yo'q</div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card className="border-border/50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Daraja bo'yicha natijalar</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {levelDistribution.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={levelDistribution}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis dataKey="level" fontSize={12} />
-                        <YAxis domain={[0, 100]} fontSize={12} />
-                        <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '13px' }} formatter={(value: number) => [`${value}%`, "O'rtacha"]} />
-                        <Bar dataKey="avgScore" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="h-[240px] flex items-center justify-center text-muted-foreground text-sm">Ma'lumot yo'q</div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="border-border/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Daraja bo'yicha progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {levelAnalysis.map(level => (
-                    <div key={level.level} className={`p-4 rounded-xl border text-center ${level.recommended ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-border/50'}`}>
-                      <p className="text-xl font-display font-bold mb-0.5">{level.level}</p>
-                      <p className="text-base font-semibold text-primary">{level.averageScore}%</p>
-                      <p className="text-[10px] text-muted-foreground">{level.testsCompleted} test</p>
-                      {level.recommended && <Badge variant="default" className="mt-2 text-[10px]">O'zlashtirilgan</Badge>}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </main>
+
+      <AchievementToast achievement={newAchievement} onDismiss={dismissAchievement} />
     </div>
   );
 }
