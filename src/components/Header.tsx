@@ -3,6 +3,8 @@ import { ChevronDown, Menu, X, LogOut, User, Shield, Moon, Sun, Sparkles, Gamepa
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUnreadDMCount } from '@/hooks/useUnreadDMCount';
+import { Badge } from '@/components/ui/badge';
 
 interface HeaderProps {
   onNavigate: (view: 'landing' | 'levels') => void;
