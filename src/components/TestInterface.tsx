@@ -495,7 +495,6 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
                   ))}
                 </div>
               </>
-              </>
             )}
 
             {/* Question navigator - same style as ExamInterface */}
