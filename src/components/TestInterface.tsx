@@ -596,25 +596,43 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
             )}
           </div>
 
-          {/* Bottom navigation - same style as ExamInterface */}
+          {/* Bottom navigation */}
           <div className="bg-card border-t border-border p-4">
             <div className="flex items-center justify-between max-w-3xl mx-auto">
-              <Button
-                variant="outline"
-                disabled={isNoParts ? currentQuestion === 1 : (currentPart === 1 && currentQuestion === 1)}
-                onClick={() => handleNavigate('prev')}
-              >
-                <ArrowLeft className="w-4 h-4 mr-1" />Oldingi
-              </Button>
-              <span className="text-sm text-muted-foreground">{answers.length}/{totalQ} javob</span>
-              {(isNoParts ? currentQuestion === totalQ : (currentPart === (mockTest?.parts.length || 4) && currentQuestion === (part?.questions.length || 10))) ? (
-                <Button onClick={() => setShowConfirmFinish(true)}>
-                  <Flag className="w-4 h-4 mr-1" />Tugatish
-                </Button>
+              {isOpenEnded ? (
+                <>
+                  <div />
+                  <Button 
+                    onClick={() => setShowConfirmFinish(true)} 
+                    disabled={speakingSubmitting || (isWriting && !writingText.trim()) || (isSpeaking && !audioBlob)}
+                  >
+                    {speakingSubmitting ? (
+                      <><Loader2Icon className="w-4 h-4 mr-1 animate-spin" />Tekshirilmoqda...</>
+                    ) : (
+                      <><Send className="w-4 h-4 mr-1" />AI baholash uchun yuborish</>
+                    )}
+                  </Button>
+                </>
               ) : (
-                <Button onClick={() => handleNavigate('next')}>
-                  Keyingi<ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
+                <>
+                  <Button
+                    variant="outline"
+                    disabled={isNoParts ? currentQuestion === 1 : (currentPart === 1 && currentQuestion === 1)}
+                    onClick={() => handleNavigate('prev')}
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-1" />Oldingi
+                  </Button>
+                  <span className="text-sm text-muted-foreground">{answers.length}/{totalQ} javob</span>
+                  {(isNoParts ? currentQuestion === totalQ : (currentPart === (mockTest?.parts.length || 4) && currentQuestion === (part?.questions.length || 10))) ? (
+                    <Button onClick={() => setShowConfirmFinish(true)}>
+                      <Flag className="w-4 h-4 mr-1" />Tugatish
+                    </Button>
+                  ) : (
+                    <Button onClick={() => handleNavigate('next')}>
+                      Keyingi<ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           </div>
