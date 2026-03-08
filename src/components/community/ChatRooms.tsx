@@ -1,13 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Hash, X, Forward, Search, User } from 'lucide-react';
+import { ArrowLeft, Hash, X, Forward, Search, User, Plus, Trash2, Pencil } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { ChatMediaInput } from './ChatMediaInput';
 import { ChatMessageBubble, ReplyInfo, ForwardInfo } from './ChatMessageBubble';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Room { id: string; name: string; description: string | null; level: string; }
 interface Message { id: string; room_id: string; user_id: string; content: string; created_at: string; image_url?: string | null; audio_url?: string | null; reply_to_id?: string | null; forwarded_from?: string | null; }
@@ -15,6 +20,7 @@ interface Profile { user_id: string; full_name: string | null; username: string 
 
 export const ChatRooms = () => {
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -24,14 +30,56 @@ export const ChatRooms = () => {
   const [forwardSearch, setForwardSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showRoomDialog, setShowRoomDialog] = useState(false);
+  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const [roomForm, setRoomForm] = useState({ name: '', description: '', level: 'general' });
+
+  const loadRooms = () => {
+    supabase.from('chat_rooms').select('*').then(({ data }) => { if (data) setRooms(data); });
+  };
 
   useEffect(() => {
-    supabase.from('chat_rooms').select('*').then(({ data }) => { if (data) setRooms(data); });
+    loadRooms();
     if (user) {
       (supabase.from('profiles') as any).select('user_id, full_name, username, avatar_url').neq('user_id', user.id).limit(50)
         .then(({ data }: any) => { if (data) setAllUsers(data); });
     }
   }, [user]);
+
+  const openCreateRoom = () => {
+    setEditingRoom(null);
+    setRoomForm({ name: '', description: '', level: 'general' });
+    setShowRoomDialog(true);
+  };
+
+  const openEditRoom = (room: Room, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingRoom(room);
+    setRoomForm({ name: room.name, description: room.description || '', level: room.level });
+    setShowRoomDialog(true);
+  };
+
+  const handleSaveRoom = async () => {
+    if (!roomForm.name.trim()) return;
+    if (editingRoom) {
+      await supabase.from('chat_rooms').update({ name: roomForm.name, description: roomForm.description || null, level: roomForm.level } as any).eq('id', editingRoom.id);
+      toast.success("Xona yangilandi");
+    } else {
+      await supabase.from('chat_rooms').insert({ name: roomForm.name, description: roomForm.description || null, level: roomForm.level } as any);
+      toast.success("Yangi xona yaratildi");
+    }
+    setShowRoomDialog(false);
+    loadRooms();
+  };
+
+  const handleDeleteRoom = async (roomId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Bu xonani o'chirishni xohlaysizmi?")) return;
+    await supabase.from('chat_messages').delete().eq('room_id', roomId);
+    await supabase.from('chat_rooms').delete().eq('id', roomId);
+    toast.success("Xona o'chirildi");
+    loadRooms();
+  };
 
   useEffect(() => {
     if (!activeRoom) return;
@@ -149,17 +197,71 @@ export const ChatRooms = () => {
   if (!activeRoom) {
     return (
       <div className="space-y-3">
+        {isAdmin && (
+          <Button onClick={openCreateRoom} className="w-full gap-2 rounded-xl">
+            <Plus className="w-4 h-4" /> Yangi xona yaratish
+          </Button>
+        )}
         {rooms.map(room => (
           <motion.button key={room.id} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
             onClick={() => setActiveRoom(room)}
             className="w-full p-4 rounded-xl border border-border bg-card hover:bg-muted/50 text-left transition-all flex items-center gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Hash className="w-5 h-5 text-primary" /></div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h3 className="font-semibold">{room.name}</h3>
               <p className="text-sm text-muted-foreground">{room.description}</p>
             </div>
+            {isAdmin && (
+              <div className="flex items-center gap-1 shrink-0">
+                <button onClick={(e) => openEditRoom(room, e)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                  <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
+                <button onClick={(e) => handleDeleteRoom(room.id, e)} className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                </button>
+              </div>
+            )}
           </motion.button>
         ))}
+
+        {/* Room create/edit dialog */}
+        <Dialog open={showRoomDialog} onOpenChange={setShowRoomDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingRoom ? "Xonani tahrirlash" : "Yangi xona yaratish"}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label>Xona nomi</Label>
+                <Input value={roomForm.name} onChange={e => setRoomForm(f => ({ ...f, name: e.target.value }))} placeholder="Masalan: English Beginners" />
+              </div>
+              <div className="space-y-2">
+                <Label>Tavsif</Label>
+                <Input value={roomForm.description} onChange={e => setRoomForm(f => ({ ...f, description: e.target.value }))} placeholder="Xona haqida qisqacha..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Daraja</Label>
+                <Select value={roomForm.level} onValueChange={v => setRoomForm(f => ({ ...f, level: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">Umumiy</SelectItem>
+                    <SelectItem value="A1">A1</SelectItem>
+                    <SelectItem value="A2">A2</SelectItem>
+                    <SelectItem value="B1">B1</SelectItem>
+                    <SelectItem value="B2">B2</SelectItem>
+                    <SelectItem value="C1">C1</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRoomDialog(false)}>Bekor qilish</Button>
+              <Button onClick={handleSaveRoom} disabled={!roomForm.name.trim()}>
+                {editingRoom ? "Saqlash" : "Yaratish"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
