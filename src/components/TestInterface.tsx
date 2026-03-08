@@ -23,6 +23,8 @@ const skillConfig: Record<string, { label: string; icon: any; color: string }> =
   grammar: { label: 'Grammatika', icon: BookOpen, color: 'text-amber-500' },
   reading: { label: 'Reading', icon: BookOpen, color: 'text-primary' },
   listening: { label: 'Listening', icon: Headphones, color: 'text-primary' },
+  writing: { label: 'Writing', icon: PenTool, color: 'text-emerald-500' },
+  speaking: { label: 'Speaking', icon: Mic, color: 'text-rose-500' },
 };
 
 export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }: TestInterfaceProps) => {
