@@ -177,6 +177,7 @@ export const useWebRTC = (userId: string | undefined) => {
       await pc.setLocalDescription(offer);
       await sendSignal(callerId, 'offer', { sdp: offer });
 
+      if (timerRef.current) clearInterval(timerRef.current);
       timerRef.current = setInterval(() => setDuration(d => d + 1), 1000);
     } catch {
       updateCallState('idle');
