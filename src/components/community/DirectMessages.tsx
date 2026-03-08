@@ -129,7 +129,10 @@ export const DirectMessages = () => {
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <User className="w-5 h-5 text-primary" />
                 </div>
-                <span className="font-semibold">{c.full_name || 'Foydalanuvchi'}</span>
+                <div>
+                  <span className="font-semibold">{c.username ? `@${c.username}` : c.full_name || 'Foydalanuvchi'}</span>
+                  {c.username && c.full_name && <p className="text-xs text-muted-foreground">{c.full_name}</p>}
+                </div>
               </button>
             ))}
           </>
