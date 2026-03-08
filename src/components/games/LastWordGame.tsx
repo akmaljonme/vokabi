@@ -408,8 +408,8 @@ export const LastWordGame = ({ onBack }: Props) => {
             <Bot className="w-5 h-5 mr-2" /> AI bilan o'ynash
           </Button>
 
-          <Button className="w-full h-14 text-lg bg-gradient-to-r from-primary to-primary/80" onClick={() => { setMode('online'); setGameState('lobby'); }}>
-            <Wifi className="w-5 h-5 mr-2" /> 🌐 Online o'ynash
+          <Button className="w-full h-14 text-lg bg-gradient-to-r from-primary to-primary/80" onClick={() => { setMode('online'); findRoom(); }}>
+            <Wifi className="w-5 h-5 mr-2" /> 🌐 Online o'ynash (avtomatik raqib)
           </Button>
         </div>
         <div className="text-center mt-6">
@@ -419,39 +419,27 @@ export const LastWordGame = ({ onBack }: Props) => {
     );
   }
 
-  // === ONLINE LOBBY ===
+  // === ONLINE LOBBY (fallback — show waiting with join option) ===
   if (mode === 'online' && gameState === 'lobby') {
     return (
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="text-center mb-6">
-          <Wifi className="w-10 h-10 text-primary mx-auto mb-3" />
-          <h2 className="text-xl font-display font-bold">Online o'yin</h2>
-          <p className="text-sm text-muted-foreground">Boshqa talaba bilan o'ynang!</p>
-        </div>
-        <div className="max-w-md mx-auto space-y-4">
-          <Button className="w-full h-12" onClick={findRoom}>
-            <Users className="w-4 h-4 mr-2" /> Raqib topish (avtomatik)
-          </Button>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto text-center py-10">
+        <Loader2 className="w-12 h-12 text-primary mx-auto mb-4 animate-spin" />
+        <h2 className="text-xl font-display font-bold mb-2">Raqib qidirilmoqda...</h2>
+        <p className="text-sm text-muted-foreground mb-6">Saytdagi online foydalanuvchilar orasidan raqib topilmoqda</p>
 
+        <div className="space-y-4">
           <div className="relative">
             <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">yoki</span></div>
+            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">yoki do'stingiz ID bergan bo'lsa</span></div>
           </div>
-
           <div className="flex gap-2">
-            <Input
-              value={joinId}
-              onChange={e => setJoinId(e.target.value)}
-              placeholder="Xona ID kiriting..."
-              className="flex-1"
-            />
-            <Button onClick={() => joinId.trim() && joinRoom(joinId.trim())} disabled={!joinId.trim()}>
-              Qo'shilish
-            </Button>
+            <Input value={joinId} onChange={e => setJoinId(e.target.value)} placeholder="Xona ID kiriting..." className="flex-1" />
+            <Button onClick={() => joinId.trim() && joinRoom(joinId.trim())} disabled={!joinId.trim()}>Qo'shilish</Button>
           </div>
         </div>
-        <div className="text-center mt-6">
-          <Button variant="ghost" onClick={() => setMode('select')}>← Orqaga</Button>
+
+        <div className="mt-6">
+          <Button variant="ghost" onClick={() => { leaveRoom(); setMode('select'); }}>← Bekor qilish</Button>
         </div>
       </motion.div>
     );
@@ -463,12 +451,12 @@ export const LastWordGame = ({ onBack }: Props) => {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto text-center py-10">
         <Loader2 className="w-12 h-12 text-primary mx-auto mb-4 animate-spin" />
         <h2 className="text-xl font-display font-bold mb-2">Raqib kutilmoqda...</h2>
-        <p className="text-sm text-muted-foreground mb-6">Do'stingizga xona ID ni yuboring:</p>
+        <p className="text-sm text-muted-foreground mb-4">Saytdagi biror foydalanuvchi online o'yinga kirishi bilan o'yin boshlanadi</p>
 
-        <div className="card-elevated p-4 mb-6">
-          <p className="text-xs text-muted-foreground mb-2">Xona ID:</p>
+        <div className="card-elevated p-4 mb-4">
+          <p className="text-xs text-muted-foreground mb-2">Do'stingizga ham yuborishingiz mumkin:</p>
           <div className="flex items-center gap-2 justify-center">
-            <code className="text-sm font-mono bg-muted px-3 py-1.5 rounded-lg break-all">{roomId}</code>
+            <code className="text-xs font-mono bg-muted px-3 py-1.5 rounded-lg break-all">{roomId}</code>
             <Button size="icon" variant="ghost" onClick={copyRoomId}>
               {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
             </Button>
