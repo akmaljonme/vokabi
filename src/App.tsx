@@ -12,6 +12,7 @@ import ProfileSettings from "./pages/ProfileSettings";
 import Games from "./pages/Games";
 import Community from "./pages/Community";
 import NotFound from "./pages/NotFound";
+import Leaderboard from "./pages/Leaderboard";
 
 const queryClient = new QueryClient();
 
