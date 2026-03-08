@@ -411,8 +411,14 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="outline">{test.level}</Badge>
               <Badge variant="secondary">{test.skill}</Badge>
+              {isAIEvaluated && (
+                <Badge variant="default" className="bg-emerald-500/10 text-emerald-600 border-emerald-200">
+                  🤖 AI baholaydi
+                </Badge>
+              )}
               <span className="text-sm text-muted-foreground">
-                {questions.length} ta savol • {totalPoints} ball
+                {questions.length} ta {isAIEvaluated ? 'topshiriq' : 'savol'}
+                {!isAIEvaluated && ` • ${totalPoints} ball`}
                 {test.skill === 'reading' && ` • ${passages.length} ta matn`}
                 {test.skill === 'listening' && ` • ${audioFiles.length} ta audio`}
               </span>
@@ -434,7 +440,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
           )}
           <Button onClick={() => { setSelectedQuestion(null); setDialogOpen(true); }}>
             <Plus className="w-4 h-4 mr-2" />
-            Savol qo'shish
+            {isAIEvaluated ? 'Topshiriq qo\'shish' : 'Savol qo\'shish'}
           </Button>
         </div>
       </div>
