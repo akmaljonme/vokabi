@@ -18,6 +18,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const unreadCount = useUnreadDMCount();
 
   const toggleTheme = () => {
     const next = !isDark;
