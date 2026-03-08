@@ -146,6 +146,28 @@ export const UsersTab = () => {
     }
   };
 
+  const deleteUser = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke('delete-user', {
+        body: { user_id: deleteTarget.user_id },
+      });
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || 'Xatolik');
+      }
+      toast.success(`${deleteTarget.full_name || 'Foydalanuvchi'} o'chirildi`);
+      setDeleteTarget(null);
+      fetchUsers();
+    } catch (error: any) {
+      console.error('Delete error:', error);
+      toast.error(error.message || 'Foydalanuvchini o\'chirishda xatolik');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const viewUserDetails = async (user: UserProfile) => {
     setSelectedUser(user);
     
