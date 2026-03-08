@@ -1,25 +1,42 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { grammarQuestions } from '@/data/gameData';
+import { grammarQuestions, GrammarQuestion } from '@/data/gameData';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { Check, X, Timer } from 'lucide-react';
+import { Check, X, Timer, Loader2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useEffect } from 'react';
+import { useAIGameQuestions } from '@/hooks/useAIGameQuestions';
 
 interface Props { onBack: () => void; }
 
 export const GrammarBattleGame = ({ onBack }: Props) => {
   const { user } = useAuth();
-  const [questions] = useState(() => [...grammarQuestions].sort(() => Math.random() - 0.5).slice(0, 8));
+  const [questions, setQuestions] = useState<GrammarQuestion[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15);
   const [started, setStarted] = useState(false);
+  const ai = useAIGameQuestions<GrammarQuestion>('grammar_battle');
+
+  const startWithAI = async () => {
+    const aiQ = await ai.generate('B1');
+    if (aiQ && aiQ.length >= 4) {
+      setQuestions(aiQ.slice(0, 8));
+    } else {
+      setQuestions([...grammarQuestions].sort(() => Math.random() - 0.5).slice(0, 8));
+    }
+    setStarted(true);
+    setCurrentIdx(0);
+    setScore(0);
+    setSelected(null);
+    setGameOver(false);
+    setTimeLeft(15);
+  };
 
   useEffect(() => {
     if (!started || gameOver || selected !== null) return;
