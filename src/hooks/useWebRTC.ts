@@ -64,7 +64,7 @@ export const useWebRTC = (userId: string | undefined) => {
       if (!remoteAudioRef.current) {
         const audio = document.createElement('audio');
         audio.autoplay = true;
-        audio.playsInline = true;
+        (audio as any).playsInline = true;
         audio.id = 'webrtc-remote-audio';
         document.body.appendChild(audio);
         remoteAudioRef.current = audio;
