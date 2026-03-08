@@ -513,38 +513,54 @@ export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps)
             </h2>
           </FadeUp>
 
+          {/* Feedback button */}
+          {user && (
+            <FadeUp className="text-center mb-10">
+              <Button
+                variant="outline"
+                onClick={() => setShowFeedbackDialog(true)}
+                className="border-primary/30 hover:bg-primary/10"
+              >
+                <MessageSquarePlus className="w-4 h-4 mr-2" />
+                Fikr qoldirish
+              </Button>
+            </FadeUp>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
-            {[
-              { name: 'Aziza Karimova', level: 'B2 → IELTS 7.0', text: "AI tahlil funksiyasi juda kuchli — zaif tomonlarimni aniqlab, maxsus mashqlar tavsiya qildi. 3 oyda IELTS 7.0 oldim!", avatar: 'AK' },
-              { name: 'Sardor Rahimov', level: 'B1 → C1', text: "Speaking practice AI bilan juda qulay. Har kuni mashq qildim va 6 oyda B1 dan C1 ga o'tdim. Eng yaxshi platforma!", avatar: 'SR' },
-              { name: 'Malika Usmanova', level: 'A2 → B2', text: "Bepul versiyasi ham juda foydali, lekin Pro olganidan keyin AI writing baholash va video tavsiyalar hayotimni o'zgartirdi.", avatar: 'MU' },
-              { name: 'Bobur Aliyev', level: 'IELTS 8.0', text: "Boshqa platformalarni ham sinab ko'rdim, lekin IELTSify AI tahlili boshqalardan ancha ustun. Juda tavsiya qilaman!", avatar: 'BA' },
-              { name: 'Nilufar Qodirova', level: 'B1 Sertifikat', text: "Mobil qurilmada ham mukammal ishlaydi. Metro'da, navbatda — har joyda mashq qildim. Interfeys juda qulay.", avatar: 'NQ' },
-              { name: 'Jasur Toshmatov', level: 'C1 Sertifikat', text: "O'qituvchim tavsiya qildi. Grammatika testlari va AI feedback orqali xatolarimni tezda tushunib oldim.", avatar: 'JT' },
-            ].map((testimonial, index) => (
-              <FadeUp key={index} delay={index * 0.08}>
-                <div className="rounded-2xl p-7 bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] h-full hover:bg-white/[0.05] transition-colors">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-semibold text-sm text-primary">
-                      {testimonial.avatar}
+            {(feedbacks.length > 0 ? feedbacks : [
+              { full_name: 'Aziza Karimova', level_info: 'B2 → IELTS 7.0', message: "AI tahlil funksiyasi juda kuchli — zaif tomonlarimni aniqlab, maxsus mashqlar tavsiya qildi. 3 oyda IELTS 7.0 oldim!", rating: 5 },
+              { full_name: 'Sardor Rahimov', level_info: 'B1 → C1', message: "Speaking practice AI bilan juda qulay. Har kuni mashq qildim va 6 oyda B1 dan C1 ga o'tdim.", rating: 5 },
+              { full_name: 'Malika Usmanova', level_info: 'A2 → B2', message: "Bepul versiyasi ham juda foydali, lekin Pro olganidan keyin AI writing baholash hayotimni o'zgartirdi.", rating: 5 },
+            ]).map((fb: any, index: number) => {
+              const initials = fb.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || '??';
+              return (
+                <FadeUp key={fb.id || index} delay={index * 0.08}>
+                  <div className="rounded-2xl p-7 bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] h-full hover:bg-white/[0.05] transition-colors">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-semibold text-sm text-primary">
+                        {initials}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-sm">{fb.full_name}</div>
+                        {fb.level_info && <div className="text-xs text-secondary-foreground/50">{fb.level_info}</div>}
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-semibold text-sm">{testimonial.name}</div>
-                      <div className="text-xs text-secondary-foreground/50">{testimonial.level}</div>
+                    <div className="flex gap-0.5 mb-3">
+                      {[...Array(fb.rating || 5)].map((_: any, i: number) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-primary text-primary" />
+                      ))}
                     </div>
+                    <p className="text-secondary-foreground/60 text-sm leading-relaxed">{fb.message}</p>
                   </div>
-                  <div className="flex gap-0.5 mb-3">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="text-secondary-foreground/60 text-sm leading-relaxed">{testimonial.text}</p>
-                </div>
-              </FadeUp>
-            ))}
+                </FadeUp>
+              );
+            })}
           </div>
         </div>
       </section>
+
+      <FeedbackDialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog} />
 
       {/* FAQ Section */}
       <section id="faq" className="py-28 lg:py-36">
