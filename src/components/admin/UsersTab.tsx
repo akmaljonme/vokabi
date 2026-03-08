@@ -27,6 +27,7 @@ interface UserProfile {
   roles: string[];
   test_count: number;
   avg_score: number;
+  is_pro: boolean;
 }
 
 export const UsersTab = () => {
