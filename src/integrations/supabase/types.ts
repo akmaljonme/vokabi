@@ -133,6 +133,7 @@ export type Database = {
           audio_url: string | null
           content: string
           created_at: string
+          forwarded_from: string | null
           id: string
           image_url: string | null
           reply_to_id: string | null
@@ -143,6 +144,7 @@ export type Database = {
           audio_url?: string | null
           content: string
           created_at?: string
+          forwarded_from?: string | null
           id?: string
           image_url?: string | null
           reply_to_id?: string | null
@@ -153,6 +155,7 @@ export type Database = {
           audio_url?: string | null
           content?: string
           created_at?: string
+          forwarded_from?: string | null
           id?: string
           image_url?: string | null
           reply_to_id?: string | null
@@ -205,6 +208,7 @@ export type Database = {
           audio_url: string | null
           content: string
           created_at: string
+          forwarded_from: string | null
           id: string
           image_url: string | null
           is_read: boolean
@@ -216,6 +220,7 @@ export type Database = {
           audio_url?: string | null
           content: string
           created_at?: string
+          forwarded_from?: string | null
           id?: string
           image_url?: string | null
           is_read?: boolean
@@ -227,6 +232,7 @@ export type Database = {
           audio_url?: string | null
           content?: string
           created_at?: string
+          forwarded_from?: string | null
           id?: string
           image_url?: string | null
           is_read?: boolean
@@ -699,6 +705,33 @@ export type Database = {
           id?: string
           level?: string
           score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      message_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          message_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          message_id: string
+          message_type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          message_type?: string
           user_id?: string
         }
         Relationships: []
