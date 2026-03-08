@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import { ArrowLeft, TrendingUp, Target, Clock, Award, BookOpen, Headphones, AlertTriangle, CheckCircle, BarChart3 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { ArrowLeft, TrendingUp, Target, Clock, Award, BookOpen, Headphones, AlertTriangle, CheckCircle, BarChart3, Flame, Zap, Trophy, Star, Crown, Medal } from 'lucide-react';
 import { CEFRLevel } from '@/types/cefr';
 import { Header } from '@/components/Header';
 import { motion } from 'framer-motion';
+import { useGamification } from '@/hooks/useGamification';
+import { AchievementToast } from '@/components/AchievementToast';
 
 interface TestResult {
   id: string;
