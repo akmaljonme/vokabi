@@ -7,14 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChatRooms } from '@/components/community/ChatRooms';
 import { DirectMessages } from '@/components/community/DirectMessages';
 import { useWebRTC } from '@/hooks/useWebRTC';
-import { IncomingCallOverlay } from '@/components/community/IncomingCallOverlay';
+import { AudioCallDialog } from '@/components/community/AudioCallDialog';
 
 export default function Community() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { callState, remoteCallerId, remoteCallerName, acceptCall, rejectCall, isMuted, duration, toggleMute, endCall } = useWebRTC(user?.id);
+  const webrtc = useWebRTC(user?.id);
 
   if (!user) { navigate('/auth'); return null; }
+
+  const showCallUI = webrtc.callState !== 'idle';
 
   return (
     <div className="min-h-screen bg-background">
@@ -39,16 +41,21 @@ export default function Community() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="rooms"><ChatRooms /></TabsContent>
-          <TabsContent value="dm"><DirectMessages /></TabsContent>
+          <TabsContent value="dm"><DirectMessages webrtc={webrtc} /></TabsContent>
         </Tabs>
       </main>
 
-      {/* Incoming call overlay */}
-      {callState === 'ringing' && remoteCallerId && remoteCallerName && (
-        <IncomingCallOverlay
-          callerName={remoteCallerName}
-          onAccept={() => acceptCall(remoteCallerId)}
-          onReject={() => rejectCall(remoteCallerId)}
+      {/* Global call overlay for all states */}
+      {showCallUI && (
+        <AudioCallDialog
+          contactName={webrtc.remoteCallerName || 'Foydalanuvchi'}
+          callState={webrtc.callState as any}
+          isMuted={webrtc.isMuted}
+          duration={webrtc.duration}
+          onToggleMute={webrtc.toggleMute}
+          onEnd={() => webrtc.endCall(webrtc.remoteCallerId || undefined)}
+          onAccept={webrtc.remoteCallerId ? () => webrtc.acceptCall(webrtc.remoteCallerId!) : undefined}
+          onReject={webrtc.remoteCallerId ? () => webrtc.rejectCall(webrtc.remoteCallerId!) : undefined}
         />
       )}
     </div>
