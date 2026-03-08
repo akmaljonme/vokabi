@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, FileText, Headphones, BookOpen, MessageSquare, Search, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, Headphones, BookOpen, MessageSquare, Search, Loader2, Eye, EyeOff, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
