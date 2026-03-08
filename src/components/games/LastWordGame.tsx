@@ -421,7 +421,6 @@ export const LastWordGame = ({ onBack }: Props) => {
 
   // === ONLINE LOBBY ===
   if (mode === 'online' && gameState === 'lobby') {
-    const [joinId, setJoinId] = useState('');
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <div className="text-center mb-6">
