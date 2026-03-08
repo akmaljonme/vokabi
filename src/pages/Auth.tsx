@@ -1,23 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Mail, Lock, User, ArrowRight, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff, Sparkles, AtSign, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 
 const emailSchema = z.string().trim().email({ message: "Invalid email address" }).max(255);
 const passwordSchema = z.string().min(6, { message: "Password must be at least 6 characters" }).max(72);
 const nameSchema = z.string().trim().min(1, { message: "Name is required" }).max(100).optional();
+const usernameSchema = z.string().trim().min(3, { message: "Username kamida 3 ta belgi bo'lishi kerak" }).max(30, { message: "Username 30 ta belgidan oshmasligi kerak" }).regex(/^[a-zA-Z0-9_]+$/, { message: "Faqat harf, raqam va _ ishlatish mumkin" });
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
 
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -25,6 +29,32 @@ const Auth = () => {
   useEffect(() => {
     if (user) navigate('/');
   }, [user, navigate]);
+
+  const checkUsername = useCallback(async (value: string) => {
+    if (!value || value.length < 3) {
+      setUsernameStatus('idle');
+      return;
+    }
+    try {
+      usernameSchema.parse(value);
+    } catch {
+      setUsernameStatus('invalid');
+      return;
+    }
+    setUsernameStatus('checking');
+    const { data, error } = await supabase.rpc('check_username_available', { p_username: value });
+    if (error) {
+      setUsernameStatus('idle');
+      return;
+    }
+    setUsernameStatus(data ? 'available' : 'taken');
+  }, []);
+
+  useEffect(() => {
+    if (isLogin) return;
+    const timer = setTimeout(() => checkUsername(username), 500);
+    return () => clearTimeout(timer);
+  }, [username, isLogin, checkUsername]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +65,20 @@ const Auth = () => {
     try {
       emailSchema.parse(email);
       passwordSchema.parse(password);
-      if (!isLogin && fullName) nameSchema.parse(fullName);
+      if (!isLogin) {
+        if (fullName) nameSchema.parse(fullName);
+        usernameSchema.parse(username);
+        if (usernameStatus === 'taken') {
+          setError('Bu username allaqachon band. Boshqasini tanlang.');
+          setLoading(false);
+          return;
+        }
+        if (usernameStatus !== 'available') {
+          setError('Username mavjudligini tekshiring.');
+          setLoading(false);
+          return;
+        }
+      }
     } catch (err) {
       if (err instanceof z.ZodError) {
         setError(err.errors[0].message);
@@ -51,7 +94,7 @@ const Auth = () => {
           setError(error.message.includes('Invalid login') ? 'Noto\'g\'ri email yoki parol.' : error.message);
         }
       } else {
-        const { error } = await signUp(email, password, fullName);
+        const { error } = await signUp(email, password, fullName, username);
         if (error) {
           setError(error.message.includes('already registered') ? 'Bu email allaqachon ro\'yxatdan o\'tgan.' : error.message);
         } else {
@@ -118,6 +161,35 @@ const Auth = () => {
                       className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                     />
                   </div>
+                </div>
+              )}
+
+              {!isLogin && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">Username</label>
+                  <div className="relative">
+                    <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                      placeholder="masalan: ali_123"
+                      required
+                      className="w-full pl-10 pr-10 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                    />
+                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                      {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />}
+                      {usernameStatus === 'available' && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                      {usernameStatus === 'taken' && <XCircle className="w-4 h-4 text-destructive" />}
+                      {usernameStatus === 'invalid' && <XCircle className="w-4 h-4 text-destructive" />}
+                    </div>
+                  </div>
+                  {usernameStatus === 'taken' && (
+                    <p className="text-xs text-destructive mt-1">Bu username band. Boshqasini tanlang.</p>
+                  )}
+                  {usernameStatus === 'available' && (
+                    <p className="text-xs text-emerald-500 mt-1">Username bo'sh ✓</p>
+                  )}
                 </div>
               )}
 

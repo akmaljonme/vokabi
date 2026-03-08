@@ -1041,6 +1041,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_username_available: {
+        Args: { p_username: string }
+        Returns: boolean
+      }
       get_leaderboard: {
         Args: { limit_count?: number }
         Returns: {
