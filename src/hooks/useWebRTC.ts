@@ -31,6 +31,8 @@ export const useWebRTC = (userId: string | undefined) => {
   const ringtoneRef = useRef<HTMLAudioElement | null>(null);
   const callModeRef = useRef<CallMode>('audio');
   const callStateRef = useRef<CallState>('idle');
+  const durationRef = useRef(0);
+  const callConnectedRef = useRef(false);
 
   const updateCallState = useCallback((state: CallState) => {
     callStateRef.current = state;
