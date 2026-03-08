@@ -1,0 +1,2 @@
+ALTER TABLE public.tests DROP CONSTRAINT tests_skill_check;
+ALTER TABLE public.tests ADD CONSTRAINT tests_skill_check CHECK (skill = ANY (ARRAY['reading'::text, 'listening'::text, 'grammar'::text, 'vocabulary'::text, 'writing'::text, 'speaking'::text]));
