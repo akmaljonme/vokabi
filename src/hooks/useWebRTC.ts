@@ -192,6 +192,7 @@ export const useWebRTC = (userId: string | undefined) => {
       }
       currentCalleeRef.current = callerId;
       updateCallState('connected');
+      callConnectedRef.current = true;
 
       await sendSignal(callerId, 'call-accept');
 
@@ -203,7 +204,10 @@ export const useWebRTC = (userId: string | undefined) => {
       await sendSignal(callerId, 'offer', { sdp: offer });
 
       if (timerRef.current) clearInterval(timerRef.current);
-      timerRef.current = setInterval(() => setDuration(d => d + 1), 1000);
+      timerRef.current = setInterval(() => {
+        durationRef.current++;
+        setDuration(d => d + 1);
+      }, 1000);
     } catch {
       updateCallState('idle');
       cleanup();
