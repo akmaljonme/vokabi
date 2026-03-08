@@ -76,7 +76,9 @@ export const GrammarBattleGame = ({ onBack }: Props) => {
         <div className="text-6xl mb-4">⚔️</div>
         <h2 className="text-2xl font-bold mb-2">Grammar Battle</h2>
         <p className="text-muted-foreground mb-6">Har bir savol uchun 15 soniya! Tayyor bo'ling!</p>
-        <Button size="lg" onClick={() => setStarted(true)}>Boshlash!</Button>
+        <Button size="lg" onClick={startWithAI} disabled={ai.loading}>
+          {ai.loading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Savollar tayyorlanmoqda...</> : 'Boshlash!'}
+        </Button>
       </motion.div>
     );
   }
