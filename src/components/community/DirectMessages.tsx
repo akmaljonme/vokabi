@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface Profile { user_id: string; full_name: string | null; username: string | null; avatar_url: string | null; }
-interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; image_url?: string | null; audio_url?: string | null; }
+interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; image_url?: string | null; audio_url?: string | null; reply_to_id?: string | null; }
+interface ReplyInfo { id: string; content: string; senderName?: string; }
 interface ChatPreview { profile: Profile; lastMessage: string; lastMessageAt: string; unreadCount: number; }
 
 const formatTime = (dateStr: string) => {
