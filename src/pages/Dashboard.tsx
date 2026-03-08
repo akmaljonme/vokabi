@@ -241,11 +241,88 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* Gamification Section */}
+        {progress && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+            {/* XP & Level */}
+            <Card className="border-border/50 lg:col-span-2">
+              <CardContent className="pt-5">
+                <div className="flex items-center gap-6">
+                  <div className="relative">
+                    <motion.div
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex flex-col items-center justify-center border border-primary/20"
+                    >
+                      <Crown className="w-5 h-5 text-primary mb-0.5" />
+                      <span className="text-2xl font-display font-bold">{progress.level}</span>
+                    </motion.div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-semibold flex items-center gap-1.5">
+                        <Zap className="w-4 h-4 text-primary" />
+                        {progress.xp.toLocaleString()} XP
+                      </span>
+                      <span className="text-xs text-muted-foreground">{xpToNextLevel} XP keyingi darajaga</span>
+                    </div>
+                    <Progress value={xpProgress} className="h-3 mb-3" />
+                    <div className="flex items-center gap-5">
+                      <div className="flex items-center gap-1.5">
+                        <Flame className={`w-4 h-4 ${progress.current_streak > 0 ? 'text-orange-500' : 'text-muted-foreground'}`} />
+                        <span className="text-sm font-semibold">{progress.current_streak} kun</span>
+                        <span className="text-xs text-muted-foreground">streak</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Trophy className="w-4 h-4 text-amber-500" />
+                        <span className="text-sm font-semibold">{userAchievements.length}/{achievements.length}</span>
+                        <span className="text-xs text-muted-foreground">yutuq</span>
+                      </div>
+                      {userRank > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <Medal className="w-4 h-4 text-primary" />
+                          <span className="text-sm font-semibold">#{userRank}</span>
+                          <span className="text-xs text-muted-foreground">reyting</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Streak Calendar */}
+            <Card className="border-border/50">
+              <CardContent className="pt-5">
+                <div className="text-center">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', delay: 0.2 }}
+                    className={`w-16 h-16 rounded-2xl mx-auto mb-3 flex items-center justify-center ${
+                      progress.current_streak > 0
+                        ? 'bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30'
+                        : 'bg-muted'
+                    }`}
+                  >
+                    <Flame className={`w-8 h-8 ${progress.current_streak > 0 ? 'text-orange-500' : 'text-muted-foreground'}`} />
+                  </motion.div>
+                  <p className="text-3xl font-display font-bold">{progress.current_streak}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">kunlik streak</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Eng yaxshi: {progress.longest_streak} kun</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="overview">Umumiy</TabsTrigger>
+            <TabsTrigger value="skills">Ko'nikmalar</TabsTrigger>
+            <TabsTrigger value="leaderboard">Reyting</TabsTrigger>
+            <TabsTrigger value="achievements">Yutuqlar</TabsTrigger>
             <TabsTrigger value="history">Tarix</TabsTrigger>
-            <TabsTrigger value="analysis">Tahlil</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
