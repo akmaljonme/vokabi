@@ -551,6 +551,7 @@ export const TestQuestionsPanel = ({ test, onBack }: TestQuestionsPanelProps) =>
         onOpenChange={setDialogOpen}
         question={selectedQuestion}
         testId={test.id}
+        testSkill={test.skill}
         onSave={handleSaveQuestion}
         loading={saving}
         questionCount={questions.length}
