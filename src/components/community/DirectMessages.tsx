@@ -150,7 +150,7 @@ export const DirectMessages = () => {
         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
           <User className="w-4 h-4 text-primary" />
         </div>
-        <span className="font-semibold text-sm">{activeContact.full_name || 'Foydalanuvchi'}</span>
+        <span className="font-semibold text-sm">{activeContact.username ? `@${activeContact.username}` : activeContact.full_name || 'Foydalanuvchi'}</span>
       </div>
 
       <ScrollArea className="flex-1 p-4">

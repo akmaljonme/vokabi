@@ -171,6 +171,15 @@ export default function ProfileSettings() {
                   <Label htmlFor="fullName" className="text-xs">To'liq ism</Label>
                   <Input id="fullName" type="text" placeholder="Ismingizni kiriting" value={profile.full_name || ''} onChange={(e) => setProfile(prev => ({ ...prev, full_name: e.target.value }))} className="text-sm" />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="username" className="text-xs">Username</Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">@</span>
+                    <Input id="username" type="text" placeholder="username_123" value={profile.username || ''} onChange={(e) => { setProfile(prev => ({ ...prev, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })); setUsernameError(''); }} className="text-sm pl-8" maxLength={30} />
+                  </div>
+                  {usernameError && <p className="text-xs text-destructive">{usernameError}</p>}
+                  <p className="text-[10px] text-muted-foreground">Hamjamiyatda siz shu nom bilan ko'rinasiz. Faqat kichik harflar, raqamlar va _</p>
+                </div>
               </CardContent>
             </Card>
 
