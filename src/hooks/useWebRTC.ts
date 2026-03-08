@@ -7,13 +7,18 @@ const ICE_SERVERS = [
 ];
 
 type CallState = 'idle' | 'calling' | 'ringing' | 'connected' | 'ended';
+type CallMode = 'audio' | 'video';
 
 export const useWebRTC = (userId: string | undefined) => {
   const [callState, setCallState] = useState<CallState>('idle');
+  const [callMode, setCallMode] = useState<CallMode>('audio');
   const [isMuted, setIsMuted] = useState(false);
+  const [isCameraOff, setIsCameraOff] = useState(false);
   const [duration, setDuration] = useState(0);
   const [remoteCallerId, setRemoteCallerId] = useState<string | null>(null);
   const [remoteCallerName, setRemoteCallerName] = useState<string | null>(null);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -21,10 +26,32 @@ export const useWebRTC = (userId: string | undefined) => {
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const currentCalleeRef = useRef<string | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
+  const ringtoneRef = useRef<HTMLAudioElement | null>(null);
+  const callModeRef = useRef<CallMode>('audio');
+
+  const playRingtone = useCallback(() => {
+    try {
+      const audio = new Audio('/ringtone.mp3');
+      audio.loop = true;
+      audio.volume = 0.7;
+      audio.play().catch(() => {});
+      ringtoneRef.current = audio;
+    } catch {}
+  }, []);
+
+  const stopRingtone = useCallback(() => {
+    if (ringtoneRef.current) {
+      ringtoneRef.current.pause();
+      ringtoneRef.current.currentTime = 0;
+      ringtoneRef.current = null;
+    }
+  }, []);
 
   const cleanup = useCallback(() => {
     localStreamRef.current?.getTracks().forEach(t => t.stop());
     localStreamRef.current = null;
+    setLocalStream(null);
+    setRemoteStream(null);
     pcRef.current?.close();
     pcRef.current = null;
     if (remoteAudioRef.current) {
@@ -36,8 +63,10 @@ export const useWebRTC = (userId: string | undefined) => {
     timerRef.current = null;
     setDuration(0);
     setIsMuted(false);
+    setIsCameraOff(false);
     currentCalleeRef.current = null;
-  }, []);
+    stopRingtone();
+  }, [stopRingtone]);
 
   const sendSignal = async (calleeId: string, signalType: string, signalData?: any) => {
     if (!userId) return;
@@ -59,18 +88,23 @@ export const useWebRTC = (userId: string | undefined) => {
     };
 
     pc.ontrack = (e) => {
-      console.log('[WebRTC] Remote track received', e.streams.length);
-      // Create persistent audio element attached to DOM
-      if (!remoteAudioRef.current) {
-        const audio = document.createElement('audio');
-        audio.autoplay = true;
-        (audio as any).playsInline = true;
-        audio.id = 'webrtc-remote-audio';
-        document.body.appendChild(audio);
-        remoteAudioRef.current = audio;
+      console.log('[WebRTC] Remote track received:', e.track.kind, e.streams.length);
+      const stream = e.streams[0];
+      setRemoteStream(stream);
+
+      // For audio-only or as fallback, attach to DOM audio element
+      if (e.track.kind === 'audio') {
+        if (!remoteAudioRef.current) {
+          const audio = document.createElement('audio');
+          audio.autoplay = true;
+          (audio as any).playsInline = true;
+          audio.id = 'webrtc-remote-audio';
+          document.body.appendChild(audio);
+          remoteAudioRef.current = audio;
+        }
+        remoteAudioRef.current.srcObject = stream;
+        remoteAudioRef.current.play().catch(err => console.error('[WebRTC] Audio play error:', err));
       }
-      remoteAudioRef.current.srcObject = e.streams[0];
-      remoteAudioRef.current.play().catch(err => console.error('[WebRTC] Audio play error:', err));
     };
 
     pc.onconnectionstatechange = () => {
@@ -83,40 +117,51 @@ export const useWebRTC = (userId: string | undefined) => {
     return pc;
   }, [userId]);
 
-  const startCall = useCallback(async (calleeId: string) => {
+  const getMediaStream = async (mode: CallMode) => {
+    const constraints: MediaStreamConstraints = {
+      audio: true,
+      video: mode === 'video' ? { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } : false,
+    };
+    return navigator.mediaDevices.getUserMedia(constraints);
+  };
+
+  const startCall = useCallback(async (calleeId: string, mode: CallMode = 'audio') => {
     if (!userId) return;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      callModeRef.current = mode;
+      setCallMode(mode);
+      const stream = await getMediaStream(mode);
       localStreamRef.current = stream;
+      setLocalStream(stream);
       currentCalleeRef.current = calleeId;
       
-      // Fetch callee name for display
       const { data: profile } = await supabase.from('profiles').select('full_name, username').eq('user_id', calleeId).single();
       setRemoteCallerName(profile?.username ? `@${profile.username}` : profile?.full_name || 'Foydalanuvchi');
       setRemoteCallerId(calleeId);
       
       setCallState('calling');
-      await sendSignal(calleeId, 'call-invite');
+      playRingtone();
+      await sendSignal(calleeId, 'call-invite', { mode });
     } catch {
       setCallState('idle');
     }
-  }, [userId]);
+  }, [userId, playRingtone]);
 
   const acceptCall = useCallback(async (callerId: string) => {
     if (!userId) return;
     try {
+      stopRingtone();
+      const mode = callModeRef.current;
       if (!localStreamRef.current) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await getMediaStream(mode);
         localStreamRef.current = stream;
+        setLocalStream(stream);
       }
       currentCalleeRef.current = callerId;
       setCallState('connected');
-      setRemoteCallerId(null);
 
-      // Send accept signal
       await sendSignal(callerId, 'call-accept');
 
-      // Create offer (callee creates the offer after accepting)
       const pc = createPeerConnection(callerId);
       localStreamRef.current.getTracks().forEach(t => pc.addTrack(t, localStreamRef.current!));
       
@@ -124,36 +169,44 @@ export const useWebRTC = (userId: string | undefined) => {
       await pc.setLocalDescription(offer);
       await sendSignal(callerId, 'offer', { sdp: offer });
 
-      // Start timer
       timerRef.current = setInterval(() => setDuration(d => d + 1), 1000);
     } catch {
       setCallState('idle');
       cleanup();
     }
-  }, [userId, createPeerConnection, cleanup]);
+  }, [userId, createPeerConnection, cleanup, stopRingtone]);
 
   const rejectCall = useCallback(async (callerId: string) => {
     if (!userId) return;
+    stopRingtone();
     await sendSignal(callerId, 'call-reject');
     setCallState('idle');
     setRemoteCallerId(null);
     cleanup();
-  }, [userId, cleanup]);
+  }, [userId, cleanup, stopRingtone]);
 
   const endCall = useCallback(async (remoteId?: string) => {
     const targetId = remoteId || currentCalleeRef.current;
     if (targetId && userId) {
       await sendSignal(targetId, 'call-end');
     }
+    stopRingtone();
     setCallState('ended');
     cleanup();
     setTimeout(() => setCallState('idle'), 1500);
-  }, [userId, cleanup]);
+  }, [userId, cleanup, stopRingtone]);
 
   const toggleMute = useCallback(() => {
     if (localStreamRef.current) {
       localStreamRef.current.getAudioTracks().forEach(t => { t.enabled = !t.enabled; });
       setIsMuted(prev => !prev);
+    }
+  }, []);
+
+  const toggleCamera = useCallback(() => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getVideoTracks().forEach(t => { t.enabled = !t.enabled; });
+      setIsCameraOff(prev => !prev);
     }
   }, []);
 
@@ -173,39 +226,43 @@ export const useWebRTC = (userId: string | undefined) => {
 
         switch (signal_type) {
           case 'call-invite': {
-            // Incoming call
             if (callState !== 'idle') {
-              // Busy - auto reject
               await sendSignal(caller_id, 'call-reject');
               return;
             }
-            // Fetch caller name
+            // Set call mode from invite
+            const mode = signal_data?.mode || 'audio';
+            callModeRef.current = mode;
+            setCallMode(mode);
+
             const { data: profile } = await supabase.from('profiles').select('full_name, username').eq('user_id', caller_id).single();
             setRemoteCallerId(caller_id);
             setRemoteCallerName(profile?.username ? `@${profile.username}` : profile?.full_name || 'Foydalanuvchi');
             setCallState('ringing');
+            playRingtone();
             break;
           }
           case 'call-accept': {
-            // Our call was accepted, now wait for offer from callee
+            stopRingtone();
             setCallState('connected');
             timerRef.current = setInterval(() => setDuration(d => d + 1), 1000);
             break;
           }
           case 'call-reject': {
+            stopRingtone();
             setCallState('ended');
             cleanup();
             setTimeout(() => setCallState('idle'), 1500);
             break;
           }
           case 'call-end': {
+            stopRingtone();
             setCallState('ended');
             cleanup();
             setTimeout(() => setCallState('idle'), 1500);
             break;
           }
           case 'offer': {
-            // Received offer - create answer
             const pc = pcRef.current || createPeerConnection(caller_id);
             if (localStreamRef.current) {
               localStreamRef.current.getTracks().forEach(t => {
@@ -243,14 +300,19 @@ export const useWebRTC = (userId: string | undefined) => {
 
   return {
     callState,
+    callMode,
     isMuted,
+    isCameraOff,
     duration,
     remoteCallerId,
     remoteCallerName,
+    localStream,
+    remoteStream,
     startCall,
     acceptCall,
     rejectCall,
     endCall,
     toggleMute,
+    toggleCamera,
   };
 };
