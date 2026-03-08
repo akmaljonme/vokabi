@@ -9,7 +9,8 @@ import { ChatMessageBubble } from './ChatMessageBubble';
 import { toast } from 'sonner';
 
 interface Room { id: string; name: string; description: string | null; level: string; }
-interface Message { id: string; room_id: string; user_id: string; content: string; created_at: string; image_url?: string | null; audio_url?: string | null; }
+interface Message { id: string; room_id: string; user_id: string; content: string; created_at: string; image_url?: string | null; audio_url?: string | null; reply_to_id?: string | null; }
+interface ReplyInfo { id: string; content: string; senderName?: string; }
 
 export const ChatRooms = () => {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ export const ChatRooms = () => {
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [replyTo, setReplyTo] = useState<ReplyInfo | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
