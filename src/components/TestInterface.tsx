@@ -658,20 +658,38 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
           {/* Bottom navigation */}
           <div className="bg-card border-t border-border p-4">
             <div className="flex items-center justify-between max-w-3xl mx-auto">
-              {isOpenEnded ? (
+              {isWriting ? (
                 <>
-                  <div />
-                  <Button 
-                    onClick={() => setShowConfirmFinish(true)} 
-                    disabled={speakingSubmitting || (isWriting && !writingText.trim()) || (isSpeaking && !audioBlob)}
+                  <Button
+                    variant="outline"
+                    disabled={currentPart === 1}
+                    onClick={() => setCurrentPart(p => p - 1)}
                   >
-                    {speakingSubmitting ? (
-                      <><Loader2Icon className="w-4 h-4 mr-1 animate-spin" />Tekshirilmoqda...</>
-                    ) : (
-                      <><Send className="w-4 h-4 mr-1" />AI baholash uchun yuborish</>
-                    )}
+                    <ArrowLeft className="w-4 h-4 mr-1" />Oldingi Part
                   </Button>
+                  <span className="text-sm text-muted-foreground">
+                    {Object.values(writingTexts).filter(t => t.trim()).length}/{mockTest?.parts.length || 2} part yozildi
+                  </span>
+                  {currentPart < (mockTest?.parts.length || 2) ? (
+                    <Button onClick={() => setCurrentPart(p => p + 1)}>
+                      Keyingi Part<ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={() => setShowConfirmFinish(true)} 
+                      disabled={speakingSubmitting || Object.values(writingTexts).every(t => !t.trim())}
+                    >
+                      {speakingSubmitting ? (
+                        <><Loader2Icon className="w-4 h-4 mr-1 animate-spin" />Tekshirilmoqda...</>
+                      ) : (
+                        <><Send className="w-4 h-4 mr-1" />AI baholash</>
+                      )}
+                    </Button>
+                  )}
                 </>
+              ) : isSpeaking ? (
+                // Speaking has its own navigation inside the component
+                <div />
               ) : (
                 <>
                   <Button
