@@ -276,6 +276,19 @@ export const UsersTab = () => {
                               </>
                             )}
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toggleProStatus(user.user_id, user.is_pro)}>
+                            {user.is_pro ? (
+                              <>
+                                <Crown className="w-4 h-4 mr-2 text-muted-foreground" />
+                                Remove Pro
+                              </>
+                            ) : (
+                              <>
+                                <Crown className="w-4 h-4 mr-2 text-amber-500" />
+                                Make Pro
+                              </>
+                            )}
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
