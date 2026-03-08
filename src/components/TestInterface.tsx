@@ -101,6 +101,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
 
   // Timer
   useEffect(() => {
+    if (isPaused) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 0) { clearInterval(timer); handleFinishTest(); return 0; }
@@ -108,7 +109,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isPaused]);
 
   // Auto-save
   useEffect(() => {
