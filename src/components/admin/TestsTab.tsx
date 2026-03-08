@@ -214,10 +214,16 @@ export const TestsTab = () => {
           <h2 className="text-2xl font-bold">Testlar boshqaruvi</h2>
           <p className="text-muted-foreground">Mock testlarni yarating va boshqaring</p>
         </div>
-        <Button onClick={() => { setSelectedTest(null); setDialogOpen(true); }}>
-          <Plus className="w-4 h-4 mr-2" />
-          Yangi test
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setPdfDialogOpen(true)}>
+            <Upload className="w-4 h-4 mr-2" />
+            PDF dan import
+          </Button>
+          <Button onClick={() => { setSelectedTest(null); setDialogOpen(true); }}>
+            <Plus className="w-4 h-4 mr-2" />
+            Yangi test
+          </Button>
+        </div>
       </div>
 
       {/* Search and Filters */}
