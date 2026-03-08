@@ -99,16 +99,22 @@ export const VideoRecommendations = ({ wrongQuestions, level, skill }: VideoReco
             <div className="space-y-3">
               {videoSuggestions.videos.map((video, i) => (
                 <a key={i} href={video.url} target="_blank" rel="noopener noreferrer"
-                  className="block p-4 rounded-lg border border-border hover:border-primary/50 transition-colors">
+                  className="block p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-muted/30 transition-all group">
                   <div className="flex items-start gap-3">
-                    <Play className="w-8 h-8 text-primary shrink-0 mt-1" />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm flex items-center gap-1">
-                        {video.title}<ExternalLink className="w-3 h-3" />
+                    <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
+                      <Play className="w-5 h-5 text-destructive" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm flex items-center gap-1.5 group-hover:text-primary transition-colors">
+                        {video.title}
+                        <ExternalLink className="w-3 h-3 shrink-0 opacity-50 group-hover:opacity-100" />
                       </h4>
-                      <p className="text-xs text-primary">{video.channel}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{video.description}</p>
-                      <Badge variant="outline" className="text-xs mt-2">{video.topic}</Badge>
+                      <p className="text-xs text-primary/80 mt-0.5">{video.channel}</p>
+                      <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{video.description}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant="outline" className="text-xs">{video.topic}</Badge>
+                        <span className="text-[10px] text-muted-foreground/60">YouTube'da qidirish →</span>
+                      </div>
                     </div>
                   </div>
                 </a>
