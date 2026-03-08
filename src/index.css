@@ -269,7 +269,7 @@
   }
 
   .question-option.correct {
-    @apply border-green-500 bg-green-50;
+    @apply border-green-500 bg-green-500/10;
   }
 
   .question-option.incorrect {
