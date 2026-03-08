@@ -30,14 +30,56 @@ export const ChatRooms = () => {
   const [forwardSearch, setForwardSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showRoomDialog, setShowRoomDialog] = useState(false);
+  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const [roomForm, setRoomForm] = useState({ name: '', description: '', level: 'general' });
+
+  const loadRooms = () => {
+    supabase.from('chat_rooms').select('*').then(({ data }) => { if (data) setRooms(data); });
+  };
 
   useEffect(() => {
-    supabase.from('chat_rooms').select('*').then(({ data }) => { if (data) setRooms(data); });
+    loadRooms();
     if (user) {
       (supabase.from('profiles') as any).select('user_id, full_name, username, avatar_url').neq('user_id', user.id).limit(50)
         .then(({ data }: any) => { if (data) setAllUsers(data); });
     }
   }, [user]);
+
+  const openCreateRoom = () => {
+    setEditingRoom(null);
+    setRoomForm({ name: '', description: '', level: 'general' });
+    setShowRoomDialog(true);
+  };
+
+  const openEditRoom = (room: Room, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingRoom(room);
+    setRoomForm({ name: room.name, description: room.description || '', level: room.level });
+    setShowRoomDialog(true);
+  };
+
+  const handleSaveRoom = async () => {
+    if (!roomForm.name.trim()) return;
+    if (editingRoom) {
+      await supabase.from('chat_rooms').update({ name: roomForm.name, description: roomForm.description || null, level: roomForm.level } as any).eq('id', editingRoom.id);
+      toast.success("Xona yangilandi");
+    } else {
+      await supabase.from('chat_rooms').insert({ name: roomForm.name, description: roomForm.description || null, level: roomForm.level } as any);
+      toast.success("Yangi xona yaratildi");
+    }
+    setShowRoomDialog(false);
+    loadRooms();
+  };
+
+  const handleDeleteRoom = async (roomId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Bu xonani o'chirishni xohlaysizmi?")) return;
+    await supabase.from('chat_messages').delete().eq('room_id', roomId);
+    await supabase.from('chat_rooms').delete().eq('id', roomId);
+    toast.success("Xona o'chirildi");
+    loadRooms();
+  };
 
   useEffect(() => {
     if (!activeRoom) return;
