@@ -254,7 +254,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
             timeTaken: mockTest.timeLimit - timeLeft,
             mockTest,
             aiResult: data?.result,
-          } as any);
+          } as TestResult);
         } catch {
           onFinish({
             mockId, level, skill, totalQuestions: 1,
