@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  MessageSquare,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -22,7 +23,7 @@ const menuItems = [
   { id: 'users', label: 'Users', icon: Users },
   { id: 'results', label: 'Results & Analytics', icon: BarChart3 },
   { id: 'tests', label: 'Tests Management', icon: FileText },
-  
+  { id: 'feedbacks', label: 'Feedbacklar', icon: MessageSquare },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
