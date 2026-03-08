@@ -18,6 +18,7 @@ import { motion } from 'framer-motion';
 
 interface ProfileData {
   full_name: string | null;
+  username: string | null;
   avatar_url: string | null;
   email_notifications: boolean;
   test_reminders: boolean;
