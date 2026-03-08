@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en" class="has-navbar-fixed-top">
+<head><meta charset="ISO-8859-1">
+<base href="https://www.mobiles24.co">
+<title>Opening Default iPhone Free Ringtone download - Download Free Opening Default iPhone Ringtone to your mobile phone</title><meta name="Keywords" content=""><meta name="Description" content="Download Opening Default iPhone Ringtone to your mobile phone or tablet for free, uploaded by Indesign. Get Free Ringtones downloads like Opening Default iPhone &amp; send to your phone or iPhone"><meta name="Content-Language" content="en-UK"><meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="Robots" content="INDEX, FOLLOW"><link rel="stylesheet" href="https://img.mobiles24.net/public/css/primary.min.css"></head>
+<body>
+<header class="navbar is-fixed-top mo-bg">
+  
+  <div class="navbar-brand">
+    <a class="navbar-item" href="https://www.mobiles24.co/"><img src="https://img.mobiles24.net/static/images/logo-lt2.svg" width="112" height="28" alt="Mobiles24 Logo"></a>
+
+    <div class="mo-navbar-buttons">
+    <a role="button" id="btn-search" class="mo-navbar-button is-hidden-desktop" aria-label="Search">
+    <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="s1 stroke-black fa-lg" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+    </a>
+    <a role="button" class="navbar-burger burger" aria-haspopup="menu" aria-controls="primary-nav" aria-label="Menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+    </div>
+  </div>
+
+  <!-- mobile search -->
+  <div id="search-container" class="is-hidden-touch">
+    <form id="search" action="https://www.mobiles24.co/search" method="get" autocomplete="off">
+        <div class="field is-grouped">
+            <p id="search-input" class="control is-expanded">
+            <input class="input acs" name="q" type="text" aria-label="Search" placeholder="Find downloads">
+            </p>
+            <p class="control">
+            <button type="submit" id="search-btn" class="button is-primary" aria-label="Search">
+                <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="s1 stroke-white fa-lg" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+            </button>
+            </p>
+        </div>
+
+        
+        <div id="search-category" class="field">
+            <div class="control">
+                <p class="select">
+                <select aria-label="Filter category" name="c" class="select">
+                <option value="">All Downloads</option>
+                <option value="free-mp3-ringtones" selected>Free Ringtones</option><option value="wallpapers">Wallpapers</option><option value="video-wallpapers">Video Wallpapers</option><option value="android-themes">Android Themes</option><option value="free-android-apps">Android Apps</option><option value="free-android-games">Android Games</option><option value="android-live-wallpapers">Live Wallpapers</option><option value="free-mobile-games">Java Games</option><option value="free-mobile-software">Java Apps</option><option value="symbian-s60-games">Symbian S60 Games</option><option value="symbian-s60-apps">Symbian S60 Apps</option><option value="phone">Phones</option>    
+            </select></p>
+            </div>
+        </div>
+    </form>
+  </div>
+  <!-- /mobile search -->
+
+<nav class="navbar-menu" aria-label="primary" role="navigation">
+  <div id="primary-nav" class="navbar-menu">
+    <div class="navbar-start">
+        <div class="navbar-item mo is-hidden-desktop">
+        <div class="buttons">
+        <a href="https://www.mobiles24.co/upload" class="has-text-weight-medium button"><span class="icon"><svg aria-hidden="true"><use href="#upload" class="stroke-black"/></svg></span><span>Upload</span></a>
+
+                  </div>
+      </div>
+      <ul>
+        
+              
+        <li class="navbar-item has-dropdown is-hoverable">  
+            <h2 class="navbar-link is-heading">Downloads</h2>
+            <ul class="navbar-dropdown">
+                <li><a href="https://www.mobiles24.co/downloads/free-mp3-ringtones" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#music" class="stroke-blue"/></svg></span><span>Free Ringtones</span></a></li><li><a href="https://www.mobiles24.co/downloads/wallpapers" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#wallpaper" class="stroke-red"/></svg></span><span>Wallpapers</span></a></li><li><a href="https://www.mobiles24.co/downloads/video-wallpapers" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#wallpaper" class="stroke-purple"/></svg></span><span>Video Wallpapers</span></a></li><li><a href="https://www.mobiles24.co/downloads/android-themes" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#android" class="stroke-purple"/></svg></span><span>Android Themes</span></a></li><li><a href="https://www.mobiles24.co/downloads/free-android-apps" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#android" class="stroke-green"/></svg></span><span>Android Apps</span></a></li><li><a href="https://www.mobiles24.co/downloads/free-android-games" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#android" class="stroke-green"/></svg></span><span>Android Games</span></a></li><li><a href="https://www.mobiles24.co/downloads/android-live-wallpapers" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#android" class="stroke-red"/></svg></span><span>Live Wallpapers</span></a></li><li><a href="https://www.mobiles24.co/downloads/free-mobile-games" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#java" class="stroke-blue"/></svg></span><span>Java Games</span></a></li><li><a href="https://www.mobiles24.co/downloads/free-mobile-software" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#java" class="stroke-blue"/></svg></span><span>Java Apps</span></a></li><li><a href="https://www.mobiles24.co/downloads/symbian-s60-games" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#s60" class="stroke-blue"/></svg></span><span>Symbian S60 Games</span></a></li><li><a href="https://www.mobiles24.co/downloads/symbian-s60-apps" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#s60" class="stroke-blue"/></svg></span><span>Symbian S60 Apps</span></a></li>                <li><a href="https://www.mobiles24.co/downloads" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#arr-rt-cir" class="stroke-grey"/></svg></span><span>All Downloads</span></a></li>
+            </ul>
+        </li>
+        <li class="navbar-item has-dropdown is-hoverable">
+            <h2 class="navbar-link is-heading has-divider">Upload</h2>
+            <ul class="navbar-dropdown">
+              <li><a href="https://www.mobiles24.co/upload" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#upload" class="stroke-grey"/></svg></span><span>Upload / Publish</span></a></li>
+              <li><a href="https://www.mobiles24.co/mp3-cutter-ringtone-maker" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#scissors" class="stroke-grey"/></svg></span><span>Make A Ringtone</span></a></li>
+              <li><a href="https://www.mobiles24.co/apk2bar" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#cloud" class="stroke-grey"/></svg></span><span>APK to BAR Converter</span></a></li>
+            </ul>
+        </li>
+        <li class="navbar-item has-dropdown is-hoverable">
+            <h2 class="navbar-link is-heading has-divider">Community</h2>
+            <ul class="navbar-dropdown">
+            
+            <li><a href="https://discord.gg/Ny24F9fRA9" target="_blank" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#message-square" class="stroke-grey"/></svg></span><span>Join Us On Discord</span></a></li>
+              <li><a href="https://forum.mobiles24.co/" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#message-square" class="stroke-grey"/></svg></span><span>Forum</span></a></li>
+                            <li><a href="https://phone.mobiles24.co/" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#smartphone" class="stroke-grey"/></svg></span><span>Phones & Devices</span></a></li>
+              <li><a href="https://www.mobiles24.co/top-creators" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#award" class="stroke-grey"/></svg></span><span>Top Creators</span></a></li>
+            </ul>
+        </li>
+        <li class="navbar-item has-dropdown is-hoverable">             <h2 class="navbar-link is-heading has-divider">Help</h2>
+            <ul class="navbar-dropdown">
+              <li><a href="https://www.mobiles24.co/help" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#arr-rt-cir" class="stroke-grey"/></svg></span><span>FAQ</span></a></li>
+              <li><a href="https://www.mobiles24.co/tos" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#arr-rt-cir" class="stroke-grey"/></svg></span><span>Terms Of Service</span></a></li>
+              <li><a href="https://www.mobiles24.co/content-policy" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#arr-rt-cir" class="stroke-grey"/></svg></span><span>Content Policy</span></a></li>
+              <li><a href="https://www.mobiles24.co/privacy" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#arr-rt-cir" class="stroke-grey"/></svg></span><span>Privacy Policy</span></a></li>
+              <li><a href="https://www.mobiles24.co/contact" class="navbar-item"><span class="icon"><svg aria-hidden="true"><use href="#arr-rt-cir" class="stroke-grey"/></svg></span><span>Contact Us</span></a></li>
+            </ul>
+        </li>
+    </ul>
+
+    </div><!-- /navbar-start -->
+
+    <div class="navbar-end">
+            <div class="navbar-item mo">
+        <div class="buttons">
+          <a href="https://www.mobiles24.co/register" class="has-text-weight-medium button is-primary">
+            Sign up
+          </a>
+          <a href="https://www.mobiles24.co/login" class="button is-light">
+            Log in
+          </a>
+        </div>
+      </div>
+          </div><!-- /navbar-end -->
+  </div><!-- /navbar-menu -->
+</nav>
+
+</header>
+      
+
+<main>
+
+
+<div class="container mo-container">
+
+<nav class="mo-sub-content" role="navigation" aria-label="shortcuts"><ul class="mo-tags mo-tags-is-block"><li><a href="https://www.mobiles24.co/downloads/free-mp3-ringtones" class="bg-blue">Ringtones</a></li><li><a href="https://www.mobiles24.co/downloads/wallpapers" class="bg-red">Wallpapers</a></li><li><a href="https://www.mobiles24.co/downloads/video-wallpapers" class="bg-purple">Video Wallpapers</a></li><li><a href="https://www.mobiles24.co/downloads/android-themes" class="bg-purple">Themes</a></li><li><a href="https://www.mobiles24.co/downloads/free-android-apps" class="bg-dgreen">Android Apps</a></li><li><a href="https://www.mobiles24.co/downloads/free-android-games" class="bg-green">Android Games</a></li></ul></nav>
+<div class="mo-main-content">
+
+	<nav class="mo-btn-back-alt"><a href="/downloads/free-mp3-ringtones" class="button mo-is-borderless"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="s0 fa-sm fa-sm" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></span><span class="mo-action-label">Ringtones</span></a></nav>
+
+<article itemscope itemtype="https://schema.org/MusicRecording">
+
+<div class="is-flex mo-margin">
+
+
+<div><h1 class="title is-5">Opening Default iPhone</h1>
+    <div class="subtitle is-size-6"><img src="https://www.mobiles24.com/static/avatars/small/avatar_sm_8598581.jpg" width="20" height="20" class="mo-avatar-sm" alt="Indesign avatar"> <span itemscope itemtype="https://schema.org/Person"><a href="https://profile.mobiles24.co/indesign" itemprop="url" class="mo-author"><span itemprop="name" rel="author">Indesign</span></a> </div></div>
+</div>
+
+
+<div class="mo-margin has-text-centered has-text-left-desktop">
+	<div><p><a href="https://play.google.com/store/apps/details?id=com.mobiles24.downloads&amp;utm_source=website&amp;utm_medium=referral&amp;utm_campaign=download_button&amp;utm_term=635412" target="_blank" class="mo-btn-download-external button is-success" style="background-color:#01875f"><span class="icon"><svg aria-hidden="true"><use href="#arrow-down" class="stroke-white"/></svg></span><span>Download</span></a></p>
+	
+	</div>
+	</div>
+<div class="mo-margin has-text-centered is-relative"><div class="large mplyr bgg8"><audio class="listen" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635412&amp;cat=3&amp;h=13661358" data-dlid="635412" data-gacat="lg"></audio></div><div id="clip-placeholder"></div></div>
+
+<div id="btns-actions" class="mo-margin level is-mobile">
+    <div class="level-left"><button id="mo-btn-like" class="button mo-is-borderless" data-action="like" arial-label="Like">
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" class="s0 fa-lg fa-3x" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></span>
+        <span id="res-like">112</span></button>  <button id="mo-btn-save" class="button mo-is-borderless nli"  data-action="save" arial-label="Save">
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" class="s0 fa-lg fa-3x" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg></span>
+        <span class="mo-action-label">Save</span></button> <button id="mo-btn-clip" class="button mo-is-borderless"  data-action="clip" arial-label="Clip">
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" class="s0 fa-lg fa-3x" aria-hidden="true"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></span>
+        <span class="mo-action-label">Edit</span></button></div><div class="level-right has-text-right"><button id="mo-btn-share" class="button mo-is-borderless" data-url="https://www.mobiles24.co/downloads/s/635412-3-opening_default_iphone" data-title="Download Opening Default iPhone Ringtone from Mobiles24" arial-label="Share">
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" class="s0 fa-lg fa-3x" aria-hidden="true"><path d="M22.9,8.4l-8.5,8.4v-4.5c0,0-7.9-0.5-12.9,10.3C0.6,5.8,14.3,5.8,14.3,5.8V1.3L22.9,8.4z"></path></svg></span>
+        </span><span class="mo-action-label">Share</span></button>
+    </div>
+</div>
+
+<div class="mo-margin has-text-centered mo-is-size-65">Download Opening Default iPhone Ringtone to your phone for free.</div>
+
+
+
+
+
+<div class="level is-mobile mo-download-buttons">
+	<div class="level-item has-text-centered has-text-left-desktop">
+        <div><p><a href="https://www.mobiles24.co/downloads/d/aCJsaYKSbQ" data-fmt="mp3" class="mo-btn-download button is-primary"><span class="icon"><svg aria-hidden="true"><use href="#arrow-down" class="stroke-white"/></svg></span><span>Download MP3 Ringtone</span></a></p>
+        <p class="mo-help">Compatible with Android & others</p></div>
+		</div>	<div class="level-item has-text-centered">
+			<div><p><a href="https://www.mobiles24.co/downloads/d/aCJsaYKSbQ&amp;f=m4r" data-fmt="m4r" class="mo-btn-download button is-primary"><span class="icon"><svg aria-hidden="true"><use href="#arrow-down" class="stroke-white"/></svg></span><span>Download M4R for iPhone</span></a></p>
+			<p class="mo-help">Compatible with Apple iPhone & iPad</p></div>
+		</div>		</div>
+<div style="margin-top:-10px" class="mo-margin has-text-centered has-text-weight-medium">
+<a href="https://www.mobiles24.co/downloads/s/635412-3-opening_default_iphone#set-as-ringtone" class="button has-text-link mo-is-borderless"><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="s0 fa-lg fa-1x" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+		<span>How do I set this as my ringtone?</span></a>
+</div>
+
+
+
+
+<div class="mo-fileinfo mo-margin-lg mo-is-size-65"> 
+    <dl><div><dt>Published</dt><dd><time itemprop="datePublished" datetime="2019-03-01">1 Mar 19</time></dd></div><div><dt>File Type</dt><dd>MP3 / M4R</dd></div><div><dt>File Size</dt><dd>113 KB<meta itemprop="contentSize" content="115730"></dd></div><div><dt>Duration</dt><dd>7s<meta itemprop="duration" content="PT7S"></dd></div><div><dt>Downloads</dt><dd>21508</dd></div><div><dt>Category</dt><dd><a href="https://www.mobiles24.co/downloads/free-mp3-ringtones/original">Original</a></dd></div></dl>	<div class="is-uppercase" style="color:#917000;margin-top:5px"><span class="has-text-weight-bold">#84 most popular</span> in <a href="/downloads/free-mp3-ringtones" style="color:#917000">Ringtones</a></div>          
+</div>
+
+	<div class="mo-margin-lg mo-tags mo-tags-is-block">
+<a href="https://www.mobiles24.co/downloads/tag/iphone/free-mp3-ringtones">IPhone</a> <a href="https://www.mobiles24.co/downloads/tag/apple+iphone/free-mp3-ringtones">Apple IPhone</a> <a href="https://www.mobiles24.co/downloads/tag/iphone+stock/free-mp3-ringtones">IPhone Stock</a> <a href="https://www.mobiles24.co/downloads/tag/apple+iphone+stock/free-mp3-ringtones">Apple IPhone Stock</a> <a href="https://www.mobiles24.co/downloads/tag/stock/free-mp3-ringtones">Stock</a> <a href="https://www.mobiles24.co/downloads/tag/iphone+xs/free-mp3-ringtones">IPhone XS</a> <a href="https://www.mobiles24.co/downloads/tag/iphone+xs+max/free-mp3-ringtones">IPhone XS Max</a> <a href="https://www.mobiles24.co/downloads/tag/iphone+xr/free-mp3-ringtones">IPhone XR</a> <a href="https://www.mobiles24.co/downloads/tag/apple+iphone+xr/free-mp3-ringtones">Apple IPhone XR</a> <a href="https://www.mobiles24.co/downloads/tag/apple+iphone+xs/free-mp3-ringtones">Apple IPhone XS</a> <a href="https://www.mobiles24.co/downloads/tag/apple+iphone+xs+max/free-mp3-ringtones">Apple IPhone XS Max</a> </div>
+
+	<style>.rmb input{opacity:0;position:absolute;pointer-events:none}.rmb input:checked+h2+p{-webkit-line-clamp:unset!important}.rmb input:checked~label,.rmb p:not(.truncated)~label{display:none}.rmb p{display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden}</style>
+<section class="mo-margin-lg rmb"><input type="checkbox" id="expanded" aria-hidden="true">
+<h2>Description</h2>
+<p class="mo-margin">Stock ringtone from the Apple iPhone XS, XS Max, and XR</p><label for="expanded" class="button" aria-label="Expand description">Read More</label>
+</section>
+
+
+
+
+<section class="mo-margin-lg">
+    <h2>Sped Up & Slowed Versions</h2>
+<ul class="columns is-mobile is-multiline is-gapless mo-gallery mo-gallery-list"><li>
+	<div>
+		<div class="thumb mplyr bgg8"><audio class="listen" data-playbackrate="1.15" data-bitrate="128" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635412&amp;cat=3&amp;h=13661358" data-dlid="635412" data-gacat="sm"></audio></div>
+		<div class="media-content">
+		<div class="name mo-margin-sm">Download Opening Default iPhone <strong>Sped Up</strong></div>
+		<div><button class="button is-small mo-btn-save-flavor" data-format="mp3"><span class="icon"><svg aria-hidden="true"><use href="#download" class="stroke-black"></use></svg></span> <span>MP3 (Android)</span></button> <button class="button is-small mo-btn-save-flavor" data-format="m4r"><span class="icon"><svg aria-hidden="true"><use href="#download" class="stroke-black"></use></svg></span> <span>M4R (iPhone)</span></button></div>
+		</div>
+	</div>
+	</li><li>
+	<div>
+		<div class="thumb mplyr bgg8"><audio class="listen" data-playbackrate="0.85" data-bitrate="128" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635412&amp;cat=3&amp;h=13661358" data-dlid="635412" data-gacat="sm"></audio></div>
+		<div class="media-content">
+		<div class="name mo-margin-sm">Download Opening Default iPhone <strong>Slowed</strong></div>
+		<div><button class="button is-small mo-btn-save-flavor" data-format="mp3"><span class="icon"><svg aria-hidden="true"><use href="#download" class="stroke-black"></use></svg></span> <span>MP3 (Android)</span></button> <button class="button is-small mo-btn-save-flavor" data-format="m4r"><span class="icon"><svg aria-hidden="true"><use href="#download" class="stroke-black"></use></svg></span> <span>M4R (iPhone)</span></button></div>
+		</div>
+	</div>
+	</li></ul>
+
+<aside class="mo-margin-lg">
+<h2>Similar MP3 Ringtones</h2>
+    <ul class="mo-ajax-content columns is-mobile is-multiline is-gapless mo-gallery mo-gallery-list">
+    
+				<li>
+					<div>
+						<div class="thumb mplyr bgg6"><audio class="listen" preload="none" src="https://www.mobiles24.co/metapreview.php?id=642153&amp;cat=3&amp;h=13806290" data-dlid="642153" data-gacat="sm"></audio></div>
+						<div class="media-content">
+						<div class="name"><a href="https://www.mobiles24.co/downloads/s/642153-3-iphone_strum" title="iPhone Strum ">iPhone Strum</a></div>
+							<p class="author"><a href="https://profile.mobiles24.co/ringtoneartist">ringtoneartist</a></p>
+							<p class="stats"><span class="icon"><svg aria-label="Total downloads"><use href="#arrow-down" class="stroke-grey"/></svg></span>1.2K</p>
+							<a href="https://www.mobiles24.co/downloads/s/642153-3-iphone_strum" class="click-target" aria-hidden="true" tabindex="-1"></a>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div>
+						<div class="thumb mplyr bgg3"><audio class="listen" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635407&amp;cat=3&amp;h=13661251" data-dlid="635407" data-gacat="sm"></audio></div>
+						<div class="media-content">
+						<div class="name"><a href="https://www.mobiles24.co/downloads/s/635407-3-bulletin_iphone_xs_xs_max_xr_stock" title="Bulletin (iPhone XS, XS Max, XR Stock) ">Bulletin (iPhone XS, XS Max, XR Stock)</a></div>
+							<p class="author"><a href="https://profile.mobiles24.co/indesign">Indesign</a></p>
+							<p class="stats"><span class="icon"><svg aria-label="Total downloads"><use href="#arrow-down" class="stroke-grey"/></svg></span>1.0K</p>
+							<a href="https://www.mobiles24.co/downloads/s/635407-3-bulletin_iphone_xs_xs_max_xr_stock" class="click-target" aria-hidden="true" tabindex="-1"></a>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div>
+						<div class="thumb mplyr bgg9"><audio class="listen" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635395&amp;cat=3&amp;h=13660993" data-dlid="635395" data-gacat="sm"></audio></div>
+						<div class="media-content">
+						<div class="name"><a href="https://www.mobiles24.co/downloads/s/635395-3-ripples_iphone_xs_xs_max_xr_stock" title="Ripples (iPhone XS, XS Max, XR Stock) ">Ripples (iPhone XS, XS Max, XR Stock)</a></div>
+							<p class="author"><a href="https://profile.mobiles24.co/indesign">Indesign</a></p>
+							<p class="stats"><span class="icon"><svg aria-label="Total downloads"><use href="#arrow-down" class="stroke-grey"/></svg></span>1.1K</p>
+							<a href="https://www.mobiles24.co/downloads/s/635395-3-ripples_iphone_xs_xs_max_xr_stock" class="click-target" aria-hidden="true" tabindex="-1"></a>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div>
+						<div class="thumb mplyr bgg5"><audio class="listen" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635396&amp;cat=3&amp;h=13661014" data-dlid="635396" data-gacat="sm"></audio></div>
+						<div class="media-content">
+						<div class="name"><a href="https://www.mobiles24.co/downloads/s/635396-3-hillside_iphone_xs_xs_max_xr_stock" title="Hillside (iPhone XS, XS Max, XR Stock) ">Hillside (iPhone XS, XS Max, XR Stock)</a></div>
+							<p class="author"><a href="https://profile.mobiles24.co/indesign">Indesign</a></p>
+							<p class="stats"><span class="icon"><svg aria-label="Total downloads"><use href="#arrow-down" class="stroke-grey"/></svg></span>1.2K</p>
+							<a href="https://www.mobiles24.co/downloads/s/635396-3-hillside_iphone_xs_xs_max_xr_stock" class="click-target" aria-hidden="true" tabindex="-1"></a>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div>
+						<div class="thumb mplyr bgg7"><audio class="listen" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635397&amp;cat=3&amp;h=13661036" data-dlid="635397" data-gacat="sm"></audio></div>
+						<div class="media-content">
+						<div class="name"><a href="https://www.mobiles24.co/downloads/s/635397-3-note_iphone_xs_xs_max_xr_stock" title="Note (iPhone XS, XS Max, XR Stock) ">Note (iPhone XS, XS Max, XR Stock)</a></div>
+							<p class="author"><a href="https://profile.mobiles24.co/indesign">Indesign</a></p>
+							<p class="stats"><span class="icon"><svg aria-label="Total downloads"><use href="#arrow-down" class="stroke-grey"/></svg></span>4.4K</p>
+							<a href="https://www.mobiles24.co/downloads/s/635397-3-note_iphone_xs_xs_max_xr_stock" class="click-target" aria-hidden="true" tabindex="-1"></a>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div>
+						<div class="thumb mplyr bgg9"><audio class="listen" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635398&amp;cat=3&amp;h=13661057" data-dlid="635398" data-gacat="sm"></audio></div>
+						<div class="media-content">
+						<div class="name"><a href="https://www.mobiles24.co/downloads/s/635398-3-radar_iphone_xs_xs_max_xr_stock" title="Radar (iPhone XS, XS Max, XR Stock) ">Radar (iPhone XS, XS Max, XR Stock)</a></div>
+							<p class="author"><a href="https://profile.mobiles24.co/indesign">Indesign</a></p>
+							<p class="stats"><span class="icon"><svg aria-label="Total downloads"><use href="#arrow-down" class="stroke-grey"/></svg></span>1.3K</p>
+							<a href="https://www.mobiles24.co/downloads/s/635398-3-radar_iphone_xs_xs_max_xr_stock" class="click-target" aria-hidden="true" tabindex="-1"></a>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div>
+						<div class="thumb mplyr bgg6"><audio class="listen" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635399&amp;cat=3&amp;h=13661079" data-dlid="635399" data-gacat="sm"></audio></div>
+						<div class="media-content">
+						<div class="name"><a href="https://www.mobiles24.co/downloads/s/635399-3-illuminate_iphone_xs_xs_max_xr_stock" title="Illuminate (iPhone XS, XS Max, XR Stock) ">Illuminate (iPhone XS, XS Max, XR Stock)</a></div>
+							<p class="author"><a href="https://profile.mobiles24.co/indesign">Indesign</a></p>
+							<p class="stats"><span class="icon"><svg aria-label="Total downloads"><use href="#arrow-down" class="stroke-grey"/></svg></span>1.5K</p>
+							<a href="https://www.mobiles24.co/downloads/s/635399-3-illuminate_iphone_xs_xs_max_xr_stock" class="click-target" aria-hidden="true" tabindex="-1"></a>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div>
+						<div class="thumb mplyr bgg3"><audio class="listen" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635400&amp;cat=3&amp;h=13661100" data-dlid="635400" data-gacat="sm"></audio></div>
+						<div class="media-content">
+						<div class="name"><a href="https://www.mobiles24.co/downloads/s/635400-3-beacon_iphone_xs_xs_max_xr_stock" title="Beacon (iPhone XS, XS Max, XR Stock) ">Beacon (iPhone XS, XS Max, XR Stock)</a></div>
+							<p class="author"><a href="https://profile.mobiles24.co/indesign">Indesign</a></p>
+							<p class="stats"><span class="icon"><svg aria-label="Total downloads"><use href="#arrow-down" class="stroke-grey"/></svg></span>768</p>
+							<a href="https://www.mobiles24.co/downloads/s/635400-3-beacon_iphone_xs_xs_max_xr_stock" class="click-target" aria-hidden="true" tabindex="-1"></a>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div>
+						<div class="thumb mplyr bgg8"><audio class="listen" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635401&amp;cat=3&amp;h=13661122" data-dlid="635401" data-gacat="sm"></audio></div>
+						<div class="media-content">
+						<div class="name"><a href="https://www.mobiles24.co/downloads/s/635401-3-presto_iphone_xs_xs_max_xr_stock" title="Presto (iPhone XS, XS Max, XR Stock) ">Presto (iPhone XS, XS Max, XR Stock)</a></div>
+							<p class="author"><a href="https://profile.mobiles24.co/indesign">Indesign</a></p>
+							<p class="stats"><span class="icon"><svg aria-label="Total downloads"><use href="#arrow-down" class="stroke-grey"/></svg></span>1.1K</p>
+							<a href="https://www.mobiles24.co/downloads/s/635401-3-presto_iphone_xs_xs_max_xr_stock" class="click-target" aria-hidden="true" tabindex="-1"></a>
+						</div>
+					</div>
+				</li>
+				<li>
+					<div>
+						<div class="thumb mplyr bgg3"><audio class="listen" preload="none" src="https://www.mobiles24.co/metapreview.php?id=635402&amp;cat=3&amp;h=13661143" data-dlid="635402" data-gacat="sm"></audio></div>
+						<div class="media-content">
+						<div class="name"><a href="https://www.mobiles24.co/downloads/s/635402-3-apex_iphone_xs_xs_max_xr_stock" title="Apex (iPhone XS, XS Max, XR Stock) ">Apex (iPhone XS, XS Max, XR Stock)</a></div>
+							<p class="author"><a href="https://profile.mobiles24.co/indesign">Indesign</a></p>
+							<p class="stats"><span class="icon"><svg aria-label="Total downloads"><use href="#arrow-down" class="stroke-grey"/></svg></span>1.1K</p>
+							<a href="https://www.mobiles24.co/downloads/s/635402-3-apex_iphone_xs_xs_max_xr_stock" class="click-target" aria-hidden="true" tabindex="-1"></a>
+						</div>
+					</div>
+				</li>	</ul>
+<button data-action="similar" class="mo-btn-more mo-more button">Show More</button></aside>
+
+
+
+<section class="mo-margin-lg">
+    <h2>Comments</h2>
+	<p><button data-action="comments" class="mo-btn-comments button">Show comments &amp; add yours</button></p>
+</section>
+
+
+
+
+<section class="mo-margin-lg">
+<h2>Help & Information</h2>
+	<article class="content notification">
+	<h3 id="set-as-ringtone" class="is-size-6">How do I set this as my ringtone?</h3>
+	<p>Using an Android device?</p>
+	<p><a href="https://play.google.com/store/apps/details?id=com.mobiles24.downloads&amp;utm_source=website&amp;utm_medium=referral&amp;utm_campaign=download_button&amp;utm_term=635412" target="_blank" class="has-text-weight-bold"><span class="icon"><svg aria-hidden="true"><use href="#arrow-down" class="stroke-black"/></svg></span><span>Download Opening Default iPhone on Mobiles24 app!</span></a></p>
+	<p>Set Opening Default iPhone ringtone for Android:</p>
+	<ol><li>Select <b>Download Ringtone</b> button above</li>
+	<li>Go to <b>Settings</b> app</li>
+	<li>Select <b>Sounds &amp; Vibration</b></li>
+	<li>Select <b>Phone ringtone</b></li>
+	<li>Select <b>Ringtone from Internal Storage</b></li>
+	</ol>
+		<p>Set Opening Default iPhone ringtone for iPhone:</p>
+	<ol><li>Select <b>Download M4R for iPhone</b> button above and save to your PC or Mac</li>
+	<li>Connect your iPhone to your PC or Mac via its charging cable</li>
+	<li>Launch <b>iTunes</b> and drag <b>Opening Default iPhone.m4r</b> to the <b>Tones</b> folder (Under "On My Device")</li></ol>
+<p>Need help? <a href="contact">Contact us</a> or <a href="https://forum.mobiles24.co/">post on the forum</a></p>	
+</article>
+</section>
+
+<div> 
+<button class="mo-btn-report button mo-is-borderless">
+        <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="s0 fa-lg fa-3x" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg></span>
+		</span><span class="mo-action-label">Report this Ringtone</span></button>      
+		<br>
+				<a href="https://www.mobiles24.co/search/user/indesign/free-mp3-ringtones" class="button mo-is-borderless">
+        <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" class="s0 fa-lg fa-3x" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+        </span><span class="mo-action-label">Browse Ringtones by Indesign</span></a> 
+		
+		
+		</div>
+
+</article> 
+<!-- mo-content-container --></div>
+
+<nav class="breadcrumb" aria-label="breadcrumbs">
+	<ol itemscope itemtype="https://schema.org/BreadcrumbList">
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="navbit"><a accesskey="1" itemprop="item" href="https://www.mobiles24.co/" itemprop="url"><span class="icon mo-is-size-65 is-marginless"><svg aria-hidden="true"><use href="#home" class="stroke-blue"/></svg></span><span itemprop="name" class="sr-only">Home</span></a><meta itemprop="position" content="1"></li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="navbit"><a href="/downloads" itemprop="item"><span itemprop="name">Downloads</span></a><meta itemprop="position" content="2"></li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="navbit"><a href="/downloads/free-mp3-ringtones" itemprop="item"><span itemprop="name">Free MP3 Ringtones</span></a><meta itemprop="position" content="3"></li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" class="navbit lastnavbit"><span itemprop="name">Opening Default iPhone Ringtone</span><meta itemprop="position" content="4"></li> </ol></nav>
+
+
+
+</div><!-- /mo-container -->
+
+
+</main>
+
+
+<footer class="footer has-text-centered">
+    
+    <p class="mo-margin">Follow us: <a href="https://www.facebook.com/mobiles24" target="_blank" rel="noreferrer">Facebook</a> &middot; <a href="https://x.com/mobiles24" target="_blank" rel=”noreferrer”>X</a></p>
+    <p>Download our app: <a href="https://play.google.com/store/apps/details?id=com.mobiles24.downloads" target="_blank" rel="noreferrer">Mobiles24 - Ringtones &amp; Wallpapers</a></p>
+    <p>&copy; 2026 Mobiles24</p>
+</footer>
+
+<!-- hidden -->
+<div class="mo-overlay" style="display:none"></div>
+ <svg style="display: none;">
+  <style>.s1{ stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;}.grecaptcha-badge{visibility:hidden;}</style>
+  <symbol id="music" viewBox="0 0 24 24" class="s1">
+  <path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle>
+  </symbol>
+  <symbol id="wallpaper" viewBox="0 0 24 24" class="s1">
+  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline>
+  </symbol>
+  <symbol id="bell" viewBox="0 0 24 24" class="s1">
+  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+  </symbol>
+  <symbol id="android" viewBox="0 0 24 24" class="s1">
+  <path d="M5,8h14v9c0,1.1-0.9,2-2,2  H7c-1.1,0-2-0.9-2-2V8z"/><path d="M5,11V7c0-2.8,2.7-5,7-5  c4.2,0,7,2.2,7,5v4"/><line x1="1.8" y1="10" x2="1.8" y2="17"/><line x1="22.2" y1="10" x2="22.2" y2="17"/><line x1="8.8" y1="20" x2="8.8" y2="22"/><line x1="15.4" y1="20" x2="15.4" y2="22"/>
+  </symbol>
+  <symbol id="film" viewBox="0 0 24 24" class="s1">
+  <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line>
+  </symbol>
+  <symbol id="upload" viewBox="0 0 24 24" class="s1">
+  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line>
+  </symbol>
+  <symbol id="scissors" viewBox="0 0 24 24" class="s1">
+  <circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+  </symbol>
+  <symbol id="cloud" viewBox="0 0 24 24" class="s1">
+  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+  </symbol>
+  <symbol id="arr-rt-cir" viewBox="0 0 24 24" class="s1">
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 16 16 12 12 8"></polyline><line x1="8" y1="12" x2="16" y2="12"></line>
+  </symbol>
+  <symbol id="message-square" viewBox="0 0 24 24" class="s1">
+  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+  </symbol>
+  <symbol id="award" viewBox="0 0 24 24" class="s1">
+  <circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+  </symbol>
+  <symbol id="smartphone" viewBox="0 0 24 24" class="s1">
+  <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line>
+  </symbol>
+  <symbol id="x" viewBox="0 0 24 24" class="s1">
+  <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+  </symbol>
+  <symbol id="download" viewBox="0 0 24 24" class="s1">
+  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>
+  </symbol>
+  <symbol id="arrow-down" viewBox="0 0 24 24" class="s1">
+  <line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline>
+</symbol>
+<symbol id="s60" viewBox="0 0 24 24" class="s1">
+<line x1="2" y1="12.1" x2="9.4" y2="12.1"/><line x1="14.6" y1="12.1" x2="22" y2="12.1"/><line x1="13.3" y1="14.3" x2="17" y2="20.6"/><line x1="7.1" y1="3.6" x2="10.8" y2="9.9"/><line x1="17" y1="3.5" x2="13.3" y2="9.9"/>
+</symbol>
+<symbol id="java" viewBox="0 0 24 24" class="s1">
+<path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line>
+</symbol>
+<symbol id="home" viewBox="0 0 24 24" class="s1">
+<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>
+</symbol>
+</svg>
+
+
+<div id="download_modal" class="m24modal" style="display:none">
+<div class="m24modalclose"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" aria-label="Close"><path fill="#ffffff" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" /></svg></div>
+<div class="m24modalcontent">
+<h1 class="mo-margin is-size-5">Your download will start automatically. <a class="mo-force-url">Not started?</a></h1>
+<div class="content mo-margin has-text-centered">
+<div class="mo-margin has-text-centered has-text-left-desktop">
+	<div><p><a href="https://play.google.com/store/apps/details?id=com.mobiles24.downloads&amp;utm_source=website&amp;utm_medium=referral&amp;utm_campaign=download_button&amp;utm_term=635412" target="_blank" class="mo-btn-download-external button is-success" style="background-color:#01875f"><span class="icon"><svg aria-hidden="true"><use href="#arrow-down" class="stroke-white"/></svg></span><span>Download on Google Play</span></a></p>
+	<p class="mo-help">Mobiles24 Official App</p>
+	</div>
+	</div></div><h2>More Ringtones</h2>
+<p class="mo-placeholder-similar" style="max-height:150px;overflow-x:auto"></p>
+</div>
+</div>
+</div>
+		
+<form name="vars" id="vars"><input name="id" type="hidden" value="635412"><input name="securitytoken" id="page" type="hidden" value="guest"></form> 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://img.mobiles24.net/public/js/circular/player.min.js"></script><script>$(document).ready(function() {  
+	
+			const observer = new ResizeObserver(entries => {
+			  for (let entry of entries) {
+				entry.target.classList[entry.target.scrollHeight > entry.contentRect.height ? 'add' : 'remove']('truncated');
+				console.log(entry.target.scrollHeight > entry.contentRect.height ? 'add' : 'remove');
+			  }
+			});
+			
+			observer.observe(document.querySelector('.rmb p'));
+
+			});</script><script>
+
+var AC_SEARCH_CAT = '';
+const M24URL = 'https://www.mobiles24.co/';
+const SECURITYTOKEN = 'guest'; 
+
+function handleAjaxError(err) {
+   alert("An error occurred! Refresh the page and try again.");
+}
+
+/**
+* Modal outside click
+*/
+function moEv(e, hideOnClose=false)
+{
+	$('.m24modal' ).on('click', function(e)
+            { if ($(e.target).closest('.m24modalcontent').length === 0){if(hideOnClose){ $(this).hide();}else{$(this).remove();}}
+            });
+}
+
+function isJSON(un) {
+
+    try {
+        JSON.parse(un);
+        
+    } catch (e) {
+        
+        return false;
+    }
+
+    return true;
+}
+
+$(document).ready(function() {
+
+    $('.mplyr').mediaPlayer();
+	function getAcScript(){$.getScript(M24URL+"public/js/autocomplete/jquery.autocomplete.min.js",(function(){$("#search select[name=c]").on("change",e=>{AC_SEARCH_CAT=$(e.target).val(),loadAC()}),loadAC()}))}function loadAC(){$(".acs").autocomplete({serviceUrl:M24URL+"ajax/autocomplete.php",paramName:"q",params:{c:AC_SEARCH_CAT},deferRequestBy:150,minChars:2,triggerSelectOnValidInput:!1,onSearchError:function(){return!1},onSelect:function(suggestion){gtag("event","ac_search",{event_category:AC_SEARCH_CAT,event_label:suggestion.value}),$(this).closest("form").submit()}})}$(".nli").on("click",(function(e){$.get("/ajax/login.php",{},(function(data){$("body").append(data),moEv(e)})).fail(handleAjaxError)})),$(".dropdown .button").click((function(){var dropdown=$(this).parents(".dropdown");dropdown.toggleClass("is-active"),dropdown.focusout((function(){}))})),$(".navbar-burger").click((function(){$("html").hasClass("search-active")?($(".navbar-burger").removeClass("is-active"),$("html").removeClass("search-active"),$("#search-container").addClass("is-hidden-touch")):($(".navbar-burger").toggleClass("is-active"),$(".navbar-menu").toggleClass("is-active"))})),$("#btn-search").click((function(){$(".navbar-menu").hasClass("is-active")&&$(".navbar-burger").trigger("click"),$("html").toggleClass("search-active"),$(".navbar-burger").addClass("is-active"),$("#search-container").toggleClass("is-hidden-touch"),$("#search-input input").focus()})),$(".mo-btn-familyfilter").on("click",(function(e){$.get("/ajax/familyfilter.php",$("#vars").serialize(),(function(data){$("body").append(data),moEv(e)})).fail(handleAjaxError)})),$("#search-input [name=q]").one("focus",(function(){getAcScript()}));$(".mo-btn-download").on("click",(function(e){e.preventDefault();var downloadUrl=$(this).attr("href");return $("#download_modal").find(".mo-force-url").attr("href",downloadUrl),$("#download_modal").show(),gtag("event","download",{event_category:$(this).data("fmt"),event_label:$("#vars").find("input[name=id]").val()}),setTimeout((function(){location.href=downloadUrl}),2e3),moEv(e,!0),!1}));var ratingGiven=!1;$("#mo-btn-like,#mo-btn-dislike").on("click",(function(e){var act=$(this).data("action");if(ratingGiven==act)return alert("You have already rated this download."),!1;$.post("/ajax/ajax_like.php","sf=touch&action="+act+"&"+$("#vars").serialize(),(function(jsonobj){jsonobj.status&&(ratingGiven&&ratingGiven!=act&&($("#res-"+ratingGiven).text(parseInt($("#res-"+ratingGiven).text())-1),$("#res-"+ratingGiven).removeClass("active")),$("#res-"+act).text(parseInt($("#res-"+act).text())+1),$("#res-"+act).addClass("active"),ratingGiven=act)}),"json")})),$("#mo-btn-share").on("click",(function(e){navigator.share?navigator.share({title:$(this).data("title"),text:$(this).data("title"),url:$(this).data("url")}).then(()=>{gtag("event","share",{event_label:$(this).data("url")})}).catch(error=>console.log("Error sharing",error)):$.post("/ajax/share.php",{sf:"touch",url:$(this).data("url"),title:$(this).data("title")},(function(data){$("body").append(data),moEv(e)})).fail(handleAjaxError)})),$("#mo-btn-save:not(.nli)").on("click",(function(e){$.get("/ajax/collection.php",$("#vars").serialize(),(function(data){if(jsonData=isJSON(data))return"nopermission"==jsonData.error?alert("You must be logged in!"):handleAjaxError(jsonData),!1;$("body").append(data),moEv(e)})).fail(handleAjaxError)})),$(".mo-btn-report").on("click",(function(e){$.get("/ajax/report.php",$("#vars").serialize(),(function(data){$("body").append(data),moEv(e)})).fail(handleAjaxError)})),browse_similar_downloads_page_number=2,$(".mo-btn-more").on("click",(function(e){$.get("/ajax/browse_downloads.php","page="+browse_similar_downloads_page_number+"&action="+$(this).data("action")+"&"+$("#vars").serialize(),(function(jsonData){if(!jsonData.can_show_more)return $(e.target).hide(),!1;jsonData.html&&(browse_similar_downloads_page_number++,$(e.target).prev(".mo-ajax-content").append(jsonData.html),$(".mplyr").length>0&&$(".mplyr").mediaPlayer())}),"json").fail(handleAjaxError)})),$(".mo-btn-comments").on("click",(function(e){console.log("comment click")}));$("#mo-btn-clip").on("click",(function(e){if("undefined"==typeof WaveSurfer)$.post("/ajax/clip.php",$("#vars").serialize(),(function(res){var bgg=$(".large.mplyr").attr("class").match(/(bgg\d+)/)[1];$(".large.mplyr").hide(),$("#clip-placeholder").html(res),$("#waveform-container").addClass(bgg),$.getScript("public/js/wavesurfer/wavesurfer_combined.min.js").done((function(){$.getScript("public/js/ringtonemaker/ringtonemaker_clip.min.js").done((function(){loadRingtone(window.location.href),$("#songtitle").val($("h1:first").text())})).fail(handleAjaxError)})).fail(handleAjaxError)})).fail(handleAjaxError);else{if($("#clip-placeholder").is(":visible"))return!1;$("#clip-placeholder").show(),$(".large.mplyr").hide()}}));var cachedRingtoneBuffer=!1;$(".mo-btn-save-flavor").on("click",(function(e){var audioEl=$(this).closest(".media-content").prev(".mplyr").find("audio"),el=this;function createRingtone(){var opts={title:$("h1:first").text(),format:$(el).data("format"),downloadId:$("#vars").find("input[name=id]").val(),playbackRate:$(audioEl).data("playbackrate"),bitrate:$(audioEl).data("bitrate"),cachedRingtoneBuffer:cachedRingtoneBuffer};$(el).ringtoneTools(opts).saveFromUrl(window.location.href).then(buffer=>{cachedRingtoneBuffer=buffer,gtag("event","download",{event_category:$(el).data("format"),event_label:opts.downloadId+"_"+opts.playbackRate}),$(el).prop("disabled",!1)}).catch(err=>{handleAjaxError(err),$(el).prop("disabled",!1)})}$(el).prop("disabled",!0),"undefined"==typeof ringtoneTools?$.getScript("public/js/lamejs/lame.min.js").done((function(){$.getScript("public/js/ringtonemaker/ringtonemaker_tools.min.js").done(createRingtone).fail(handleAjaxError)})).fail(handleAjaxError):createRingtone()}));	
+	
+	$('.mo-placeholder-similar').html($('.mo-ajax-content').clone());
+	//.find('ul').addClass('mo-is-cards');
+});
+
+</script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-221971-4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-221971-4');
+</script>
+
+
+
+
+
+    
+</body>
+</html>
