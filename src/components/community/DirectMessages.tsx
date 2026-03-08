@@ -20,8 +20,8 @@ export const DirectMessages = () => {
   const [messages, setMessages] = useState<DM[]>([]);
   const [search, setSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
-  const [showCall, setShowCall] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { callState, isMuted, duration, startCall, endCall, toggleMute } = useWebRTC(user?.id);
 
   useEffect(() => {
     if (!user) return;
