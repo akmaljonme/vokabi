@@ -1,0 +1,2 @@
+ALTER TABLE public.questions DROP CONSTRAINT questions_category_check;
+ALTER TABLE public.questions ADD CONSTRAINT questions_category_check CHECK (category = ANY (ARRAY['grammar'::text, 'vocabulary'::text, 'reading'::text, 'listening'::text, 'writing'::text, 'speaking'::text]));
