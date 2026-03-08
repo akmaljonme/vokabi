@@ -88,7 +88,7 @@ export default function Dashboard() {
   };
 
   const getSkillAnalysis = (): SkillAnalysis[] => {
-    const skills = ['reading', 'listening'];
+    const skills = ['reading', 'listening', 'vocabulary', 'grammar', 'writing', 'speaking'];
     return skills.map(skill => {
       const skillResults = results.filter(r => r.skill === skill);
       const averageScore = skillResults.length > 0
