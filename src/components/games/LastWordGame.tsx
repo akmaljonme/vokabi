@@ -66,6 +66,7 @@ export const LastWordGame = ({ onBack }: Props) => {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const [playerName, setPlayerName] = useState('');
+  const [joinId, setJoinId] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<any>(null);
   const channelRef = useRef<any>(null);
