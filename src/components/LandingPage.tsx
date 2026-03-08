@@ -577,7 +577,7 @@ export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps)
               Kelajagingizga invest qiling
             </h2>
             <p className="text-white/75 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-              50,000+ o'quvchi bilan birga IELTS va CEFR sertifikatiga tayyorlaning
+              Minglab o'quvchilar bilan birga IELTS va CEFR sertifikatiga tayyorlaning
             </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
