@@ -1,10 +1,12 @@
-import { ArrowRight, BookOpen, Headphones, Award, Users, CheckCircle2, Star, ChevronDown, Zap, Globe, TrendingUp, Shield, Sparkles, Crown, Brain, BarChart3, Target, Mic, PenTool } from 'lucide-react';
+import { ArrowRight, BookOpen, Headphones, Award, Users, CheckCircle2, Star, ChevronDown, Zap, Globe, TrendingUp, Shield, Sparkles, Crown, Brain, BarChart3, Target, Mic, PenTool, MessageSquarePlus } from 'lucide-react';
 import { levels } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { FeedbackDialog } from '@/components/FeedbackDialog';
+import { Button } from '@/components/ui/button';
 
 interface LandingPageProps {
   onStartTest: () => void;
