@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { MapPin, Mail, Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { z } from 'zod';
+import { motion } from 'framer-motion';
 
 const emailSchema = z.string().trim().email({ message: "Invalid email address" }).max(255);
 const passwordSchema = z.string().min(6, { message: "Password must be at least 6 characters" }).max(72);
@@ -17,14 +18,12 @@ const Auth = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
-  
+
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
+    if (user) navigate('/');
   }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,12 +33,9 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Validate inputs
       emailSchema.parse(email);
       passwordSchema.parse(password);
-      if (!isLogin && fullName) {
-        nameSchema.parse(fullName);
-      }
+      if (!isLogin && fullName) nameSchema.parse(fullName);
     } catch (err) {
       if (err instanceof z.ZodError) {
         setError(err.errors[0].message);
@@ -52,73 +48,74 @@ const Auth = () => {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes('Invalid login')) {
-            setError('Invalid email or password. Please try again.');
-          } else {
-            setError(error.message);
-          }
+          setError(error.message.includes('Invalid login') ? 'Noto\'g\'ri email yoki parol.' : error.message);
         }
       } else {
         const { error } = await signUp(email, password, fullName);
         if (error) {
-          if (error.message.includes('already registered')) {
-            setError('This email is already registered. Please sign in instead.');
-          } else {
-            setError(error.message);
-          }
+          setError(error.message.includes('already registered') ? 'Bu email allaqachon ro\'yxatdan o\'tgan.' : error.message);
         } else {
-          setSuccess('Account created successfully! You can now sign in.');
+          setSuccess('Hisob yaratildi! Emailingizni tasdiqlang va keyin kiring.');
           setIsLogin(true);
         }
       }
-    } catch (err: any) {
-      setError('An unexpected error occurred. Please try again.');
+    } catch {
+      setError('Kutilmagan xatolik yuz berdi.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 flex flex-col">
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 mesh-gradient" />
+      <div className="absolute inset-0 dot-pattern opacity-20" />
+
       {/* Header */}
-      <header className="bg-background border-b border-border py-4">
+      <header className="relative z-10 py-5">
         <div className="container mx-auto px-4">
-          <a href="/" className="flex items-center gap-2 w-fit">
-            <span className="text-xl font-display font-bold text-secondary">CEFR</span>
-            <MapPin className="w-5 h-5 text-primary" />
-            <span className="text-xl font-display font-bold text-primary">TEST HUB</span>
+          <a href="/" className="inline-flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-display font-bold tracking-tight">IELTSify</span>
           </a>
         </div>
       </header>
 
       {/* Auth Form */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <div className="card-elevated p-8 animate-slide-up">
+      <div className="flex-1 flex items-center justify-center p-4 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-md"
+        >
+          <div className="card-elevated p-8 md:p-10 border border-border/50">
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-display font-bold mb-2">
-                {isLogin ? 'Welcome Back!' : 'Create Account'}
+              <h1 className="text-2xl font-display font-bold mb-2 tracking-tight">
+                {isLogin ? 'Xush kelibsiz!' : 'Hisob yaratish'}
               </h1>
-              <p className="text-muted-foreground">
-                {isLogin 
-                  ? 'Sign in to track your progress and save results'
-                  : 'Join thousands of learners achieving CEFR success'
-                }
+              <p className="text-muted-foreground text-sm">
+                {isLogin
+                  ? 'Natijalaringizni saqlash uchun kiring'
+                  : 'Minglab o\'quvchilarga qo\'shiling'}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <div>
-                  <label className="block text-sm font-medium mb-2">Full Name</label>
+                  <label className="block text-sm font-medium mb-2">To'liq ism</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Enter your full name"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                      placeholder="Ismingizni kiriting"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                     />
                   </div>
                 </div>
@@ -127,85 +124,91 @@ const Auth = () => {
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
+                    placeholder="email@example.com"
                     required
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Password</label>
+                <label className="block text-sm font-medium mb-2">Parol</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder="Kamida 6 ta belgi"
                     required
-                    className="w-full pl-10 pr-12 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    className="w-full pl-10 pr-12 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
               {error && (
-                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 rounded-xl bg-destructive/10 text-destructive text-sm border border-destructive/20"
+                >
                   {error}
-                </div>
+                </motion.div>
               )}
 
               {success && (
-                <div className="p-3 rounded-lg bg-emerald-100 text-emerald-700 text-sm">
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 text-sm border border-emerald-500/20"
+                >
                   {success}
-                </div>
+                </motion.div>
               )}
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
                 type="submit"
                 disabled={loading}
-                className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50"
+                className="btn-primary w-full flex items-center justify-center gap-2 py-3.5 disabled:opacity-50"
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    {isLogin ? 'Sign In' : 'Create Account'}
-                    <ArrowRight className="w-5 h-5" />
+                    {isLogin ? 'Kirish' : 'Ro\'yxatdan o\'tish'}
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 )}
-              </button>
+              </motion.button>
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-muted-foreground">
-                {isLogin ? "Don't have an account?" : 'Already have an account?'}
+              <p className="text-muted-foreground text-sm">
+                {isLogin ? "Hisobingiz yo'qmi?" : 'Allaqachon ro\'yxatdan o\'tganmisiz?'}
                 <button
-                  onClick={() => {
-                    setIsLogin(!isLogin);
-                    setError('');
-                    setSuccess('');
-                  }}
-                  className="ml-2 text-primary font-medium hover:underline"
+                  onClick={() => { setIsLogin(!isLogin); setError(''); setSuccess(''); }}
+                  className="ml-1.5 text-primary font-medium hover:underline"
                 >
-                  {isLogin ? 'Sign Up' : 'Sign In'}
+                  {isLogin ? 'Ro\'yxatdan o\'tish' : 'Kirish'}
                 </button>
               </p>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
