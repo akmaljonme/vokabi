@@ -316,6 +316,13 @@ export const UsersTab = () => {
                               </>
                             )}
                           </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setDeleteTarget(user)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Foydalanuvchini o'chirish
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
