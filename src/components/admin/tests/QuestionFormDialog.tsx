@@ -210,6 +210,24 @@ export const QuestionFormDialog = ({
       setUploading(false);
     }
 
+    // For AI-evaluated skills, use simplified data
+    if (isAIEvaluated) {
+      await onSave({
+        ...(question ? { id: question.id } : {}),
+        test_id: testId,
+        question_text: formData.question_text,
+        question_type: 'fill-blank',
+        category: testSkill || 'writing',
+        options: null,
+        correct_answer: 'AI_EVALUATED',
+        explanation: formData.explanation || null,
+        points: formData.points,
+        order_index: formData.order_index,
+        image_url: imageUrl,
+      });
+      return;
+    }
+
     const filteredOptions = formData.question_type === 'fill-blank' 
       ? null 
       : formData.options.filter(opt => opt.trim() !== '');
