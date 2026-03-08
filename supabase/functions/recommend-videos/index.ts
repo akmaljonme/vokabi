@@ -5,8 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function buildYouTubeSearchUrl(query: string): string {
-  return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+function buildSearchUrl(query: string): string {
+  return `https://www.google.com/search?q=${encodeURIComponent(query + " site:youtube.com")}`;
 }
 
 serve(async (req) => {
@@ -89,7 +89,7 @@ CRITICAL RULES:
     if (result?.videos) {
       result.videos = result.videos.map((video: any) => ({
         ...video,
-        url: buildYouTubeSearchUrl(video.searchQuery || `${video.topic} ${video.channel} english lesson`),
+        url: buildSearchUrl(video.searchQuery || `${video.topic} ${video.channel} english lesson`),
       }));
     }
 
