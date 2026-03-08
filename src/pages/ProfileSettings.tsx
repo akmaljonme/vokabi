@@ -90,7 +90,7 @@ export default function ProfileSettings() {
         if (uname.length > 30) { setUsernameError('Username 30 ta belgidan oshmasligi kerak'); setIsSaving(false); return; }
         if (!/^[a-z0-9_]+$/.test(uname)) { setUsernameError('Faqat kichik harflar, raqamlar va _ ishlatiladi'); setIsSaving(false); return; }
         // Check uniqueness
-        const { data: existing } = await supabase.from('profiles').select('user_id').eq('username' as any, uname).neq('user_id', user.id).maybeSingle();
+        const { data: existing } = await (supabase.from('profiles').select('user_id') as any).eq('username', uname).neq('user_id', user.id).maybeSingle();
         if (existing) { setUsernameError('Bu username allaqachon band'); setIsSaving(false); return; }
       }
       setUsernameError('');
