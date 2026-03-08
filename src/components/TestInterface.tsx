@@ -232,6 +232,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
       passed: percentage >= 70,
       answers: results,
       timeTaken: mockTest.timeLimit - timeLeft,
+      mockTest,
     });
   };
 
