@@ -408,6 +408,13 @@ export const TestsTab = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* PDF Import Dialog */}
+      <PDFImportDialog
+        open={pdfDialogOpen}
+        onOpenChange={setPdfDialogOpen}
+        onSuccess={fetchTests}
+      />
     </div>
   );
 };
