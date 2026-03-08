@@ -30,7 +30,7 @@ export const ChatRooms = () => {
   const [forwardSearch, setForwardSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [onlineUsers, setOnlineUsers] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<{ user_id: string; username: string | null; full_name: string | null }[]>([]);
   const [showOnline, setShowOnline] = useState(false);
   const [showRoomDialog, setShowRoomDialog] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
