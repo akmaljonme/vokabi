@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, ArrowLeft, Search, User } from 'lucide-react';
 
-interface Profile { user_id: string; full_name: string | null; avatar_url: string | null; }
+interface Profile { user_id: string; full_name: string | null; username: string | null; avatar_url: string | null; }
 interface DM { id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; created_at: string; }
 
 export const DirectMessages = () => {
