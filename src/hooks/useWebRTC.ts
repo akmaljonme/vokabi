@@ -225,14 +225,18 @@ export const useWebRTC = (userId: string | undefined) => {
 
   const endCall = useCallback(async (remoteId?: string) => {
     const targetId = remoteId || currentCalleeRef.current;
+    const wasConnected = callConnectedRef.current;
+    const dur = durationRef.current;
     if (targetId && userId) {
       await sendSignal(targetId, 'call-end');
+      // Save call record in chat
+      await saveCallMessage(targetId, wasConnected, dur);
     }
     stopRingtone();
     updateCallState('ended');
     cleanup();
     setTimeout(() => updateCallState('idle'), 1500);
-  }, [userId, cleanup, stopRingtone, updateCallState]);
+  }, [userId, cleanup, stopRingtone, updateCallState, saveCallMessage]);
 
   const toggleMute = useCallback(() => {
     if (localStreamRef.current) {
