@@ -194,6 +194,7 @@ export const UsersTab = () => {
               <tr>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">User</th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Role</th>
+                <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Plan</th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Tests Taken</th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Avg Score</th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Joined</th>
