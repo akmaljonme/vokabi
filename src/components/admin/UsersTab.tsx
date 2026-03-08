@@ -232,6 +232,18 @@ export const UsersTab = () => {
                         </span>
                       )}
                     </td>
+                    <td className="py-4 px-4">
+                      {user.is_pro ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600">
+                          <Crown className="w-3 h-3" />
+                          Pro
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                          Free
+                        </span>
+                      )}
+                    </td>
                     <td className="py-4 px-4 text-sm">{user.test_count}</td>
                     <td className="py-4 px-4">
                       <span className={user.avg_score >= 60 ? 'text-green-500' : 'text-destructive'}>
