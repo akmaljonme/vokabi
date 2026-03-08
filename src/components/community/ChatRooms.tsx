@@ -30,7 +30,7 @@ export const ChatRooms = () => {
   const [forwardSearch, setForwardSearch] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [onlineUsers, setOnlineUsers] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<{ user_id: string; username: string | null; full_name: string | null }[]>([]);
   const [showOnline, setShowOnline] = useState(false);
   const [showRoomDialog, setShowRoomDialog] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
@@ -121,14 +121,15 @@ export const ChatRooms = () => {
         const state = presenceChannel.presenceState();
         const users = Object.values(state).flat().map((p: any) => ({
           user_id: p.user_id,
-          full_name: p.full_name || 'Foydalanuvchi',
+          username: p.username || null,
+          full_name: p.full_name || null,
         }));
         setOnlineUsers(users);
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', user.id).single();
-          await presenceChannel.track({ user_id: user.id, full_name: profile?.full_name || 'Foydalanuvchi' });
+          const { data: profile } = await (supabase.from('profiles') as any).select('full_name, username').eq('user_id', user.id).single();
+          await presenceChannel.track({ user_id: user.id, username: profile?.username || null, full_name: profile?.full_name || null });
         }
       });
 
@@ -140,11 +141,11 @@ export const ChatRooms = () => {
   const loadProfiles = async (userIds: string[]) => {
     const newIds = userIds.filter(id => !profiles[id]);
     if (newIds.length === 0) return;
-    const { data } = await supabase.from('profiles').select('user_id, full_name').in('user_id', newIds);
+    const { data } = await (supabase.from('profiles') as any).select('user_id, full_name, username').in('user_id', newIds);
     if (data) {
       setProfiles(prev => {
         const updated = { ...prev };
-        data.forEach(p => { updated[p.user_id] = p.full_name || 'Foydalanuvchi'; });
+        data.forEach((p: any) => { updated[p.user_id] = p.username ? `@${p.username}` : p.full_name || 'Foydalanuvchi'; });
         return updated;
       });
     }
@@ -172,7 +173,7 @@ export const ChatRooms = () => {
     } as any);
     setForwardMsg(null);
     setForwardSearch('');
-    toast.success(`Xabar ${targetProfile.username ? `@${targetProfile.username}` : targetProfile.full_name}ga yo'naltirildi`);
+    toast.success(`Xabar ${targetProfile.username ? `@${targetProfile.username}` : targetProfile.full_name || 'Foydalanuvchi'}ga yo'naltirildi`);
   };
 
   const handleEdit = async (id: string, newContent: string) => {
@@ -313,7 +314,7 @@ export const ChatRooms = () => {
           {onlineUsers.map(u => (
             <span key={u.user_id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-background border border-border text-xs">
               <Circle className="w-2 h-2 fill-green-500 text-green-500" />
-              {u.full_name}
+              {u.username ? `@${u.username}` : u.full_name || 'Foydalanuvchi'}
             </span>
           ))}
         </div>

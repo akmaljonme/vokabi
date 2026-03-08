@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, Menu, X, LogOut, User, Shield, Moon, Sun, Sparkles, Gamepad2, Users, MessageCircle, Phone } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUnreadDMCount } from '@/hooks/useUnreadDMCount';
 import { useCall } from '@/contexts/CallContext';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
   onNavigate: (view: 'landing' | 'levels') => void;
@@ -21,6 +22,15 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
   const navigate = useNavigate();
   const unreadCount = useUnreadDMCount();
   const call = useCall();
+  const [displayName, setDisplayName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    (supabase.from('profiles') as any).select('username, full_name').eq('user_id', user.id).maybeSingle()
+      .then(({ data }: any) => {
+        if (data) setDisplayName(data.username ? `@${data.username}` : data.full_name || user.email);
+      });
+  }, [user]);
 
   const toggleTheme = () => {
     const next = !isDark;
@@ -157,7 +167,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                     <User className="w-3.5 h-3.5 text-primary" />
                   </div>
                   <span className="text-sm font-medium truncate max-w-28">
-                    {user.email}
+                    {displayName || user.email}
                   </span>
                 </button>
                 <button
@@ -257,7 +267,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 <>
                   <button onClick={() => { navigate('/profile'); setIsMenuOpen(false); }} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors">
                     <User className="w-4 h-4 text-primary" />
-                    <span className="text-sm">{user.email}</span>
+                    <span className="text-sm">{displayName || user.email}</span>
                   </button>
                   <button onClick={handleSignOut} className="btn-outline w-full flex items-center justify-center gap-2 mt-2">
                     <LogOut className="w-4 h-4" /> Sign Out
