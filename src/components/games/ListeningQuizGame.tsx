@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { Volume2, CheckCircle, XCircle } from 'lucide-react';
+import { Volume2, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { useAIGameQuestions } from '@/hooks/useAIGameQuestions';
 
 interface Props { onBack: () => void; }
 
@@ -15,7 +16,7 @@ interface ListeningQ {
   correct: number;
 }
 
-const questions: Record<string, ListeningQ[]> = {
+const fallbackQuestions: Record<string, ListeningQ[]> = {
   A1: [
     { text: 'Hello, my name is Sarah. I am from London. I like reading books and playing tennis.', question: "Sarah nimani yoqtiradi?", options: ["Futbol o'ynash", "Kitob o'qish va tennis", "Suzish", "Rasm chizish"], correct: 1 },
     { text: 'The weather today is sunny. The temperature is 25 degrees. It is a perfect day for a picnic.', question: "Bugungi ob-havo qanday?", options: ["Yomg'irli", "Quyoshli", "Qorli", "Bulutli"], correct: 1 },
@@ -24,10 +25,8 @@ const questions: Record<string, ListeningQ[]> = {
     { text: 'There are five people in my family. My mother, father, two sisters and me.', question: "Oilada nechta kishi bor?", options: ["3 ta", "4 ta", "5 ta", "6 ta"], correct: 2 },
   ],
   B1: [
-    { text: 'The conference will be held on March 15th at the Grand Hotel. Registration starts at 9 AM. The keynote speaker is Professor Johnson from Oxford University.', question: "Konferensiya qayerda bo'ladi?", options: ["Universitetda", "Grand Hotelda", "Kutubxonada", "Parkda"], correct: 1 },
-    { text: 'According to a recent study, people who exercise regularly are 40 percent less likely to develop heart disease. The study was conducted over a period of 10 years.', question: "Tadqiqot necha yil davom etgan?", options: ["5 yil", "10 yil", "15 yil", "20 yil"], correct: 1 },
-    { text: 'The new library will open next month. It has three floors with a children\'s section on the ground floor, a study area on the first floor, and a multimedia room on the second floor.', question: "Bolalar bo'limi qaysi qavatda?", options: ["Birinchi", "Ikkinchi", "Uchinchi", "Yerda"], correct: 3 },
-    { text: 'Due to the heavy rain, the outdoor concert has been postponed to next Saturday. Tickets will remain valid for the new date. Refunds are available until Wednesday.', question: "Konsert nima uchun kechiktirildi?", options: ["Shamol", "Kuchli yomg'ir", "Qor", "Texnik muammo"], correct: 1 },
+    { text: 'The conference will be held on March 15th at the Grand Hotel. Registration starts at 9 AM.', question: "Konferensiya qayerda bo'ladi?", options: ["Universitetda", "Grand Hotelda", "Kutubxonada", "Parkda"], correct: 1 },
+    { text: 'According to a recent study, people who exercise regularly are 40 percent less likely to develop heart disease.', question: "Mashq qiluvchilar yurak kasalligi xavfi qanchaga kamayadi?", options: ["20%", "40%", "60%", "80%"], correct: 1 },
   ],
 };
 
@@ -40,6 +39,7 @@ export const ListeningQuizGame = ({ onBack }: Props) => {
   const [checked, setChecked] = useState(false);
   const [quizQuestions, setQuizQuestions] = useState<ListeningQ[]>([]);
   const [speaking, setSpeaking] = useState(false);
+  const ai = useAIGameQuestions<ListeningQ>('listening_quiz');
 
   const speak = (text: string) => {
     if ('speechSynthesis' in window) {
@@ -53,9 +53,15 @@ export const ListeningQuizGame = ({ onBack }: Props) => {
     }
   };
 
-  const startGame = (lvl: string) => {
+  const startGame = async (lvl: string) => {
     setLevel(lvl);
-    const q = [...(questions[lvl] || questions.A1)].sort(() => Math.random() - 0.5).slice(0, 5);
+    const aiQ = await ai.generate(lvl);
+    let q: ListeningQ[];
+    if (aiQ && aiQ.length >= 3) {
+      q = aiQ.slice(0, 5);
+    } else {
+      q = [...(fallbackQuestions[lvl] || fallbackQuestions.A1)].sort(() => Math.random() - 0.5).slice(0, 5);
+    }
     setQuizQuestions(q);
     setRound(0);
     setScore(0);

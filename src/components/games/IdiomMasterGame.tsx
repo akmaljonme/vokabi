@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, Lightbulb } from 'lucide-react';
+import { CheckCircle, XCircle, Lightbulb, Loader2 } from 'lucide-react';
+import { useAIGameQuestions } from '@/hooks/useAIGameQuestions';
 
 interface Props { onBack: () => void; }
 
@@ -17,7 +18,7 @@ interface Idiom {
   example: string;
 }
 
-const idioms: Idiom[] = [
+const fallbackIdioms: Idiom[] = [
   { idiom: 'Break the ice', meaning: 'Start a conversation in a social situation', meaningUz: "Suhbatni boshlash", options: ["Muzni sindirish", "Suhbatni boshlash", "Muzroq ichimlik", "Sovuq ob-havo"], correct: 1, example: "He told a joke to break the ice at the meeting." },
   { idiom: 'Piece of cake', meaning: 'Something very easy', meaningUz: "Juda oson narsa", options: ["Mazali tort", "Juda oson narsa", "Kichik bo'lak", "Tug'ilgan kun"], correct: 1, example: "The exam was a piece of cake!" },
   { idiom: 'Hit the nail on the head', meaning: 'Describe exactly what is causing a problem', meaningUz: "Muammoni aniq aniqlash", options: ["Qurilish qilish", "Muammoni aniq aniqlash", "Juda qattiq urish", "Noto'g'ri qilish"], correct: 1, example: "You hit the nail on the head with that analysis." },
@@ -26,10 +27,6 @@ const idioms: Idiom[] = [
   { idiom: 'Let the cat out of the bag', meaning: 'Reveal a secret', meaningUz: "Sirni oshkor qilmoq", options: ["Mushukni qo'yib yuborish", "Sirni oshkor qilmoq", "Xarid qilish", "Hayvon asrash"], correct: 1, example: "She let the cat out of the bag about the surprise party." },
   { idiom: 'Once in a blue moon', meaning: 'Very rarely', meaningUz: "Juda kamdan-kam", options: ["Har oy", "Juda kamdan-kam", "Tunda", "Ko'k rangda"], correct: 1, example: "He visits us once in a blue moon." },
   { idiom: 'Burn the midnight oil', meaning: 'Work late into the night', meaningUz: "Kechasi ishlash", options: ["Yong'in chiqarish", "Kechasi ishlash", "Moy ishlatish", "Erta turish"], correct: 1, example: "She burned the midnight oil to finish the project." },
-  { idiom: 'Bite the bullet', meaning: 'Face a difficult situation bravely', meaningUz: "Qiyinchilikka jasurona duch kelmoq", options: ["Tishni qisish", "Qiyinchilikka jasurona duch kelmoq", "Ovqatlanish", "Kurash qilish"], correct: 1, example: "I decided to bite the bullet and ask for a raise." },
-  { idiom: 'Spill the beans', meaning: 'Reveal secret information', meaningUz: "Sirni aytib qo'ymoq", options: ["Ovqat to'kish", "Sirni aytib qo'ymoq", "Loviya ekish", "Aybni bo'yniga olish"], correct: 1, example: "Come on, spill the beans! What happened?" },
-  { idiom: 'The ball is in your court', meaning: "It's your decision/turn", meaningUz: "Navbat sizda", options: ["Sport o'yini", "Navbat sizda", "To'p o'ynash", "Sud jarayoni"], correct: 1, example: "I've done my part. The ball is in your court now." },
-  { idiom: 'Kill two birds with one stone', meaning: 'Accomplish two things at once', meaningUz: "Bir tosh bilan ikki qushni urish", options: ["Qushlarni ovlash", "Bir tosh bilan ikki qushni urish", "Ikki marta urinish", "Tosh otish"], correct: 1, example: "By cycling to work, I kill two birds with one stone — exercise and commuting." },
 ];
 
 export const IdiomMasterGame = ({ onBack }: Props) => {
@@ -41,10 +38,15 @@ export const IdiomMasterGame = ({ onBack }: Props) => {
   const [checked, setChecked] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [gameIdioms, setGameIdioms] = useState<Idiom[]>([]);
+  const ai = useAIGameQuestions<Idiom>('idiom_master');
 
-  const startGame = () => {
-    const shuffled = [...idioms].sort(() => Math.random() - 0.5).slice(0, 8);
-    setGameIdioms(shuffled);
+  const startGame = async () => {
+    const aiIdioms = await ai.generate('B1');
+    if (aiIdioms && aiIdioms.length >= 4) {
+      setGameIdioms(aiIdioms.slice(0, 8));
+    } else {
+      setGameIdioms([...fallbackIdioms].sort(() => Math.random() - 0.5).slice(0, 8));
+    }
     setStarted(true);
     setRound(0);
     setScore(0);
