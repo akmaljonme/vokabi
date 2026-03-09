@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Shield,
   MessageSquare,
+  Video,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +25,7 @@ const menuItems = [
   { id: 'results', label: 'Results & Analytics', icon: BarChart3 },
   { id: 'tests', label: 'Tests Management', icon: FileText },
   { id: 'feedbacks', label: 'Feedbacklar', icon: MessageSquare },
+  { id: 'videos', label: 'Video Darslar', icon: Video },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 

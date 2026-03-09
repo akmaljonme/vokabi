@@ -16,6 +16,7 @@ import Games from "./pages/Games";
 import Community from "./pages/Community";
 import NotFound from "./pages/NotFound";
 import Leaderboard from "./pages/Leaderboard";
+import VideoLessons from "./pages/VideoLessons";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/games" element={<Games />} />
               <Route path="/community" element={<Community />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/videos" element={<VideoLessons />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <AITutorChat />

@@ -17,6 +17,7 @@ import { AchievementToast } from '@/components/AchievementToast';
 import { StudyHeatmap } from '@/components/dashboard/StudyHeatmap';
 import { AIStudyPlan } from '@/components/dashboard/AIStudyPlan';
 import { DailyChallenges } from '@/components/dashboard/DailyChallenges';
+import { VideoRecommendations } from '@/components/dashboard/VideoRecommendations';
 
 interface TestResult {
   id: string;
@@ -337,6 +338,9 @@ export default function Dashboard() {
 
             {/* AI Study Plan */}
             <AIStudyPlan results={results} />
+
+            {/* Video Recommendations */}
+            <VideoRecommendations weakSkills={skillAnalysis.filter(s => s.averageScore < 60 && s.totalTests > 0).map(s => s.skill)} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               <Card className="lg:col-span-2 border-border/50">
