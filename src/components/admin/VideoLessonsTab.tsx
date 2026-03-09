@@ -185,10 +185,71 @@ export const VideoLessonsTab = () => {
           <h2 className="text-2xl font-display font-bold">Video Darslar</h2>
           <p className="text-sm text-muted-foreground">{videos.length} ta video</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}><Plus className="w-4 h-4 mr-2" /> Video qo'shish</Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          {/* Playlist Import */}
+          <Dialog open={playlistDialogOpen} onOpenChange={(o) => { setPlaylistDialogOpen(o); if (!o) { setParsedVideos([]); setPlaylistUrl(''); } }}>
+            <DialogTrigger asChild>
+              <Button variant="outline"><ListVideo className="w-4 h-4 mr-2" /> Playlistdan import</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>YouTube Playlistdan import</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>Playlist URL *</Label>
+                  <Input value={playlistUrl} onChange={e => setPlaylistUrl(e.target.value)} placeholder="https://youtube.com/playlist?list=..." />
+                </div>
+                <div className="flex gap-3 items-end">
+                  <div className="flex-1">
+                    <Label>Standart daraja</Label>
+                    <Select value={playlistLevel} onValueChange={setPlaylistLevel}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{LEVELS.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={handleParsePlaylist} disabled={playlistLoading}>
+                    {playlistLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Yuklanmoqda...</> : 'Videolarni olish'}
+                  </Button>
+                </div>
+
+                {parsedVideos.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold">{parsedVideos.length} ta video topildi</p>
+                      <Button onClick={handleImportAll} disabled={importProgress > 0 && importProgress < 100}>
+                        {importProgress > 0 && importProgress < 100 ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {importProgress}%</>
+                        ) : (
+                          <><CheckCircle className="w-4 h-4 mr-2" /> Barchasini import qilish</>
+                        )}
+                      </Button>
+                    </div>
+                    {importProgress > 0 && <Progress value={importProgress} className="h-2" />}
+                    <div className="max-h-80 overflow-y-auto space-y-2">
+                      {parsedVideos.map((v, i) => (
+                        <div key={i} className="flex items-center gap-3 p-2 rounded-lg border border-border/50 text-sm">
+                          {v.youtube_id && (
+                            <img src={`https://img.youtube.com/vi/${v.youtube_id}/default.jpg`} alt="" className="w-16 h-10 object-cover rounded shrink-0" />
+                          )}
+                          <span className="flex-1 truncate text-xs">{v.title}</span>
+                          <Select value={v.skill} onValueChange={val => updateParsedVideoSkill(i, val)}>
+                            <SelectTrigger className="w-28 h-8 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>{SKILLS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm}><Plus className="w-4 h-4 mr-2" /> Video qo'shish</Button>
+            </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>{editingVideo ? "Videoni tahrirlash" : "Yangi video qo'shish"}</DialogTitle>
