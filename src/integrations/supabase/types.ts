@@ -203,6 +203,42 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_challenges: {
+        Row: {
+          challenge_data: Json
+          challenge_date: string
+          challenge_type: string
+          created_at: string
+          description: string
+          difficulty: string
+          id: string
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          challenge_data?: Json
+          challenge_date?: string
+          challenge_type?: string
+          created_at?: string
+          description: string
+          difficulty?: string
+          id?: string
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          challenge_data?: Json
+          challenge_date?: string
+          challenge_type?: string
+          created_at?: string
+          description?: string
+          difficulty?: string
+          id?: string
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       direct_messages: {
         Row: {
           audio_url: string | null
@@ -1023,6 +1059,44 @@ export type Database = {
             columns: ["achievement_id"]
             isOneToOne: false
             referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_daily_challenges: {
+        Row: {
+          challenge_id: string
+          completed_at: string
+          id: string
+          score: number
+          streak_multiplier: number
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string
+          id?: string
+          score?: number
+          streak_multiplier?: number
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string
+          id?: string
+          score?: number
+          streak_multiplier?: number
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_daily_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "daily_challenges"
             referencedColumns: ["id"]
           },
         ]

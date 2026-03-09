@@ -16,6 +16,7 @@ import { useGamification } from '@/hooks/useGamification';
 import { AchievementToast } from '@/components/AchievementToast';
 import { StudyHeatmap } from '@/components/dashboard/StudyHeatmap';
 import { AIStudyPlan } from '@/components/dashboard/AIStudyPlan';
+import { DailyChallenges } from '@/components/dashboard/DailyChallenges';
 
 interface TestResult {
   id: string;
@@ -328,6 +329,9 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* Daily Challenges */}
+            <DailyChallenges />
+
             {/* Study Heatmap */}
             <StudyHeatmap results={results} />
 
