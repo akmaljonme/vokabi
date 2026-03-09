@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Pencil, Trash2, Video, ExternalLink, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Video, ExternalLink, Search, ListVideo, Loader2, CheckCircle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 
 interface VideoLesson {
