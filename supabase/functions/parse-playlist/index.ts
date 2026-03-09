@@ -90,7 +90,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { playlistUrl, defaultLevel } = await req.json();
+    const { playlistUrl, defaultSkill } = await req.json();
     if (!playlistUrl) throw new Error("Playlist URL kerak");
 
     const plMatch = playlistUrl.match(/[?&]list=([\w-]+)/);
@@ -146,8 +146,8 @@ serve(async (req) => {
       youtube_url: `https://www.youtube.com/watch?v=${v.videoId}&list=${playlistId}`,
       youtube_id: v.videoId,
       thumbnail_url: `https://img.youtube.com/vi/${v.videoId}/mqdefault.jpg`,
-      skill: skills[i] || "grammar",
-      level: defaultLevel || "A1",
+      skill: defaultSkill || skills[i] || "grammar",
+      level: "A1",
       duration: v.duration,
       order_index: i,
       is_active: true,

@@ -55,7 +55,7 @@ export const VideoLessonsTab = () => {
   // Playlist import state
   const [playlistDialogOpen, setPlaylistDialogOpen] = useState(false);
   const [playlistUrl, setPlaylistUrl] = useState('');
-  const [playlistLevel, setPlaylistLevel] = useState('A1');
+  const [playlistSkill, setPlaylistSkill] = useState('grammar');
   const [playlistLoading, setPlaylistLoading] = useState(false);
   const [parsedVideos, setParsedVideos] = useState<any[]>([]);
   const [importProgress, setImportProgress] = useState(0);
@@ -132,7 +132,7 @@ export const VideoLessonsTab = () => {
     setParsedVideos([]);
     try {
       const { data, error } = await supabase.functions.invoke('parse-playlist', {
-        body: { playlistUrl, defaultLevel: playlistLevel },
+        body: { playlistUrl, defaultSkill: playlistSkill },
       });
       if (error) throw error;
       if (data?.videos) {
@@ -202,10 +202,10 @@ export const VideoLessonsTab = () => {
                 </div>
                 <div className="flex gap-3 items-end">
                   <div className="flex-1">
-                    <Label>Standart daraja</Label>
-                    <Select value={playlistLevel} onValueChange={setPlaylistLevel}>
+                    <Label>Standart skill</Label>
+                    <Select value={playlistSkill} onValueChange={setPlaylistSkill}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{LEVELS.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+                      <SelectContent>{SKILLS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   <Button onClick={handleParsePlaylist} disabled={playlistLoading}>
