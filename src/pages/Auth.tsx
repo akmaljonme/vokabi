@@ -122,7 +122,7 @@ const Auth = () => {
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-display font-bold tracking-tight">IELTSify</span>
+            <span className="text-xl font-display font-bold tracking-tight">​Vokabi</span>
           </a>
         </div>
       </header>
@@ -133,50 +133,50 @@ const Auth = () => {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-md"
-        >
+          className="w-full max-w-md">
+          
           <div className="card-elevated p-8 md:p-10 border border-border/50">
             <div className="text-center mb-8">
               <h1 className="text-2xl font-display font-bold mb-2 tracking-tight">
                 {isLogin ? 'Xush kelibsiz!' : 'Hisob yaratish'}
               </h1>
               <p className="text-muted-foreground text-sm">
-                {isLogin
-                  ? 'Natijalaringizni saqlash uchun kiring'
-                  : 'Minglab o\'quvchilarga qo\'shiling'}
+                {isLogin ?
+                'Natijalaringizni saqlash uchun kiring' :
+                'Minglab o\'quvchilarga qo\'shiling'}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {!isLogin && (
-                <div>
+              {!isLogin &&
+              <div>
                   <label className="block text-sm font-medium mb-2">To'liq ism</label>
                   <div className="relative">
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Ismingizni kiriting"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                    />
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Ismingizni kiriting"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" />
+                  
                   </div>
                 </div>
-              )}
+              }
 
-              {!isLogin && (
-                <div>
+              {!isLogin &&
+              <div>
                   <label className="block text-sm font-medium mb-2">Username</label>
                   <div className="relative">
                     <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                      placeholder="masalan: ali_123"
-                      required
-                      className="w-full pl-10 pr-10 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                    />
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    placeholder="masalan: ali_123"
+                    required
+                    className="w-full pl-10 pr-10 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" />
+                  
                     <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
                       {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />}
                       {usernameStatus === 'available' && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
@@ -184,14 +184,14 @@ const Auth = () => {
                       {usernameStatus === 'invalid' && <XCircle className="w-4 h-4 text-destructive" />}
                     </div>
                   </div>
-                  {usernameStatus === 'taken' && (
-                    <p className="text-xs text-destructive mt-1">Bu username band. Boshqasini tanlang.</p>
-                  )}
-                  {usernameStatus === 'available' && (
-                    <p className="text-xs text-emerald-500 mt-1">Username bo'sh ✓</p>
-                  )}
+                  {usernameStatus === 'taken' &&
+                <p className="text-xs text-destructive mt-1">Bu username band. Boshqasini tanlang.</p>
+                }
+                  {usernameStatus === 'available' &&
+                <p className="text-xs text-emerald-500 mt-1">Username bo'sh ✓</p>
+                }
                 </div>
-              )}
+              }
 
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
@@ -203,8 +203,8 @@ const Auth = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@example.com"
                     required
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                  />
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" />
+                  
                 </div>
               </div>
 
@@ -218,53 +218,53 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Kamida 6 ta belgi"
                     required
-                    className="w-full pl-10 pr-12 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                  />
+                    className="w-full pl-10 pr-12 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" />
+                  
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                    
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-3 rounded-xl bg-destructive/10 text-destructive text-sm border border-destructive/20"
-                >
+              {error &&
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3 rounded-xl bg-destructive/10 text-destructive text-sm border border-destructive/20">
+                
                   {error}
                 </motion.div>
-              )}
+              }
 
-              {success && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 text-sm border border-emerald-500/20"
-                >
+              {success &&
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 text-sm border border-emerald-500/20">
+                
                   {success}
                 </motion.div>
-              )}
+              }
 
               <motion.button
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 type="submit"
                 disabled={loading}
-                className="btn-primary w-full flex items-center justify-center gap-2 py-3.5 disabled:opacity-50"
-              >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
+                className="btn-primary w-full flex items-center justify-center gap-2 py-3.5 disabled:opacity-50">
+                
+                {loading ?
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> :
+
+                <>
                     {isLogin ? 'Kirish' : 'Ro\'yxatdan o\'tish'}
                     <ArrowRight className="w-4 h-4" />
                   </>
-                )}
+                }
               </motion.button>
             </form>
 
@@ -272,9 +272,9 @@ const Auth = () => {
               <p className="text-muted-foreground text-sm">
                 {isLogin ? "Hisobingiz yo'qmi?" : 'Allaqachon ro\'yxatdan o\'tganmisiz?'}
                 <button
-                  onClick={() => { setIsLogin(!isLogin); setError(''); setSuccess(''); }}
-                  className="ml-1.5 text-primary font-medium hover:underline"
-                >
+                  onClick={() => {setIsLogin(!isLogin);setError('');setSuccess('');}}
+                  className="ml-1.5 text-primary font-medium hover:underline">
+                  
                   {isLogin ? 'Ro\'yxatdan o\'tish' : 'Kirish'}
                 </button>
               </p>
@@ -282,8 +282,8 @@ const Auth = () => {
           </div>
         </motion.div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Auth;
