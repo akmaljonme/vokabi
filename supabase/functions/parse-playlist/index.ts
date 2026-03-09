@@ -5,6 +5,87 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+interface VideoItem {
+  videoId: string;
+  title: string;
+  duration: string;
+  index: number;
+}
+
+async function fetchPlaylistVideos(playlistId: string): Promise<VideoItem[]> {
+  // Fetch the playlist page
+  const res = await fetch(`https://www.youtube.com/playlist?list=${playlistId}`, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Accept": "text/html,application/xhtml+xml",
+    },
+  });
+
+  if (!res.ok) throw new Error(`YouTube returned ${res.status}`);
+  const html = await res.text();
+
+  // Extract video data from the page using regex patterns
+  const videos: VideoItem[] = [];
+
+  // Find all video IDs and titles from the playlist renderer
+  // Pattern: "videoId":"XXXXXXXXXXX" near "title":{"runs":[{"text":"..."}]}
+  const videoIdRegex = /"playlistVideoRenderer":\{"videoId":"([\w-]{11})"/g;
+  const videoIds: string[] = [];
+  let match;
+  while ((match = videoIdRegex.exec(html)) !== null) {
+    videoIds.push(match[1]);
+  }
+
+  if (videoIds.length === 0) {
+    // Try alternate pattern
+    const altRegex = /"videoId"\s*:\s*"([\w-]{11})"/g;
+    const seen = new Set<string>();
+    while ((match = altRegex.exec(html)) !== null) {
+      if (!seen.has(match[1])) {
+        seen.add(match[1]);
+        videoIds.push(match[1]);
+      }
+    }
+  }
+
+  // Extract titles - look for patterns near video renderers
+  const titleRegex = /"title"\s*:\s*\{"runs"\s*:\s*\[\{"text"\s*:\s*"([^"]+)"/g;
+  const titles: string[] = [];
+  while ((match = titleRegex.exec(html)) !== null) {
+    titles.push(match[1]);
+  }
+
+  // Extract durations
+  const durationRegex = /"lengthText"\s*:\s*\{"accessibility"[^}]*\},"simpleText"\s*:\s*"([^"]+)"/g;
+  const durations: string[] = [];
+  while ((match = durationRegex.exec(html)) !== null) {
+    durations.push(match[1]);
+  }
+
+  // Build video list - use the minimum of all arrays to stay in sync
+  // Skip first few titles that might be playlist title/channel name
+  // Find the offset where titles start matching video content
+  let titleOffset = 0;
+  if (titles.length > videoIds.length) {
+    titleOffset = titles.length - videoIds.length;
+    // But cap it at a reasonable number
+    if (titleOffset > 5) titleOffset = 0;
+  }
+
+  const count = Math.min(videoIds.length, 200);
+  for (let i = 0; i < count; i++) {
+    videos.push({
+      videoId: videoIds[i],
+      title: titles[titleOffset + i] || `Video ${i + 1}`,
+      duration: durations[i] || "",
+      index: i,
+    });
+  }
+
+  return videos;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -12,47 +93,15 @@ serve(async (req) => {
     const { playlistUrl, defaultLevel } = await req.json();
     if (!playlistUrl) throw new Error("Playlist URL kerak");
 
-    // Extract playlist ID
-    const match = playlistUrl.match(/[?&]list=([\w-]+)/);
-    if (!match) throw new Error("Noto'g'ri playlist URL");
-    const playlistId = match[1];
+    const plMatch = playlistUrl.match(/[?&]list=([\w-]+)/);
+    if (!plMatch) throw new Error("Noto'g'ri playlist URL");
+    const playlistId = plMatch[1];
 
-    // Fetch playlist page HTML
-    const pageRes = await fetch(`https://www.youtube.com/playlist?list=${playlistId}`, {
-      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36", "Accept-Language": "en-US,en;q=0.9" },
-    });
-    if (!pageRes.ok) throw new Error("Playlist sahifasini yuklashda xato");
-    const html = await pageRes.text();
+    console.log("Fetching playlist:", playlistId);
+    const videos = await fetchPlaylistVideos(playlistId);
+    console.log(`Found ${videos.length} videos`);
 
-    // Extract ytInitialData JSON
-    const dataMatch = html.match(/var ytInitialData = ({.*?});<\/script>/s);
-    if (!dataMatch) throw new Error("Playlist ma'lumotlarini o'qib bo'lmadi");
-
-    let ytData: any;
-    try { ytData = JSON.parse(dataMatch[1]); } catch { throw new Error("Playlist JSON parse xatosi"); }
-
-    // Navigate to playlist items
-    const tabs = ytData?.contents?.twoColumnBrowseResultsRenderer?.tabs;
-    const tab = tabs?.[0];
-    const sectionList = tab?.tabRenderer?.content?.sectionListRenderer?.contents;
-    const itemSection = sectionList?.[0]?.itemSectionRenderer?.contents;
-    const playlistItems = itemSection?.[0]?.playlistVideoListRenderer?.contents;
-
-    if (!playlistItems || playlistItems.length === 0) throw new Error("Playlistda video topilmadi");
-
-    // Extract video info
-    const videos: { videoId: string; title: string; duration: string; index: number }[] = [];
-    for (const item of playlistItems) {
-      const renderer = item.playlistVideoRenderer;
-      if (!renderer) continue;
-      const videoId = renderer.videoId;
-      const title = renderer.title?.runs?.[0]?.text || renderer.title?.simpleText || "";
-      const duration = renderer.lengthText?.simpleText || "";
-      const index = parseInt(renderer.index?.simpleText || "0");
-      if (videoId && title) videos.push({ videoId, title, duration, index });
-    }
-
-    if (videos.length === 0) throw new Error("Videolar topilmadi");
+    if (videos.length === 0) throw new Error("Playlistda video topilmadi");
 
     // Use AI to categorize videos by skill
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -68,11 +117,11 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You categorize English learning video titles into skills. Return ONLY a valid JSON array of strings. Each string must be one of: "reading", "listening", "writing", "speaking", "grammar", "vocabulary". The array length must match the number of videos. Analyze each title and assign the most fitting skill. If unclear, use "grammar" as default.`,
+            content: `You categorize English learning video titles into skills. Return ONLY a valid JSON array of strings (no markdown, no explanation). Each string must be one of: "reading", "listening", "writing", "speaking", "grammar", "vocabulary". The array length MUST be exactly ${videos.length}. Analyze each title carefully. If a title is about tenses, verbs, articles, pronouns, prepositions etc → "grammar". If about words/meanings → "vocabulary". If about reading passages → "reading". If about listening/audio → "listening". If about essay/letter writing → "writing". If about pronunciation/conversation → "speaking". Default to "grammar" if unclear.`,
           },
           { role: "user", content: `Categorize these ${videos.length} videos:\n${videoList}` },
         ],
-        temperature: 0.2,
+        temperature: 0.1,
       }),
     });
 
@@ -82,15 +131,16 @@ serve(async (req) => {
       let content = aiData.choices?.[0]?.message?.content || "[]";
       content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       try {
-        skills = JSON.parse(content);
+        const parsed = JSON.parse(content);
+        if (Array.isArray(parsed)) skills = parsed;
       } catch {
-        skills = videos.map(() => "grammar");
+        console.log("AI parse failed, using defaults");
       }
-    } else {
-      skills = videos.map(() => "grammar");
     }
 
-    // Build result
+    // Pad skills array if needed
+    while (skills.length < videos.length) skills.push("grammar");
+
     const result = videos.map((v, i) => ({
       title: v.title,
       youtube_url: `https://www.youtube.com/watch?v=${v.videoId}&list=${playlistId}`,
@@ -99,7 +149,7 @@ serve(async (req) => {
       skill: skills[i] || "grammar",
       level: defaultLevel || "A1",
       duration: v.duration,
-      order_index: v.index || i,
+      order_index: i,
       is_active: true,
     }));
 
