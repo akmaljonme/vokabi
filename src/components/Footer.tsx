@@ -17,33 +17,33 @@ export const Footer = () => {
               IELTS va CEFR imtihonlariga professional tayyorgarlik platformasi. Bilimingizni sinang va rivojlantiring.
             </p>
             <div className="flex gap-3">
-              {['facebook', 'twitter', 'instagram', 'youtube'].map((s) => (
-                <a key={s} href="#" className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center hover:bg-primary transition-colors text-xs font-bold uppercase tracking-wider">
+              {['facebook', 'twitter', 'instagram', 'youtube'].map((s) =>
+              <a key={s} className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center hover:bg-primary transition-colors text-xs font-bold uppercase tracking-wider" href="#">
                   {s[0]}
                 </a>
-              ))}
+              )}
             </div>
           </div>
 
           <div>
             <h4 className="font-display font-semibold text-sm uppercase tracking-wider mb-5 text-secondary-foreground/70">Product</h4>
             <ul className="space-y-3">
-              {['Practice Tests', 'Mock Exams', 'Study Materials', 'Progress Tracking'].map((item) => (
-                <li key={item}>
+              {['Practice Tests', 'Mock Exams', 'Study Materials', 'Progress Tracking'].map((item) =>
+              <li key={item}>
                   <a href="#" className="text-secondary-foreground/50 hover:text-primary transition-colors text-sm">{item}</a>
                 </li>
-              ))}
+              )}
             </ul>
           </div>
 
           <div>
             <h4 className="font-display font-semibold text-sm uppercase tracking-wider mb-5 text-secondary-foreground/70">Company</h4>
             <ul className="space-y-3">
-              {['About Us', 'Blog', 'Careers', 'Contact'].map((item) => (
-                <li key={item}>
+              {['About Us', 'Blog', 'Careers', 'Contact'].map((item) =>
+              <li key={item}>
                   <a href="#" className="text-secondary-foreground/50 hover:text-primary transition-colors text-sm">{item}</a>
                 </li>
-              ))}
+              )}
             </ul>
           </div>
 
@@ -52,7 +52,7 @@ export const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-primary" />
-                <span className="text-secondary-foreground/50 text-sm">support@ieltsify.uz</span>
+                <span className="text-secondary-foreground/50 text-sm">​akmalkarimboyev529@gmail.com</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-primary" />
@@ -67,12 +67,12 @@ export const Footer = () => {
             © 2026 IELTSify. All rights reserved. Created by Akmal Karimboyev
           </p>
           <div className="flex gap-6 text-xs">
-            {['Privacy Policy', 'Terms of Service'].map((item) => (
-              <a key={item} href="#" className="text-secondary-foreground/30 hover:text-primary transition-colors">{item}</a>
-            ))}
+            {['Privacy Policy', 'Terms of Service'].map((item) =>
+            <a key={item} href="#" className="text-secondary-foreground/30 hover:text-primary transition-colors">{item}</a>
+            )}
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>);
+
 };
