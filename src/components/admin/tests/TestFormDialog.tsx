@@ -159,7 +159,7 @@ export const TestFormDialog = ({ open, onOpenChange, test, onSave, loading }: Te
           </div>
 
           {(formData.skill === 'reading' || formData.skill === 'listening') && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-500/10 text-blue-700 dark:text-blue-300 text-sm">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-accent text-accent-foreground text-sm">
               <Info className="w-4 h-4 mt-0.5 shrink-0" />
               <p>Reading va Listening testlari 1 partdan iborat bo'lishi va 10 ta savol bo'lishi kerak.</p>
             </div>
