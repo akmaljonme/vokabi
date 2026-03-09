@@ -304,6 +304,7 @@ export const VideoLessonsTab = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Filters */}
