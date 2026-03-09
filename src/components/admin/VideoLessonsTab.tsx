@@ -55,7 +55,7 @@ export const VideoLessonsTab = () => {
   // Playlist import state
   const [playlistDialogOpen, setPlaylistDialogOpen] = useState(false);
   const [playlistUrl, setPlaylistUrl] = useState('');
-  const [playlistLevel, setPlaylistLevel] = useState('A1');
+  const [playlistSkill, setPlaylistSkill] = useState('grammar');
   const [playlistLoading, setPlaylistLoading] = useState(false);
   const [parsedVideos, setParsedVideos] = useState<any[]>([]);
   const [importProgress, setImportProgress] = useState(0);
