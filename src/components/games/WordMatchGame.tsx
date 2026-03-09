@@ -47,8 +47,10 @@ export const WordMatchGame = ({ onBack }: Props) => {
     }
   };
 
+  const [wrongPair, setWrongPair] = useState<number[]>([]);
+
   const handleSelect = useCallback((id: number) => {
-    if (selected.length >= 2 || cards.find(c => c.id === id)?.matched) return;
+    if (selected.length >= 2 || cards.find(c => c.id === id)?.matched || selected.includes(id)) return;
     const newSelected = [...selected, id];
     setSelected(newSelected);
 
@@ -67,7 +69,8 @@ export const WordMatchGame = ({ onBack }: Props) => {
         });
         setSelected([]);
       } else {
-        setTimeout(() => setSelected([]), 600);
+        setWrongPair(newSelected);
+        setTimeout(() => { setSelected([]); setWrongPair([]); }, 800);
       }
     }
   }, [selected, cards]);

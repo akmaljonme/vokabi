@@ -13,7 +13,11 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-tutor`;
 export const AITutorChat = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = window.location.pathname;
   const [isOpen, setIsOpen] = useState(false);
+
+  // Hide on games page to avoid interfering with gameplay
+  if (location === '/games') return null;
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
