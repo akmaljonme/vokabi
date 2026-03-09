@@ -339,6 +339,9 @@ export default function Dashboard() {
             {/* AI Study Plan */}
             <AIStudyPlan results={results} />
 
+            {/* Video Recommendations */}
+            <VideoRecommendations weakSkills={skillAnalysis.filter(s => s.averageScore < 60 && s.totalTests > 0).map(s => s.skill)} />
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               <Card className="lg:col-span-2 border-border/50">
                 <CardHeader className="pb-2">
