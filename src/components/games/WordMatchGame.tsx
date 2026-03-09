@@ -47,8 +47,10 @@ export const WordMatchGame = ({ onBack }: Props) => {
     }
   };
 
+  const [wrongPair, setWrongPair] = useState<number[]>([]);
+
   const handleSelect = useCallback((id: number) => {
-    if (selected.length >= 2 || cards.find(c => c.id === id)?.matched) return;
+    if (selected.length >= 2 || cards.find(c => c.id === id)?.matched || selected.includes(id)) return;
     const newSelected = [...selected, id];
     setSelected(newSelected);
 
@@ -67,7 +69,8 @@ export const WordMatchGame = ({ onBack }: Props) => {
         });
         setSelected([]);
       } else {
-        setTimeout(() => setSelected([]), 600);
+        setWrongPair(newSelected);
+        setTimeout(() => { setSelected([]); setWrongPair([]); }, 800);
       }
     }
   }, [selected, cards]);
@@ -119,9 +122,12 @@ export const WordMatchGame = ({ onBack }: Props) => {
             <motion.button
               key={card.id}
               whileTap={{ scale: 0.95 }}
+              animate={wrongPair.includes(card.id) ? { x: [0, -6, 6, -6, 6, 0] } : {}}
+              transition={{ duration: 0.4 }}
               onClick={() => handleSelect(card.id)}
               className={`p-4 rounded-xl border-2 text-sm font-medium transition-all min-h-[64px] ${
                 card.matched ? 'bg-primary/10 border-primary text-primary' :
+                wrongPair.includes(card.id) ? 'bg-destructive/10 border-destructive text-destructive' :
                 selected.includes(card.id) ? 'bg-accent border-accent-foreground/30' :
                 'bg-card border-border hover:border-primary/30'
               }`}
