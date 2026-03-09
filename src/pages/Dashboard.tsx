@@ -17,6 +17,7 @@ import { AchievementToast } from '@/components/AchievementToast';
 import { StudyHeatmap } from '@/components/dashboard/StudyHeatmap';
 import { AIStudyPlan } from '@/components/dashboard/AIStudyPlan';
 import { DailyChallenges } from '@/components/dashboard/DailyChallenges';
+import { VideoRecommendations } from '@/components/dashboard/VideoRecommendations';
 
 interface TestResult {
   id: string;
