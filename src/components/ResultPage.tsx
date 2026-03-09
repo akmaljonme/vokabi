@@ -189,13 +189,13 @@ const StandardResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
               </div>
             </div>
           )}
-          <button onClick={() => generateTestPDF(mockTest)} className="btn-outline flex items-center gap-2 text-sm">
+          <button onClick={() => generateTestPDF(mockTest)} className="btn-outline flex items-center justify-center gap-2 text-sm w-full sm:w-auto">
             <FileDown className="w-4 h-4" /> Test PDF
           </button>
-          <button onClick={() => generateResultPDF(result, mockTest)} className="btn-outline flex items-center gap-2 text-sm">
+          <button onClick={() => generateResultPDF(result, mockTest)} className="btn-outline flex items-center justify-center gap-2 text-sm w-full sm:w-auto">
             <FileDown className="w-4 h-4" /> Natijalar PDF
           </button>
-          <button onClick={onBack} className="btn-outline text-sm">Boshqa test</button>
+          <button onClick={onBack} className="btn-outline text-sm w-full sm:w-auto">Boshqa test</button>
         </motion.div>
 
         {/* AI Video Recommendations - Pro Only */}

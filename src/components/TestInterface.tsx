@@ -412,7 +412,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
             </div>
           )}
 
-          <div className="p-6 flex-1 overflow-y-auto">
+          <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
             {/* Writing Interface - Multi-part */}
             {isWriting && mockTest && (
               <div className="max-w-3xl mx-auto">
