@@ -171,9 +171,9 @@ const StandardResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="flex flex-wrap items-center justify-center gap-3 mb-12"
+          className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 mb-12 px-2"
         >
-          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={onRetry} className="btn-primary flex items-center gap-2 text-sm">
+          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={onRetry} className="btn-primary flex items-center justify-center gap-2 text-sm w-full sm:w-auto">
             <RotateCcw className="w-4 h-4" /> Qayta ishlash
           </motion.button>
           {isPro ? (
@@ -189,13 +189,13 @@ const StandardResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
               </div>
             </div>
           )}
-          <button onClick={() => generateTestPDF(mockTest)} className="btn-outline flex items-center gap-2 text-sm">
+          <button onClick={() => generateTestPDF(mockTest)} className="btn-outline flex items-center justify-center gap-2 text-sm w-full sm:w-auto">
             <FileDown className="w-4 h-4" /> Test PDF
           </button>
-          <button onClick={() => generateResultPDF(result, mockTest)} className="btn-outline flex items-center gap-2 text-sm">
+          <button onClick={() => generateResultPDF(result, mockTest)} className="btn-outline flex items-center justify-center gap-2 text-sm w-full sm:w-auto">
             <FileDown className="w-4 h-4" /> Natijalar PDF
           </button>
-          <button onClick={onBack} className="btn-outline text-sm">Boshqa test</button>
+          <button onClick={onBack} className="btn-outline text-sm w-full sm:w-auto">Boshqa test</button>
         </motion.div>
 
         {/* AI Video Recommendations - Pro Only */}

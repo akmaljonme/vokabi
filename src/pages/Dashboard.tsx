@@ -247,8 +247,8 @@ export default function Dashboard() {
             {/* XP & Level */}
             <Card className="border-border/50 lg:col-span-2">
               <CardContent className="pt-5">
-                <div className="flex items-center gap-6">
-                  <div className="relative">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                  <div className="relative shrink-0">
                     <motion.div
                       initial={{ scale: 0.8 }}
                       animate={{ scale: 1 }}
@@ -267,7 +267,7 @@ export default function Dashboard() {
                       <span className="text-xs text-muted-foreground">{xpToNextLevel} XP keyingi darajaga</span>
                     </div>
                     <Progress value={xpProgress} className="h-3 mb-3" />
-                    <div className="flex items-center gap-5">
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-5">
                       <div className="flex items-center gap-1.5">
                         <Flame className={`w-4 h-4 ${progress.current_streak > 0 ? 'text-orange-500' : 'text-muted-foreground'}`} />
                         <span className="text-sm font-semibold">{progress.current_streak} kun</span>

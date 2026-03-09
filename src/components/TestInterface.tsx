@@ -373,15 +373,15 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
         {/* Reading: Left side passage */}
         {skill === 'reading' && part && (
           <div className="lg:w-1/2 bg-card border-r border-border">
-            <div className="p-6 h-[calc(100vh-3.5rem)] overflow-y-auto">
-              <h2 className="text-xl font-bold mb-4">{part.passage.title}</h2>
+            <div className="p-4 sm:p-6 h-[40vh] lg:h-[calc(100vh-3.5rem)] overflow-y-auto">
+              <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">{part.passage.title}</h2>
               {part.passage.paragraphs?.map((para) => (
-                <div key={para.label} className="mb-4">
+                <div key={para.label} className="mb-3 sm:mb-4">
                   <span className="font-bold text-primary mr-2">{para.label}</span>
-                  <span className="leading-relaxed">{para.text}</span>
+                  <span className="leading-relaxed text-sm sm:text-base">{para.text}</span>
                 </div>
               )) || (
-                <p className="leading-relaxed whitespace-pre-line">{part.passage.content}</p>
+                <p className="leading-relaxed whitespace-pre-line text-sm sm:text-base">{part.passage.content}</p>
               )}
             </div>
           </div>
@@ -412,7 +412,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
             </div>
           )}
 
-          <div className="p-6 flex-1 overflow-y-auto">
+          <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
             {/* Writing Interface - Multi-part */}
             {isWriting && mockTest && (
               <div className="max-w-3xl mx-auto">
