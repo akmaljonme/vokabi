@@ -348,7 +348,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
       </header>
 
       {/* Part Tabs */}
-      {!isNoParts && (
+      {!isNoParts && mockTest.parts.length > 1 && (
         <div className="bg-card border-b border-border">
           <div className="container mx-auto px-4">
             <div className="flex">
