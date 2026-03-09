@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Pencil, Trash2, Video, ExternalLink, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Video, ExternalLink, Search, ListVideo, Loader2, CheckCircle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 
 interface VideoLesson {
@@ -50,6 +51,14 @@ export const VideoLessonsTab = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterSkill, setFilterSkill] = useState<string>('all');
   const [filterLevel, setFilterLevel] = useState<string>('all');
+
+  // Playlist import state
+  const [playlistDialogOpen, setPlaylistDialogOpen] = useState(false);
+  const [playlistUrl, setPlaylistUrl] = useState('');
+  const [playlistLevel, setPlaylistLevel] = useState('A1');
+  const [playlistLoading, setPlaylistLoading] = useState(false);
+  const [parsedVideos, setParsedVideos] = useState<any[]>([]);
+  const [importProgress, setImportProgress] = useState(0);
 
   // Form state
   const [form, setForm] = useState({
@@ -117,6 +126,51 @@ export const VideoLessonsTab = () => {
     fetchVideos();
   };
 
+  const handleParsePlaylist = async () => {
+    if (!playlistUrl.trim()) { toast.error("Playlist URL kiriting"); return; }
+    setPlaylistLoading(true);
+    setParsedVideos([]);
+    try {
+      const { data, error } = await supabase.functions.invoke('parse-playlist', {
+        body: { playlistUrl, defaultLevel: playlistLevel },
+      });
+      if (error) throw error;
+      if (data?.videos) {
+        setParsedVideos(data.videos);
+        toast.success(`${data.videos.length} ta video topildi`);
+      } else {
+        throw new Error(data?.error || "Videolar topilmadi");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Playlistni o'qishda xatolik");
+    } finally {
+      setPlaylistLoading(false);
+    }
+  };
+
+  const handleImportAll = async () => {
+    if (parsedVideos.length === 0) return;
+    setImportProgress(0);
+    const batchSize = 10;
+    let imported = 0;
+    for (let i = 0; i < parsedVideos.length; i += batchSize) {
+      const batch = parsedVideos.slice(i, i + batchSize);
+      const { error } = await (supabase.from('video_lessons') as any).insert(batch);
+      if (error) { toast.error("Import xatolik: " + error.message); return; }
+      imported += batch.length;
+      setImportProgress(Math.round((imported / parsedVideos.length) * 100));
+    }
+    toast.success(`${imported} ta video import qilindi!`);
+    setPlaylistDialogOpen(false);
+    setParsedVideos([]);
+    setPlaylistUrl('');
+    fetchVideos();
+  };
+
+  const updateParsedVideoSkill = (index: number, skill: string) => {
+    setParsedVideos(prev => prev.map((v, i) => i === index ? { ...v, skill } : v));
+  };
+
   const filtered = videos.filter(v => {
     if (filterSkill !== 'all' && v.skill !== filterSkill) return false;
     if (filterLevel !== 'all' && v.level !== filterLevel) return false;
@@ -131,10 +185,71 @@ export const VideoLessonsTab = () => {
           <h2 className="text-2xl font-display font-bold">Video Darslar</h2>
           <p className="text-sm text-muted-foreground">{videos.length} ta video</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}><Plus className="w-4 h-4 mr-2" /> Video qo'shish</Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          {/* Playlist Import */}
+          <Dialog open={playlistDialogOpen} onOpenChange={(o) => { setPlaylistDialogOpen(o); if (!o) { setParsedVideos([]); setPlaylistUrl(''); } }}>
+            <DialogTrigger asChild>
+              <Button variant="outline"><ListVideo className="w-4 h-4 mr-2" /> Playlistdan import</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>YouTube Playlistdan import</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>Playlist URL *</Label>
+                  <Input value={playlistUrl} onChange={e => setPlaylistUrl(e.target.value)} placeholder="https://youtube.com/playlist?list=..." />
+                </div>
+                <div className="flex gap-3 items-end">
+                  <div className="flex-1">
+                    <Label>Standart daraja</Label>
+                    <Select value={playlistLevel} onValueChange={setPlaylistLevel}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{LEVELS.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={handleParsePlaylist} disabled={playlistLoading}>
+                    {playlistLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Yuklanmoqda...</> : 'Videolarni olish'}
+                  </Button>
+                </div>
+
+                {parsedVideos.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold">{parsedVideos.length} ta video topildi</p>
+                      <Button onClick={handleImportAll} disabled={importProgress > 0 && importProgress < 100}>
+                        {importProgress > 0 && importProgress < 100 ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {importProgress}%</>
+                        ) : (
+                          <><CheckCircle className="w-4 h-4 mr-2" /> Barchasini import qilish</>
+                        )}
+                      </Button>
+                    </div>
+                    {importProgress > 0 && <Progress value={importProgress} className="h-2" />}
+                    <div className="max-h-80 overflow-y-auto space-y-2">
+                      {parsedVideos.map((v, i) => (
+                        <div key={i} className="flex items-center gap-3 p-2 rounded-lg border border-border/50 text-sm">
+                          {v.youtube_id && (
+                            <img src={`https://img.youtube.com/vi/${v.youtube_id}/default.jpg`} alt="" className="w-16 h-10 object-cover rounded shrink-0" />
+                          )}
+                          <span className="flex-1 truncate text-xs">{v.title}</span>
+                          <Select value={v.skill} onValueChange={val => updateParsedVideoSkill(i, val)}>
+                            <SelectTrigger className="w-28 h-8 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>{SKILLS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm}><Plus className="w-4 h-4 mr-2" /> Video qo'shish</Button>
+            </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>{editingVideo ? "Videoni tahrirlash" : "Yangi video qo'shish"}</DialogTitle>
@@ -189,6 +304,7 @@ export const VideoLessonsTab = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Filters */}
