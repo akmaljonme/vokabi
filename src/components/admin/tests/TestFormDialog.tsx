@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info } from 'lucide-react';
 
 interface Test {
   id: string;
@@ -155,8 +155,15 @@ export const TestFormDialog = ({ open, onOpenChange, test, onSave, loading }: Te
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+           </div>
           </div>
+
+          {(formData.skill === 'reading' || formData.skill === 'listening') && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-accent text-accent-foreground text-sm">
+              <Info className="w-4 h-4 mt-0.5 shrink-0" />
+              <p>Reading va Listening testlari 1 partdan iborat bo'lishi va 10 ta savol bo'lishi kerak.</p>
+            </div>
+          )}
 
            <div className="space-y-2">
              <Label htmlFor="time_limit">Vaqt chegarasi (daqiqalarda) *</Label>
