@@ -126,6 +126,51 @@ export const VideoLessonsTab = () => {
     fetchVideos();
   };
 
+  const handleParsePlaylist = async () => {
+    if (!playlistUrl.trim()) { toast.error("Playlist URL kiriting"); return; }
+    setPlaylistLoading(true);
+    setParsedVideos([]);
+    try {
+      const { data, error } = await supabase.functions.invoke('parse-playlist', {
+        body: { playlistUrl, defaultLevel: playlistLevel },
+      });
+      if (error) throw error;
+      if (data?.videos) {
+        setParsedVideos(data.videos);
+        toast.success(`${data.videos.length} ta video topildi`);
+      } else {
+        throw new Error(data?.error || "Videolar topilmadi");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Playlistni o'qishda xatolik");
+    } finally {
+      setPlaylistLoading(false);
+    }
+  };
+
+  const handleImportAll = async () => {
+    if (parsedVideos.length === 0) return;
+    setImportProgress(0);
+    const batchSize = 10;
+    let imported = 0;
+    for (let i = 0; i < parsedVideos.length; i += batchSize) {
+      const batch = parsedVideos.slice(i, i + batchSize);
+      const { error } = await (supabase.from('video_lessons') as any).insert(batch);
+      if (error) { toast.error("Import xatolik: " + error.message); return; }
+      imported += batch.length;
+      setImportProgress(Math.round((imported / parsedVideos.length) * 100));
+    }
+    toast.success(`${imported} ta video import qilindi!`);
+    setPlaylistDialogOpen(false);
+    setParsedVideos([]);
+    setPlaylistUrl('');
+    fetchVideos();
+  };
+
+  const updateParsedVideoSkill = (index: number, skill: string) => {
+    setParsedVideos(prev => prev.map((v, i) => i === index ? { ...v, skill } : v));
+  };
+
   const filtered = videos.filter(v => {
     if (filterSkill !== 'all' && v.skill !== filterSkill) return false;
     if (filterLevel !== 'all' && v.level !== filterLevel) return false;
