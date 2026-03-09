@@ -202,16 +202,18 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
 
   const handleNavigate = (direction: 'prev' | 'next') => {
     const total = getTotalQuestions();
+    const partsCount = mockTest?.parts.length || 1;
+    const questionsPerPart = mockTest ? Math.ceil(total / partsCount) : 10;
     if (isNoParts) {
       if (direction === 'next' && currentQuestion < total) setCurrentQuestion(prev => prev + 1);
       else if (direction === 'prev' && currentQuestion > 1) setCurrentQuestion(prev => prev - 1);
     } else {
       if (direction === 'next') {
-        if (currentQuestion < 10) setCurrentQuestion(prev => prev + 1);
-        else if (currentPart < 4) { setCurrentPart(prev => prev + 1); setCurrentQuestion(1); }
+        if (currentQuestion < questionsPerPart) setCurrentQuestion(prev => prev + 1);
+        else if (currentPart < partsCount) { setCurrentPart(prev => prev + 1); setCurrentQuestion(1); }
       } else {
         if (currentQuestion > 1) setCurrentQuestion(prev => prev - 1);
-        else if (currentPart > 1) { setCurrentPart(prev => prev - 1); setCurrentQuestion(10); }
+        else if (currentPart > 1) { setCurrentPart(prev => prev - 1); setCurrentQuestion(questionsPerPart); }
       }
     }
   };

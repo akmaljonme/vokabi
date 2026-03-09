@@ -233,7 +233,11 @@ export const generateMockTest = (
 ): MockTest => {
   const parts: Part[] = [];
   
-  for (let partNum = 1; partNum <= 4; partNum++) {
+  // Reading and Listening: 1 part with 10 questions
+  // Other skills: 4 parts with 10 questions each
+  const totalParts = (skill === 'reading' || skill === 'listening') ? 1 : 4;
+  
+  for (let partNum = 1; partNum <= totalParts; partNum++) {
     const questionType = questionTypes[(mockId + partNum) % questionTypes.length];
     parts.push({
       id: partNum,
