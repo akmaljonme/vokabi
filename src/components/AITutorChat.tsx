@@ -21,9 +21,6 @@ export const AITutorChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Hide on games page
-  if (location.pathname === '/games') return null;
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -31,6 +28,9 @@ export const AITutorChat = () => {
   useEffect(() => {
     if (isOpen && inputRef.current) inputRef.current.focus();
   }, [isOpen]);
+
+  // Hide on games page
+  if (location.pathname === '/games') return null;
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
