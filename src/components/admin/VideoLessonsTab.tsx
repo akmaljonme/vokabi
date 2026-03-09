@@ -52,6 +52,14 @@ export const VideoLessonsTab = () => {
   const [filterSkill, setFilterSkill] = useState<string>('all');
   const [filterLevel, setFilterLevel] = useState<string>('all');
 
+  // Playlist import state
+  const [playlistDialogOpen, setPlaylistDialogOpen] = useState(false);
+  const [playlistUrl, setPlaylistUrl] = useState('');
+  const [playlistLevel, setPlaylistLevel] = useState('A1');
+  const [playlistLoading, setPlaylistLoading] = useState(false);
+  const [parsedVideos, setParsedVideos] = useState<any[]>([]);
+  const [importProgress, setImportProgress] = useState(0);
+
   // Form state
   const [form, setForm] = useState({
     title: '', description: '', youtube_url: '', skill: 'grammar',
