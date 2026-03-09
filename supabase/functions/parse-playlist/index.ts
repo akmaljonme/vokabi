@@ -90,7 +90,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { playlistUrl, defaultLevel } = await req.json();
+    const { playlistUrl, defaultSkill } = await req.json();
     if (!playlistUrl) throw new Error("Playlist URL kerak");
 
     const plMatch = playlistUrl.match(/[?&]list=([\w-]+)/);
