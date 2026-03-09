@@ -132,7 +132,7 @@ export const VideoLessonsTab = () => {
     setParsedVideos([]);
     try {
       const { data, error } = await supabase.functions.invoke('parse-playlist', {
-        body: { playlistUrl, defaultLevel: playlistLevel },
+        body: { playlistUrl, defaultSkill: playlistSkill },
       });
       if (error) throw error;
       if (data?.videos) {
