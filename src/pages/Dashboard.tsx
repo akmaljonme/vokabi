@@ -14,6 +14,8 @@ import { Header } from '@/components/Header';
 import { motion } from 'framer-motion';
 import { useGamification } from '@/hooks/useGamification';
 import { AchievementToast } from '@/components/AchievementToast';
+import { StudyHeatmap } from '@/components/dashboard/StudyHeatmap';
+import { AIStudyPlan } from '@/components/dashboard/AIStudyPlan';
 
 interface TestResult {
   id: string;
@@ -326,6 +328,12 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* Study Heatmap */}
+            <StudyHeatmap results={results} />
+
+            {/* AI Study Plan */}
+            <AIStudyPlan results={results} />
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               <Card className="lg:col-span-2 border-border/50">
                 <CardHeader className="pb-2">
