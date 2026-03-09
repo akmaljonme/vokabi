@@ -247,8 +247,8 @@ export default function Dashboard() {
             {/* XP & Level */}
             <Card className="border-border/50 lg:col-span-2">
               <CardContent className="pt-5">
-                <div className="flex items-center gap-6">
-                  <div className="relative">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                  <div className="relative shrink-0">
                     <motion.div
                       initial={{ scale: 0.8 }}
                       animate={{ scale: 1 }}
