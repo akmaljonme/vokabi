@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Shield,
   MessageSquare,
+  Video,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
