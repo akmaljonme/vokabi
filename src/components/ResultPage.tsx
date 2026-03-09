@@ -171,7 +171,7 @@ const StandardResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="flex flex-wrap items-center justify-center gap-3 mb-12"
+          className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 mb-12 px-2"
         >
           <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={onRetry} className="btn-primary flex items-center gap-2 text-sm">
             <RotateCcw className="w-4 h-4" /> Qayta ishlash
