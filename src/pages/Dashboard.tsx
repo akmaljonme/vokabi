@@ -14,6 +14,8 @@ import { Header } from '@/components/Header';
 import { motion } from 'framer-motion';
 import { useGamification } from '@/hooks/useGamification';
 import { AchievementToast } from '@/components/AchievementToast';
+import { StudyHeatmap } from '@/components/dashboard/StudyHeatmap';
+import { AIStudyPlan } from '@/components/dashboard/AIStudyPlan';
 
 interface TestResult {
   id: string;
