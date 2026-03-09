@@ -96,29 +96,30 @@ export const VideoRecommendations = ({ wrongQuestions, level, skill }: VideoReco
               </div>
             )}
 
-            <div className="space-y-3">
-              {videoSuggestions.videos.map((video, i) => (
-                <a key={i} href={video.url} target="_blank" rel="noopener noreferrer"
-                  className="block p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-muted/30 transition-all group">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
-                      <Play className="w-5 h-5 text-destructive" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm flex items-center gap-1.5 group-hover:text-primary transition-colors">
-                        {video.title}
-                        <ExternalLink className="w-3 h-3 shrink-0 opacity-50 group-hover:opacity-100" />
-                      </h4>
-                      <p className="text-xs text-primary/80 mt-0.5">{video.channel}</p>
-                      <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{video.description}</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline" className="text-xs">{video.topic}</Badge>
-                        <span className="text-[10px] text-muted-foreground/60">YouTube'da ko'rish →</span>
+            <div className="space-y-4">
+              {videoSuggestions.videos.map((video, i) => {
+                const videoId = video.url.match(/[?&]v=([^&]+)/)?.[1] || '';
+                return (
+                  <div key={i} className="rounded-xl border border-border overflow-hidden">
+                    {videoId && (
+                      <div className="aspect-video w-full">
+                        <iframe
+                          src={`https://www.youtube-nocookie.com/embed/${videoId}?rel=0`}
+                          title={video.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full"
+                        />
                       </div>
+                    )}
+                    <div className="p-3">
+                      <h4 className="font-medium text-sm">{video.title}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">{video.description}</p>
+                      <Badge variant="outline" className="text-xs mt-2">{video.topic}</Badge>
                     </div>
                   </div>
-                </a>
-              ))}
+                );
+              })}
             </div>
 
             <div className="bg-primary/5 rounded-lg p-4">
