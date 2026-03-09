@@ -11,14 +11,14 @@ export const Footer = () => {
               <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
-              <span className="text-lg font-display font-bold tracking-tight">IELTSify</span>
+              <span className="text-lg font-display font-bold tracking-tight">
+</span>
             </div>
             <p className="text-secondary-foreground/50 text-sm leading-relaxed mb-6">
               IELTS va CEFR imtihonlariga professional tayyorgarlik platformasi. Bilimingizni sinang va rivojlantiring.
             </p>
             <div className="flex gap-3">
-              {['facebook', 'twitter', 'instagram', 'youtube'].map((s) =>
-              <a key={s} className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center hover:bg-primary transition-colors text-xs font-bold uppercase tracking-wider" href="#">
+              {['facebook', 'twitter', 'instagram', 'youtube'].map((s) => <a key={s} className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center hover:bg-primary transition-colors text-xs font-bold uppercase tracking-wider" href="#">
                   {s[0]}
                 </a>
               )}
@@ -63,8 +63,8 @@ export const Footer = () => {
         </div>
 
         <div className="border-t border-white/[0.06] mt-14 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-secondary-foreground/30 text-xs">
-            © 2026 IELTSify. All rights reserved. Created by Akmal Karimboyev
+          <p className="text-secondary-foreground/30 text-xs">© 2026 Vokabi. All rights reserved. Created by Akmal Karimboyev
+
           </p>
           <div className="flex gap-6 text-xs">
             {['Privacy Policy', 'Terms of Service'].map((item) =>
