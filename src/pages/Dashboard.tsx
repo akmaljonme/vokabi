@@ -329,6 +329,9 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* Daily Challenges */}
+            <DailyChallenges />
+
             {/* Study Heatmap */}
             <StudyHeatmap results={results} />
 
