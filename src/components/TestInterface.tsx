@@ -333,7 +333,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   const SkillIcon = config.icon;
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-muted/30 flex flex-col">
+    <div ref={containerRef} className={`min-h-screen bg-background text-foreground flex flex-col ${isDark ? 'dark' : ''}`}>
       {/* Header - same as ExamInterface */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="container mx-auto px-4">
