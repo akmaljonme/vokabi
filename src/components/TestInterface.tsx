@@ -37,6 +37,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   const [timeLeft, setTimeLeft] = useState(30 * 60);
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isNoParts = skill === 'vocabulary' || skill === 'grammar';
