@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import { Brain, PenTool, Mic, Star, BookOpen, MessageSquare, CheckCircle2, ArrowLeft, RotateCcw, Clock } from 'lucide-react';
 import { TestResult, AIWritingResult, AISpeakingResult } from '@/types/cefr';
 import { Progress } from '@/components/ui/progress';
+import { VideoRecommendations } from '@/components/AIResultsSection';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface AIResultDisplayProps {
   result: TestResult;
