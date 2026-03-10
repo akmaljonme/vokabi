@@ -201,6 +201,10 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
       else if (current.length < 2) setAnswer([...current, option]);
     } else {
       setAnswer(option);
+      // Auto-advance to next question after selecting an answer
+      setTimeout(() => {
+        handleNavigate('next');
+      }, 350);
     }
   };
 
