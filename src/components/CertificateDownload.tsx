@@ -147,7 +147,7 @@ export const CertificateDownload = ({ result }: CertificateDownloadProps) => {
     ctx.moveTo(200, 720);
     ctx.lineTo(400, 720);
     ctx.stroke();
-    ctx.fillText('CEFR Test Hub', 300, 745);
+    ctx.fillText('Vokabi', 300, 745);
 
     // Right signature
     ctx.beginPath();
