@@ -67,7 +67,7 @@ export const CertificateDownload = ({ result }: CertificateDownloadProps) => {
     ctx.fillStyle = '#1a1a2e';
     ctx.font = 'bold 18px Georgia, serif';
     ctx.textAlign = 'center';
-    ctx.fillText('CEFR TEST HUB', w / 2, 130);
+    ctx.fillText('VOKABI', w / 2, 130);
 
     ctx.font = 'bold 42px Georgia, serif';
     ctx.fillStyle = '#1a1a2e';
