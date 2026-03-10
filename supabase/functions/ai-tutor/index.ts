@@ -24,7 +24,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Siz IELTSify platformasining AI tutorsiz. Sizning vazifangiz foydalanuvchilarga ingliz tili o'rganishda yordam berish.
+            content: `Siz Vokabi platformasining AI tutorsiz. Sizning vazifangiz foydalanuvchilarga ingliz tili o'rganishda yordam berish.
 
 Qoidalar:
 - Har doim O'zbek tilida javob bering (grammatik tushuntirishlar ingliz tilida bo'lishi mumkin)

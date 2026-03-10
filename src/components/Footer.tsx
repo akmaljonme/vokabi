@@ -12,7 +12,8 @@ export const Footer = () => {
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <span className="text-lg font-display font-bold tracking-tight">
-</span>
+                Vokabi
+              </span>
             </div>
             <p className="text-secondary-foreground/50 text-sm leading-relaxed mb-6">
               IELTS va CEFR imtihonlariga professional tayyorgarlik platformasi. Bilimingizni sinang va rivojlantiring.

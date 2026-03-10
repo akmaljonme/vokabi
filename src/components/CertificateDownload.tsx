@@ -159,7 +159,7 @@ export const CertificateDownload = ({ result }: CertificateDownloadProps) => {
     // Footer
     ctx.font = '12px Georgia, serif';
     ctx.fillStyle = '#bbb';
-    ctx.fillText('This certificate is issued by CEFR Test Hub', w / 2, 795);
+    ctx.fillText('This certificate is issued by Vokabi', w / 2, 795);
 
     // Download
     const link = document.createElement('a');
