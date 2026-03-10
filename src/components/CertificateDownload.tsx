@@ -67,7 +67,7 @@ export const CertificateDownload = ({ result }: CertificateDownloadProps) => {
     ctx.fillStyle = '#1a1a2e';
     ctx.font = 'bold 18px Georgia, serif';
     ctx.textAlign = 'center';
-    ctx.fillText('CEFR TEST HUB', w / 2, 130);
+    ctx.fillText('VOKABI', w / 2, 130);
 
     ctx.font = 'bold 42px Georgia, serif';
     ctx.fillStyle = '#1a1a2e';
@@ -147,7 +147,7 @@ export const CertificateDownload = ({ result }: CertificateDownloadProps) => {
     ctx.moveTo(200, 720);
     ctx.lineTo(400, 720);
     ctx.stroke();
-    ctx.fillText('CEFR Test Hub', 300, 745);
+    ctx.fillText('Vokabi', 300, 745);
 
     // Right signature
     ctx.beginPath();
@@ -159,7 +159,7 @@ export const CertificateDownload = ({ result }: CertificateDownloadProps) => {
     // Footer
     ctx.font = '12px Georgia, serif';
     ctx.fillStyle = '#bbb';
-    ctx.fillText('This certificate is issued by CEFR Test Hub', w / 2, 795);
+    ctx.fillText('This certificate is issued by Vokabi', w / 2, 795);
 
     // Download
     const link = document.createElement('a');

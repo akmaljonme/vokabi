@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 export const SettingsTab = () => {
   const [settings, setSettings] = useState({
-    siteName: 'CEFR Test Hub',
+    siteName: 'Vokabi',
     primaryColor: '#0ea5e9',
     enableNotifications: true,
     maintenanceMode: false,
