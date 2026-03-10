@@ -85,6 +85,15 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
     }
   }, [mockId, level, skill, testId, dbTest, testStorageKey]);
 
+  // Sync dark mode with fullscreen container
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
   // Fullscreen
   const enterFullscreen = useCallback(async () => {
     try {
