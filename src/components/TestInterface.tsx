@@ -37,6 +37,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   const [timeLeft, setTimeLeft] = useState(30 * 60);
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isNoParts = skill === 'vocabulary' || skill === 'grammar';
@@ -83,6 +84,15 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
       if (!saved) setTimeLeft(test.timeLimit);
     }
   }, [mockId, level, skill, testId, dbTest, testStorageKey]);
+
+  // Sync dark mode with fullscreen container
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Fullscreen
   const enterFullscreen = useCallback(async () => {
@@ -323,7 +333,7 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   const SkillIcon = config.icon;
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-muted/30 flex flex-col">
+    <div ref={containerRef} className={`min-h-screen bg-background text-foreground flex flex-col ${isDark ? 'dark' : ''}`}>
       {/* Header - same as ExamInterface */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="container mx-auto px-4">
