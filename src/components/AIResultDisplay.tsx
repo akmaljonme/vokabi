@@ -70,6 +70,7 @@ const CriteriaCard = ({ title, score, feedback, icon: Icon, delay }: {
 };
 
 export const AIResultDisplay = ({ result, onRetry, onBack }: AIResultDisplayProps) => {
+  const { isPro } = useSubscription();
   const isWriting = result.skill === 'writing';
   const aiResult = result.aiResult;
 
