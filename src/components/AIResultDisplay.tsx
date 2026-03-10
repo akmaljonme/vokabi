@@ -263,6 +263,30 @@ export const AIResultDisplay = ({ result, onRetry, onBack }: AIResultDisplayProp
           </motion.div>
         )}
 
+        {/* AI Video Recommendations */}
+        {isPro && aiResult && aiResult.overallBand < 9 && (() => {
+          // Build pseudo "wrong questions" from weak criteria for video recommendations
+          const weakQuestions: { question: string; correct: string; userAnswer: string }[] = [];
+          if (isWriting && writingCriteria) {
+            if (writingCriteria.taskAchievement.score < 7) weakQuestions.push({ question: `Task Achievement: ${writingCriteria.taskAchievement.feedback}`, correct: 'Band 7+', userAnswer: `Band ${writingCriteria.taskAchievement.score}` });
+            if (writingCriteria.coherenceAndCohesion.score < 7) weakQuestions.push({ question: `Coherence & Cohesion: ${writingCriteria.coherenceAndCohesion.feedback}`, correct: 'Band 7+', userAnswer: `Band ${writingCriteria.coherenceAndCohesion.score}` });
+            if (writingCriteria.lexicalResource.score < 7) weakQuestions.push({ question: `Lexical Resource: ${writingCriteria.lexicalResource.feedback}`, correct: 'Band 7+', userAnswer: `Band ${writingCriteria.lexicalResource.score}` });
+            if (writingCriteria.grammaticalRange.score < 7) weakQuestions.push({ question: `Grammatical Range: ${writingCriteria.grammaticalRange.feedback}`, correct: 'Band 7+', userAnswer: `Band ${writingCriteria.grammaticalRange.score}` });
+          }
+          if (!isWriting && speakingCriteria) {
+            if (speakingCriteria.fluencyAndCoherence.score < 7) weakQuestions.push({ question: `Fluency & Coherence: ${speakingCriteria.fluencyAndCoherence.feedback}`, correct: 'Band 7+', userAnswer: `Band ${speakingCriteria.fluencyAndCoherence.score}` });
+            if (speakingCriteria.lexicalResource.score < 7) weakQuestions.push({ question: `Lexical Resource: ${speakingCriteria.lexicalResource.feedback}`, correct: 'Band 7+', userAnswer: `Band ${speakingCriteria.lexicalResource.score}` });
+            if (speakingCriteria.grammaticalRange.score < 7) weakQuestions.push({ question: `Grammatical Range: ${speakingCriteria.grammaticalRange.feedback}`, correct: 'Band 7+', userAnswer: `Band ${speakingCriteria.grammaticalRange.score}` });
+            if (speakingCriteria.pronunciation.score < 7) weakQuestions.push({ question: `Pronunciation: ${speakingCriteria.pronunciation.feedback}`, correct: 'Band 7+', userAnswer: `Band ${speakingCriteria.pronunciation.score}` });
+          }
+          if (weakQuestions.length === 0) return null;
+          return (
+            <div className="max-w-2xl mx-auto mb-10">
+              <VideoRecommendations wrongQuestions={weakQuestions} level={result.level} skill={result.skill} />
+            </div>
+          );
+        })()}
+
         {/* Actions */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
