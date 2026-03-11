@@ -13,6 +13,7 @@ interface Props { onBack: () => void; }
 
 export const WordMatchGame = ({ onBack }: Props) => {
   const { user } = useAuth();
+  const { addScore: addTournamentScore } = useTournamentScore();
   const [level, setLevel] = useState<string | null>(null);
   const [cards, setCards] = useState<{ id: number; text: string; pairId: number; matched: boolean; selected: boolean }[]>([]);
   const [selected, setSelected] = useState<number[]>([]);
