@@ -239,6 +239,42 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_game_quests: {
+        Row: {
+          created_at: string
+          description: string
+          game_type: string | null
+          id: string
+          quest_date: string
+          quest_type: string
+          target_value: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          game_type?: string | null
+          id?: string
+          quest_date?: string
+          quest_type: string
+          target_value?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          game_type?: string | null
+          id?: string
+          quest_date?: string
+          quest_type?: string
+          target_value?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       direct_messages: {
         Row: {
           audio_url: string | null
@@ -664,6 +700,30 @@ export type Database = {
         }
         Relationships: []
       }
+      friendships: {
+        Row: {
+          created_at: string
+          friend_id: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_id: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       game_rooms: {
         Row: {
           created_at: string
@@ -1034,6 +1094,74 @@ export type Database = {
         }
         Relationships: []
       }
+      tournament_participants: {
+        Row: {
+          games_played: number
+          id: string
+          joined_at: string
+          total_score: number
+          tournament_id: string
+          user_id: string
+        }
+        Insert: {
+          games_played?: number
+          id?: string
+          joined_at?: string
+          total_score?: number
+          tournament_id: string
+          user_id: string
+        }
+        Update: {
+          games_played?: number
+          id?: string
+          joined_at?: string
+          total_score?: number
+          tournament_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_participants_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournaments: {
+        Row: {
+          created_at: string
+          end_date: string
+          game_type: string
+          id: string
+          prize_xp: number
+          start_date: string
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          game_type?: string
+          id?: string
+          prize_xp?: number
+          start_date?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          game_type?: string
+          id?: string
+          prize_xp?: number
+          start_date?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: string
@@ -1142,6 +1270,44 @@ export type Database = {
           xp?: number
         }
         Relationships: []
+      }
+      user_quest_progress: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          current_value: number
+          id: string
+          quest_id: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          quest_id: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          quest_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_quest_progress_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "daily_game_quests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

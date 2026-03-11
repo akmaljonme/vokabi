@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gamepad2, ArrowLeft, Trophy, Zap } from 'lucide-react';
+import { Gamepad2, ArrowLeft, Trophy, Zap, BarChart3, Users, Target, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { WordMatchGame } from '@/components/games/WordMatchGame';
@@ -12,8 +12,12 @@ import { SentenceBuilderGame } from '@/components/games/SentenceBuilderGame';
 import { ListeningQuizGame } from '@/components/games/ListeningQuizGame';
 import { IdiomMasterGame } from '@/components/games/IdiomMasterGame';
 import { LastWordGame } from '@/components/games/LastWordGame';
+import { GameTournament } from '@/components/games/GameTournament';
+import { GameFriends } from '@/components/games/GameFriends';
+import { GameStats } from '@/components/games/GameStats';
+import { DailyGameQuests } from '@/components/games/DailyGameQuests';
 
-type GameType = 'menu' | 'wordmatch' | 'spelling' | 'grammar' | 'flashcards' | 'hangman' | 'sentence' | 'listening' | 'idiom' | 'lastword';
+type GameType = 'menu' | 'wordmatch' | 'spelling' | 'grammar' | 'flashcards' | 'hangman' | 'sentence' | 'listening' | 'idiom' | 'lastword' | 'tournament' | 'friends' | 'stats';
 
 const games = [
   { id: 'wordmatch' as const, title: 'Word Match', desc: 'Inglizcha-O\'zbekcha so\'zlarni juftlang', icon: '🔗', color: 'from-blue-500 to-cyan-500' },
@@ -53,14 +57,53 @@ export default function Games() {
         <AnimatePresence mode="wait">
           {activeGame === 'menu' && (
             <motion.div key="menu" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-              <div className="text-center mb-10">
+              <div className="text-center mb-8">
                 <h2 className="text-3xl font-display font-bold mb-2">🎮 O'yin tanlang</h2>
                 <p className="text-muted-foreground mb-4">O'yin orqali ingliz tilini o'rganing!</p>
-                <button onClick={() => navigate('/leaderboard')} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 transition-colors text-sm font-medium">
-                  <Trophy className="w-4 h-4" /> Leaderboard
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl mx-auto mb-8">
+                <button
+                  onClick={() => setActiveGame('tournament')}
+                  className="group p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 transition-all text-center"
+                >
+                  <Crown className="w-6 h-6 text-amber-500 mx-auto mb-1.5" />
+                  <p className="text-sm font-bold">Turnir</p>
+                  <p className="text-[10px] text-muted-foreground">Haftalik musobaqa</p>
+                </button>
+                <button
+                  onClick={() => setActiveGame('friends')}
+                  className="group p-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all text-center"
+                >
+                  <Users className="w-6 h-6 text-primary mx-auto mb-1.5" />
+                  <p className="text-sm font-bold">Do'stlar</p>
+                  <p className="text-[10px] text-muted-foreground">Birga o'ynash</p>
+                </button>
+                <button
+                  onClick={() => setActiveGame('stats')}
+                  className="group p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all text-center"
+                >
+                  <BarChart3 className="w-6 h-6 text-emerald-500 mx-auto mb-1.5" />
+                  <p className="text-sm font-bold">Statistika</p>
+                  <p className="text-[10px] text-muted-foreground">Batafsil tahlil</p>
+                </button>
+                <button
+                  onClick={() => navigate('/leaderboard')}
+                  className="group p-4 rounded-2xl border border-fuchsia-500/30 bg-fuchsia-500/5 hover:bg-fuchsia-500/10 transition-all text-center"
+                >
+                  <Trophy className="w-6 h-6 text-fuchsia-500 mx-auto mb-1.5" />
+                  <p className="text-sm font-bold">Leaderboard</p>
+                  <p className="text-[10px] text-muted-foreground">Top o'yinchilar</p>
                 </button>
               </div>
 
+              {/* Daily Quests (compact) */}
+              <div className="max-w-4xl mx-auto mb-8">
+                <DailyGameQuests compact />
+              </div>
+
+              {/* Games Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
                 {games.map((game, i) => (
                   <motion.button
@@ -99,6 +142,9 @@ export default function Games() {
           {activeGame === 'listening' && <ListeningQuizGame key="lq" onBack={() => setActiveGame('menu')} />}
           {activeGame === 'idiom' && <IdiomMasterGame key="im" onBack={() => setActiveGame('menu')} />}
           {activeGame === 'lastword' && <LastWordGame key="lw" onBack={() => setActiveGame('menu')} />}
+          {activeGame === 'tournament' && <GameTournament key="tr" onBack={() => setActiveGame('menu')} />}
+          {activeGame === 'friends' && <GameFriends key="fr" onBack={() => setActiveGame('menu')} />}
+          {activeGame === 'stats' && <GameStats key="st" onBack={() => setActiveGame('menu')} />}
         </AnimatePresence>
       </main>
     </div>

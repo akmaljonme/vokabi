@@ -6,12 +6,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { useAIGameQuestions } from '@/hooks/useAIGameQuestions';
+import { useTournamentScore } from '@/hooks/useTournamentScore';
 import { Loader2 } from 'lucide-react';
 
 interface Props { onBack: () => void; }
 
 export const WordMatchGame = ({ onBack }: Props) => {
   const { user } = useAuth();
+  const { addScore: addTournamentScore } = useTournamentScore();
   const [level, setLevel] = useState<string | null>(null);
   const [cards, setCards] = useState<{ id: number; text: string; pairId: number; matched: boolean; selected: boolean }[]>([]);
   const [selected, setSelected] = useState<number[]>([]);
@@ -78,6 +80,7 @@ export const WordMatchGame = ({ onBack }: Props) => {
   const saveScore = async (score: number) => {
     if (!user) return;
     await supabase.from('game_scores').insert({ user_id: user.id, game_type: 'word_match', score, level: level || 'A1' });
+    addTournamentScore(score * 10);
     toast({ title: '🎉 Tabriklaymiz!', description: `${moves} urinishda topildingiz! +${score * 10} XP` });
   };
 
