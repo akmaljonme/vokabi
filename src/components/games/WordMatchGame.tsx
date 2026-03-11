@@ -80,6 +80,7 @@ export const WordMatchGame = ({ onBack }: Props) => {
   const saveScore = async (score: number) => {
     if (!user) return;
     await supabase.from('game_scores').insert({ user_id: user.id, game_type: 'word_match', score, level: level || 'A1' });
+    addTournamentScore(score * 10);
     toast({ title: '🎉 Tabriklaymiz!', description: `${moves} urinishda topildingiz! +${score * 10} XP` });
   };
 
