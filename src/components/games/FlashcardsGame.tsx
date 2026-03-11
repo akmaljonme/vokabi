@@ -13,6 +13,7 @@ export const FlashcardsGame = ({ onBack }: Props) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [known, setKnown] = useState<Set<number>>(new Set());
   const [aiCards, setAiCards] = useState<FlashCard[]>([]);
+  const [loading, setLoading] = useState(false);
   const ai = useAIGameQuestions<FlashCard>('flashcards');
 
   const cards = aiCards.length > 0 ? aiCards : (level ? flashcards[level] || [] : []);
@@ -22,11 +23,18 @@ export const FlashcardsGame = ({ onBack }: Props) => {
     setCurrentIdx(0);
     setKnown(new Set());
     setIsFlipped(false);
-    const generated = await ai.generate(l);
-    if (generated && generated.length >= 3) {
-      setAiCards(generated);
-    } else {
+    setLoading(true);
+    try {
+      const generated = await ai.generate(l);
+      if (generated && generated.length >= 3) {
+        setAiCards(generated);
+      } else {
+        setAiCards([]);
+      }
+    } catch {
       setAiCards([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -37,8 +45,8 @@ export const FlashcardsGame = ({ onBack }: Props) => {
         <p className="text-muted-foreground mb-6">Daraja tanlang:</p>
         <div className="grid grid-cols-2 gap-3">
           {Object.keys(flashcards).map(l => (
-            <Button key={l} variant="outline" size="lg" onClick={() => startLevel(l)} disabled={ai.loading} className="text-lg">
-              {ai.loading ? <Loader2 className="w-4 h-4 animate-spin" /> : l}
+            <Button key={l} variant="outline" size="lg" onClick={() => startLevel(l)} disabled={loading} className="text-lg">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : l}
             </Button>
           ))}
         </div>
@@ -46,16 +54,12 @@ export const FlashcardsGame = ({ onBack }: Props) => {
     );
   }
 
-  if (!level) {
+  if (loading) {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-md mx-auto text-center">
-        <h2 className="text-2xl font-bold mb-6">🃏 Flashcards</h2>
-        <p className="text-muted-foreground mb-6">Daraja tanlang:</p>
-        <div className="grid grid-cols-2 gap-3">
-          {Object.keys(flashcards).map(l => (
-            <Button key={l} variant="outline" size="lg" onClick={() => { setLevel(l); setCurrentIdx(0); setKnown(new Set()); }} className="text-lg">{l}</Button>
-          ))}
-        </div>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-md mx-auto text-center py-16">
+        <Loader2 className="w-12 h-12 text-primary mx-auto mb-4 animate-spin" />
+        <h3 className="text-lg font-semibold mb-2">Kartochkalar tayyorlanmoqda...</h3>
+        <p className="text-sm text-muted-foreground">AI yangi so'zlarni generatsiya qilmoqda</p>
       </motion.div>
     );
   }

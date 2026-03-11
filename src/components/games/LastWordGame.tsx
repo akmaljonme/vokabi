@@ -48,10 +48,23 @@ const aiWords: Record<string, string[]> = {
   Z: ['zebra', 'zero', 'zigzag'],
 };
 
+// Validate English word using free dictionary API
+const validateEnglishWord = async (word: string): Promise<boolean> => {
+  try {
+    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+    return res.ok;
+  } catch {
+    // If API fails, accept the word to not block gameplay
+    return true;
+  }
+};
+
 export const LastWordGame = ({ onBack }: Props) => {
   const { user } = useAuth();
   const [mode, setMode] = useState<'select' | 'ai' | 'online'>('select');
   const [gameState, setGameState] = useState<'lobby' | 'waiting' | 'playing' | 'finished'>('lobby');
+  const gameStateRef = useRef(gameState);
+  gameStateRef.current = gameState;
   const [roomId, setRoomId] = useState<string | null>(null);
   const [messages, setMessages] = useState<GameMessage[]>([]);
   const [currentWord, setCurrentWord] = useState('');
@@ -67,10 +80,13 @@ export const LastWordGame = ({ onBack }: Props) => {
   const [copied, setCopied] = useState(false);
   const [playerName, setPlayerName] = useState('');
   const [joinId, setJoinId] = useState('');
+  const [validating, setValidating] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<any>(null);
   const channelRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const myScoreRef = useRef(myScore);
+  myScoreRef.current = myScore;
 
   // Load player name
   useEffect(() => {
@@ -127,7 +143,7 @@ export const LastWordGame = ({ onBack }: Props) => {
           clearInterval(timerRef.current);
           setGameState('finished');
           toast({ title: "⏰ Vaqt tugadi!", variant: 'destructive' });
-          if (user) supabase.from('game_scores').insert({ user_id: user.id, game_type: 'last_word', score: myScore, level: 'A1' });
+          if (user) supabase.from('game_scores').insert({ user_id: user.id, game_type: 'last_word', score: myScoreRef.current, level: 'A1' });
           return 0;
         }
         return prev - 1;
@@ -136,15 +152,27 @@ export const LastWordGame = ({ onBack }: Props) => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [mode, gameState, currentTurn, round]);
 
-  const submitAIWord = () => {
+  const submitAIWord = async () => {
     const word = inputWord.trim().toLowerCase();
-    if (!word) return;
+    if (!word || validating) return;
     if (word.length < 2) { setError("Kamida 2 harf bo'lishi kerak"); return; }
+    if (!/^[a-z]+$/.test(word)) { setError("Faqat inglizcha harflar kiriting (a-z)"); return; }
     if (usedWords.has(word)) { setError("Bu so'z allaqachon ishlatilgan!"); return; }
     if (currentWord && word[0] !== currentWord[currentWord.length - 1]) {
       setError(`So'z "${currentWord[currentWord.length - 1].toUpperCase()}" harfi bilan boshlanishi kerak!`);
       return;
     }
+
+    // Validate English word
+    setValidating(true);
+    setError('');
+    const isValid = await validateEnglishWord(word);
+    setValidating(false);
+    if (!isValid) {
+      setError(`"${word}" — bu ingliz tilida mavjud so'z emas!`);
+      return;
+    }
+
     setError('');
     const newUsed = new Set(usedWords); newUsed.add(word); setUsedWords(newUsed);
     setMessages(prev => [...prev, { player: 'Siz', playerId: user?.id || 'player', word, timestamp: Date.now() }]);
@@ -155,7 +183,9 @@ export const LastWordGame = ({ onBack }: Props) => {
       const aiWord = getAIWord(word[word.length - 1]);
       if (!aiWord) {
         setGameState('finished');
-        setMyScore(s => { const f = s + 50; if (user) supabase.from('game_scores').insert({ user_id: user.id, game_type: 'last_word', score: f, level: 'A1' }); return f; });
+        const finalScore = myScoreRef.current + 50;
+        setMyScore(finalScore);
+        if (user) supabase.from('game_scores').insert({ user_id: user.id, game_type: 'last_word', score: finalScore, level: 'A1' });
         toast({ title: "🎉 AI so'z topa olmadi!" });
         return;
       }
@@ -169,7 +199,6 @@ export const LastWordGame = ({ onBack }: Props) => {
   // === ONLINE MODE ===
   const createRoom = async () => {
     if (!user) return;
-    // Clean up old waiting rooms
     await (supabase.from('game_rooms') as any).delete().eq('player1_id', user.id).eq('status', 'waiting');
 
     const { data, error: err } = await (supabase.from('game_rooms') as any).insert({
@@ -211,7 +240,6 @@ export const LastWordGame = ({ onBack }: Props) => {
 
   const findRoom = async () => {
     if (!user) return;
-    // Find a waiting room that isn't mine
     const { data: rooms } = await (supabase.from('game_rooms') as any)
       .select('*').eq('status', 'waiting').neq('player1_id', user.id).order('created_at', { ascending: true }).limit(1);
 
@@ -243,8 +271,8 @@ export const LastWordGame = ({ onBack }: Props) => {
   const handleRoomUpdate = useCallback((room: any) => {
     if (!user) return;
 
-    // Someone joined
-    if (room.status === 'playing' && gameState === 'waiting') {
+    // Someone joined - use ref to avoid stale closure
+    if (room.status === 'playing' && gameStateRef.current === 'waiting') {
       setGameState('playing');
       const isP1 = room.player1_id === user.id;
       setOpponentName(isP1 ? room.player2_name : room.player1_name);
@@ -265,7 +293,6 @@ export const LastWordGame = ({ onBack }: Props) => {
     // Rebuild messages from used_words
     if (words.length > 0) {
       const msgs: GameMessage[] = words.map((w, i) => {
-        // Alternate turns: p1 starts (round 0), then p2 (round 1), etc.
         const isP1Turn = i % 2 === 0;
         const pid = isP1Turn ? room.player1_id : room.player2_id;
         const pname = isP1Turn ? room.player1_name : room.player2_name;
@@ -289,7 +316,7 @@ export const LastWordGame = ({ onBack }: Props) => {
       setTimeLeft(TURN_TIME);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [user, gameState]);
+  }, [user]);
 
   // Online timer
   useEffect(() => {
@@ -301,7 +328,6 @@ export const LastWordGame = ({ onBack }: Props) => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
-          // Time up — opponent wins
           handleOnlineTimeout();
           return 0;
         }
@@ -318,19 +344,31 @@ export const LastWordGame = ({ onBack }: Props) => {
     const isP1 = room.player1_id === user.id;
     const winnerId = isP1 ? room.player2_id : room.player1_id;
     await (supabase.from('game_rooms') as any).update({ status: 'finished', winner_id: winnerId }).eq('id', roomId);
-    supabase.from('game_scores').insert({ user_id: user.id, game_type: 'last_word', score: myScore, level: 'A1' });
+    supabase.from('game_scores').insert({ user_id: user.id, game_type: 'last_word', score: myScoreRef.current, level: 'A1' });
   };
 
   const submitOnlineWord = async () => {
-    if (!roomId || !user) return;
+    if (!roomId || !user || validating) return;
     const word = inputWord.trim().toLowerCase();
     if (!word) return;
     if (word.length < 2) { setError("Kamida 2 harf bo'lishi kerak"); return; }
+    if (!/^[a-z]+$/.test(word)) { setError("Faqat inglizcha harflar kiriting (a-z)"); return; }
     if (usedWords.has(word)) { setError("Bu so'z allaqachon ishlatilgan!"); return; }
     if (currentWord && word[0] !== currentWord[currentWord.length - 1]) {
       setError(`So'z "${currentWord[currentWord.length - 1].toUpperCase()}" harfi bilan boshlanishi kerak!`);
       return;
     }
+
+    // Validate English word
+    setValidating(true);
+    setError('');
+    const isValid = await validateEnglishWord(word);
+    setValidating(false);
+    if (!isValid) {
+      setError(`"${word}" — bu ingliz tilida mavjud so'z emas!`);
+      return;
+    }
+
     setError('');
     setInputWord('');
 
@@ -398,6 +436,7 @@ export const LastWordGame = ({ onBack }: Props) => {
             <h3 className="font-bold mb-2">📖 Qoidalar</h3>
             <ul className="text-sm text-muted-foreground text-left space-y-1">
               <li>• Har bir so'z oldingi so'zning oxirgi harfi bilan boshlanishi kerak</li>
+              <li>• Faqat haqiqiy inglizcha so'zlar qabul qilinadi</li>
               <li>• Bir xil so'zni ikki marta ishlatish mumkin emas</li>
               <li>• Har bir so'z uchun {TURN_TIME} soniya vaqt beriladi</li>
               <li>• Raqib so'z topa olmasa — siz yutasiz! 🎉</li>
@@ -419,7 +458,7 @@ export const LastWordGame = ({ onBack }: Props) => {
     );
   }
 
-  // === ONLINE LOBBY (fallback — show waiting with join option) ===
+  // === ONLINE LOBBY ===
   if (mode === 'online' && gameState === 'lobby') {
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto text-center py-10">
@@ -598,8 +637,11 @@ export const LastWordGame = ({ onBack }: Props) => {
                 placeholder={currentWord ? `"${currentWord[currentWord.length - 1].toUpperCase()}" bilan boshlanadigan so'z...` : "Birinchi so'zni yozing..."}
                 className="flex-1"
                 autoFocus
+                disabled={validating}
               />
-              <Button type="submit" size="icon"><Send className="w-4 h-4" /></Button>
+              <Button type="submit" size="icon" disabled={validating}>
+                {validating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              </Button>
             </form>
           </div>
         )}
