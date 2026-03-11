@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { useAIGameQuestions } from '@/hooks/useAIGameQuestions';
+import { useTournamentScore } from '@/hooks/useTournamentScore';
 import { Loader2 } from 'lucide-react';
 
 interface Props { onBack: () => void; }
