@@ -93,7 +93,7 @@ export const HangmanGame = ({ onBack }: Props) => {
     const item = list[currentRound];
     setWord(item.word.toUpperCase());
     setHint(item.hint);
-    setGuessed([]); setWrongCount(0); setWon(false);
+    setGuessed([]); setWrongCount(0); setWon(false); setGameOver(false);
   };
 
   const nextWord = (lvl: string, currentRound: number) => {
