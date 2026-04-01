@@ -62,6 +62,7 @@ export const TestsTab = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [testToDelete, setTestToDelete] = useState<Test | null>(null);
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
 
   const levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
