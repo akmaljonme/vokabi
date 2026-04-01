@@ -249,9 +249,9 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
             ? { essay: allWritingText, question: mockTest.parts.map(p => p.passage.content).join(' | '), level }
             : { transcript: Object.values(speakingTranscripts).filter(Boolean).join('\n\n') || '[Audio submitted - no transcript available]', question: mockTest.parts[0]?.questions.map(q => q.question).join(' | ') || '', level };
 
-          const { data } = await import('@/integrations/supabase/client').then(m => 
-            m.supabase.functions.invoke(functionName, { body })
-          );
+          const { supabase } = await import('@/integrations/supabase/client');
+          const { data, error } = await supabase.functions.invoke(functionName, { body });
+          if (error) throw error;
 
           const totalParts = isWriting ? mockTest.parts.length : mockTest.parts[0]?.questions.length || 0;
           onFinish({
