@@ -51,10 +51,12 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   // Speaking state - support multiple questions
   const [isRecording, setIsRecording] = useState(false);
   const [speakingRecordings, setSpeakingRecordings] = useState<Record<number, { blob: Blob; url: string }>>({});
+  const [speakingTranscripts, setSpeakingTranscripts] = useState<Record<number, string>>({});
   const [speakingSubmitting, setSpeakingSubmitting] = useState(false);
   const [currentSpeakingQ, setCurrentSpeakingQ] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const recognitionRef = useRef<any>(null);
 
   const { test: dbTest, loading: dbLoading } = useTestWithQuestions(testId);
 
