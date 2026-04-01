@@ -216,7 +216,11 @@ export const TestsTab = () => {
           <h2 className="text-2xl font-bold">Testlar boshqaruvi</h2>
           <p className="text-muted-foreground">Mock testlarni yarating va boshqaring</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={() => setAiDialogOpen(true)} className="text-primary border-primary/30 hover:bg-primary/5">
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI bilan yaratish
+          </Button>
           <Button variant="outline" onClick={() => setPdfDialogOpen(true)}>
             <Upload className="w-4 h-4 mr-2" />
             PDF dan import
