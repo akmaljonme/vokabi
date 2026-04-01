@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { TestFormDialog } from './tests/TestFormDialog';
 import { TestQuestionsPanel } from './tests/TestQuestionsPanel';
 import { PDFImportDialog } from './tests/PDFImportDialog';
+import { AITestGenerateDialog } from './tests/AITestGenerateDialog';
 import {
   AlertDialog,
   AlertDialogAction,
