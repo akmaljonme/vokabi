@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, FileText, Headphones, BookOpen, MessageSquare, Search, Loader2, Eye, EyeOff, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, Headphones, BookOpen, MessageSquare, Search, Loader2, Eye, EyeOff, Upload, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { TestFormDialog } from './tests/TestFormDialog';
 import { TestQuestionsPanel } from './tests/TestQuestionsPanel';
 import { PDFImportDialog } from './tests/PDFImportDialog';
+import { AITestGenerateDialog } from './tests/AITestGenerateDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,6 +62,7 @@ export const TestsTab = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [testToDelete, setTestToDelete] = useState<Test | null>(null);
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
 
   const levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
@@ -214,7 +216,11 @@ export const TestsTab = () => {
           <h2 className="text-2xl font-bold">Testlar boshqaruvi</h2>
           <p className="text-muted-foreground">Mock testlarni yarating va boshqaring</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={() => setAiDialogOpen(true)} className="text-primary border-primary/30 hover:bg-primary/5">
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI bilan yaratish
+          </Button>
           <Button variant="outline" onClick={() => setPdfDialogOpen(true)}>
             <Upload className="w-4 h-4 mr-2" />
             PDF dan import
@@ -413,6 +419,13 @@ export const TestsTab = () => {
       <PDFImportDialog
         open={pdfDialogOpen}
         onOpenChange={setPdfDialogOpen}
+        onSuccess={fetchTests}
+      />
+
+      {/* AI Generate Dialog */}
+      <AITestGenerateDialog
+        open={aiDialogOpen}
+        onOpenChange={setAiDialogOpen}
         onSuccess={fetchTests}
       />
     </div>
