@@ -504,6 +504,10 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
                           onClick={async () => {
                             if (isRecording) {
                               mediaRecorderRef.current?.stop();
+                              if (recognitionRef.current) {
+                                recognitionRef.current.stop();
+                                recognitionRef.current = null;
+                              }
                               setIsRecording(false);
                             } else {
                               try {
@@ -520,6 +524,27 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
                                 };
                                 recorder.start();
                                 setIsRecording(true);
+
+                                // Start speech recognition for transcript
+                                const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                                if (SpeechRecognition) {
+                                  const recognition = new SpeechRecognition();
+                                  recognition.continuous = true;
+                                  recognition.interimResults = false;
+                                  recognition.lang = 'en-US';
+                                  let transcript = '';
+                                  recognition.onresult = (event: any) => {
+                                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                                      if (event.results[i].isFinal) {
+                                        transcript += event.results[i][0].transcript + ' ';
+                                      }
+                                    }
+                                    const qIdx = currentSpeakingQ;
+                                    setSpeakingTranscripts(prev => ({ ...prev, [qIdx]: transcript.trim() }));
+                                  };
+                                  recognition.start();
+                                  recognitionRef.current = recognition;
+                                }
                               } catch { /* mic permission denied */ }
                             }
                           }}
