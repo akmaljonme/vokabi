@@ -51,10 +51,12 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
   // Speaking state - support multiple questions
   const [isRecording, setIsRecording] = useState(false);
   const [speakingRecordings, setSpeakingRecordings] = useState<Record<number, { blob: Blob; url: string }>>({});
+  const [speakingTranscripts, setSpeakingTranscripts] = useState<Record<number, string>>({});
   const [speakingSubmitting, setSpeakingSubmitting] = useState(false);
   const [currentSpeakingQ, setCurrentSpeakingQ] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const recognitionRef = useRef<any>(null);
 
   const { test: dbTest, loading: dbLoading } = useTestWithQuestions(testId);
 
@@ -245,11 +247,11 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
           const functionName = isWriting ? 'check-writing' : 'check-speaking';
           const body = isWriting
             ? { essay: allWritingText, question: mockTest.parts.map(p => p.passage.content).join(' | '), level }
-            : { transcript: '[Audio submitted]', question: mockTest.parts[0]?.questions.map(q => q.question).join(' | ') || '', level };
+            : { transcript: Object.values(speakingTranscripts).filter(Boolean).join('\n\n') || '[Audio submitted - no transcript available]', question: mockTest.parts[0]?.questions.map(q => q.question).join(' | ') || '', level };
 
-          const { data } = await import('@/integrations/supabase/client').then(m => 
-            m.supabase.functions.invoke(functionName, { body })
-          );
+          const { supabase } = await import('@/integrations/supabase/client');
+          const { data, error } = await supabase.functions.invoke(functionName, { body });
+          if (error) throw error;
 
           const totalParts = isWriting ? mockTest.parts.length : mockTest.parts[0]?.questions.length || 0;
           onFinish({
@@ -502,6 +504,10 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
                           onClick={async () => {
                             if (isRecording) {
                               mediaRecorderRef.current?.stop();
+                              if (recognitionRef.current) {
+                                recognitionRef.current.stop();
+                                recognitionRef.current = null;
+                              }
                               setIsRecording(false);
                             } else {
                               try {
@@ -518,6 +524,27 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
                                 };
                                 recorder.start();
                                 setIsRecording(true);
+
+                                // Start speech recognition for transcript
+                                const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                                if (SpeechRecognition) {
+                                  const recognition = new SpeechRecognition();
+                                  recognition.continuous = true;
+                                  recognition.interimResults = false;
+                                  recognition.lang = 'en-US';
+                                  let transcript = '';
+                                  recognition.onresult = (event: any) => {
+                                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                                      if (event.results[i].isFinal) {
+                                        transcript += event.results[i][0].transcript + ' ';
+                                      }
+                                    }
+                                    const qIdx = currentSpeakingQ;
+                                    setSpeakingTranscripts(prev => ({ ...prev, [qIdx]: transcript.trim() }));
+                                  };
+                                  recognition.start();
+                                  recognitionRef.current = recognition;
+                                }
                               } catch { /* mic permission denied */ }
                             }
                           }}
@@ -539,6 +566,12 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
                               <CheckCircle className="w-4 h-4 text-primary" />
                               <span className="text-sm text-primary">Yozib olindi</span>
                             </div>
+                            {speakingTranscripts[currentSpeakingQ] && (
+                              <div className="bg-muted/50 rounded-lg p-3">
+                                <p className="text-xs text-muted-foreground mb-1">Transkript:</p>
+                                <p className="text-sm">{speakingTranscripts[currentSpeakingQ]}</p>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
