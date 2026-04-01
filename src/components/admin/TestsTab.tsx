@@ -421,6 +421,13 @@ export const TestsTab = () => {
         onOpenChange={setPdfDialogOpen}
         onSuccess={fetchTests}
       />
+
+      {/* AI Generate Dialog */}
+      <AITestGenerateDialog
+        open={aiDialogOpen}
+        onOpenChange={setAiDialogOpen}
+        onSuccess={fetchTests}
+      />
     </div>
   );
 };
