@@ -566,6 +566,12 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
                               <CheckCircle className="w-4 h-4 text-primary" />
                               <span className="text-sm text-primary">Yozib olindi</span>
                             </div>
+                            {speakingTranscripts[currentSpeakingQ] && (
+                              <div className="bg-muted/50 rounded-lg p-3">
+                                <p className="text-xs text-muted-foreground mb-1">Transkript:</p>
+                                <p className="text-sm">{speakingTranscripts[currentSpeakingQ]}</p>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
