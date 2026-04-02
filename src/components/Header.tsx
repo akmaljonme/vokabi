@@ -253,6 +253,9 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                   <button onClick={() => {navigate('/videos');setIsMenuOpen(false);}} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
                     <Video className="w-4 h-4" /> Video Darslar
                   </button>
+                  <button onClick={() => {navigate('/exams');setIsMenuOpen(false);}} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
+                    <ClipboardList className="w-4 h-4" /> Examlar
+                  </button>
                   <button onClick={() => {navigate('/community');setIsMenuOpen(false);}} className="relative flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
                     <Users className="w-4 h-4" /> Hamjamiyat
                     {unreadCount > 0 &&
