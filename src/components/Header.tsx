@@ -270,6 +270,15 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 {isDark ? <><Sun className="w-4 h-4" /> Light Mode</> : <><Moon className="w-4 h-4" /> Dark Mode</>}
               </button>
 
+              {isAdmin && onToggleAdmin && (
+                <button
+                  onClick={() => { onToggleAdmin(); setIsMenuOpen(false); }}
+                  className="flex items-center gap-2 py-2.5 px-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/15 transition-colors font-medium text-sm"
+                >
+                  <Shield className="w-4 h-4" /> Admin Panel
+                </button>
+              )}
+
               <div className="h-px bg-border my-2" />
 
               {user ?
