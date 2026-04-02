@@ -183,18 +183,30 @@ IMPORTANT RULES:
       });
     }
 
-    // Insert questions
-    const questions = generated.questions.map((q: any, i: number) => ({
-      test_id: testId,
-      question_text: q.question_text,
-      question_type: q.question_type,
-      category: q.category || skill,
-      options: q.options || null,
-      correct_answer: q.correct_answer,
-      explanation: q.explanation || null,
-      points: q.points || 1,
-      order_index: i + 1,
-    }));
+    // Insert questions — enforce DB constraints
+    const validCategories = ['grammar', 'vocabulary', 'reading', 'listening', 'writing', 'speaking'];
+    const validTypes = ['multiple-choice', 'true-false', 'fill-blank', 'matching-headings', 'matching-paragraph', 'matching-features', 'matching-endings', 'list-selection', 'choose-title'];
+
+    const questions = generated.questions.map((q: any, i: number) => {
+      const category = validCategories.includes(q.category) ? q.category : skill;
+      let questionType = q.question_type;
+      if (!validTypes.includes(questionType)) {
+        // Map common AI-generated types to valid ones
+        if (questionType === 'essay' || questionType === 'speaking') questionType = 'fill-blank';
+        else questionType = 'multiple-choice';
+      }
+      return {
+        test_id: testId,
+        question_text: q.question_text,
+        question_type: questionType,
+        category,
+        options: q.options || null,
+        correct_answer: q.correct_answer,
+        explanation: q.explanation || null,
+        points: q.points || 1,
+        order_index: i + 1,
+      };
+    });
 
     const { error: qError } = await adminClient.from("questions").insert(questions);
     if (qError) throw qError;
