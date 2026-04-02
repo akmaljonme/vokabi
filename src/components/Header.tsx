@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, Menu, X, LogOut, User, Shield, Moon, Sun, Sparkles, Gamepad2, Users, MessageCircle, Phone, Video } from 'lucide-react';
+import { ChevronDown, Menu, X, LogOut, User, Shield, Moon, Sun, Sparkles, Gamepad2, Users, MessageCircle, Phone, Video, ClipboardList } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -121,6 +121,12 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5">
                 
                   <Video className="w-3.5 h-3.5" /> Video Darslar
+                </button>
+                <button
+                onClick={() => navigate('/exams')}
+                className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5">
+                
+                  <ClipboardList className="w-3.5 h-3.5" /> Examlar
                 </button>
                 <button
                 onClick={() => navigate('/community')}
@@ -252,6 +258,9 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                   </button>
                   <button onClick={() => {navigate('/videos');setIsMenuOpen(false);}} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
                     <Video className="w-4 h-4" /> Video Darslar
+                  </button>
+                  <button onClick={() => {navigate('/exams');setIsMenuOpen(false);}} className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
+                    <ClipboardList className="w-4 h-4" /> Examlar
                   </button>
                   <button onClick={() => {navigate('/community');setIsMenuOpen(false);}} className="relative flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm">
                     <Users className="w-4 h-4" /> Hamjamiyat
