@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Users, FileText, BarChart3, Settings, 
-  ChevronLeft, ChevronRight, Shield, MessageSquare, Video, X
+  ChevronLeft, ChevronRight, Shield, MessageSquare, Video, X, ClipboardList
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
