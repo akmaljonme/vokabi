@@ -28,6 +28,7 @@ export const AdminDashboard = ({ onExitAdmin }: AdminDashboardProps) => {
       case 'users': return <UsersTab />;
       case 'results': return <ResultsTab />;
       case 'tests': return <TestsTab />;
+      case 'exams': return <ExamsTab />;
       case 'feedbacks': return <FeedbacksTab />;
       case 'videos': return <VideoLessonsTab />;
       case 'settings': return <SettingsTab />;

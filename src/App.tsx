@@ -43,6 +43,7 @@ const App = () => (
               <Route path="/community" element={<Community />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/videos" element={<VideoLessons />} />
+              <Route path="/exams" element={<Exams />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <AITutorChat />

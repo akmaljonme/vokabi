@@ -18,6 +18,7 @@ const menuItems = [
   { id: 'users', label: 'Users', icon: Users },
   { id: 'results', label: 'Results & Analytics', icon: BarChart3 },
   { id: 'tests', label: 'Tests Management', icon: FileText },
+  { id: 'exams', label: 'Exams', icon: ClipboardList },
   { id: 'feedbacks', label: 'Feedbacklar', icon: MessageSquare },
   { id: 'videos', label: 'Video Darslar', icon: Video },
   { id: 'settings', label: 'Settings', icon: Settings },
