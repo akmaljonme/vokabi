@@ -6,6 +6,7 @@ import { UsersTab } from './UsersTab';
 import { ResultsTab } from './ResultsTab';
 import { TestsTab } from './TestsTab';
 import { FeedbacksTab } from './FeedbacksTab';
+import { ExamsTab } from './ExamsTab';
 import { SettingsTab } from './SettingsTab';
 import { VideoLessonsTab } from './VideoLessonsTab';
 import { cn } from '@/lib/utils';
