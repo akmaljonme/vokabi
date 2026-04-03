@@ -72,6 +72,11 @@ const Index = () => {
     setCurrentView('vocabulary');
   }, []);
 
+  // Show onboarding if not completed
+  if (showOnboarding) {
+    return <OnboardingFlow onComplete={() => setShowOnboarding(false)} />;
+  }
+
   // Show admin dashboard if user is admin and toggled
   if (showAdmin && isAdmin) {
     return <AdminDashboard onExitAdmin={() => setShowAdmin(false)} />;
