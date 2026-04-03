@@ -62,7 +62,11 @@ export default {
           b2: "hsl(var(--level-b2))",
           c1: "hsl(var(--level-c1))",
         },
-      },
+        neon: {
+          blue: "hsl(var(--neon-blue))",
+          purple: "hsl(var(--neon-purple))",
+          mint: "hsl(var(--neon-mint))",
+        },
       fontFamily: {
         sans: ['DM Sans', 'system-ui', 'sans-serif'],
         display: ['Space Grotesk', 'system-ui', 'sans-serif'],
