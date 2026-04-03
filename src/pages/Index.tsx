@@ -95,7 +95,19 @@ const Index = () => {
         return (
           <>
             <Header {...headerProps} />
-            <LandingPage onStartTest={() => setCurrentView('levels')} onGoToVocabulary={handleGoToVocabulary} />
+            <LandingPage onStartTest={() => setCurrentView('path')} onGoToVocabulary={handleGoToVocabulary} />
+            <Footer />
+          </>
+        );
+      
+      case 'path':
+        return (
+          <>
+            <Header {...headerProps} />
+            <LearningPathMap 
+              onSelectLevel={handleSelectLevel}
+              onBack={() => handleNavigate('landing')}
+            />
             <Footer />
           </>
         );

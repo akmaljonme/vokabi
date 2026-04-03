@@ -98,4 +98,4 @@ export interface TestResult {
   aiResult?: AIWritingResult | AISpeakingResult;
 }
 
-export type ViewType = 'landing' | 'levels' | 'skills' | 'vocabulary' | 'test' | 'result';
+export type ViewType = 'landing' | 'levels' | 'path' | 'skills' | 'vocabulary' | 'test' | 'result';
