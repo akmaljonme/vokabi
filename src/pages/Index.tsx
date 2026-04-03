@@ -7,7 +7,9 @@ import { SkillSelection } from '@/components/SkillSelection';
 import { TestInterface } from '@/components/TestInterface';
 import { ResultPage } from '@/components/ResultPage';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
+import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useTheme } from '@/contexts/ThemeContext';
 import { CEFRLevel, SkillType, ViewType, TestResult } from '@/types/cefr';
 
 const Index = () => {
