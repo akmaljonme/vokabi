@@ -21,6 +21,8 @@ const Index = () => {
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const { isAdmin } = useUserRole();
+  const { hasCompletedOnboarding } = useTheme();
+  const [showOnboarding, setShowOnboarding] = useState(!hasCompletedOnboarding);
 
   const handleNavigate = useCallback((view: ViewType) => {
     setCurrentView(view);
