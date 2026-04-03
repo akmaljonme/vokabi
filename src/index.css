@@ -69,6 +69,16 @@
     --level-b1: 45 93% 47%;
     --level-b2: 25 95% 53%;
     --level-c1: 358 84% 50%;
+
+    /* Glassmorphism */
+    --glass-bg: 0 0% 100% / 0.6;
+    --glass-border: 0 0% 100% / 0.2;
+    --glass-blur: 20px;
+
+    /* Neon accents */
+    --neon-blue: 217 91% 60%;
+    --neon-purple: 270 76% 55%;
+    --neon-mint: 160 84% 52%;
   }
 
   .dark {
