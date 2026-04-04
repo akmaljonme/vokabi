@@ -588,6 +588,8 @@ export const ExamsTab = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AIExamGenerateDialog open={aiDialogOpen} onOpenChange={setAiDialogOpen} onSuccess={fetchExams} />
     </div>
   );
 };
