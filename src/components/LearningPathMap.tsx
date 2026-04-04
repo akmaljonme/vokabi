@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Check, Star, ArrowLeft, Trophy } from 'lucide-react';
+import { Check, Star, ArrowLeft, Trophy } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { CEFRLevel } from '@/types/cefr';
@@ -43,17 +43,10 @@ export const LearningPathMap = ({ onSelectLevel, onBack }: LearningPathMapProps)
     fetchScores();
   }, [user]);
 
-  const isUnlocked = (index: number): boolean => {
-    if (index === 0) return true;
-    const prevLevel = pathNodes[index - 1].level;
-    return (levelScores[prevLevel] || 0) >= 90;
-  };
-
   const getScore = (level: string) => levelScores[level] || 0;
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 mesh-gradient" />
       <div className="absolute inset-0 dot-pattern opacity-10" />
 
@@ -77,7 +70,7 @@ export const LearningPathMap = ({ onSelectLevel, onBack }: LearningPathMapProps)
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-3 tracking-tight">
             O'quv <span className="text-gradient">yo'lingiz</span>
           </h1>
-          <p className="text-muted-foreground">Har bir daraja uchun 90% ball to'plang</p>
+          <p className="text-muted-foreground">Istalgan darajani tanlang va testlarni boshlang</p>
         </motion.div>
 
         {/* Path Map */}
@@ -86,15 +79,13 @@ export const LearningPathMap = ({ onSelectLevel, onBack }: LearningPathMapProps)
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             {pathNodes.slice(0, -1).map((node, i) => {
               const next = pathNodes[i + 1];
-              const unlocked = isUnlocked(i + 1);
               return (
                 <motion.line
                   key={i}
                   x1={`${node.x}%`} y1={`${node.y}%`}
                   x2={`${next.x}%`} y2={`${next.y}%`}
-                  stroke={unlocked ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground) / 0.2)'}
+                  stroke="hsl(var(--primary))"
                   strokeWidth="0.4"
-                  strokeDasharray={unlocked ? "0" : "2 2"}
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: 1 }}
                   transition={{ duration: 1, delay: i * 0.2 }}
@@ -105,7 +96,6 @@ export const LearningPathMap = ({ onSelectLevel, onBack }: LearningPathMapProps)
 
           {/* Nodes */}
           {pathNodes.map((node, index) => {
-            const unlocked = isUnlocked(index);
             const score = getScore(node.level);
             const completed = score >= 90;
 
@@ -119,30 +109,23 @@ export const LearningPathMap = ({ onSelectLevel, onBack }: LearningPathMapProps)
                 style={{ left: `${node.x}%`, top: `${node.y}%`, transform: 'translate(-50%, -50%)' }}
               >
                 <motion.button
-                  whileHover={unlocked ? { scale: 1.1, y: -5 } : {}}
-                  whileTap={unlocked ? { scale: 0.95 } : {}}
-                  onClick={() => unlocked && onSelectLevel(node.level)}
-                  disabled={!unlocked}
-                  className={`relative group ${!unlocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                  whileHover={{ scale: 1.1, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => onSelectLevel(node.level)}
+                  className="relative group cursor-pointer"
                 >
                   {/* Glow effect */}
-                  {unlocked && (
-                    <motion.div
-                      className={`absolute inset-0 rounded-full bg-gradient-to-br ${node.color} blur-xl opacity-30`}
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                  )}
+                  <motion.div
+                    className={`absolute inset-0 rounded-full bg-gradient-to-br ${node.color} blur-xl opacity-30`}
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
 
                   {/* Node circle */}
                   <div className={`relative w-20 h-20 md:w-24 md:h-24 rounded-full flex flex-col items-center justify-center
-                    ${unlocked 
-                      ? `bg-gradient-to-br ${node.color} text-white shadow-lg` 
-                      : 'bg-muted text-muted-foreground border-2 border-border'}`}
+                    bg-gradient-to-br ${node.color} text-white shadow-lg`}
                   >
-                    {!unlocked ? (
-                      <Lock className="w-6 h-6" />
-                    ) : completed ? (
+                    {completed ? (
                       <>
                         <Check className="w-6 h-6 mb-0.5" />
                         <span className="text-xs font-bold">{score}%</span>
@@ -157,7 +140,7 @@ export const LearningPathMap = ({ onSelectLevel, onBack }: LearningPathMapProps)
 
                   {/* Label */}
                   <div className="text-center mt-2">
-                    <p className={`text-xs font-display font-bold ${unlocked ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    <p className="text-xs font-display font-bold text-foreground">
                       {node.label}
                     </p>
                     {score > 0 && score < 90 && (
@@ -210,10 +193,6 @@ export const LearningPathMap = ({ onSelectLevel, onBack }: LearningPathMapProps)
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-full bg-primary" />
             <span>Ochiq</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Lock className="w-4 h-4" />
-            <span>Qulflangan (90% kerak)</span>
           </div>
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 text-emerald-500" />
