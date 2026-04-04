@@ -56,6 +56,7 @@ export const ExamsTab = () => {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null);
   const [saving, setSaving] = useState(false);
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
 
   // Form state
   const [title, setTitle] = useState('');
