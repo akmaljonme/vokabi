@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, Loader2, Eye, EyeOff, UserPlus, Search, ClipboardList } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, Eye, EyeOff, UserPlus, Search, ClipboardList, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { AIExamGenerateDialog } from './tests/AIExamGenerateDialog';
 
 interface Exam {
   id: string;
@@ -55,6 +56,7 @@ export const ExamsTab = () => {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null);
   const [saving, setSaving] = useState(false);
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -299,9 +301,14 @@ export const ExamsTab = () => {
           <h2 className="text-2xl font-bold">Exam boshqaruvi</h2>
           <p className="text-muted-foreground">Maxsus examlar yarating va foydalanuvchilarga tayinlang</p>
         </div>
-        <Button onClick={() => openForm()}>
-          <Plus className="w-4 h-4 mr-2" /> Yangi exam
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setAiDialogOpen(true)}>
+            <Sparkles className="w-4 h-4 mr-2" /> AI bilan yaratish
+          </Button>
+          <Button onClick={() => openForm()}>
+            <Plus className="w-4 h-4 mr-2" /> Yangi exam
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -581,6 +588,8 @@ export const ExamsTab = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AIExamGenerateDialog open={aiDialogOpen} onOpenChange={setAiDialogOpen} onSuccess={fetchExams} />
     </div>
   );
 };
