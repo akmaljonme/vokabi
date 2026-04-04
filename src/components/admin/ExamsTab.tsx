@@ -301,9 +301,14 @@ export const ExamsTab = () => {
           <h2 className="text-2xl font-bold">Exam boshqaruvi</h2>
           <p className="text-muted-foreground">Maxsus examlar yarating va foydalanuvchilarga tayinlang</p>
         </div>
-        <Button onClick={() => openForm()}>
-          <Plus className="w-4 h-4 mr-2" /> Yangi exam
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setAiDialogOpen(true)}>
+            <Sparkles className="w-4 h-4 mr-2" /> AI bilan yaratish
+          </Button>
+          <Button onClick={() => openForm()}>
+            <Plus className="w-4 h-4 mr-2" /> Yangi exam
+          </Button>
+        </div>
       </div>
 
       {loading ? (
