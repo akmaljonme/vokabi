@@ -10,13 +10,15 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt, skill, level, questionCount, timeLimit } = await req.json();
+    const { prompt, skill, level, questionCount, timeLimit, targetTable } = await req.json();
 
     if (!prompt || !skill || !level) {
       return new Response(JSON.stringify({ error: "prompt, skill, level kerak" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const isExam = targetTable === "exams";
 
     // Auth check
     const authHeader = req.headers.get("Authorization");
@@ -153,72 +155,132 @@ IMPORTANT RULES:
 
     const generated = JSON.parse(toolCall.function.arguments);
 
-    // Save to database
-    const { data: testData, error: testError } = await adminClient
-      .from("tests")
-      .insert({
-        title: generated.title,
-        description: generated.description,
-        level,
-        skill,
-        time_limit: (timeLimit || 30) * 60,
-        is_active: true,
-        randomize_questions: false,
-        created_by: user.id,
-      })
-      .select("id")
-      .single();
-
-    if (testError) throw testError;
-
-    const testId = testData.id;
-
-    // Insert reading passage if exists
-    if (skill === "reading" && generated.readingPassage) {
-      await adminClient.from("reading_passages").insert({
-        test_id: testId,
-        title: generated.readingPassage.title,
-        content: generated.readingPassage.content,
-        order_index: 1,
-      });
-    }
-
-    // Insert questions — enforce DB constraints
-    const validCategories = ['grammar', 'vocabulary', 'reading', 'listening', 'writing', 'speaking'];
     const validTypes = ['multiple-choice', 'true-false', 'fill-blank', 'matching-headings', 'matching-paragraph', 'matching-features', 'matching-endings', 'list-selection', 'choose-title'];
 
-    const questions = generated.questions.map((q: any, i: number) => {
-      const category = validCategories.includes(q.category) ? q.category : skill;
-      let questionType = q.question_type;
-      if (!validTypes.includes(questionType)) {
-        // Map common AI-generated types to valid ones
-        if (questionType === 'essay' || questionType === 'speaking') questionType = 'fill-blank';
-        else questionType = 'multiple-choice';
+    if (isExam) {
+      // Save to exams table
+      const { data: examData, error: examError } = await adminClient
+        .from("exams")
+        .insert({
+          title: generated.title,
+          description: generated.description,
+          level,
+          skill,
+          time_limit: (timeLimit || 30) * 60,
+          is_active: false,
+          max_attempts: 1,
+          created_by: user.id,
+        })
+        .select("id")
+        .single();
+
+      if (examError) throw examError;
+      const examId = examData.id;
+
+      // Insert reading passage if exists
+      if (skill === "reading" && generated.readingPassage) {
+        await adminClient.from("exam_reading_passages").insert({
+          exam_id: examId,
+          title: generated.readingPassage.title,
+          content: generated.readingPassage.content,
+          order_index: 1,
+        });
       }
-      return {
-        test_id: testId,
-        question_text: q.question_text,
-        question_type: questionType,
-        category,
-        options: q.options || null,
-        correct_answer: q.correct_answer,
-        explanation: q.explanation || null,
-        points: q.points || 1,
-        order_index: i + 1,
-      };
-    });
 
-    const { error: qError } = await adminClient.from("questions").insert(questions);
-    if (qError) throw qError;
+      // Insert exam questions
+      const questions = generated.questions.map((q: any, i: number) => {
+        let questionType = q.question_type;
+        if (!validTypes.includes(questionType)) {
+          if (questionType === 'essay' || questionType === 'speaking') questionType = 'fill-blank';
+          else questionType = 'multiple-choice';
+        }
+        return {
+          exam_id: examId,
+          question_text: q.question_text,
+          question_type: questionType,
+          options: q.options || null,
+          correct_answer: q.correct_answer,
+          explanation: q.explanation || null,
+          points: q.points || 1,
+          order_index: i + 1,
+        };
+      });
 
-    return new Response(JSON.stringify({
-      success: true,
-      testId,
-      title: generated.title,
-      questionCount: questions.length,
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+      const { error: qError } = await adminClient.from("exam_questions").insert(questions);
+      if (qError) throw qError;
+
+      return new Response(JSON.stringify({
+        success: true,
+        testId: examId,
+        title: generated.title,
+        questionCount: questions.length,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    } else {
+      // Save to tests table (original behavior)
+      const { data: testData, error: testError } = await adminClient
+        .from("tests")
+        .insert({
+          title: generated.title,
+          description: generated.description,
+          level,
+          skill,
+          time_limit: (timeLimit || 30) * 60,
+          is_active: true,
+          randomize_questions: false,
+          created_by: user.id,
+        })
+        .select("id")
+        .single();
+
+      if (testError) throw testError;
+      const testId = testData.id;
+
+      // Insert reading passage if exists
+      if (skill === "reading" && generated.readingPassage) {
+        await adminClient.from("reading_passages").insert({
+          test_id: testId,
+          title: generated.readingPassage.title,
+          content: generated.readingPassage.content,
+          order_index: 1,
+        });
+      }
+
+      // Insert questions
+      const validCategories = ['grammar', 'vocabulary', 'reading', 'listening', 'writing', 'speaking'];
+      const questions = generated.questions.map((q: any, i: number) => {
+        const category = validCategories.includes(q.category) ? q.category : skill;
+        let questionType = q.question_type;
+        if (!validTypes.includes(questionType)) {
+          if (questionType === 'essay' || questionType === 'speaking') questionType = 'fill-blank';
+          else questionType = 'multiple-choice';
+        }
+        return {
+          test_id: testId,
+          question_text: q.question_text,
+          question_type: questionType,
+          category,
+          options: q.options || null,
+          correct_answer: q.correct_answer,
+          explanation: q.explanation || null,
+          points: q.points || 1,
+          order_index: i + 1,
+        };
+      });
+
+      const { error: qError } = await adminClient.from("questions").insert(questions);
+      if (qError) throw qError;
+
+      return new Response(JSON.stringify({
+        success: true,
+        testId,
+        title: generated.title,
+        questionCount: questions.length,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
   } catch (e) {
     console.error("generate-test error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
