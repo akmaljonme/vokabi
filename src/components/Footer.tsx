@@ -19,10 +19,12 @@ export const Footer = () => {
               IELTS va CEFR imtihonlariga professional tayyorgarlik platformasi. Bilimingizni sinang va rivojlantiring.
             </p>
             <div className="flex gap-3">
-              {['facebook', 'twitter', 'instagram', 'youtube'].map((s) => <a key={s} className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center hover:bg-primary transition-colors text-xs font-bold uppercase tracking-wider" href="#">
-                  {s[0]}
-                </a>
-              )}
+              <a href="https://t.me/vokabi" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center hover:bg-primary transition-colors text-xs font-bold" title="Telegram kanal">
+                📢
+              </a>
+              <a href="https://t.me/vokabi_bot" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center hover:bg-primary transition-colors text-xs font-bold" title="Telegram bot">
+                🤖
+              </a>
             </div>
           </div>
 
@@ -53,11 +55,21 @@ export const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-primary" />
-                <span className="text-secondary-foreground/50 text-sm">​akmalkarimboyev529@gmail.com</span>
+                <span className="text-secondary-foreground/50 text-sm">akmalkarimboyev529@gmail.com</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-primary" />
                 <span className="text-secondary-foreground/50 text-sm">+998 92 198 1401</span>
+              </li>
+              <li>
+                <a href="https://t.me/vokabi" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-secondary-foreground/50 hover:text-primary transition-colors text-sm">
+                  📢 Telegram kanal
+                </a>
+              </li>
+              <li>
+                <a href="https://t.me/vokabi_bot" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-secondary-foreground/50 hover:text-primary transition-colors text-sm">
+                  🤖 Telegram bot — Pro olish
+                </a>
               </li>
             </ul>
           </div>

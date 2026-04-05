@@ -227,7 +227,9 @@ const StandardResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
             <p className="text-sm text-muted-foreground mb-1">
               AI tahlil, video tavsiyalar, sertifikat yuklab olish va cheksiz testlar
             </p>
-            <p className="text-xs text-muted-foreground">Admin bilan bog'laning Pro olish uchun</p>
+            <a href="https://t.me/vokabi_bot" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-3 px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
+              📩 Adminga yozish (@vokabi_bot)
+            </a>
           </motion.div>
         )}
 
