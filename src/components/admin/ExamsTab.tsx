@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, Loader2, Eye, EyeOff, UserPlus, Search, ClipboardList, Sparkles } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, Eye, EyeOff, ClipboardList, Sparkles, Copy, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,8 +23,8 @@ interface Exam {
   max_attempts: number;
   is_active: boolean;
   created_at: string;
+  access_code: string | null;
   question_count?: number;
-  assigned_count?: number;
 }
 
 interface ExamQuestion {
@@ -45,12 +45,18 @@ const skills = [
 ];
 const levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
+const generateCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+};
+
 export const ExamsTab = () => {
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [assignOpen, setAssignOpen] = useState(false);
   const [questionsOpen, setQuestionsOpen] = useState(false);
   const [questionFormOpen, setQuestionFormOpen] = useState(false);
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
@@ -65,12 +71,7 @@ export const ExamsTab = () => {
   const [level, setLevel] = useState('B1');
   const [timeLimit, setTimeLimit] = useState(30);
   const [maxAttempts, setMaxAttempts] = useState(1);
-
-  // Assign state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [assignedUsers, setAssignedUsers] = useState<any[]>([]);
-  const [searching, setSearching] = useState(false);
+  const [accessCode, setAccessCode] = useState('');
 
   // Question form state
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
@@ -92,8 +93,7 @@ export const ExamsTab = () => {
       const withCounts = await Promise.all(
         ((data || []) as Exam[]).map(async (exam) => {
           const { count: qCount } = await (supabase.from('exam_questions' as any).select('*', { count: 'exact', head: true }).eq('exam_id', exam.id) as any);
-          const { count: aCount } = await (supabase.from('exam_user_assignments' as any).select('*', { count: 'exact', head: true }).eq('exam_id', exam.id) as any);
-          return { ...exam, question_count: qCount || 0, assigned_count: aCount || 0 };
+          return { ...exam, question_count: qCount || 0 };
         })
       );
       setExams(withCounts);
@@ -114,22 +114,25 @@ export const ExamsTab = () => {
       setLevel(exam.level);
       setTimeLimit(exam.time_limit / 60);
       setMaxAttempts(exam.max_attempts);
+      setAccessCode(exam.access_code || '');
     } else {
       setSelectedExam(null);
       setTitle(''); setDescription(''); setSkill('grammar'); setLevel('B1');
-      setTimeLimit(30); setMaxAttempts(1);
+      setTimeLimit(30); setMaxAttempts(1); setAccessCode(generateCode());
     }
     setFormOpen(true);
   };
 
   const handleSave = async () => {
     if (!title.trim()) { toast.error("Sarlavha kiriting"); return; }
+    if (!accessCode.trim()) { toast.error("Kirish kodi kiriting"); return; }
     setSaving(true);
     try {
       const payload = {
         title, description: description || null, skill, level,
         time_limit: timeLimit * 60, max_attempts: maxAttempts,
         is_active: selectedExam?.is_active ?? false,
+        access_code: accessCode.trim().toUpperCase(),
       };
       if (selectedExam) {
         const { error } = await (supabase.from('exams' as any).update(payload).eq('id', selectedExam.id) as any);
@@ -175,54 +178,9 @@ export const ExamsTab = () => {
     }
   };
 
-  // === Assign users ===
-  const openAssign = async (exam: Exam) => {
-    setSelectedExam(exam);
-    setSearchQuery('');
-    setSearchResults([]);
-    setAssignOpen(true);
-    // Load assigned users
-    const { data } = await (supabase.from('exam_user_assignments' as any).select('user_id').eq('exam_id', exam.id) as any);
-    const userIds = (data || []).map((d: any) => d.user_id);
-    if (userIds.length > 0) {
-      const { data: profiles } = await (supabase.from('profiles' as any).select('user_id, full_name, username').in('user_id', userIds) as any);
-      setAssignedUsers(profiles || []);
-    } else {
-      setAssignedUsers([]);
-    }
-  };
-
-  const searchUsers = async (q: string) => {
-    setSearchQuery(q);
-    if (q.length < 2) { setSearchResults([]); return; }
-    setSearching(true);
-    const { data } = await (supabase.from('profiles' as any).select('user_id, full_name, username').or(`full_name.ilike.%${q}%,username.ilike.%${q}%`).limit(10) as any);
-    setSearchResults(data || []);
-    setSearching(false);
-  };
-
-  const assignUser = async (userId: string) => {
-    if (!selectedExam) return;
-    try {
-      const { error } = await (supabase.from('exam_user_assignments' as any).insert({ exam_id: selectedExam.id, user_id: userId }) as any);
-      if (error) {
-        if (error.code === '23505') { toast.info("Bu foydalanuvchi allaqachon tayinlangan"); return; }
-        throw error;
-      }
-      toast.success("Foydalanuvchi tayinlandi");
-      openAssign(selectedExam);
-      fetchExams();
-    } catch (e: any) {
-      toast.error(e.message);
-    }
-  };
-
-  const unassignUser = async (userId: string) => {
-    if (!selectedExam) return;
-    await (supabase.from('exam_user_assignments' as any).delete().eq('exam_id', selectedExam.id).eq('user_id', userId) as any);
-    toast.success("Foydalanuvchi olib tashlandi");
-    openAssign(selectedExam);
-    fetchExams();
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast.success("Kod nusxalandi");
   };
 
   // === Questions ===
@@ -299,7 +257,7 @@ export const ExamsTab = () => {
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div>
           <h2 className="text-2xl font-bold">Exam boshqaruvi</h2>
-          <p className="text-muted-foreground">Maxsus examlar yarating va foydalanuvchilarga tayinlang</p>
+          <p className="text-muted-foreground">Examlar yarating va kirish kodini talabalaringizga bering</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setAiDialogOpen(true)}>
@@ -339,20 +297,26 @@ export const ExamsTab = () => {
                 </Badge>
               </div>
 
+              {exam.access_code && (
+                <div className="flex items-center gap-2 mb-3 p-2 rounded-lg bg-muted/50">
+                  <span className="text-xs text-muted-foreground">Kod:</span>
+                  <code className="font-mono font-bold text-sm tracking-widest">{exam.access_code}</code>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" onClick={() => copyCode(exam.access_code!)}>
+                    <Copy className="w-3 h-3" />
+                  </Button>
+                </div>
+              )}
+
               {exam.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{exam.description}</p>}
 
               <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
                 <span>{exam.time_limit / 60} daqiqa</span>
                 <span>{exam.max_attempts} urinish</span>
-                <span>{exam.assigned_count} talaba</span>
               </div>
 
               <div className="flex gap-1 border-t pt-3">
                 <Button variant="ghost" size="sm" onClick={() => openQuestions(exam)}>
                   <ClipboardList className="w-4 h-4 mr-1" /> Savollar
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => openAssign(exam)}>
-                  <UserPlus className="w-4 h-4 mr-1" /> Tayinlash
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleActive(exam)}>
                   {exam.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -383,6 +347,22 @@ export const ExamsTab = () => {
             <div className="space-y-2">
               <Label>Tavsif</Label>
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+            </div>
+            <div className="space-y-2">
+              <Label>Kirish kodi *</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={accessCode}
+                  onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                  placeholder="ABCD12"
+                  className="font-mono tracking-widest"
+                  maxLength={8}
+                />
+                <Button variant="outline" size="icon" onClick={() => setAccessCode(generateCode())} type="button">
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Bu kodni talabalaringizga bering. Ular examga kirish uchun shu kodni kiritishlari kerak.</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -442,55 +422,6 @@ export const ExamsTab = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Assign Users Dialog */}
-      <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Foydalanuvchilarni tayinlash</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Ism yoki username bo'yicha qidiring..."
-                value={searchQuery}
-                onChange={(e) => searchUsers(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {searchResults.length > 0 && (
-              <div className="border rounded-lg max-h-40 overflow-y-auto">
-                {searchResults.map((u) => (
-                  <button
-                    key={u.user_id}
-                    onClick={() => assignUser(u.user_id)}
-                    className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted transition-colors text-sm"
-                  >
-                    <span>{u.full_name || u.username || 'Nomsiz'}</span>
-                    <Plus className="w-4 h-4 text-primary" />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <div>
-              <Label className="text-xs text-muted-foreground">Tayinlangan ({assignedUsers.length})</Label>
-              <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
-                {assignedUsers.map((u) => (
-                  <div key={u.user_id} className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg text-sm">
-                    <span>{u.full_name || u.username || 'Nomsiz'}</span>
-                    <Button variant="ghost" size="sm" className="h-7 text-destructive" onClick={() => unassignUser(u.user_id)}>
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Questions Dialog */}
       <Dialog open={questionsOpen} onOpenChange={setQuestionsOpen}>
