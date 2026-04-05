@@ -547,14 +547,16 @@ export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps)
                     </li>
                   ))}
                 </ul>
-                <motion.button
+                <motion.a
+                  href="https://t.me/vokabi_bot"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={handleStartTest}
-                  className="w-full btn-primary py-3 text-sm shadow-glow"
+                  className="w-full btn-primary py-3 text-sm shadow-glow block text-center"
                 >
-                  Pro olish uchun bog'laning
-                </motion.button>
+                  📩 Adminga yozish (@vokabi_bot)
+                </motion.a>
               </Card3D>
             </FadeUp>
           </div>
@@ -638,7 +640,7 @@ export const LandingPage = ({ onStartTest, onGoToVocabulary }: LandingPageProps)
               { q: 'CEFR nima?', a: "CEFR — tillarni bilish darajasini belgilovchi xalqaro standart. A1 dan C2 gacha 6 ta daraja mavjud. Bizning platformamiz A1 dan C1 gacha testlarni qamrab oladi." },
               { q: 'Qanday turdagi testlar mavjud?', a: "6 xil test turi mavjud: Lug'at, Grammatika, Reading, Listening, Writing va Speaking. Har biri A1-C1 darajalar uchun tayyorlangan." },
               { q: 'Pro versiya nimalar beradi?', a: "Pro versiya cheksiz testlar, AI tahlil va feedback, writing/speaking AI baholash, video tavsiyalar, sertifikat yuklab olish va batafsil statistikani o'z ichiga oladi." },
-              { q: "Pro qanday olsa bo'ladi?", a: 'Pro versiya admin tomonidan tayinlanadi. Pro olish uchun biz bilan bog\'laning.' },
+              { q: "Pro qanday olsa bo'ladi?", a: 'Pro versiya admin tomonidan tayinlanadi. Pro olish uchun Telegram botimizga yozing: @vokabi_bot' },
               { q: 'AI tahlil qanday ishlaydi?', a: "Sun'iy intellekt natijalaringizni tahlil qilib, zaif tomonlaringizni aniqlaydi, video tavsiyalar beradi va shaxsiy o'quv reja tuzadi." },
               { q: 'Har bir test qancha vaqt oladi?', a: "Har bir test 30 daqiqaga mo'ljallangan — haqiqiy CEFR imtihon bo'limlari kabi. Test davomida sahifa fullscreen rejimda bo'ladi." },
             ].map((faq, index) => (
