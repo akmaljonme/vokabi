@@ -159,6 +159,10 @@ IMPORTANT RULES:
 
     if (isExam) {
       // Save to exams table
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let accessCode = '';
+      for (let i = 0; i < 6; i++) accessCode += chars[Math.floor(Math.random() * chars.length)];
+
       const { data: examData, error: examError } = await adminClient
         .from("exams")
         .insert({
@@ -170,6 +174,7 @@ IMPORTANT RULES:
           is_active: false,
           max_attempts: 1,
           created_by: user.id,
+          access_code: accessCode,
         })
         .select("id")
         .single();
