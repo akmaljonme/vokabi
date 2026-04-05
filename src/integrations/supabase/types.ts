@@ -627,6 +627,7 @@ export type Database = {
       }
       exams: {
         Row: {
+          access_code: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -640,6 +641,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_code?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -653,6 +655,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_code?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null

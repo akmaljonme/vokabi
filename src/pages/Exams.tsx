@@ -7,9 +7,11 @@ import { Footer } from '@/components/Footer';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, ClipboardList, Clock, Target, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Loader2, ClipboardList, Clock, Target, ArrowLeft, Lock, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 import { ExamInterface } from '@/components/ExamInterface';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 interface ExamData {
   id: string;
@@ -20,6 +22,7 @@ interface ExamData {
   time_limit: number;
   max_attempts: number;
   is_active: boolean;
+  access_code: string | null;
   question_count?: number;
   attempts_used?: number;
 }
@@ -30,33 +33,23 @@ const Exams = () => {
   const [exams, setExams] = useState<ExamData[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeExam, setActiveExam] = useState<ExamData | null>(null);
+  const [codeDialogExam, setCodeDialogExam] = useState<ExamData | null>(null);
+  const [enteredCode, setEnteredCode] = useState('');
 
   useEffect(() => {
     if (!user) { navigate('/auth'); return; }
-    fetchMyExams();
+    fetchExams();
   }, [user]);
 
-  const fetchMyExams = async () => {
+  const fetchExams = async () => {
     if (!user) return;
     try {
-      // Get assigned exam IDs
-      const { data: assignments } = await (supabase
-        .from('exam_user_assignments' as any)
-        .select('exam_id')
-        .eq('user_id', user.id) as any);
-
-      if (!assignments || assignments.length === 0) { setExams([]); setLoading(false); return; }
-
-      const examIds = assignments.map((a: any) => a.exam_id);
-
-      // Get exam details
       const { data: examData } = await (supabase
         .from('exams' as any)
         .select('*')
-        .in('id', examIds)
-        .eq('is_active', true) as any);
+        .eq('is_active', true)
+        .order('created_at', { ascending: false }) as any);
 
-      // Get attempts and question counts for each exam
       const enriched = await Promise.all(
         ((examData || []) as ExamData[]).map(async (exam) => {
           const { count: qCount } = await (supabase
@@ -81,7 +74,7 @@ const Exams = () => {
     }
   };
 
-  const startExam = (exam: ExamData) => {
+  const handleExamClick = (exam: ExamData) => {
     if ((exam.attempts_used || 0) >= exam.max_attempts) {
       toast.error("Urinishlar tugadi");
       return;
@@ -90,7 +83,19 @@ const Exams = () => {
       toast.error("Bu examda savollar yo'q");
       return;
     }
-    setActiveExam(exam);
+    setCodeDialogExam(exam);
+    setEnteredCode('');
+  };
+
+  const verifyCode = () => {
+    if (!codeDialogExam) return;
+    if (enteredCode.trim().toUpperCase() === (codeDialogExam.access_code || '').toUpperCase()) {
+      setActiveExam(codeDialogExam);
+      setCodeDialogExam(null);
+      setEnteredCode('');
+    } else {
+      toast.error("Kod noto'g'ri!");
+    }
   };
 
   if (activeExam) {
@@ -99,7 +104,7 @@ const Exams = () => {
         exam={activeExam}
         onFinish={() => {
           setActiveExam(null);
-          fetchMyExams();
+          fetchExams();
         }}
         onBack={() => setActiveExam(null)}
       />
@@ -125,8 +130,8 @@ const Exams = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Mening examlarim</h1>
-            <p className="text-muted-foreground text-sm">Sizga tayinlangan examlar</p>
+            <h1 className="text-2xl font-bold">Examlar</h1>
+            <p className="text-muted-foreground text-sm">Examga kirish uchun o'qituvchingiz bergan kodni kiriting</p>
           </div>
         </div>
 
@@ -138,7 +143,7 @@ const Exams = () => {
           <Card className="p-12 text-center">
             <ClipboardList className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h3 className="font-semibold text-lg mb-2">Examlar topilmadi</h3>
-            <p className="text-muted-foreground text-sm">Sizga hali exam tayinlanmagan</p>
+            <p className="text-muted-foreground text-sm">Hozircha faol examlar yo'q</p>
           </Card>
         ) : (
           <div className="grid gap-4">
@@ -164,18 +169,19 @@ const Exams = () => {
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {exam.time_limit / 60} daqiqa</span>
                         <span className="flex items-center gap-1"><Target className="w-3.5 h-3.5" /> {exam.question_count} savol</span>
-                        <span className={`flex items-center gap-1 ${canAttempt ? '' : 'text-destructive'}`}>
-                          {canAttempt ? <CheckCircle className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                        <span className="flex items-center gap-1">
+                          <Lock className="w-3.5 h-3.5" />
                           {attemptsLeft}/{exam.max_attempts} urinish qoldi
                         </span>
                       </div>
                     </div>
                     <Button
-                      onClick={() => startExam(exam)}
+                      onClick={() => handleExamClick(exam)}
                       disabled={!canAttempt}
                       className="shrink-0"
                     >
-                      {canAttempt ? 'Boshlash' : 'Tugagan'}
+                      <KeyRound className="w-4 h-4 mr-2" />
+                      {canAttempt ? 'Kirish' : 'Tugagan'}
                     </Button>
                   </div>
                 </Card>
@@ -185,6 +191,38 @@ const Exams = () => {
         )}
       </div>
       <Footer />
+
+      {/* Access Code Dialog */}
+      <Dialog open={!!codeDialogExam} onOpenChange={(open) => { if (!open) setCodeDialogExam(null); }}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5" />
+              Kirish kodini kiriting
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              <strong>{codeDialogExam?.title}</strong> examiga kirish uchun o'qituvchingiz bergan kodni kiriting.
+            </p>
+            <Input
+              value={enteredCode}
+              onChange={(e) => setEnteredCode(e.target.value.toUpperCase())}
+              placeholder="Masalan: ABC123"
+              className="font-mono text-center text-lg tracking-[0.3em]"
+              maxLength={8}
+              onKeyDown={(e) => { if (e.key === 'Enter') verifyCode(); }}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCodeDialogExam(null)}>Bekor</Button>
+            <Button onClick={verifyCode} disabled={!enteredCode.trim()}>
+              Kirish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
