@@ -1,5 +1,5 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as DefaultToaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -9,8 +9,10 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AITutorChat } from "@/components/AITutorChat";
 import { useDMNotifications } from "@/hooks/useDMNotifications";
 import { GlobalCallOverlay } from "@/components/community/GlobalCallOverlay";
+
+// Pages
 import Index from "./pages/Index";
-import AuthLayout from '@/components/AuthLayout';
+import Auth from "./pages/Auth"; // Fixed missing import
 import Dashboard from "./pages/Dashboard";
 import ProfileSettings from "./pages/ProfileSettings";
 import Games from "./pages/Games";
@@ -33,8 +35,11 @@ const App = () => (
       <CallProvider>
         <ThemeProvider>
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
+            {/* Toast Notifications */}
+            <DefaultToaster />
+            <SonnerToaster />
+
+            {/* Router */}
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -48,6 +53,8 @@ const App = () => (
                 <Route path="/exams" element={<Exams />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+
+              {/* Global Components */}
               <AITutorChat />
               <GlobalListeners />
               <GlobalCallOverlay />
