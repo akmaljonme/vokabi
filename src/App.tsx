@@ -10,7 +10,7 @@ import { AITutorChat } from "@/components/AITutorChat";
 import { useDMNotifications } from "@/hooks/useDMNotifications";
 import { GlobalCallOverlay } from "@/components/community/GlobalCallOverlay";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
+import AuthLayout from '@/components/AuthLayout';
 import Dashboard from "./pages/Dashboard";
 import ProfileSettings from "./pages/ProfileSettings";
 import Games from "./pages/Games";
