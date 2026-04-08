@@ -1,24 +1,30 @@
-import { ArrowLeft, MessageCircle, Users } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChatRooms } from '@/components/community/ChatRooms';
-import { DirectMessages } from '@/components/community/DirectMessages';
+import { ArrowLeft, MessageCircle, Users } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChatRooms } from "@/components/community/ChatRooms";
+import { DirectMessages } from "@/components/community/DirectMessages";
 
 export default function Community() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const dmUserId = searchParams.get('dm');
-  const defaultTab = dmUserId ? 'dm' : 'rooms';
+  const dmUserId = searchParams.get("dm");
+  const defaultTab = dmUserId ? "dm" : "rooms";
 
-  if (!user) { navigate('/auth'); return null; }
+  if (!user) {
+    navigate("/login");
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center gap-4">
-          <button onClick={() => navigate('/')} className="p-2 rounded-xl hover:bg-muted transition-colors">
+          <button
+            onClick={() => navigate("/")}
+            className="p-2 rounded-xl hover:bg-muted transition-colors"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <Users className="w-5 h-5 text-primary" />
@@ -36,8 +42,12 @@ export default function Community() {
               <Users className="w-4 h-4" /> Shaxsiy xabarlar
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="rooms"><ChatRooms /></TabsContent>
-          <TabsContent value="dm"><DirectMessages openUserId={dmUserId} /></TabsContent>
+          <TabsContent value="rooms">
+            <ChatRooms />
+          </TabsContent>
+          <TabsContent value="dm">
+            <DirectMessages openUserId={dmUserId} />
+          </TabsContent>
         </Tabs>
       </main>
     </div>

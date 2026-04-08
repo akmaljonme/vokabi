@@ -286,7 +286,7 @@ export const LandingPage = ({
 
   const handleStartTest = () => {
     if (user) onStartTest();
-    else navigate("/auth");
+    else navigate("/login");
   };
 
   const fireConfetti = useCallback(() => {
@@ -554,7 +554,7 @@ export const LandingPage = ({
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => navigate(user ? "/games" : "/auth")}
+                onClick={() => navigate(user ? "/games" : "/login")}
                 className="btn-outline flex items-center gap-2.5 text-base px-8 py-4"
               >
                 <Gamepad2 className="w-4 h-4" />
@@ -680,7 +680,7 @@ export const LandingPage = ({
                 <motion.div
                   whileHover={{ scale: 1.08, y: -4 }}
                   className="px-4 py-2.5 rounded-2xl border border-border bg-card text-sm font-medium hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer"
-                  onClick={() => navigate(user ? "/games" : "/auth")}
+                  onClick={() => navigate(user ? "/games" : "/login")}
                 >
                   {game}
                 </motion.div>
@@ -692,7 +692,7 @@ export const LandingPage = ({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate(user ? "/games" : "/auth")}
+              onClick={() => navigate(user ? "/games" : "/login")}
               className="btn-primary px-8 py-3 text-sm shadow-glow"
             >
               <Gamepad2 className="w-4 h-4 mr-2 inline" /> Barcha o'yinlarni
