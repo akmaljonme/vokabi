@@ -10,8 +10,7 @@ import { AITutorChat } from "@/components/AITutorChat";
 import { useDMNotifications } from "@/hooks/useDMNotifications";
 import { GlobalCallOverlay } from "@/components/community/GlobalCallOverlay";
 import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import AuthLayout from '@/components/AuthLayout';
 import Dashboard from "./pages/Dashboard";
 import ProfileSettings from "./pages/ProfileSettings";
 import Games from "./pages/Games";
@@ -39,8 +38,7 @@ const App = () => (
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+                <Route path="/auth" element={<Auth />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<ProfileSettings />} />
                 <Route path="/games" element={<Games />} />
