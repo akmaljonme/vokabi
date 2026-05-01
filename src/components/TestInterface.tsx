@@ -555,133 +555,21 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
 
             {/* Speaking Interface - Multi-question */}
             {isSpeaking && mockTest && mockTest.parts[0] && (
-              <div className="max-w-2xl mx-auto">
-                {(() => {
-                  const speakingQuestions = mockTest.parts[0].questions;
-                  const currentQ = speakingQuestions[currentSpeakingQ];
-                  if (!currentQ) return null;
-                  const recording = speakingRecordings[currentSpeakingQ];
-                  
-                  return (
-                    <div>
-                      <div className="flex items-center justify-between mb-6">
-                        <Badge variant="secondary">Savol {currentSpeakingQ + 1} / {speakingQuestions.length}</Badge>
-                        <div className="flex gap-2">
-                          {speakingQuestions.map((_, i) => (
-                            <button
-                              key={i}
-                              onClick={() => setCurrentSpeakingQ(i)}
-                              className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${
-                                i === currentSpeakingQ ? 'bg-primary text-primary-foreground' :
-                                speakingRecordings[i] ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
-                              }`}
-                            >
-                              {i + 1}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="bg-muted/50 rounded-xl border border-border p-6 mb-8 text-center">
-                        <p className="text-lg font-medium">{currentQ.question}</p>
-                      </div>
-
-                      <div className="flex flex-col items-center gap-6">
-                        <button
-                          onClick={async () => {
-                            if (isRecording) {
-                              mediaRecorderRef.current?.stop();
-                              if (recognitionRef.current) {
-                                recognitionRef.current.stop();
-                                recognitionRef.current = null;
-                              }
-                              setIsRecording(false);
-                            } else {
-                              try {
-                                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                                const recorder = new MediaRecorder(stream);
-                                mediaRecorderRef.current = recorder;
-                                chunksRef.current = [];
-                                recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
-                                recorder.onstop = () => {
-                                  const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-                                  const url = URL.createObjectURL(blob);
-                                  setSpeakingRecordings(prev => ({ ...prev, [currentSpeakingQ]: { blob, url } }));
-                                  stream.getTracks().forEach(t => t.stop());
-                                };
-                                recorder.start();
-                                setIsRecording(true);
-
-                                // Start speech recognition for transcript
-                                const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                                if (SpeechRecognition) {
-                                  const recognition = new SpeechRecognition();
-                                  recognition.continuous = true;
-                                  recognition.interimResults = false;
-                                  recognition.lang = 'en-US';
-                                  let transcript = '';
-                                  recognition.onresult = (event: any) => {
-                                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                                      if (event.results[i].isFinal) {
-                                        transcript += event.results[i][0].transcript + ' ';
-                                      }
-                                    }
-                                    const qIdx = currentSpeakingQ;
-                                    setSpeakingTranscripts(prev => ({ ...prev, [qIdx]: transcript.trim() }));
-                                  };
-                                  recognition.start();
-                                  recognitionRef.current = recognition;
-                                }
-                              } catch { /* mic permission denied */ }
-                            }
-                          }}
-                          className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
-                            isRecording
-                              ? 'bg-destructive text-destructive-foreground animate-pulse'
-                              : 'bg-primary text-primary-foreground hover:opacity-90'
-                          }`}
-                        >
-                          {isRecording ? <MicOff className="w-10 h-10" /> : <Mic className="w-10 h-10" />}
-                        </button>
-                        <p className="text-sm text-muted-foreground">
-                          {isRecording ? 'Yozib olinmoqda... To\'xtatish uchun bosing' : 'Gapirish uchun bosing'}
-                        </p>
-                        {recording && (
-                          <div className="w-full space-y-3">
-                            <audio src={recording.url} controls className="w-full" />
-                            <div className="flex items-center justify-center gap-2">
-                              <CheckCircle className="w-4 h-4 text-primary" />
-                              <span className="text-sm text-primary">Yozib olindi</span>
-                            </div>
-                            {speakingTranscripts[currentSpeakingQ] && (
-                              <div className="bg-muted/50 rounded-lg p-3">
-                                <p className="text-xs text-muted-foreground mb-1">Transkript:</p>
-                                <p className="text-sm">{speakingTranscripts[currentSpeakingQ]}</p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Navigation */}
-                      <div className="flex justify-between mt-8">
-                        <Button variant="outline" disabled={currentSpeakingQ === 0} onClick={() => setCurrentSpeakingQ(i => i - 1)}>
-                          <ArrowLeft className="w-4 h-4 mr-1" /> Oldingi
-                        </Button>
-                        {currentSpeakingQ < speakingQuestions.length - 1 ? (
-                          <Button onClick={() => setCurrentSpeakingQ(i => i + 1)}>
-                            Keyingi <ArrowRight className="w-4 h-4 ml-1" />
-                          </Button>
-                        ) : (
-                          <Button onClick={() => setShowConfirmFinish(true)} disabled={Object.keys(speakingRecordings).length === 0}>
-                            <Send className="w-4 h-4 mr-1" /> Tugatish
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
+              <SpeakingPanel
+                questions={mockTest.parts[0].questions}
+                currentIdx={currentSpeakingQ}
+                setCurrentIdx={setCurrentSpeakingQ}
+                isRecording={isRecording}
+                setIsRecording={setIsRecording}
+                recordings={speakingRecordings}
+                setRecordings={setSpeakingRecordings}
+                transcripts={speakingTranscripts}
+                setTranscripts={setSpeakingTranscripts}
+                mediaRecorderRef={mediaRecorderRef}
+                chunksRef={chunksRef}
+                recognitionRef={recognitionRef}
+                onFinish={() => setShowConfirmFinish(true)}
+              />
             )}
 
             {/* Standard question-based interface */}
