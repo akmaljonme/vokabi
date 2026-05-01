@@ -48,6 +48,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+let __isMobileGlobal = false;
 
 interface LandingPageProps {
   onStartTest: () => void;
@@ -133,6 +136,7 @@ const Card3D = ({
   const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (__isMobileGlobal) return;
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
@@ -171,9 +175,11 @@ const Card3D = ({
 };
 
 /* ─── Floating particles ─── */
-const FloatingParticles = () => (
+const FloatingParticles = () => {
+  if (__isMobileGlobal) return null;
+  return (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {Array.from({ length: 25 }).map((_, i) => (
+    {Array.from({ length: 12 }).map((_, i) => (
       <motion.div
         key={i}
         className="absolute rounded-full"
@@ -198,7 +204,8 @@ const FloatingParticles = () => (
       />
     ))}
   </div>
-);
+  );
+};
 
 /* ─── Marquee ticker ─── */
 const MarqueeTicker = ({
@@ -235,6 +242,10 @@ export const LandingPage = ({
 }: LandingPageProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  useEffect(() => {
+    __isMobileGlobal = isMobile;
+  }, [isMobile]);
   const [liveStats, setLiveStats] = useState({
     users: 0,
     tests: 0,
@@ -450,7 +461,7 @@ export const LandingPage = ({
         <div className="absolute inset-0 dot-pattern opacity-20" />
         <FloatingParticles />
 
-        <motion.div
+        {!isMobile && <motion.div
           className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full opacity-[0.06]"
           style={{
             background:
@@ -458,8 +469,8 @@ export const LandingPage = ({
           }}
           animate={{ scale: [1, 1.2, 1], x: [0, 30, 0], y: [0, -20, 0] }}
           transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
+        />}
+        {!isMobile && <motion.div
           className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full opacity-[0.04]"
           style={{
             background:
@@ -472,10 +483,10 @@ export const LandingPage = ({
             ease: "easeInOut",
             delay: 2,
           }}
-        />
+        />}
 
         <motion.div
-          style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
+          style={isMobile ? undefined : { y: heroY, opacity: heroOpacity, scale: heroScale }}
           className="container mx-auto px-4 relative z-10"
         >
           <div className="max-w-5xl mx-auto text-center">

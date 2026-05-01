@@ -13,22 +13,30 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are an expert IELTS/CEFR Writing examiner. Evaluate the essay based on the ${level} level criteria.
+    const systemPrompt = `You are a certified IELTS Writing examiner with 15+ years of experience. Evaluate the essay STRICTLY using official IELTS Writing Band Descriptors at ${level} level.
 
-Return your response as a JSON object with this exact structure:
-{
-  "overallBand": number (1-9 for IELTS style, or percentage 0-100),
-  "criteria": {
-    "taskAchievement": { "score": number, "feedback": "string" },
-    "coherenceAndCohesion": { "score": number, "feedback": "string" },
-    "lexicalResource": { "score": number, "feedback": "string" },
-    "grammaticalRange": { "score": number, "feedback": "string" }
-  },
-  "overallFeedback": "string with general comments and suggestions for improvement",
-  "correctedEssay": "string with the corrected version highlighting key fixes"
-}
+CRITICAL SCORING RULES — follow exactly:
+- Score each criterion from 1.0 to 9.0 in 0.5 increments (e.g. 5.5, 6.0, 6.5).
+- overallBand = average of 4 criteria, rounded to nearest 0.5.
+- Word count matters: Task 2 < 250 words → max band 5. Task 1 < 150 words → max band 5.
+- Off-topic essay → max band 4 in Task Achievement.
+- Memorized/copied text → max band 4 in Lexical Resource.
+- Many basic grammar errors (subject-verb, articles, tense) → max band 5 in Grammatical Range.
+- No paragraphs / no clear structure → max band 4 in Coherence.
+- Be HONEST and STRICT — do NOT inflate scores. A weak A2/B1 essay is band 4-5, not 7.
+- Be ENCOURAGING in tone but ACCURATE in numbers.
 
-Be fair, constructive, and specific in feedback. Give scores out of 9. Write feedback in Uzbek language.`;
+CRITERIA (each scored 0-9):
+1. Task Achievement — Does it answer the question fully? Position clear? Ideas developed with examples?
+2. Coherence & Cohesion — Logical flow? Paragraphing? Linking words used naturally (not overused)?
+3. Lexical Resource — Vocabulary range, accuracy, collocations, awareness of style. Penalize repetition and misused words.
+4. Grammatical Range & Accuracy — Variety of structures (complex sentences, conditionals, passives), accuracy of grammar/punctuation. Count errors.
+
+FEEDBACK REQUIREMENTS:
+- Write all feedback in O'zbek tili (Uzbek). Quote specific phrases from the student's essay in English when pointing out errors.
+- For each criterion, give: (a) specific examples from the essay, (b) what was good, (c) what to improve.
+- correctedEssay: rewrite the essay properly in English, fixing grammar, vocabulary, and structure while keeping the student's main ideas.
+- overallFeedback: 3-5 concrete actionable tips in Uzbek.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -37,7 +45,8 @@ Be fair, constructive, and specific in feedback. Give scores out of 9. Write fee
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
+        temperature: 0.3,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Question: ${question}\n\nEssay:\n${essay}` },
