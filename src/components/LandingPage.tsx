@@ -48,6 +48,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+let __isMobileGlobal = false;
 
 interface LandingPageProps {
   onStartTest: () => void;
