@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Clock, Flag, AlertCircle, ArrowLeft, ArrowRight, BookOpen, Headphones, BookA, Mic, MicOff, CheckCircle, PenTool, Send, Loader2 as Loader2Icon } from 'lucide-react';
+import { Clock, Flag, AlertCircle, ArrowLeft, ArrowRight, BookOpen, Headphones, BookA, Mic, MicOff, CheckCircle, PenTool, Send, Loader2 as Loader2Icon, Sparkles, Trash2, Play, Pause, RotateCcw, Lightbulb, Target, Save } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { MockTest, UserAnswer, Part, TestResult, Question } from '@/types/cefr';
 import { generateMockTest } from '@/data/mockData';
@@ -8,6 +8,7 @@ import { CEFRLevel, SkillType } from '@/types/cefr';
 import { PartAudioPlayer } from '@/components/PartAudioPlayer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { SpeakingPanel } from '@/components/SpeakingPanel';
 
 interface TestInterfaceProps {
   level: CEFRLevel;
@@ -433,168 +434,143 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
           <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
             {/* Writing Interface - Multi-part */}
             {isWriting && mockTest && (
-              <div className="max-w-3xl mx-auto">
-                {mockTest.parts.map((writePart, idx) => (
-                  currentPart === writePart.id && (
-                    <div key={writePart.id}>
-                      <div className="mb-6">
-                        <Badge variant="secondary" className="mb-3">{writePart.title}</Badge>
-                        <h3 className="text-lg font-semibold mb-2">{writePart.passage.title}</h3>
-                        <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{writePart.passage.content}</p>
-                        <p className="text-sm text-muted-foreground mt-2 italic">{writePart.instruction}</p>
-                        {writePart.questions[0] && (
-                          <div className="mt-4 p-4 bg-muted/50 rounded-xl border border-border">
-                            <p className="font-medium">{writePart.questions[0].question}</p>
+              <div className="max-w-4xl mx-auto">
+                {mockTest.parts.map((writePart) => (
+                  currentPart === writePart.id && (() => {
+                    const text = writingTexts[writePart.id] || '';
+                    const wordCount = text.split(/\s+/).filter(Boolean).length;
+                    const charCount = text.length;
+                    const sentenceCount = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+                    // Task 1 has shorter target (150), Task 2 default 250
+                    const isTask1 = /task\s*1/i.test(writePart.title) || writePart.id === 1;
+                    const targetWords = isTask1 ? 150 : 250;
+                    const minWords = isTask1 ? 130 : 220;
+                    const progress = Math.min((wordCount / targetWords) * 100, 100);
+                    const wordColor = wordCount === 0 ? 'text-muted-foreground'
+                      : wordCount < minWords ? 'text-destructive'
+                      : wordCount < targetWords ? 'text-amber-500'
+                      : 'text-emerald-500';
+
+                    return (
+                      <div key={writePart.id} className="space-y-6">
+                        {/* Question card */}
+                        <div className="rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card p-5 sm:p-6 shadow-sm">
+                          <div className="flex items-center gap-2 mb-3 flex-wrap">
+                            <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-500">
+                              <PenTool className="w-3 h-3 mr-1" />{writePart.title}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              <Target className="w-3 h-3 mr-1" />Maqsad: {targetWords}+ so'z
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              <Clock className="w-3 h-3 mr-1" />Tavsiya: {isTask1 ? '20' : '40'} daqiqa
+                            </Badge>
                           </div>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Javobingiz</span>
-                          <span className="text-xs text-muted-foreground">{(writingTexts[writePart.id] || '').split(/\s+/).filter(Boolean).length} so'z</span>
+                          <h3 className="text-lg sm:text-xl font-bold mb-3">{writePart.passage.title}</h3>
+                          <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-sm sm:text-base">{writePart.passage.content}</p>
+                          {writePart.instruction && (
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-3 italic flex items-start gap-2">
+                              <Lightbulb className="w-4 h-4 mt-0.5 shrink-0 text-amber-500" />
+                              {writePart.instruction}
+                            </p>
+                          )}
+                          {writePart.questions[0] && (
+                            <div className="mt-4 p-4 bg-background/80 backdrop-blur rounded-xl border-2 border-dashed border-primary/30">
+                              <p className="font-semibold text-base">{writePart.questions[0].question}</p>
+                            </div>
+                          )}
                         </div>
-                        <Textarea
-                          value={writingTexts[writePart.id] || ''}
-                          onChange={(e) => setWritingTexts(prev => ({ ...prev, [writePart.id]: e.target.value }))}
-                          placeholder="Javobingizni shu yerga yozing..."
-                          className="min-h-[300px] text-base leading-relaxed"
-                        />
+
+                        {/* Writing area with stats bar */}
+                        <div className="rounded-2xl border bg-card overflow-hidden shadow-sm">
+                          {/* Stats bar */}
+                          <div className="flex flex-wrap items-center gap-3 px-4 py-2.5 border-b bg-muted/30">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className={`text-base font-bold tabular-nums ${wordColor}`}>
+                                {wordCount}
+                              </span>
+                              <span className="text-xs text-muted-foreground">/ {targetWords} so'z</span>
+                              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden max-w-32">
+                                <div
+                                  className={`h-full transition-all ${wordCount < minWords ? 'bg-destructive' : wordCount < targetWords ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                                  style={{ width: `${progress}%` }}
+                                />
+                              </div>
+                            </div>
+                            <div className="hidden sm:flex items-center gap-3 text-xs text-muted-foreground">
+                              <span>{charCount} belgi</span>
+                              <span>•</span>
+                              <span>{sentenceCount} gap</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-emerald-600">
+                              <Save className="w-3 h-3" />
+                              <span className="hidden sm:inline">Avto-saqlanmoqda</span>
+                            </div>
+                          </div>
+
+                          {/* Tip strip */}
+                          {wordCount > 0 && wordCount < minWords && (
+                            <div className="px-4 py-2 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-700 dark:text-amber-400 flex items-center gap-2">
+                              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                              <span>Eslatma: kamida {minWords} so'z bo'lmasa, ball pasayadi.</span>
+                            </div>
+                          )}
+                          {wordCount >= targetWords && (
+                            <div className="px-4 py-2 bg-emerald-500/10 border-b border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                              <CheckCircle className="w-3.5 h-3.5 shrink-0" />
+                              <span>Ajoyib! Maqsadli so'zlar soniga yetdingiz.</span>
+                            </div>
+                          )}
+
+                          <Textarea
+                            value={text}
+                            onChange={(e) => setWritingTexts(prev => ({ ...prev, [writePart.id]: e.target.value }))}
+                            placeholder={`Insho strukturasi:\n\n1. Kirish (Introduction) — mavzuni qisqa tanishtiring va o'z fikringizni bildiring\n2. Asosiy qism (Body 1) — birinchi argument va misol\n3. Asosiy qism (Body 2) — ikkinchi argument va misol\n4. Xulosa (Conclusion) — fikringizni yakunlang\n\nShu yerga yozishni boshlang...`}
+                            className="min-h-[400px] text-base leading-relaxed border-0 rounded-none focus-visible:ring-0 resize-y"
+                          />
+
+                          {/* Action bar */}
+                          <div className="flex items-center justify-between gap-2 px-4 py-2 border-t bg-muted/20">
+                            <button
+                              onClick={() => {
+                                if (text && confirm("Yozganingizni o'chirishni xohlaysizmi?")) {
+                                  setWritingTexts(prev => ({ ...prev, [writePart.id]: '' }));
+                                }
+                              }}
+                              className="text-xs text-muted-foreground hover:text-destructive flex items-center gap-1 transition-colors"
+                            >
+                              <Trash2 className="w-3 h-3" />Tozalash
+                            </button>
+                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Sparkles className="w-3 h-3 text-primary" />
+                              <span>AI baholaydi</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )
+                    );
+                  })()
                 ))}
               </div>
             )}
 
             {/* Speaking Interface - Multi-question */}
             {isSpeaking && mockTest && mockTest.parts[0] && (
-              <div className="max-w-2xl mx-auto">
-                {(() => {
-                  const speakingQuestions = mockTest.parts[0].questions;
-                  const currentQ = speakingQuestions[currentSpeakingQ];
-                  if (!currentQ) return null;
-                  const recording = speakingRecordings[currentSpeakingQ];
-                  
-                  return (
-                    <div>
-                      <div className="flex items-center justify-between mb-6">
-                        <Badge variant="secondary">Savol {currentSpeakingQ + 1} / {speakingQuestions.length}</Badge>
-                        <div className="flex gap-2">
-                          {speakingQuestions.map((_, i) => (
-                            <button
-                              key={i}
-                              onClick={() => setCurrentSpeakingQ(i)}
-                              className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${
-                                i === currentSpeakingQ ? 'bg-primary text-primary-foreground' :
-                                speakingRecordings[i] ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
-                              }`}
-                            >
-                              {i + 1}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="bg-muted/50 rounded-xl border border-border p-6 mb-8 text-center">
-                        <p className="text-lg font-medium">{currentQ.question}</p>
-                      </div>
-
-                      <div className="flex flex-col items-center gap-6">
-                        <button
-                          onClick={async () => {
-                            if (isRecording) {
-                              mediaRecorderRef.current?.stop();
-                              if (recognitionRef.current) {
-                                recognitionRef.current.stop();
-                                recognitionRef.current = null;
-                              }
-                              setIsRecording(false);
-                            } else {
-                              try {
-                                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                                const recorder = new MediaRecorder(stream);
-                                mediaRecorderRef.current = recorder;
-                                chunksRef.current = [];
-                                recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
-                                recorder.onstop = () => {
-                                  const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-                                  const url = URL.createObjectURL(blob);
-                                  setSpeakingRecordings(prev => ({ ...prev, [currentSpeakingQ]: { blob, url } }));
-                                  stream.getTracks().forEach(t => t.stop());
-                                };
-                                recorder.start();
-                                setIsRecording(true);
-
-                                // Start speech recognition for transcript
-                                const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                                if (SpeechRecognition) {
-                                  const recognition = new SpeechRecognition();
-                                  recognition.continuous = true;
-                                  recognition.interimResults = false;
-                                  recognition.lang = 'en-US';
-                                  let transcript = '';
-                                  recognition.onresult = (event: any) => {
-                                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                                      if (event.results[i].isFinal) {
-                                        transcript += event.results[i][0].transcript + ' ';
-                                      }
-                                    }
-                                    const qIdx = currentSpeakingQ;
-                                    setSpeakingTranscripts(prev => ({ ...prev, [qIdx]: transcript.trim() }));
-                                  };
-                                  recognition.start();
-                                  recognitionRef.current = recognition;
-                                }
-                              } catch { /* mic permission denied */ }
-                            }
-                          }}
-                          className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
-                            isRecording
-                              ? 'bg-destructive text-destructive-foreground animate-pulse'
-                              : 'bg-primary text-primary-foreground hover:opacity-90'
-                          }`}
-                        >
-                          {isRecording ? <MicOff className="w-10 h-10" /> : <Mic className="w-10 h-10" />}
-                        </button>
-                        <p className="text-sm text-muted-foreground">
-                          {isRecording ? 'Yozib olinmoqda... To\'xtatish uchun bosing' : 'Gapirish uchun bosing'}
-                        </p>
-                        {recording && (
-                          <div className="w-full space-y-3">
-                            <audio src={recording.url} controls className="w-full" />
-                            <div className="flex items-center justify-center gap-2">
-                              <CheckCircle className="w-4 h-4 text-primary" />
-                              <span className="text-sm text-primary">Yozib olindi</span>
-                            </div>
-                            {speakingTranscripts[currentSpeakingQ] && (
-                              <div className="bg-muted/50 rounded-lg p-3">
-                                <p className="text-xs text-muted-foreground mb-1">Transkript:</p>
-                                <p className="text-sm">{speakingTranscripts[currentSpeakingQ]}</p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Navigation */}
-                      <div className="flex justify-between mt-8">
-                        <Button variant="outline" disabled={currentSpeakingQ === 0} onClick={() => setCurrentSpeakingQ(i => i - 1)}>
-                          <ArrowLeft className="w-4 h-4 mr-1" /> Oldingi
-                        </Button>
-                        {currentSpeakingQ < speakingQuestions.length - 1 ? (
-                          <Button onClick={() => setCurrentSpeakingQ(i => i + 1)}>
-                            Keyingi <ArrowRight className="w-4 h-4 ml-1" />
-                          </Button>
-                        ) : (
-                          <Button onClick={() => setShowConfirmFinish(true)} disabled={Object.keys(speakingRecordings).length === 0}>
-                            <Send className="w-4 h-4 mr-1" /> Tugatish
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
+              <SpeakingPanel
+                questions={mockTest.parts[0].questions}
+                currentIdx={currentSpeakingQ}
+                setCurrentIdx={setCurrentSpeakingQ}
+                isRecording={isRecording}
+                setIsRecording={setIsRecording}
+                recordings={speakingRecordings}
+                setRecordings={setSpeakingRecordings}
+                transcripts={speakingTranscripts}
+                setTranscripts={setSpeakingTranscripts}
+                mediaRecorderRef={mediaRecorderRef}
+                chunksRef={chunksRef}
+                recognitionRef={recognitionRef}
+                onFinish={() => setShowConfirmFinish(true)}
+              />
             )}
 
             {/* Standard question-based interface */}
