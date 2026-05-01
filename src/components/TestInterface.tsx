@@ -8,6 +8,7 @@ import { CEFRLevel, SkillType } from '@/types/cefr';
 import { PartAudioPlayer } from '@/components/PartAudioPlayer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { SpeakingPanel } from '@/components/SpeakingPanel';
 
 interface TestInterfaceProps {
   level: CEFRLevel;
