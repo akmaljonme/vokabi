@@ -136,6 +136,7 @@ const Card3D = ({
   const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (__isMobileGlobal) return;
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
@@ -174,9 +175,11 @@ const Card3D = ({
 };
 
 /* ─── Floating particles ─── */
-const FloatingParticles = () => (
+const FloatingParticles = () => {
+  if (__isMobileGlobal) return null;
+  return (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {Array.from({ length: 25 }).map((_, i) => (
+    {Array.from({ length: 12 }).map((_, i) => (
       <motion.div
         key={i}
         className="absolute rounded-full"
@@ -201,7 +204,8 @@ const FloatingParticles = () => (
       />
     ))}
   </div>
-);
+  );
+};
 
 /* ─── Marquee ticker ─── */
 const MarqueeTicker = ({
@@ -238,6 +242,10 @@ export const LandingPage = ({
 }: LandingPageProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  useEffect(() => {
+    __isMobileGlobal = isMobile;
+  }, [isMobile]);
   const [liveStats, setLiveStats] = useState({
     users: 0,
     tests: 0,
