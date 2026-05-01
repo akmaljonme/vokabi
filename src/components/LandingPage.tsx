@@ -461,7 +461,7 @@ export const LandingPage = ({
         <div className="absolute inset-0 dot-pattern opacity-20" />
         <FloatingParticles />
 
-        <motion.div
+        {!isMobile && <motion.div
           className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full opacity-[0.06]"
           style={{
             background:
@@ -469,8 +469,8 @@ export const LandingPage = ({
           }}
           animate={{ scale: [1, 1.2, 1], x: [0, 30, 0], y: [0, -20, 0] }}
           transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
+        />}
+        {!isMobile && <motion.div
           className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full opacity-[0.04]"
           style={{
             background:
@@ -483,10 +483,10 @@ export const LandingPage = ({
             ease: "easeInOut",
             delay: 2,
           }}
-        />
+        />}
 
         <motion.div
-          style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
+          style={isMobile ? undefined : { y: heroY, opacity: heroOpacity, scale: heroScale }}
           className="container mx-auto px-4 relative z-10"
         >
           <div className="max-w-5xl mx-auto text-center">
