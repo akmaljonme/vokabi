@@ -13,15 +13,34 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are an expert IELTS/CEFR Speaking examiner. Evaluate the student's spoken response (provided as transcript) at ${level} level.
+    const wordCount = (transcript || "").trim().split(/\s+/).filter(Boolean).length;
 
-Score criteria (each out of 9):
-1. Fluency & Coherence - How smoothly they speak, logical flow
-2. Lexical Resource - Vocabulary range and accuracy  
-3. Grammatical Range & Accuracy - Grammar variety and correctness
-4. Pronunciation hints - Based on transcript, note potential pronunciation issues
+    const systemPrompt = `You are a certified IELTS Speaking examiner with 15+ years of experience. Evaluate the student's spoken response (transcript) STRICTLY using official IELTS Speaking Band Descriptors at ${level} level.
 
-Write all feedback in Uzbek language. Be encouraging but honest.`;
+CONTEXT:
+- Transcript word count: ${wordCount}
+- Transcript comes from speech-to-text, so minor transcription errors are possible — focus on language quality, not transcription glitches.
+
+CRITICAL SCORING RULES — follow exactly:
+- Score each criterion from 1.0 to 9.0 in 0.5 increments.
+- overallBand = average of 4 criteria, rounded to nearest 0.5.
+- Very short answer (< 20 words) → max band 4 (insufficient response).
+- Off-topic answer → max band 4 in Fluency & Coherence.
+- Many basic grammar errors → max band 5 in Grammatical Range.
+- Repetitive simple vocabulary only → max band 5 in Lexical Resource.
+- Be HONEST and STRICT — do NOT inflate scores. Weak A2/B1 response = band 4-5, not 7.
+
+CRITERIA (each 0-9):
+1. Fluency & Coherence — Speed, hesitation patterns (visible as repetitions in transcript), logical flow, use of discourse markers.
+2. Lexical Resource — Vocabulary range, idiomatic language, paraphrasing ability, accuracy.
+3. Grammatical Range & Accuracy — Variety of tenses and structures, accuracy. Count errors.
+4. Pronunciation — Inferred from transcript: word choice, common L1-Uzbek pronunciation patterns. Be modest with this score since you can't hear audio.
+
+FEEDBACK REQUIREMENTS:
+- Write all feedback in O'zbek tili (Uzbek). Quote the student's actual phrases in English when pointing out issues.
+- For each criterion: specific examples + what was good + what to improve.
+- suggestedResponse: a high-quality model answer (band 7-8) in English, ~80-120 words.
+- overallFeedback: 3-5 concrete actionable tips in Uzbek.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -30,7 +49,8 @@ Write all feedback in Uzbek language. Be encouraging but honest.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
+        temperature: 0.3,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Question: ${question}\n\nStudent's response (transcript):\n${transcript}` },
