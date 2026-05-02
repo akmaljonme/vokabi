@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { ArrowLeft, BookOpen, Headphones, Brain, Lightbulb, BookMarked, FileDown, Mic, PenTool } from 'lucide-react';
+import { ArrowLeft, BookOpen, Headphones, Brain, Lightbulb, BookMarked, FileDown, Mic, PenTool, Crown, Lock } from 'lucide-react';
 import { CEFRLevel, SkillType } from '@/types/cefr';
 import { useActiveTests, TestInfo } from '@/hooks/useTests';
 import { Loader2 } from 'lucide-react';
 import { generateMockTest } from '@/data/mockData';
 import { generateTestPDF } from '@/utils/pdfGenerator';
 import { motion } from 'framer-motion';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface SkillSelectionProps {
   level: CEFRLevel;
@@ -22,6 +23,11 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
   const [selectedVocabBook, setSelectedVocabBook] = useState<number | null>(null);
   const defaultTab = vocabularyOnly ? 'vocabulary' : (hideVocabulary ? 'grammar' : 'vocabulary');
   const [activeTab, setActiveTab] = useState<SkillType>(defaultTab as SkillType);
+  const { isPro } = useSubscription();
+
+  const PRO_SKILLS: SkillType[] = ['writing', 'speaking'];
+  const isProSkill = (skill: SkillType) => PRO_SKILLS.includes(skill);
+  const isLocked = (skill: SkillType) => isProSkill(skill) && !isPro;
 
   if (loading) {
     return (
@@ -163,13 +169,14 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
+            const locked = isLocked(tab.key);
             return (
               <motion.button
                 key={tab.key}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => { setActiveTab(tab.key); setSelectedVocabBook(null); }}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 ${
+                className={`relative flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 ${
                   isActive
                     ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -177,6 +184,7 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
               >
                 <Icon className="w-4 h-4" />
                 {tab.label}
+                {locked && <Crown className="w-3.5 h-3.5 text-amber-500 ml-1" />}
               </motion.button>
             );
           })}
@@ -246,14 +254,14 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
           {activeTab === 'writing' && (
             <div>
               <h2 className="text-lg font-display font-bold mb-6 text-center tracking-tight">Writing Testlari</h2>
-              {renderTestList(writingTests, 'writing')}
+              {isLocked('writing') ? <ProLockCard skill="Writing" /> : renderTestList(writingTests, 'writing')}
             </div>
           )}
 
           {activeTab === 'speaking' && (
             <div>
               <h2 className="text-lg font-display font-bold mb-6 text-center tracking-tight">Speaking Testlari</h2>
-              {renderTestList(speakingTests, 'speaking')}
+              {isLocked('speaking') ? <ProLockCard skill="Speaking" /> : renderTestList(speakingTests, 'speaking')}
             </div>
           )}
         </div>
@@ -261,3 +269,34 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
     </div>
   );
 };
+
+const ProLockCard = ({ skill }: { skill: string }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="max-w-xl mx-auto card-elevated p-8 text-center border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-primary/5"
+  >
+    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 mb-4">
+      <Lock className="w-8 h-8 text-amber-500" />
+    </div>
+    <div className="flex items-center justify-center gap-2 mb-2">
+      <Crown className="w-5 h-5 text-amber-500" />
+      <h3 className="font-display font-bold text-xl">{skill} — Pro versiya</h3>
+    </div>
+    <p className="text-sm text-muted-foreground mb-1">
+      {skill} testlari va AI baholash <span className="font-semibold text-foreground">Pro</span> foydalanuvchilar uchun.
+    </p>
+    <p className="text-xs text-muted-foreground mb-6">
+      IELTS standarti bo'yicha 4 ta mezon, batafsil tahlil, tuzatilgan namuna va video tavsiyalar.
+    </p>
+    <a
+      href="https://t.me/vokabi_bot"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-primary/20"
+    >
+      <Crown className="w-4 h-4" />
+      Pro versiyaga o'tish (@vokabi_bot)
+    </a>
+  </motion.div>
+);
