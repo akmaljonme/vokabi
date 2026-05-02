@@ -5,6 +5,58 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const clampBand = (value: number) => Math.max(1, Math.min(9, Math.round(value * 2) / 2));
+
+const buildFallbackSpeakingEvaluation = (transcript: string, question: string, level: string) => {
+  const cleaned = (transcript || "").trim();
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+  const normalizedWords = words.map((word) => word.toLowerCase().replace(/[^a-z']/gi, "")).filter(Boolean);
+  const uniqueWordCount = new Set(normalizedWords).size;
+  const sentenceCount = cleaned.split(/[.!?]+/).filter((part) => part.trim().length > 0).length || 1;
+  const lexicalVariety = uniqueWordCount / Math.max(wordCount, 1);
+  const hasConnectors = /\b(because|however|also|first|firstly|second|for example|in addition|but|so|then|after|finally)\b/i.test(cleaned);
+  const hasComplexForms = /\b(although|while|when|which|who|that|if|would|could|should)\b/i.test(cleaned);
+  const shortPenalty = wordCount < 20 ? 2 : wordCount < 45 ? 1 : 0;
+  const repetitionPenalty = lexicalVariety < 0.42 ? 0.5 : 0;
+
+  const fluencyAndCoherence = clampBand(4.5 + (wordCount >= 70 ? 1 : wordCount >= 40 ? 0.5 : 0) + (hasConnectors ? 0.5 : 0) - shortPenalty - repetitionPenalty);
+  const lexicalResource = clampBand(4.5 + (lexicalVariety >= 0.62 ? 1 : lexicalVariety >= 0.5 ? 0.5 : 0) - shortPenalty - repetitionPenalty);
+  const grammaticalRange = clampBand(4.5 + (hasComplexForms ? 0.5 : 0) + (sentenceCount >= 3 ? 0.5 : 0) - shortPenalty);
+  const pronunciation = clampBand(Math.min(fluencyAndCoherence, lexicalResource, grammaticalRange) - 0.5);
+  const overallBand = clampBand((fluencyAndCoherence + lexicalResource + grammaticalRange + pronunciation) / 4);
+
+  return {
+    overallBand,
+    criteria: {
+      fluencyAndCoherence: {
+        score: fluencyAndCoherence,
+        feedback: `AI limiti tugagani uchun vaqtincha avtomatik fallback baholash ishlatildi. Javobingizda ${wordCount} ta so'z bor. ${hasConnectors ? "Bog'lovchilar ishlatilgan, bu fikr oqimini yaxshilaydi." : "Bog'lovchilar kam, fikrlar orasini 'because', 'also', 'for example' kabi vositalar bilan ulang."}`,
+      },
+      lexicalResource: {
+        score: lexicalResource,
+        feedback: lexicalVariety >= 0.5
+          ? "Lug'at xilma-xilligi yomon emas, lekin aniqroq va tabiiyroq iboralar bilan javobni boyitish mumkin."
+          : "Bir xil so'zlar ko'p takrorlangan. Sinonimlar va mavzuga mos iboralarni ko'proq ishlating.",
+      },
+      grammaticalRange: {
+        score: grammaticalRange,
+        feedback: hasComplexForms
+          ? "Murakkabroq strukturalar bor, lekin aniqlikni oshirish kerak. Gaplarni qisqa va grammatik jihatdan toza tuzing."
+          : "Asosan sodda gaplar ishlatilgan. 'when', 'because', 'if' bilan murakkabroq gaplar tuzishga harakat qiling.",
+      },
+      pronunciation: {
+        score: pronunciation,
+        feedback: "Audio tinglanmagani uchun talaffuz taxminiy baholandi. So'z urg'usi, endinglar va ravonlik ustida alohida mashq qiling.",
+      },
+    },
+    overallFeedback: `Hozircha AI krediti tugagani sababli soddalashtirilgan baholash ko'rsatildi. ${level} darajasi uchun javobni savolga to'g'ridan-to'g'ri bog'lang, 3-4 ta aniq detail qo'shing va kamida 5-6 ta to'liq gap bilan yakunlang.`,
+    suggestedResponse: `I would answer the question clearly and directly. First, I would give a short main idea, and then I would add two or three specific details or examples. After that, I would explain why it is important to me and finish with a simple conclusion. This makes the answer more natural, better organized, and easier to follow in a speaking exam.`,
+    fallback: true,
+    notice: question ? `Savol: ${question}` : "",
+  };
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -88,7 +140,13 @@ FEEDBACK REQUIREMENTS:
 
     if (!response.ok) {
       if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      if (response.status === 402) return new Response(JSON.stringify({ error: "Kredit yetarli emas" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (response.status === 402) {
+        const fallbackResult = buildFallbackSpeakingEvaluation(transcript, question, level);
+        return new Response(JSON.stringify({ result: fallbackResult, fallback: true, error: "Kredit yetarli emas" }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       throw new Error(`AI error: ${response.status}`);
     }
 

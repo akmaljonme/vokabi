@@ -6,6 +6,13 @@ import { Loader2, Play, ExternalLink, Video, Star, MessageSquare } from 'lucide-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+const getFunctionErrorMessage = (err: any) => {
+  const message = err?.context?.error || err?.message || "AI tekshirishda xatolik";
+  return /kredit yetarli emas/i.test(message)
+    ? "AI krediti vaqtincha tugagan. Keyinroq urinib ko'ring yoki balansni to'ldiring."
+    : message;
+};
+
 interface VideoSuggestion {
   weakTopics: string[];
   videos: { title: string; channel: string; url: string; description: string; topic: string }[];
@@ -152,9 +159,13 @@ export const WritingEvalCard = ({ questionId, questionText, essay, level, index 
         body: { essay, question: questionText, level },
       });
       if (error) throw error;
-      if (data?.result) { setEvaluation(data.result); toast.success("AI baholash tayyor!"); }
+      if (data?.result) {
+        setEvaluation(data.result);
+        if (data?.fallback) toast.warning("AI krediti vaqtincha tugagan. Soddalashtirilgan baholash ko'rsatildi.");
+        else toast.success("AI baholash tayyor!");
+      }
     } catch (err: any) {
-      toast.error(err.message || "AI tekshirishda xatolik");
+      toast.error(getFunctionErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -246,9 +257,13 @@ export const SpeakingEvalCard = ({ questionId, questionText, transcript, level, 
         body: { transcript, question: questionText, level },
       });
       if (error) throw error;
-      if (data?.result) { setEvaluation(data.result); toast.success("AI baholash tayyor!"); }
+      if (data?.result) {
+        setEvaluation(data.result);
+        if (data?.fallback) toast.warning("AI krediti vaqtincha tugagan. Soddalashtirilgan baholash ko'rsatildi.");
+        else toast.success("AI baholash tayyor!");
+      }
     } catch (err: any) {
-      toast.error(err.message || "AI tekshirishda xatolik");
+      toast.error(getFunctionErrorMessage(err));
     } finally {
       setLoading(false);
     }
