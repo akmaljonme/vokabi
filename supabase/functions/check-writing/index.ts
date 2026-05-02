@@ -5,6 +5,66 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const clampBand = (value: number) => Math.max(1, Math.min(9, Math.round(value * 2) / 2));
+
+const buildFallbackWritingEvaluation = (essay: string, question: string, level: string) => {
+  const cleaned = (essay || "").trim();
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+  const paragraphs = cleaned.split(/\n\s*\n/).filter((part) => part.trim().length > 0);
+  const sentenceCount = cleaned.split(/[.!?]+/).filter((part) => part.trim().length > 0).length || 1;
+  const normalizedWords = words.map((word) => word.toLowerCase().replace(/[^a-z']/gi, "")).filter(Boolean);
+  const uniqueWordCount = new Set(normalizedWords).size;
+  const lexicalVariety = uniqueWordCount / Math.max(wordCount, 1);
+  const hasLinkers = /\b(firstly|first|secondly|second|however|moreover|therefore|for example|in conclusion|because|although|while)\b/i.test(cleaned);
+  const hasComplexStructures = /\b(although|while|whereas|if|which|that|because|would|could|should)\b/i.test(cleaned);
+  const lowerQuestion = (question || "").toLowerCase();
+  const questionKeywords = lowerQuestion.match(/[a-z]{4,}/g) || [];
+  const keywordHits = questionKeywords.filter((keyword) => cleaned.toLowerCase().includes(keyword)).length;
+  const taskPenalty = wordCount < 120 ? 2 : wordCount < 180 ? 1 : 0;
+  const repetitionPenalty = lexicalVariety < 0.42 ? 0.5 : 0;
+  const structurePenalty = paragraphs.length < 2 ? 1 : 0;
+  const topicPenalty = questionKeywords.length > 0 && keywordHits === 0 ? 1.5 : 0;
+
+  const taskAchievement = clampBand(5 + (keywordHits >= 2 ? 0.5 : 0) - taskPenalty - topicPenalty);
+  const coherenceAndCohesion = clampBand(5 + (paragraphs.length >= 2 ? 0.5 : 0) + (hasLinkers ? 0.5 : 0) - structurePenalty - taskPenalty);
+  const lexicalResource = clampBand(4.5 + (lexicalVariety >= 0.58 ? 1 : lexicalVariety >= 0.48 ? 0.5 : 0) - repetitionPenalty - taskPenalty);
+  const grammaticalRange = clampBand(4.5 + (hasComplexStructures ? 0.5 : 0) + (sentenceCount >= 4 ? 0.5 : 0) - taskPenalty);
+  const overallBand = clampBand((taskAchievement + coherenceAndCohesion + lexicalResource + grammaticalRange) / 4);
+
+  return {
+    overallBand,
+    criteria: {
+      taskAchievement: {
+        score: taskAchievement,
+        feedback: `AI limiti tugagani uchun vaqtincha soddalashtirilgan baholash ishlatildi. Essay ${wordCount} ta so'zdan iborat. ${topicPenalty > 0 ? "Savol mazmuniga to'g'ridan-to'g'ri javob berish kuchsiz ko'rinadi." : "Mavzuga aloqador javob bor, lekin g'oyalarni chuqurroq rivojlantirish kerak."}`,
+      },
+      coherenceAndCohesion: {
+        score: coherenceAndCohesion,
+        feedback: paragraphs.length >= 2
+          ? "Paragraf ajratish mavjud, bu yaxshi. Endi fikrlar orasidagi bog'lanishni yanada tabiiy qilish kerak."
+          : "Paragraflar tuzilmasi yetarli emas. Kirish, asosiy qism va xulosa ko'rinishida aniq bo'ling.",
+      },
+      lexicalResource: {
+        score: lexicalResource,
+        feedback: lexicalVariety >= 0.48
+          ? "Lug'at zaxirasi yomon emas, lekin aniqroq va akademikroq so'zlar bilan kuchaytirish mumkin."
+          : "So'zlar takrori ko'p. Sinonimlar va mavzuga mos collocationlarni ko'proq ishlating.",
+      },
+      grammaticalRange: {
+        score: grammaticalRange,
+        feedback: hasComplexStructures
+          ? "Murakkab gaplar ishlatishga urinish bor. Endi grammatik aniqlik va tinish belgilari ustida ishlash kerak."
+          : "Asosan sodda gaplar ishlatilgan. Complex sentence va clause'larni ko'proq qo'llang.",
+      },
+    },
+    overallFeedback: `Hozircha AI krediti tugagani sababli soddalashtirilgan writing baholash ko'rsatildi. ${level} darajasi uchun essayni kamida 3 paragrafga bo'ling, har paragrafda bitta asosiy fikrni misol bilan oching va so'z takrorini kamaytiring.`,
+    correctedEssay: cleaned || "Please rewrite your essay with a clear introduction, one or two body paragraphs, and a short conclusion.",
+    fallback: true,
+    notice: question ? `Savol: ${question}` : "",
+  };
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -84,7 +144,13 @@ FEEDBACK REQUIREMENTS:
 
     if (!response.ok) {
       if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit. Keyinroq urinib ko'ring." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      if (response.status === 402) return new Response(JSON.stringify({ error: "Kredit yetarli emas." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      if (response.status === 402) {
+        const fallbackResult = buildFallbackWritingEvaluation(essay, question, level);
+        return new Response(JSON.stringify({ result: fallbackResult, fallback: true, error: "Kredit yetarli emas." }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       throw new Error(`AI gateway error: ${response.status}`);
     }
 
