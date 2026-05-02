@@ -9,6 +9,7 @@ import { PartAudioPlayer } from '@/components/PartAudioPlayer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SpeakingPanel } from '@/components/SpeakingPanel';
+import { toast } from 'sonner';
 
 interface TestInterfaceProps {
   level: CEFRLevel;
@@ -253,6 +254,9 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
           const { supabase } = await import('@/integrations/supabase/client');
           const { data, error } = await supabase.functions.invoke(functionName, { body });
           if (error) throw error;
+          if (data?.fallback) {
+            toast.warning("AI krediti vaqtincha yetarli emas. Soddalashtirilgan baholash ko'rsatildi.");
+          }
 
           const totalParts = isWriting ? mockTest.parts.length : mockTest.parts[0]?.questions.length || 0;
           onFinish({
@@ -274,7 +278,8 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
             mockTest,
             aiResult: data?.result,
           } as TestResult);
-        } catch {
+        } catch (error: any) {
+          toast.error(error?.message || "AI baholash hozircha ishlamadi");
           onFinish({
             mockId, level, skill, totalQuestions: 1,
             correctAnswers: 0, percentage: 0, passed: false,
