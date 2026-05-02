@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SpeakingPanel } from '@/components/SpeakingPanel';
 import { toast } from 'sonner';
+import { useSubscription } from '@/hooks/useSubscription';
+import { Crown, Lock as LockIcon } from 'lucide-react';
 
 interface TestInterfaceProps {
   level: CEFRLevel;
@@ -31,6 +33,8 @@ const skillConfig: Record<string, { label: string; icon: any; color: string }> =
 
 export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }: TestInterfaceProps) => {
   const testStorageKey = `test_progress_${testId || `${level}_${skill}_${mockId}`}`;
+  const { isPro, loading: proLoading } = useSubscription();
+  const requiresPro = skill === 'writing' || skill === 'speaking';
 
   const [mockTest, setMockTest] = useState<MockTest | null>(null);
   const [currentPart, setCurrentPart] = useState(1);
@@ -334,6 +338,40 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (requiresPro && !proLoading && !isPro) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center card-elevated p-8 border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-primary/5">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 mb-4">
+            <LockIcon className="w-8 h-8 text-amber-500" />
+          </div>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Crown className="w-5 h-5 text-amber-500" />
+            <h2 className="font-display font-bold text-xl">
+              {skill === 'writing' ? 'Writing' : 'Speaking'} — Pro versiya
+            </h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6">
+            Bu test faqat <span className="font-semibold text-foreground">Pro</span> foydalanuvchilar uchun.
+            Pro versiyada AI tomonidan IELTS standarti bo'yicha baholash, batafsil tahlil va namuna javoblar mavjud.
+          </p>
+          <div className="flex flex-col gap-3">
+            <a
+              href="https://t.me/vokabi_bot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              <Crown className="w-4 h-4" />
+              Pro versiyaga o'tish (@vokabi_bot)
+            </a>
+            <button onClick={onBack} className="btn-outline text-sm">Orqaga qaytish</button>
+          </div>
+        </div>
       </div>
     );
   }
