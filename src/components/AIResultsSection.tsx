@@ -159,7 +159,11 @@ export const WritingEvalCard = ({ questionId, questionText, essay, level, index 
         body: { essay, question: questionText, level },
       });
       if (error) throw error;
-      if (data?.result) { setEvaluation(data.result); toast.success("AI baholash tayyor!"); }
+      if (data?.result) {
+        setEvaluation(data.result);
+        if (data?.fallback) toast.warning("AI krediti vaqtincha tugagan. Soddalashtirilgan baholash ko'rsatildi.");
+        else toast.success("AI baholash tayyor!");
+      }
     } catch (err: any) {
       toast.error(getFunctionErrorMessage(err));
     } finally {
@@ -253,7 +257,11 @@ export const SpeakingEvalCard = ({ questionId, questionText, transcript, level, 
         body: { transcript, question: questionText, level },
       });
       if (error) throw error;
-      if (data?.result) { setEvaluation(data.result); toast.success("AI baholash tayyor!"); }
+      if (data?.result) {
+        setEvaluation(data.result);
+        if (data?.fallback) toast.warning("AI krediti vaqtincha tugagan. Soddalashtirilgan baholash ko'rsatildi.");
+        else toast.success("AI baholash tayyor!");
+      }
     } catch (err: any) {
       toast.error(getFunctionErrorMessage(err));
     } finally {
