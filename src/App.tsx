@@ -23,6 +23,7 @@ import VideoLessons from "./pages/VideoLessons";
 import Exams from "./pages/Exams";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Pricing from "./pages/Pricing";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/videos" element={<VideoLessons />} />
                 <Route path="/exams" element={<Exams />} />
+                <Route path="/pricing" element={<Pricing />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
 

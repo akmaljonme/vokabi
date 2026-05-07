@@ -173,12 +173,12 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 </button>
               </>
             )}
-            <a
-              href="#pricing"
+            <button
+              onClick={() => navigate("/pricing")}
               className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
             >
               Pricing
-            </a>
+            </button>
             <a
               href="#faq"
               className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
@@ -351,12 +351,15 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                   </button>
                 </>
               )}
-              <a
-                href="#pricing"
-                className="py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
+              <button
+                onClick={() => {
+                  navigate("/pricing");
+                  setIsMenuOpen(false);
+                }}
+                className="text-left py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
               >
                 Pricing
-              </a>
+              </button>
               <a
                 href="#faq"
                 className="py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
