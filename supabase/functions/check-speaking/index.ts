@@ -69,8 +69,8 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Transcript too long (max 8000 chars)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     const transcriptWordCount = (transcript || "").trim().split(/\s+/).filter(Boolean).length;
-    if (!transcript || transcriptWordCount < 10) {
-      return new Response(JSON.stringify({ error: "Javobingiz juda qisqa. Kamida 10 ta so'z gapiring." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!transcript || transcriptWordCount < 3) {
+      return new Response(JSON.stringify({ error: "Iltimos, biror narsa gapiring (kamida 3 ta so'z)." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     if (typeof question === "string" && question.length > 2000) {
       return new Response(JSON.stringify({ error: "Question too long" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
