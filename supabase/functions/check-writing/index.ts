@@ -77,8 +77,8 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Essay too long (max 8000 chars)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     const essayWordCount = (essay || "").trim().split(/\s+/).filter(Boolean).length;
-    if (!essay || essayWordCount < 20) {
-      return new Response(JSON.stringify({ error: "Essay juda qisqa. Kamida 20 ta so'z yozing." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!essay || essayWordCount < 5) {
+      return new Response(JSON.stringify({ error: "Iltimos, javobingizni yozing (kamida 5 ta so'z)." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     if (typeof question === "string" && question.length > 2000) {
       return new Response(JSON.stringify({ error: "Question too long" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
