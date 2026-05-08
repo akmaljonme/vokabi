@@ -25,7 +25,7 @@ export const useTestResults = () => {
       if (error) throw error;
       setResults(data || []);
     } catch (error) {
-      console.error('Error fetching test results:', error);
+      // Suppress detailed error in production; show generic UX elsewhere
     } finally {
       setLoading(false);
     }
@@ -55,8 +55,7 @@ export const useTestResults = () => {
       
       return { error: null };
     } catch (error: any) {
-      console.error('Error saving test result:', error);
-      return { error };
+      return { error: new Error('Natijani saqlab bo\'lmadi. Qayta urinib ko\'ring.') };
     }
   };
 
