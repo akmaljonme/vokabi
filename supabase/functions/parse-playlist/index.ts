@@ -90,7 +90,13 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const authHeader = req.headers.get("Authorization") || "";
+    const userRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/auth/v1/user`, { headers: { Authorization: authHeader, apikey: Deno.env.get("SUPABASE_ANON_KEY") || "" } });
+    if (!userRes.ok) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const { playlistUrl, defaultSkill } = await req.json();
+    if (typeof playlistUrl !== "string" || playlistUrl.length > 500) {
+      return new Response(JSON.stringify({ error: "Invalid playlist URL" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     if (!playlistUrl) throw new Error("Playlist URL kerak");
 
     const plMatch = playlistUrl.match(/[?&]list=([\w-]+)/);
