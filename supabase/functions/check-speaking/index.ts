@@ -68,6 +68,10 @@ serve(async (req) => {
     if (typeof transcript === "string" && transcript.length > 8000) {
       return new Response(JSON.stringify({ error: "Transcript too long (max 8000 chars)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+    const transcriptWordCount = (transcript || "").trim().split(/\s+/).filter(Boolean).length;
+    if (!transcript || transcriptWordCount < 10) {
+      return new Response(JSON.stringify({ error: "Javobingiz juda qisqa. Kamida 10 ta so'z gapiring." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     if (typeof question === "string" && question.length > 2000) {
       return new Response(JSON.stringify({ error: "Question too long" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -150,9 +154,8 @@ FEEDBACK REQUIREMENTS:
     if (!response.ok) {
       if (response.status === 429) return new Response(JSON.stringify({ error: "Rate limit" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       if (response.status === 402) {
-        const fallbackResult = buildFallbackSpeakingEvaluation(transcript, question, level);
-        return new Response(JSON.stringify({ result: fallbackResult, fallback: true, error: "Kredit yetarli emas" }), {
-          status: 200,
+        return new Response(JSON.stringify({ error: "AI krediti tugagan. Workspace -> Usage bo'limidan kredit qo'shing." }), {
+          status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
