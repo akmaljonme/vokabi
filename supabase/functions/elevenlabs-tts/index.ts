@@ -11,6 +11,11 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get("Authorization") || "";
+    const userRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/auth/v1/user`, { headers: { Authorization: authHeader, apikey: Deno.env.get("SUPABASE_ANON_KEY") || "" } });
+    if (!userRes.ok) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     const { text, voiceId = "JBFqnCBsd6RMkjVDRZzb" } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
@@ -26,6 +31,9 @@ serve(async (req) => {
         JSON.stringify({ error: "Text is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+    if (text.length > 2000) {
+      return new Response(JSON.stringify({ error: "Text too long (max 2000 chars)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     console.log(`Generating TTS for text: ${text.substring(0, 100)}...`);
