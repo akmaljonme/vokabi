@@ -686,16 +686,23 @@ export const LandingPage = ({
             </p>
           </FadeUp>
 
-          <div className="flex flex-wrap gap-3 justify-center max-w-4xl mx-auto mb-10">
+          <div className="flex flex-wrap gap-3 justify-center max-w-4xl mx-auto mb-12">
             {gameShowcase.map((game, i) => (
               <FadeUp key={i} delay={i * 0.02}>
-                <motion.div
-                  whileHover={{ scale: 1.08, y: -4 }}
-                  className="px-4 py-2.5 rounded-2xl border border-border bg-card text-sm font-medium hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer"
+                <motion.button
+                  whileHover={{ y: -3 }}
+                  whileTap={{ y: 2 }}
                   onClick={() => navigate(user ? "/games" : "/login")}
+                  className="px-4 py-2.5 rounded-2xl text-sm font-extrabold text-white inline-flex items-center gap-2 transition-transform"
+                  style={{
+                    background: game.bg,
+                    border: `2px solid ${game.shadow}`,
+                    boxShadow: `0 4px 0 0 ${game.shadow}`,
+                  }}
                 >
-                  {game}
-                </motion.div>
+                  <span className="text-base leading-none">{game.emoji}</span>
+                  <span>{game.label}</span>
+                </motion.button>
               </FadeUp>
             ))}
           </div>
