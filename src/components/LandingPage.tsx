@@ -426,28 +426,29 @@ export const LandingPage = ({
     },
   ];
 
-  const gameShowcase = [
-    "🔗 Word Match",
-    "🐝 Spelling Bee",
-    "⚔️ Grammar Battle",
-    "🃏 Flashcards",
-    "💀 Hangman",
-    "📝 Sentence Builder",
-    "🎧 Listening Quiz",
-    "🎭 Idiom Master",
-    "🔤 Last Word (AI)",
-    "🧩 Crossword",
-    "🔀 Word Scramble",
-    "✏️ Fill in the Blank",
-    "🔄 Synonyms",
-    "📍 Prepositions",
-    "⏰ Verb Tenses",
-    "🔥 Phrasal Verbs",
-    "🧲 Collocations",
-    "👅 Tongue Twisters",
-    "⚡ Reading Speed",
-    "🧠 Memory Cards",
-    "✅ True or False",
+  // Duolingo-style colorful game chips. Each chip gets a solid color + hard offset shadow.
+  const gameShowcase: { label: string; emoji: string; bg: string; shadow: string }[] = [
+    { label: "Word Match",       emoji: "🔗", bg: "hsl(88 78% 45%)",  shadow: "hsl(88 78% 32%)" },
+    { label: "Spelling Bee",     emoji: "🐝", bg: "hsl(45 100% 55%)", shadow: "hsl(38 95% 42%)" },
+    { label: "Grammar Battle",   emoji: "⚔️", bg: "hsl(357 92% 62%)", shadow: "hsl(357 80% 45%)" },
+    { label: "Flashcards",       emoji: "🃏", bg: "hsl(199 89% 53%)", shadow: "hsl(199 85% 38%)" },
+    { label: "Hangman",          emoji: "💀", bg: "hsl(280 75% 55%)", shadow: "hsl(280 70% 38%)" },
+    { label: "Sentence Builder", emoji: "📝", bg: "hsl(25 95% 58%)",  shadow: "hsl(20 90% 42%)" },
+    { label: "Listening Quiz",   emoji: "🎧", bg: "hsl(173 75% 42%)", shadow: "hsl(173 75% 28%)" },
+    { label: "Idiom Master",     emoji: "🎭", bg: "hsl(340 82% 65%)", shadow: "hsl(340 75% 48%)" },
+    { label: "Last Word (AI)",   emoji: "🔤", bg: "hsl(217 91% 60%)", shadow: "hsl(217 85% 42%)" },
+    { label: "Crossword",        emoji: "🧩", bg: "hsl(142 70% 45%)", shadow: "hsl(142 70% 30%)" },
+    { label: "Word Scramble",    emoji: "🔀", bg: "hsl(199 89% 53%)", shadow: "hsl(199 85% 38%)" },
+    { label: "Fill in the Blank",emoji: "✏️", bg: "hsl(45 100% 55%)", shadow: "hsl(38 95% 42%)" },
+    { label: "Synonyms",         emoji: "🔄", bg: "hsl(173 75% 42%)", shadow: "hsl(173 75% 28%)" },
+    { label: "Prepositions",     emoji: "📍", bg: "hsl(357 92% 62%)", shadow: "hsl(357 80% 45%)" },
+    { label: "Verb Tenses",      emoji: "⏰", bg: "hsl(280 75% 55%)", shadow: "hsl(280 70% 38%)" },
+    { label: "Phrasal Verbs",    emoji: "🔥", bg: "hsl(25 95% 58%)",  shadow: "hsl(20 90% 42%)" },
+    { label: "Collocations",     emoji: "🧲", bg: "hsl(340 82% 65%)", shadow: "hsl(340 75% 48%)" },
+    { label: "Tongue Twisters",  emoji: "👅", bg: "hsl(330 80% 60%)", shadow: "hsl(330 75% 42%)" },
+    { label: "Reading Speed",    emoji: "⚡", bg: "hsl(45 100% 55%)", shadow: "hsl(38 95% 42%)" },
+    { label: "Memory Cards",     emoji: "🧠", bg: "hsl(217 91% 60%)", shadow: "hsl(217 85% 42%)" },
+    { label: "True or False",    emoji: "✅", bg: "hsl(88 78% 45%)",  shadow: "hsl(88 78% 32%)" },
   ];
 
   return (
@@ -685,16 +686,23 @@ export const LandingPage = ({
             </p>
           </FadeUp>
 
-          <div className="flex flex-wrap gap-3 justify-center max-w-4xl mx-auto mb-10">
+          <div className="flex flex-wrap gap-3 justify-center max-w-4xl mx-auto mb-12">
             {gameShowcase.map((game, i) => (
               <FadeUp key={i} delay={i * 0.02}>
-                <motion.div
-                  whileHover={{ scale: 1.08, y: -4 }}
-                  className="px-4 py-2.5 rounded-2xl border border-border bg-card text-sm font-medium hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer"
+                <motion.button
+                  whileHover={{ y: -3 }}
+                  whileTap={{ y: 2 }}
                   onClick={() => navigate(user ? "/games" : "/login")}
+                  className="px-4 py-2.5 rounded-2xl text-sm font-extrabold text-white inline-flex items-center gap-2 transition-transform"
+                  style={{
+                    background: game.bg,
+                    border: `2px solid ${game.shadow}`,
+                    boxShadow: `0 4px 0 0 ${game.shadow}`,
+                  }}
                 >
-                  {game}
-                </motion.div>
+                  <span className="text-base leading-none">{game.emoji}</span>
+                  <span>{game.label}</span>
+                </motion.button>
               </FadeUp>
             ))}
           </div>
