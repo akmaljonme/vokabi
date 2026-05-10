@@ -77,6 +77,10 @@
     --duo-yellow: 45 100% 55%;
     --duo-orange: 25 95% 58%;
     --duo-pink: 340 82% 65%;
+
+    /* Footer (always dark) */
+    --footer-bg: 215 30% 12%;
+    --footer-fg: 210 30% 96%;
   }
 
   .dark {
@@ -130,6 +134,9 @@
     --duo-yellow: 45 95% 60%;
     --duo-orange: 25 90% 60%;
     --duo-pink: 340 78% 68%;
+
+    --footer-bg: 220 25% 5%;
+    --footer-fg: 210 30% 96%;
   }
 }
 

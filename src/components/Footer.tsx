@@ -32,7 +32,7 @@ export const Footer = () => {
   ];
 
   return (
-    <footer className="bg-secondary text-secondary-foreground">
+    <footer style={{ backgroundColor: 'hsl(var(--footer-bg))', color: 'hsl(var(--footer-fg))' }}>
       <div className="container mx-auto px-4 py-14 lg:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* Brand */}
@@ -45,7 +45,7 @@ export const Footer = () => {
                 Vokabi
               </span>
             </div>
-            <p className="text-secondary-foreground/50 text-sm leading-relaxed mb-6">
+            <p className="text-white/60 text-sm leading-relaxed mb-6">
               IELTS va CEFR imtihonlariga professional tayyorgarlik platformasi.
               Bilimingizni sinang va rivojlantiring.
             </p>
@@ -54,7 +54,7 @@ export const Footer = () => {
                 to="https://t.me/vokabi"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center hover:bg-primary transition-colors text-xs font-bold"
+                className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center hover:bg-primary transition-colors text-xs font-bold text-white"
                 title="Telegram kanal"
               >
                 <Megaphone className="size-4" />
@@ -63,7 +63,7 @@ export const Footer = () => {
                 to="https://t.me/vokabi_bot"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center hover:bg-primary transition-colors text-xs font-bold"
+                className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center hover:bg-primary transition-colors text-xs font-bold text-white"
                 title="Telegram bot"
               >
                 <Bot className="size-4" />
@@ -72,7 +72,7 @@ export const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-display font-semibold text-sm uppercase tracking-wider mb-5 text-secondary-foreground/70">
+            <h4 className="font-display font-semibold text-sm uppercase tracking-wider mb-5 text-white/80">
               Product
             </h4>
             <ul className="space-y-3">
@@ -85,7 +85,7 @@ export const Footer = () => {
                 <li key={item}>
                   <a
                     href="#"
-                    className="text-secondary-foreground/50 hover:text-primary transition-colors text-sm"
+                    className="text-white/60 hover:text-primary transition-colors text-sm"
                   >
                     {item}
                   </a>
@@ -95,7 +95,7 @@ export const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-display font-semibold text-sm uppercase tracking-wider mb-5 text-secondary-foreground/70">
+            <h4 className="font-display font-semibold text-sm uppercase tracking-wider mb-5 text-white/80">
               Company
             </h4>
             <ul className="space-y-3">
@@ -103,7 +103,7 @@ export const Footer = () => {
                 <li key={item}>
                   <a
                     href="#"
-                    className="text-secondary-foreground/50 hover:text-primary transition-colors text-sm"
+                    className="text-white/60 hover:text-primary transition-colors text-sm"
                   >
                     {item}
                   </a>
@@ -113,7 +113,7 @@ export const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-display font-semibold text-sm uppercase tracking-wider mb-5 text-secondary-foreground/70">
+            <h4 className="font-display font-semibold text-sm uppercase tracking-wider mb-5 text-white/80">
               Contact
             </h4>
             <ul className="space-y-4">
@@ -124,7 +124,7 @@ export const Footer = () => {
                     to={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-secondary-foreground/50 hover:text-primary transition-colors text-sm"
+                    className="text-white/70 hover:text-primary transition-colors text-sm"
                     title={title}
                   >
                     {label === "Email"
@@ -139,8 +139,8 @@ export const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-white/[0.06] mt-14 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-secondary-foreground/30 text-xs">
+        <div className="border-t border-white/10 mt-14 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-white/50 text-xs">
             © {currentYear} Vokabi. All rights reserved. Created by{" "}
             <Link
               to="https://t.me/a_karimboyev"
@@ -157,7 +157,7 @@ export const Footer = () => {
               <a
                 key={item}
                 href="#"
-                className="text-secondary-foreground/30 hover:text-primary transition-colors"
+                className="text-white/50 hover:text-primary transition-colors"
               >
                 {item}
               </a>

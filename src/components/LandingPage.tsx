@@ -1304,7 +1304,7 @@ export const LandingPage = ({
 
       {/* ═══════════ FINAL CTA ═══════════ */}
       <section className="py-28 lg:py-36 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary to-rose-600" />
+        <div className="absolute inset-0 bg-primary" />
         <div className="absolute inset-0 noise-overlay" />
         <FloatingParticles />
         <div className="container mx-auto px-4 text-center relative z-10">
@@ -1341,7 +1341,7 @@ export const LandingPage = ({
                   handleStartTest();
                   fireConfetti();
                 }}
-                className="inline-flex items-center gap-2.5 bg-white text-secondary font-bold text-base px-8 py-4 rounded-xl hover:bg-white/95 transition-colors shadow-xl"
+                className="inline-flex items-center gap-2.5 bg-white text-foreground font-bold text-base px-8 py-4 rounded-2xl hover:bg-white/95 transition-colors shadow-xl border-2 border-white"
               >
                 {user ? "Testni Boshlash" : "Bepul Ro'yxatdan O'tish"}
                 <ArrowRight className="w-4 h-4" />
