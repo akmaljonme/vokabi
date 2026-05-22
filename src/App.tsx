@@ -11,6 +11,7 @@ import { useDMNotifications } from "@/hooks/useDMNotifications";
 import { GlobalCallOverlay } from "@/components/community/GlobalCallOverlay";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
+import { Background3D } from "@/components/Background3D";
 import { lazy, Suspense } from "react";
 
 // Lazy load all pages — faqat kerakli sahifa yuklanadi
@@ -50,6 +51,7 @@ const App = () => (
           <TooltipProvider>
             <DefaultToaster />
             <SonnerToaster />
+            <Background3D />
 
             <BrowserRouter>
               <ErrorBoundary>

@@ -452,7 +452,7 @@ export const LandingPage = ({
   ];
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-x-clip relative z-10">
       {/* ═══════════ HERO ═══════════ */}
       <section
         ref={heroRef}
