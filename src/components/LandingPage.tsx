@@ -509,7 +509,7 @@ export const LandingPage = ({
                 delay: 0.1,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem] font-display font-bold mb-7 leading-[1.05] tracking-tight"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem] font-display font-bold mb-7 leading-[1.05] tracking-tight text-balance"
             >
               Ingliz tilini
               <br />
@@ -534,7 +534,7 @@ export const LandingPage = ({
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.25 }}
-              className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
+              className="text-base sm:text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed text-balance px-2"
             >
               21+ o'yin, AI-powered testlar, Writing & Speaking baholash —
               barchasi bir platformada. IELTS va CEFR imtihonlariga
@@ -674,15 +674,14 @@ export const LandingPage = ({
         <FloatingParticles />
         <div className="container mx-auto px-4 relative z-10">
           <FadeUp className="text-center mb-16">
-            <span className="premium-badge mb-4 inline-flex">
+            <span className="premium-badge mb-5 inline-flex">
               <Gamepad2 className="w-3.5 h-3.5" /> 21+ O'YINLAR
             </span>
-            <h2 className="text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-5 tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
               O'yin orqali <span className="text-gradient">o'rganing</span>
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Duolingo'dan ham ko'proq o'yin — barchasi ingliz tilini
-              o'rganishga qaratilgan
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto text-balance px-4">
+              Duolingo'dan ham ko'proq o'yin — barchasi ingliz tilini o'rganishga qaratilgan
             </p>
           </FadeUp>
 
@@ -726,14 +725,13 @@ export const LandingPage = ({
         <FloatingParticles />
         <div className="container mx-auto px-4 relative z-10">
           <FadeUp className="text-center mb-20">
-            <span className="premium-badge mb-4 inline-flex">IMKONIYATLAR</span>
-            <h2 className="text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-5 tracking-tight leading-tight">
+            <span className="premium-badge mb-5 inline-flex">IMKONIYATLAR</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
               Muvaffaqiyat uchun{" "}
               <span className="text-gradient">barcha vositalar</span>
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Har bir ko'nikma uchun maxsus tayyorlangan AI-powered testlar va
-              tahlillar
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto text-balance px-4">
+              Har bir ko'nikma uchun maxsus tayyorlangan AI-powered testlar va tahlillar
             </p>
           </FadeUp>
 
@@ -788,13 +786,13 @@ export const LandingPage = ({
         <div className="absolute inset-0 mesh-gradient opacity-30" />
         <div className="container mx-auto px-4 relative z-10">
           <FadeUp className="text-center mb-16">
-            <span className="premium-badge mb-4 inline-flex">
+            <span className="premium-badge mb-5 inline-flex">
               <Trophy className="w-3.5 h-3.5" /> TAQQOSLASH
             </span>
-            <h2 className="text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-5 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
               Nima uchun <span className="text-gradient">Vokabi</span>?
             </h2>
-            <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto text-balance px-4">
               Boshqa platformalar bilan taqqoslang
             </p>
           </FadeUp>
@@ -883,10 +881,8 @@ export const LandingPage = ({
         <div className="absolute inset-0 mesh-gradient opacity-40" />
         <div className="container mx-auto px-4 relative">
           <FadeUp className="text-center mb-16">
-            <span className="premium-badge mb-4 inline-flex">
-              CEFR DARAJALAR
-            </span>
-            <h2 className="text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-5 tracking-tight leading-tight">
+            <span className="premium-badge mb-5 inline-flex">CEFR DARAJALAR</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
               O'z <span className="text-gradient">darajangizni</span> tanlang
             </h2>
           </FadeUp>
@@ -941,10 +937,8 @@ export const LandingPage = ({
       <section className="py-28 lg:py-36 relative overflow-hidden">
         <div className="container mx-auto px-4">
           <FadeUp className="text-center mb-16">
-            <span className="premium-badge mb-4 inline-flex">
-              QANDAY ISHLAYDI
-            </span>
-            <h2 className="text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-5 tracking-tight">
+            <span className="premium-badge mb-5 inline-flex">QANDAY ISHLAYDI</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
               Uchta oddiy <span className="text-gradient">qadam</span>
             </h2>
           </FadeUp>
@@ -1021,8 +1015,8 @@ export const LandingPage = ({
         <div className="absolute inset-0 mesh-gradient opacity-30" />
         <div className="container mx-auto px-4 relative">
           <FadeUp className="text-center mb-16">
-            <span className="premium-badge mb-4 inline-flex">NARXLAR</span>
-            <h2 className="text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-5 tracking-tight">
+            <span className="premium-badge mb-5 inline-flex">NARXLAR</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
               Sizga mos <span className="text-gradient">rejani</span> tanlang
             </h2>
           </FadeUp>
@@ -1120,10 +1114,10 @@ export const LandingPage = ({
       <section className="py-28 lg:py-36 bg-secondary text-secondary-foreground relative overflow-hidden noise-overlay">
         <div className="container mx-auto px-4 relative z-10">
           <FadeUp className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium bg-white/5 border border-white/10 text-primary mb-4">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium bg-white/5 border border-white/10 text-primary mb-5">
               IZOHLAR
             </span>
-            <h2 className="text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-5 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
               Foydalanuvchilar <span className="text-primary">fikrlari</span>
             </h2>
           </FadeUp>
@@ -1222,8 +1216,8 @@ export const LandingPage = ({
       <section id="faq" className="py-28 lg:py-36">
         <div className="container mx-auto px-4">
           <FadeUp className="text-center mb-16">
-            <span className="premium-badge mb-4 inline-flex">SAVOL-JAVOB</span>
-            <h2 className="text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-5 tracking-tight">
+            <span className="premium-badge mb-5 inline-flex">SAVOL-JAVOB</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
               Ko'p beriladigan <span className="text-gradient">savollar</span>
             </h2>
           </FadeUp>

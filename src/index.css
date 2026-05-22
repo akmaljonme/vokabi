@@ -342,15 +342,24 @@
 
   /* Premium badge */
   .premium-badge {
-    @apply inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium;
+    @apply inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest;
     background: hsl(var(--primary) / 0.08);
     color: hsl(var(--primary));
-    border: 1px solid hsl(var(--primary) / 0.15);
+    border: 1px solid hsl(var(--primary) / 0.2);
+    letter-spacing: 0.12em;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 0 12px hsl(var(--primary) / 0.08);
   }
 
   .dark .premium-badge {
-    background: hsl(var(--primary) / 0.12);
-    border-color: hsl(var(--primary) / 0.25);
+    background: hsl(var(--primary) / 0.13);
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 0 0 16px hsl(var(--primary) / 0.12);
+  }
+
+  /* text-balance for Tailwind v3 */
+  .text-balance {
+    text-wrap: balance;
   }
 
   /* Noise texture overlay */
