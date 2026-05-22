@@ -53,17 +53,18 @@ export const useGamification = () => {
 
   const fetchAll = useCallback(async () => {
     if (!user) { setLoading(false); return; }
-    
-    try {
-      // Fetch progress
-      const { data: prog } = await supabase
-        .from('user_progress' as any)
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
 
-      if (!prog) {
-        // Create initial progress
+    try {
+      // Parallel fetch — hammasi bir vaqtda yuboriladi
+      const [progRes, achsRes, uachsRes, lbRes] = await Promise.all([
+        supabase.from('user_progress' as any).select('*').eq('user_id', user.id).maybeSingle(),
+        supabase.from('achievements' as any).select('*'),
+        supabase.from('user_achievements' as any).select('*').eq('user_id', user.id),
+        supabase.rpc('get_leaderboard', { limit_count: 20 }),
+      ]);
+
+      // Progress: agar yo'q bo'lsa yaratib olamiz
+      if (!progRes.data) {
         const { data: newProg } = await supabase
           .from('user_progress' as any)
           .insert({ user_id: user.id } as any)
@@ -71,25 +72,12 @@ export const useGamification = () => {
           .single();
         setProgress(newProg as any);
       } else {
-        setProgress(prog as any);
+        setProgress(progRes.data as any);
       }
 
-      // Fetch achievements
-      const { data: achs } = await supabase
-        .from('achievements' as any)
-        .select('*');
-      if (achs) setAchievements(achs as any[]);
-
-      // Fetch user achievements
-      const { data: uachs } = await supabase
-        .from('user_achievements' as any)
-        .select('*')
-        .eq('user_id', user.id);
-      if (uachs) setUserAchievements(uachs as any[]);
-
-      // Fetch leaderboard
-      const { data: lb } = await supabase.rpc('get_leaderboard', { limit_count: 20 });
-      if (lb) setLeaderboard(lb as any[]);
+      if (achsRes.data)  setAchievements(achsRes.data as any[]);
+      if (uachsRes.data) setUserAchievements(uachsRes.data as any[]);
+      if (lbRes.data)    setLeaderboard(lbRes.data as any[]);
     } catch (err) {
       console.error('Gamification fetch error:', err);
     } finally {

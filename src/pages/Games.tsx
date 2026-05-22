@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Gamepad2,
@@ -12,31 +12,33 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { WordMatchGame } from "@/components/games/WordMatchGame";
-import { SpellingBeeGame } from "@/components/games/SpellingBeeGame";
-import { GrammarBattleGame } from "@/components/games/GrammarBattleGame";
-import { FlashcardsGame } from "@/components/games/FlashcardsGame";
-import { HangmanGame } from "@/components/games/HangmanGame";
-import { SentenceBuilderGame } from "@/components/games/SentenceBuilderGame";
-import { ListeningQuizGame } from "@/components/games/ListeningQuizGame";
-import { IdiomMasterGame } from "@/components/games/IdiomMasterGame";
-import { LastWordGame } from "@/components/games/LastWordGame";
-import { CrosswordGame } from "@/components/games/CrosswordGame";
-import { WordScrambleGame } from "@/components/games/WordScrambleGame";
-import { FillBlankGame } from "@/components/games/FillBlankGame";
-import { SynonymGame } from "@/components/games/SynonymGame";
-import { PrepositionGame } from "@/components/games/PrepositionGame";
-import { VerbTenseGame } from "@/components/games/VerbTenseGame";
-import { PhrasalVerbGame } from "@/components/games/PhrasalVerbGame";
-import { CollocationsGame } from "@/components/games/CollocationsGame";
-import { TongueTwisterGame } from "@/components/games/TongueTwisterGame";
-import { ReadingSpeedGame } from "@/components/games/ReadingSpeedGame";
-import { MemoryCardGame } from "@/components/games/MemoryCardGame";
-import { TrueFalseGame } from "@/components/games/TrueFalseGame";
-import { GameTournament } from "@/components/games/GameTournament";
-import { GameFriends } from "@/components/games/GameFriends";
-import { GameStats } from "@/components/games/GameStats";
 import { DailyGameQuests } from "@/components/games/DailyGameQuests";
+
+// Lazy load — faqat bosilganda yuklanadi
+const WordMatchGame     = lazy(() => import("@/components/games/WordMatchGame").then(m => ({ default: m.WordMatchGame })));
+const SpellingBeeGame   = lazy(() => import("@/components/games/SpellingBeeGame").then(m => ({ default: m.SpellingBeeGame })));
+const GrammarBattleGame = lazy(() => import("@/components/games/GrammarBattleGame").then(m => ({ default: m.GrammarBattleGame })));
+const FlashcardsGame    = lazy(() => import("@/components/games/FlashcardsGame").then(m => ({ default: m.FlashcardsGame })));
+const HangmanGame       = lazy(() => import("@/components/games/HangmanGame").then(m => ({ default: m.HangmanGame })));
+const SentenceBuilderGame = lazy(() => import("@/components/games/SentenceBuilderGame").then(m => ({ default: m.SentenceBuilderGame })));
+const ListeningQuizGame = lazy(() => import("@/components/games/ListeningQuizGame").then(m => ({ default: m.ListeningQuizGame })));
+const IdiomMasterGame   = lazy(() => import("@/components/games/IdiomMasterGame").then(m => ({ default: m.IdiomMasterGame })));
+const LastWordGame      = lazy(() => import("@/components/games/LastWordGame").then(m => ({ default: m.LastWordGame })));
+const CrosswordGame     = lazy(() => import("@/components/games/CrosswordGame").then(m => ({ default: m.CrosswordGame })));
+const WordScrambleGame  = lazy(() => import("@/components/games/WordScrambleGame").then(m => ({ default: m.WordScrambleGame })));
+const FillBlankGame     = lazy(() => import("@/components/games/FillBlankGame").then(m => ({ default: m.FillBlankGame })));
+const SynonymGame       = lazy(() => import("@/components/games/SynonymGame").then(m => ({ default: m.SynonymGame })));
+const PrepositionGame   = lazy(() => import("@/components/games/PrepositionGame").then(m => ({ default: m.PrepositionGame })));
+const VerbTenseGame     = lazy(() => import("@/components/games/VerbTenseGame").then(m => ({ default: m.VerbTenseGame })));
+const PhrasalVerbGame   = lazy(() => import("@/components/games/PhrasalVerbGame").then(m => ({ default: m.PhrasalVerbGame })));
+const CollocationsGame  = lazy(() => import("@/components/games/CollocationsGame").then(m => ({ default: m.CollocationsGame })));
+const TongueTwisterGame = lazy(() => import("@/components/games/TongueTwisterGame").then(m => ({ default: m.TongueTwisterGame })));
+const ReadingSpeedGame  = lazy(() => import("@/components/games/ReadingSpeedGame").then(m => ({ default: m.ReadingSpeedGame })));
+const MemoryCardGame    = lazy(() => import("@/components/games/MemoryCardGame").then(m => ({ default: m.MemoryCardGame })));
+const TrueFalseGame     = lazy(() => import("@/components/games/TrueFalseGame").then(m => ({ default: m.TrueFalseGame })));
+const GameTournament    = lazy(() => import("@/components/games/GameTournament").then(m => ({ default: m.GameTournament })));
+const GameFriends       = lazy(() => import("@/components/games/GameFriends").then(m => ({ default: m.GameFriends })));
+const GameStats         = lazy(() => import("@/components/games/GameStats").then(m => ({ default: m.GameStats })));
 
 type GameType =
   | "menu"
@@ -251,6 +253,14 @@ export default function Games() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        <Suspense fallback={
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="relative w-10 h-10">
+              <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+              <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+            </div>
+          </div>
+        }>
         <AnimatePresence mode="wait">
           {activeGame === "menu" && (
             <motion.div
@@ -428,6 +438,7 @@ export default function Games() {
             <GameStats key="st" onBack={() => setActiveGame("menu")} />
           )}
         </AnimatePresence>
+        </Suspense>
       </main>
     </div>
   );

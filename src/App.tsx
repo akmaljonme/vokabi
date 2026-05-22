@@ -9,23 +9,33 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AITutorChat } from "@/components/AITutorChat";
 import { useDMNotifications } from "@/hooks/useDMNotifications";
 import { GlobalCallOverlay } from "@/components/community/GlobalCallOverlay";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PageLoader } from "@/components/PageLoader";
+import { lazy, Suspense } from "react";
 
-// Pages
-import Index from "./pages/Index";
-import Auth from "./pages/Auth"; // Fixed missing import
-import Dashboard from "./pages/Dashboard";
-import ProfileSettings from "./pages/ProfileSettings";
-import Games from "./pages/Games";
-import Community from "./pages/Community";
-import NotFound from "./pages/NotFound";
-import Leaderboard from "./pages/Leaderboard";
-import VideoLessons from "./pages/VideoLessons";
-import Exams from "./pages/Exams";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Pricing from "./pages/Pricing";
+// Lazy load all pages — faqat kerakli sahifa yuklanadi
+const Index          = lazy(() => import("./pages/Index"));
+const Auth           = lazy(() => import("./pages/Auth"));
+const Login          = lazy(() => import("./pages/Login"));
+const Register       = lazy(() => import("./pages/Register"));
+const Dashboard      = lazy(() => import("./pages/Dashboard"));
+const ProfileSettings= lazy(() => import("./pages/ProfileSettings"));
+const Games          = lazy(() => import("./pages/Games"));
+const Community      = lazy(() => import("./pages/Community"));
+const NotFound       = lazy(() => import("./pages/NotFound"));
+const Leaderboard    = lazy(() => import("./pages/Leaderboard"));
+const VideoLessons   = lazy(() => import("./pages/VideoLessons"));
+const Exams          = lazy(() => import("./pages/Exams"));
+const Pricing        = lazy(() => import("./pages/Pricing"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 1000 * 60 * 2, // 2 daqiqa cache
+    },
+  },
+});
 
 const GlobalListeners = () => {
   useDMNotifications();
@@ -38,28 +48,30 @@ const App = () => (
       <CallProvider>
         <ThemeProvider>
           <TooltipProvider>
-            {/* Toast Notifications */}
             <DefaultToaster />
             <SonnerToaster />
 
-            {/* Router */}
             <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/profile" element={<ProfileSettings />} />
-                <Route path="/games" element={<Games />} />
-                <Route path="/community" element={<Community />} />
-                <Route path="/leaderboard" element={<Leaderboard />} />
-                <Route path="/videos" element={<VideoLessons />} />
-                <Route path="/exams" element={<Exams />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/"          element={<ErrorBoundary><Index /></ErrorBoundary>} />
+                    <Route path="/login"     element={<ErrorBoundary><Login /></ErrorBoundary>} />
+                    <Route path="/register"  element={<ErrorBoundary><Register /></ErrorBoundary>} />
+                    <Route path="/auth"      element={<ErrorBoundary><Auth /></ErrorBoundary>} />
+                    <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
+                    <Route path="/profile"   element={<ErrorBoundary><ProfileSettings /></ErrorBoundary>} />
+                    <Route path="/games"     element={<ErrorBoundary><Games /></ErrorBoundary>} />
+                    <Route path="/community" element={<ErrorBoundary><Community /></ErrorBoundary>} />
+                    <Route path="/leaderboard" element={<ErrorBoundary><Leaderboard /></ErrorBoundary>} />
+                    <Route path="/videos"    element={<ErrorBoundary><VideoLessons /></ErrorBoundary>} />
+                    <Route path="/exams"     element={<ErrorBoundary><Exams /></ErrorBoundary>} />
+                    <Route path="/pricing"   element={<ErrorBoundary><Pricing /></ErrorBoundary>} />
+                    <Route path="*"          element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </ErrorBoundary>
 
-              {/* Global Components */}
               <AITutorChat />
               <GlobalListeners />
               <GlobalCallOverlay />

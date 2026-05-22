@@ -43,7 +43,7 @@ import {
   useSpring,
   MotionValue,
 } from "framer-motion";
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState, useCallback, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { Button } from "@/components/ui/button";
@@ -796,32 +796,54 @@ export const LandingPage = ({
           </FadeUp>
 
           <FadeUp>
-            <div className="max-w-4xl mx-auto overflow-x-auto">
+            {/* Mobile: card view */}
+            <div className="block sm:hidden max-w-sm mx-auto space-y-3">
+              {competitorComparison.map((row, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04 }}
+                  viewport={{ once: true }}
+                  className="card-elevated rounded-xl p-4 border border-border/50"
+                >
+                  <p className="text-sm font-semibold mb-3">{row.feature}</p>
+                  <div className="grid grid-cols-4 gap-2 text-center">
+                    {[
+                      { label: "Vokabi", val: row.vokabi, primary: true },
+                      { label: "ScoreUp", val: row.scoreup, primary: false },
+                      { label: "Self-Learn", val: row.selflearn, primary: false },
+                      { label: "Duolingo", val: row.duolingo, primary: false },
+                    ].map(({ label, val, primary }) => (
+                      <div key={label}>
+                        <p className={`text-[10px] mb-1 font-medium ${primary ? "text-primary" : "text-muted-foreground"}`}>{label}</p>
+                        {val ? (
+                          <CheckCircle2 className={`w-4 h-4 mx-auto ${primary ? "text-primary" : "text-muted-foreground/50"}`} />
+                        ) : (
+                          <span className="text-muted-foreground/30 text-sm">—</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Desktop: table view */}
+            <div className="hidden sm:block max-w-4xl mx-auto overflow-x-auto rounded-2xl border border-border/50">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr>
-                    <th className="text-left p-3 text-sm font-medium text-muted-foreground">
-                      Xususiyat
-                    </th>
-                    <th className="p-3 text-center">
+                  <tr className="border-b border-border/50">
+                    <th className="text-left p-4 text-sm font-medium text-muted-foreground bg-muted/30">Xususiyat</th>
+                    <th className="p-4 text-center bg-primary/5">
                       <div className="inline-flex flex-col items-center">
-                        <span className="text-sm font-bold text-primary">
-                          Vokabi
-                        </span>
-                        <span className="text-[10px] text-primary/60">
-                          ⭐ #1
-                        </span>
+                        <span className="text-sm font-bold text-primary">Vokabi</span>
+                        <span className="text-[10px] text-primary/60">⭐ #1</span>
                       </div>
                     </th>
-                    <th className="p-3 text-center text-sm font-medium text-muted-foreground">
-                      ScoreUp
-                    </th>
-                    <th className="p-3 text-center text-sm font-medium text-muted-foreground">
-                      Self-Learn
-                    </th>
-                    <th className="p-3 text-center text-sm font-medium text-muted-foreground">
-                      Duolingo
-                    </th>
+                    <th className="p-4 text-center text-sm font-medium text-muted-foreground bg-muted/30">ScoreUp</th>
+                    <th className="p-4 text-center text-sm font-medium text-muted-foreground bg-muted/30">Self-Learn</th>
+                    <th className="p-4 text-center text-sm font-medium text-muted-foreground bg-muted/30">Duolingo</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -832,38 +854,26 @@ export const LandingPage = ({
                       whileInView={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.05 }}
                       viewport={{ once: true }}
-                      className="border-t border-border/30"
+                      className="border-t border-border/30 hover:bg-muted/20 transition-colors"
                     >
-                      <td className="p-3 text-sm font-medium">{row.feature}</td>
-                      <td className="p-3 text-center">
+                      <td className="p-4 text-sm font-medium">{row.feature}</td>
+                      <td className="p-4 text-center bg-primary/[0.03]">
                         <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/10">
                           {row.vokabi ? (
                             <CheckCircle2 className="w-4 h-4 text-primary" />
                           ) : (
-                            <span className="text-muted-foreground">—</span>
+                            <span className="text-muted-foreground text-xs">—</span>
                           )}
                         </span>
                       </td>
-                      <td className="p-3 text-center">
-                        {row.scoreup ? (
-                          <CheckCircle2 className="w-4 h-4 text-muted-foreground/50 mx-auto" />
-                        ) : (
-                          <span className="text-muted-foreground/30">—</span>
-                        )}
+                      <td className="p-4 text-center">
+                        {row.scoreup ? <CheckCircle2 className="w-4 h-4 text-muted-foreground/50 mx-auto" /> : <span className="text-muted-foreground/30">—</span>}
                       </td>
-                      <td className="p-3 text-center">
-                        {row.selflearn ? (
-                          <CheckCircle2 className="w-4 h-4 text-muted-foreground/50 mx-auto" />
-                        ) : (
-                          <span className="text-muted-foreground/30">—</span>
-                        )}
+                      <td className="p-4 text-center">
+                        {row.selflearn ? <CheckCircle2 className="w-4 h-4 text-muted-foreground/50 mx-auto" /> : <span className="text-muted-foreground/30">—</span>}
                       </td>
-                      <td className="p-3 text-center">
-                        {row.duolingo ? (
-                          <CheckCircle2 className="w-4 h-4 text-muted-foreground/50 mx-auto" />
-                        ) : (
-                          <span className="text-muted-foreground/30">—</span>
-                        )}
+                      <td className="p-4 text-center">
+                        {row.duolingo ? <CheckCircle2 className="w-4 h-4 text-muted-foreground/50 mx-auto" /> : <span className="text-muted-foreground/30">—</span>}
                       </td>
                     </motion.tr>
                   ))}
