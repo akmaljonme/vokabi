@@ -525,9 +525,8 @@ export const LandingPage = ({
                     "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--neon-purple)), hsl(var(--primary)))",
                 }}
               >
-                mukammal
-              </motion.span>{" "}
-              o'rganing
+                mukammal o'rganing
+              </motion.span>
             </motion.h1>
 
             <motion.p
@@ -727,8 +726,7 @@ export const LandingPage = ({
           <FadeUp className="text-center mb-20">
             <span className="premium-badge mb-5 inline-flex">IMKONIYATLAR</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
-              Muvaffaqiyat uchun{" "}
-              <span className="text-gradient">barcha vositalar</span>
+              Muvaffaqiyat uchun <span className="text-gradient">barcha vositalar</span>
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto text-balance px-4">
               Har bir ko'nikma uchun maxsus tayyorlangan AI-powered testlar va tahlillar
@@ -1325,8 +1323,7 @@ export const LandingPage = ({
             >
               <GraduationCap className="w-16 h-16 mx-auto mb-6 text-white/80" />
               <h2 className="text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold text-white mb-5 tracking-tight">
-                Created by{" "}
-                <Link
+                Created by <Link
                   to="https://t.me/a_karimboyev"
                   target="_blank"
                   rel="noopener noreferrer"
