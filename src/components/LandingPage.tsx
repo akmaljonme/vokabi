@@ -1111,15 +1111,20 @@ export const LandingPage = ({
       </section>
 
       {/* ═══════════ TESTIMONIALS ═══════════ */}
-      <section className="py-28 lg:py-36 bg-secondary text-secondary-foreground relative overflow-hidden noise-overlay">
+      <section className="py-28 lg:py-36 relative overflow-hidden">
+        <FloatingParticles />
+        <div className="absolute inset-0 mesh-gradient opacity-30" />
         <div className="container mx-auto px-4 relative z-10">
           <FadeUp className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium bg-white/5 border border-white/10 text-primary mb-5">
-              IZOHLAR
+            <span className="premium-badge mb-5 inline-flex">
+              <Star className="w-3.5 h-3.5" /> IZOHLAR
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
-              Foydalanuvchilar <span className="text-primary">fikrlari</span>
+              Foydalanuvchilar <span className="text-gradient">fikrlari</span>
             </h2>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto text-balance px-4">
+              Minglab o'quvchilar Vokabi orqali ingliz tilini o'zlashtirdi
+            </p>
           </FadeUp>
 
           {user && (
@@ -1170,35 +1175,36 @@ export const LandingPage = ({
               return (
                 <FadeUp key={fb.id || index} delay={index * 0.08}>
                   <motion.div
-                    whileHover={{ y: -4 }}
-                    className="rounded-2xl p-7 bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] h-full hover:bg-white/[0.05] transition-colors"
+                    whileHover={{ y: -6, scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    className="card-elevated rounded-2xl p-7 h-full flex flex-col gap-4 border border-border/50"
                   >
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-semibold text-sm text-primary">
+                    <div className="flex gap-0.5">
+                      {[...Array(fb.rating || 5)].map((_: any, i: number) => (
+                        <Star
+                          key={i}
+                          className="w-4 h-4 fill-primary text-primary"
+                        />
+                      ))}
+                    </div>
+                    <p className="text-foreground/80 text-sm leading-relaxed flex-1">
+                      "{fb.message}"
+                    </p>
+                    <div className="flex items-center gap-3 pt-2 border-t border-border/40">
+                      <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center font-bold text-xs text-primary shrink-0">
                         {initials}
                       </div>
                       <div>
-                        <div className="font-semibold text-sm">
+                        <div className="font-semibold text-sm text-foreground">
                           {fb.full_name}
                         </div>
                         {fb.level_info && (
-                          <div className="text-xs text-secondary-foreground/50">
+                          <div className="text-xs text-muted-foreground">
                             {fb.level_info}
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-0.5 mb-3">
-                      {[...Array(fb.rating || 5)].map((_: any, i: number) => (
-                        <Star
-                          key={i}
-                          className="w-3.5 h-3.5 fill-primary text-primary"
-                        />
-                      ))}
-                    </div>
-                    <p className="text-secondary-foreground/60 text-sm leading-relaxed">
-                      {fb.message}
-                    </p>
                   </motion.div>
                 </FadeUp>
               );
