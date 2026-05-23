@@ -178,6 +178,10 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 >
                   <PenTool className="w-3.5 h-3.5" /> Essay Checker
                 </button>
+                <button
+                  onClick={() => navigate("/community")}
+                  className="relative px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
+                >
                   <Users className="w-3.5 h-3.5" /> Hamjamiyat
                   {unreadCount > 0 && (
                     <Badge
