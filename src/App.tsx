@@ -30,6 +30,9 @@ const Exams          = lazy(() => import("./pages/Exams"));
 const Pricing        = lazy(() => import("./pages/Pricing"));
 const WordBank       = lazy(() => import("./pages/WordBank"));
 const Tools          = lazy(() => import("./pages/Tools"));
+const SchoolAdmin    = lazy(() => import("./pages/school/SchoolAdmin"));
+const TeacherPanel   = lazy(() => import("./pages/school/TeacherPanel"));
+const StudentPanel   = lazy(() => import("./pages/school/StudentPanel"));
 const StudyRoom      = lazy(() => import("./pages/StudyRoom"));
 const EssayChecker   = lazy(() => import("./pages/EssayChecker"));
 
@@ -74,6 +77,9 @@ const App = () => (
                     <Route path="/exams"     element={<ErrorBoundary><Exams /></ErrorBoundary>} />
                     <Route path="/pricing"   element={<ErrorBoundary><Pricing /></ErrorBoundary>} />
                     <Route path="/tools"      element={<ErrorBoundary><Tools /></ErrorBoundary>} />
+                    <Route path="/school"      element={<ErrorBoundary><SchoolAdmin /></ErrorBoundary>} />
+                    <Route path="/school/teacher" element={<ErrorBoundary><TeacherPanel /></ErrorBoundary>} />
+                    <Route path="/school/student" element={<ErrorBoundary><StudentPanel /></ErrorBoundary>} />
                     <Route path="/wordbank"   element={<ErrorBoundary><WordBank /></ErrorBoundary>} />
                     <Route path="/study-room" element={<ErrorBoundary><StudyRoom /></ErrorBoundary>} />
                     <Route path="/essay"      element={<ErrorBoundary><EssayChecker /></ErrorBoundary>} />
