@@ -7,25 +7,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const SYSTEM_PROMPT = `Siz Vokabi platformasining AI English tutorsiz. Vazifangiz foydalanuvchilarga ingliz tilini o'rganishda yordam berish.
-
-Qoidalar:
-- Har doim O'zbek tilida javob bering (grammatik misollar inglizcha bo'lishi mumkin)
-- Qisqa, aniq va foydali javoblar bering
-- Grammatika, lug'at, reading, listening, writing va speaking bo'yicha maslahatlar bering
-- IELTS va CEFR darajalari (A1–C2) bo'yicha ma'lumot bering
-- Foydalanuvchi xatolarini muloyimlik bilan tuzating va tushuntiring
-- Markdown formatda javob bering (jadvallar, ro'yxatlar, qalin matn)
-- Savollar berib, foydalanuvchini faol qiling
-- Har bir javob oxirida kichik mashq yoki savol bering`;
-
 const QUICK_PROMPTS = [
   { icon: BookOpen, text: "Grammar tushuntir", label: "Grammar" },
-  { icon: Pen, text: "IELTS Writing maslahat", label: "Writing" },
+  { icon: Pen, text: "IELTS Writing maslahat ber", label: "Writing" },
   { icon: Headphones, text: "Listening qanday yaxshilanadi?", label: "Listening" },
   { icon: MessageCircle, text: "Inglizcha gaplashishni o'rgat", label: "Speaking" },
 ];
@@ -63,28 +52,19 @@ export const AITutorChat = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages: updatedMessages,
-        }),
+      const { data, error } = await supabase.functions.invoke("ai-tutor", {
+        body: { messages: updatedMessages },
       });
 
-      const data = await response.json();
-      const assistantText =
-        data.content?.find((b: any) => b.type === "text")?.text ||
-        "Xatolik yuz berdi. Qayta urinib ko'ring.";
+      if (error) throw error;
 
+      const assistantText = data?.text || "Javob olishda xatolik yuz berdi.";
       setMessages((prev) => [...prev, { role: "assistant", content: assistantText }]);
     } catch (e) {
       console.error(e);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Xatolik yuz berdi. Internet aloqangizni tekshiring." },
+        { role: "assistant", content: "Xatolik yuz berdi. Qayta urinib ko'ring." },
       ]);
     } finally {
       setIsLoading(false);
@@ -229,7 +209,12 @@ export const AITutorChat = () => {
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
                   placeholder="Savolingizni yozing..."
                   className="flex-1 bg-background border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
                   disabled={isLoading}

@@ -2,86 +2,68 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const SYSTEM_PROMPT = `Siz Vokabi platformasining AI English tutorsiz. Vazifangiz foydalanuvchilarga ingliz tilini o'rganishda yordam berish.
+
+Qoidalar:
+- Har doim O'zbek tilida javob bering (grammatik misollar inglizcha bo'lishi mumkin)
+- Qisqa, aniq va foydali javoblar bering
+- Grammatika, lug'at, reading, listening, writing va speaking bo'yicha maslahatlar bering
+- IELTS va CEFR darajalari (A1–C2) bo'yicha ma'lumot bering
+- Foydalanuvchi xatolarini muloyimlik bilan tuzating va tushuntiring
+- Markdown formatda javob bering (jadvallar, ro'yxatlar, qalin matn)
+- Savollar berib, foydalanuvchini faol qiling`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // AuthN
-    const authHeader = req.headers.get("Authorization") || "";
-    const userRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/auth/v1/user`, { headers: { Authorization: authHeader, apikey: Deno.env.get("SUPABASE_ANON_KEY") || "" } });
-    if (!userRes.ok) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const { messages } = await req.json();
-    if (!Array.isArray(messages) || messages.length > 50) {
-      return new Response(JSON.stringify({ error: "Invalid or too many messages" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-    const totalLen = messages.reduce((s: number, m: any) => s + (typeof m?.content === "string" ? m.content.length : 0), 0);
-    if (totalLen > 20000) {
-      return new Response(JSON.stringify({ error: "Message content too long" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
+    if (!Array.isArray(messages) || messages.length > 50) {
+      return new Response(JSON.stringify({ error: "Xato so'rov" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY sozlanmagan");
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${GEMINI_API_KEY}`,
         "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "gemini-2.0-flash",
-        messages: [
-          {
-            role: "system",
-            content: `Siz Vokabi platformasining AI tutorsiz. Sizning vazifangiz foydalanuvchilarga ingliz tili o'rganishda yordam berish.
-
-Qoidalar:
-- Har doim O'zbek tilida javob bering (grammatik tushuntirishlar ingliz tilida bo'lishi mumkin)
-- Qisqa va aniq javoblar bering
-- Grammatika, lug'at, reading, listening, writing va speaking bo'yicha maslahatlar bering
-- IELTS va CEFR darajalari bo'yicha ma'lumot bering
-- Foydalanuvchini rag'batlantiring va motivatsiya qiling
-- Markdown formatda javob bering
-- Savollar berib, foydalanuvchini mashq qildiring
-- Xatolarni tuzatib, tushuntirish bering`
-          },
-          ...messages,
-        ],
-        stream: true,
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 1024,
+        system: SYSTEM_PROMPT,
+        messages,
       }),
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Juda ko'p so'rov. Biroz kuting." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Kredit yetarli emas." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI xizmati vaqtincha ishlamayapti" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      const err = await response.text();
+      console.error("Anthropic error:", response.status, err);
+      return new Response(JSON.stringify({ error: "AI xizmati ishlamayapti" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    const data = await response.json();
+    const text = data.content?.find((b: any) => b.type === "text")?.text || "";
+
+    return new Response(JSON.stringify({ text }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("ai-tutor error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Xato" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
