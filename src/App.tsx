@@ -28,6 +28,9 @@ const Leaderboard    = lazy(() => import("./pages/Leaderboard"));
 const VideoLessons   = lazy(() => import("./pages/VideoLessons"));
 const Exams          = lazy(() => import("./pages/Exams"));
 const Pricing        = lazy(() => import("./pages/Pricing"));
+const WordBank       = lazy(() => import("./pages/WordBank"));
+const StudyRoom      = lazy(() => import("./pages/StudyRoom"));
+const EssayChecker   = lazy(() => import("./pages/EssayChecker"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,6 +72,9 @@ const App = () => (
                     <Route path="/videos"    element={<ErrorBoundary><VideoLessons /></ErrorBoundary>} />
                     <Route path="/exams"     element={<ErrorBoundary><Exams /></ErrorBoundary>} />
                     <Route path="/pricing"   element={<ErrorBoundary><Pricing /></ErrorBoundary>} />
+                    <Route path="/wordbank"   element={<ErrorBoundary><WordBank /></ErrorBoundary>} />
+                    <Route path="/study-room" element={<ErrorBoundary><StudyRoom /></ErrorBoundary>} />
+                    <Route path="/essay"      element={<ErrorBoundary><EssayChecker /></ErrorBoundary>} />
                     <Route path="*"          element={<NotFound />} />
                   </Routes>
                 </Suspense>

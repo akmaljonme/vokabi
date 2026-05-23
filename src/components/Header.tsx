@@ -15,6 +15,9 @@ import {
   Phone,
   Video,
   ClipboardList,
+  BookOpen,
+  PenTool,
+  Home,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -158,9 +161,23 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                   <ClipboardList className="w-3.5 h-3.5" /> Examlar
                 </button>
                 <button
-                  onClick={() => navigate("/community")}
-                  className="relative px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
+                  onClick={() => navigate("/wordbank")}
+                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
                 >
+                  <BookOpen className="w-3.5 h-3.5" /> So'z Banki
+                </button>
+                <button
+                  onClick={() => navigate("/study-room")}
+                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
+                >
+                  <Home className="w-3.5 h-3.5" /> Study Room
+                </button>
+                <button
+                  onClick={() => navigate("/essay")}
+                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
+                >
+                  <PenTool className="w-3.5 h-3.5" /> Essay Checker
+                </button>
                   <Users className="w-3.5 h-3.5" /> Hamjamiyat
                   {unreadCount > 0 && (
                     <Badge
