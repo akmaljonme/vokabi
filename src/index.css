@@ -526,11 +526,7 @@
 
 /* Adult theme uses default red */
 
-/* Custom cursor — desktop only */
-@media (pointer: fine) {
-  * { cursor: none !important; }
-  a, button, [role="button"] { cursor: none !important; }
-}
+/* Custom cursor removed — using default browser cursor */
 
 /* 3D perspective for cards */
 .perspective-card {
