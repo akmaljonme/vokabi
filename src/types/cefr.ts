@@ -99,3 +99,14 @@ export interface TestResult {
 }
 
 export type ViewType = 'landing' | 'levels' | 'path' | 'skills' | 'vocabulary' | 'test' | 'result';
+
+// Feedback / Testimonial
+export interface Feedback {
+  id?: string;
+  full_name: string;
+  level_info?: string;
+  message: string;
+  rating: number;
+  created_at?: string;
+  user_id?: string;
+}

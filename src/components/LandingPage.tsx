@@ -46,6 +46,7 @@ import {
 import { useRef, useEffect, useState, useCallback, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
+import type { Feedback } from "@/types/cefr";
 import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -251,7 +252,7 @@ export const LandingPage = ({
     tests: 0,
     avgPass: 0,
   });
-  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
 
   const heroRef = useRef(null);
@@ -289,7 +290,7 @@ export const LandingPage = ({
         .eq("is_approved", true)
         .order("created_at", { ascending: false })
         .limit(6);
-      if (data) setFeedbacks(data as any[]);
+      if (data) setFeedbacks(data as unknown as Feedback[]);
     };
     fetchStats();
     fetchFeedbacks();
@@ -1173,7 +1174,7 @@ export const LandingPage = ({
                     rating: 5,
                   },
                 ]
-            ).map((fb: any, index: number) => {
+            ).map((fb: Feedback, index: number) => {
               const initials =
                 fb.full_name
                   ?.split(" ")
@@ -1188,7 +1189,7 @@ export const LandingPage = ({
                     className="card-elevated rounded-2xl p-7 h-full flex flex-col gap-4 border border-border/50"
                   >
                     <div className="flex gap-0.5">
-                      {[...Array(fb.rating || 5)].map((_: any, i: number) => (
+                      {[...Array(fb.rating || 5)].map((_: unknown, i: number) => (
                         <Star
                           key={i}
                           className="w-4 h-4 fill-primary text-primary"

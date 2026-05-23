@@ -10,6 +10,7 @@ import {
   Target,
   Crown,
 } from "lucide-react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { DailyGameQuests } from "@/components/games/DailyGameQuests";
@@ -224,8 +225,14 @@ const games = [
 
 export default function Games() {
   const [activeGame, setActiveGame] = useState<GameType>("menu");
+  const [lastGame, setLastGame] = useLocalStorage<GameType | null>("vokabi_last_game", null);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const handleSetGame = (game: GameType) => {
+    if (game !== "menu") setLastGame(game);
+    setActiveGame(game);
+  };
 
   if (!user) {
     navigate("/login");
@@ -280,7 +287,7 @@ export default function Games() {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-5xl mx-auto mb-8">
                 <button
-                  onClick={() => setActiveGame("tournament")}
+                  onClick={() => handleSetGame("tournament")}
                   className="group p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 transition-all text-center"
                 >
                   <Crown className="w-6 h-6 text-amber-500 mx-auto mb-1.5" />
@@ -290,7 +297,7 @@ export default function Games() {
                   </p>
                 </button>
                 <button
-                  onClick={() => setActiveGame("friends")}
+                  onClick={() => handleSetGame("friends")}
                   className="group p-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all text-center"
                 >
                   <Users className="w-6 h-6 text-primary mx-auto mb-1.5" />
@@ -300,7 +307,7 @@ export default function Games() {
                   </p>
                 </button>
                 <button
-                  onClick={() => setActiveGame("stats")}
+                  onClick={() => handleSetGame("stats")}
                   className="group p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all text-center"
                 >
                   <BarChart3 className="w-6 h-6 text-emerald-500 mx-auto mb-1.5" />
@@ -324,6 +331,28 @@ export default function Games() {
               <div className="max-w-5xl mx-auto mb-8">
                 <DailyGameQuests compact />
               </div>
+
+              {lastGame && lastGame !== "menu" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="max-w-5xl mx-auto mb-6"
+                >
+                  <button
+                    onClick={() => setActiveGame(lastGame)}
+                    className="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-primary/10 border border-primary/20 hover:bg-primary/15 transition-colors text-left"
+                  >
+                    <span className="text-2xl">▶️</span>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Oxirgi o'yin</p>
+                      <p className="text-sm font-semibold text-primary capitalize">
+                        {games.find(g => g.id === lastGame)?.title || lastGame} — davom ettirish
+                      </p>
+                    </div>
+                    <span className="ml-auto text-primary opacity-60">→</span>
+                  </button>
+                </motion.div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-5xl mx-auto">
                 {games.map((game, i) => (
