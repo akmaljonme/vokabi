@@ -36,6 +36,7 @@ interface HeaderProps {
 export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPracticeOpen, setIsPracticeOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isDark, setIsDark] = useState(() =>
     document.documentElement.classList.contains("dark"),
   );
@@ -97,20 +98,17 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
             </span>
           </motion.div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
+          {/* Desktop Navigation — chapga yopishgan */}
+          <nav className="hidden lg:flex items-center gap-0.5 ml-4 flex-1">
             <div
               className="relative"
               onMouseEnter={() => setIsPracticeOpen(true)}
               onMouseLeave={() => setIsPracticeOpen(false)}
             >
-              <button className="flex items-center gap-1 px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm">
+              <button className="flex items-center gap-1 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm">
                 Practice Tests
-                <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform ${isPracticeOpen ? "rotate-180" : ""}`}
-                />
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isPracticeOpen ? "rotate-180" : ""}`} />
               </button>
-
               <AnimatePresence>
                 {isPracticeOpen && (
                   <motion.div
@@ -118,12 +116,10 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.96 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute top-full left-0 mt-1 w-52 bg-card rounded-xl shadow-xl border border-border p-1.5"
+                    className="absolute top-full left-0 mt-1 w-52 bg-card rounded-xl shadow-xl border border-border p-1.5 z-50"
                   >
                     {["A1", "A2", "B1", "B2", "C1"].map((level) => (
-                      <button
-                        key={level}
-                        onClick={() => onNavigate("levels")}
+                      <button key={level} onClick={() => onNavigate("levels")}
                         className="w-full px-3 py-2 text-left rounded-lg hover:bg-muted transition-colors text-sm font-medium"
                       >
                         {level} Level Tests
@@ -136,76 +132,65 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
 
             {user && (
               <>
-                <button
-                  onClick={() => navigate("/dashboard")}
-                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
-                >
-                  Dashboard
-                </button>
-                <button
-                  onClick={() => navigate("/games")}
-                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
-                >
-                  <Gamepad2 className="w-3.5 h-3.5" /> O'yinlar
-                </button>
-                <button
-                  onClick={() => navigate("/videos")}
-                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
-                >
-                  <Video className="w-3.5 h-3.5" /> Video Darslar
-                </button>
-                <button
-                  onClick={() => navigate("/exams")}
-                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
-                >
-                  <ClipboardList className="w-3.5 h-3.5" /> Examlar
-                </button>
-                <button
-                  onClick={() => navigate("/school")}
-                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
-                >
-                  🏫 School
-                </button>
-                <button
-                  onClick={() => navigate("/study-room")}
-                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
-                >
-                  <Home className="w-3.5 h-3.5" /> Study Room
-                </button>
-                <button
-                  onClick={() => navigate("/essay")}
-                  className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
-                >
-                  <PenTool className="w-3.5 h-3.5" /> Essay Checker
-                </button>
-                <button
-                  onClick={() => navigate("/community")}
-                  className="relative px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
+                <button onClick={() => navigate("/dashboard")}
+                  className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
+                >Dashboard</button>
+                <button onClick={() => navigate("/games")}
+                  className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
+                ><Gamepad2 className="w-3.5 h-3.5" /> O'yinlar</button>
+                <button onClick={() => navigate("/community")}
+                  className="relative px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
                 >
                   <Users className="w-3.5 h-3.5" /> Hamjamiyat
                   {unreadCount > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5"
-                    >
+                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5">
                       {unreadCount > 99 ? "99+" : unreadCount}
                     </Badge>
                   )}
                 </button>
+
+                {/* More dropdown */}
+                <div className="relative" onMouseEnter={() => setIsMoreOpen(true)} onMouseLeave={() => setIsMoreOpen(false)}>
+                  <button className="flex items-center gap-1 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm">
+                    Ko'proq <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isMoreOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  <AnimatePresence>
+                    {isMoreOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-full left-0 mt-1 w-52 bg-card rounded-xl shadow-xl border border-border p-1.5 z-50"
+                      >
+                        {[
+                          { label: "Video Darslar", icon: "🎬", path: "/videos" },
+                          { label: "Examlar", icon: "📋", path: "/exams" },
+                          { label: "School", icon: "🏫", path: "/school" },
+                          { label: "Study Room", icon: "🏠", path: "/study-room" },
+                          { label: "Essay Checker", icon: "✍️", path: "/essay" },
+                          { label: "So'z Banki", icon: "📚", path: "/wordbank" },
+                          { label: "Tools", icon: "⚡", path: "/tools" },
+                        ].map(item => (
+                          <button key={item.path} onClick={() => navigate(item.path)}
+                            className="w-full px-3 py-2 text-left rounded-lg hover:bg-muted transition-colors text-sm font-medium flex items-center gap-2.5"
+                          >
+                            <span>{item.icon}</span> {item.label}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </>
             )}
-            <button
-              onClick={() => navigate("/pricing")}
-              className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
-            >
-              Pricing
-            </button>
-            <a
-              href="#faq"
-              className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
-            >
-              FAQ
-            </a>
+
+            <button onClick={() => navigate("/pricing")}
+              className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
+            >Pricing</button>
+            <a href="#faq"
+              className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
+            >FAQ</a>
           </nav>
 
           {/* Auth Button */}
