@@ -47,7 +47,6 @@ import { useRef, useEffect, useState, useCallback, lazy, Suspense } from "react"
 import { supabase } from "@/integrations/supabase/client";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { CertificateScene3D } from "@/components/CertificateScene3D";
-import { CustomCursor3D } from "@/components/CustomCursor3D";
 import { Scene3DStats } from "@/components/Scene3DStats";
 import { HowItWorks3D } from "@/components/HowItWorks3D";
 import { Tilt3DCard } from "@/components/Tilt3DCard";
@@ -459,7 +458,6 @@ export const LandingPage = ({
 
   return (
     <>
-    <CustomCursor3D />
     <div className="overflow-x-clip relative z-10">
       {/* ═══════════ HERO ═══════════ */}
       <section
