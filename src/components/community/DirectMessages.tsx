@@ -100,7 +100,11 @@ export const DirectMessages = ({ openUserId }: { openUserId?: string | null }) =
 
   const loadAllUsers = async () => {
     if (!user) return;
-    const { data } = await (supabase.from('profiles') as any).select('user_id, full_name, username, avatar_url').neq('user_id', user.id).limit(50);
+    const { data } = await (supabase.from('profiles') as any)
+      .select('user_id, full_name, username, avatar_url, created_at')
+      .neq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(500);
     if (data) setAllUsers(data);
   };
 
@@ -174,12 +178,12 @@ export const DirectMessages = ({ openUserId }: { openUserId?: string | null }) =
   const filteredUsers = search.trim() ? allUsers.filter(u => {
     const q = search.toLowerCase();
     return u.full_name?.toLowerCase().includes(q) || u.username?.toLowerCase().includes(q);
-  }) : [];
+  }) : allUsers;
 
   const forwardFilteredUsers = forwardSearch.trim() ? allUsers.filter(u => {
     const q = forwardSearch.toLowerCase();
     return u.full_name?.toLowerCase().includes(q) || u.username?.toLowerCase().includes(q);
-  }) : allUsers.slice(0, 10);
+  }) : allUsers;
 
   // Forward modal
   if (forwardMsg) {
