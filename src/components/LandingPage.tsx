@@ -180,70 +180,26 @@ const Card3D = ({
 };
 
 /* ─── Floating 3D Items ─── */
-const FLOAT_ITEMS = [
-  { emoji: "📚", size: 56, x: "8%",  y: "18%", duration: 7,  delay: 0,   rotate: -12 },
-  { emoji: "🏆", size: 48, x: "88%", y: "12%", duration: 9,  delay: 1.5, rotate: 10  },
-  { emoji: "🎯", size: 52, x: "6%",  y: "65%", duration: 8,  delay: 0.8, rotate: -8  },
-  { emoji: "✍️", size: 44, x: "91%", y: "58%", duration: 10, delay: 2,   rotate: 14  },
-  { emoji: "🎮", size: 50, x: "78%", y: "78%", duration: 7,  delay: 0.3, rotate: -6  },
-  { emoji: "🧠", size: 46, x: "14%", y: "82%", duration: 9,  delay: 1.2, rotate: 8   },
-  { emoji: "🎧", size: 42, x: "82%", y: "35%", duration: 8,  delay: 2.5, rotate: -10 },
-  { emoji: "⭐", size: 36, x: "22%", y: "10%", duration: 6,  delay: 0.5, rotate: 15  },
-  { emoji: "🚀", size: 40, x: "55%", y: "88%", duration: 11, delay: 1.8, rotate: -5  },
-  { emoji: "💡", size: 38, x: "38%", y: "5%",  duration: 7,  delay: 3,   rotate: 12  },
-];
-
+/* ─── Subtle floating particles (background ambiance only) ─── */
 const FloatingParticles = () => {
   if (__isMobileGlobal) return null;
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Emoji floating items */}
-      {FLOAT_ITEMS.map((item, i) => (
-        <motion.div
-          key={i}
-          className="absolute select-none"
-          style={{ left: item.x, top: item.y, fontSize: item.size }}
-          initial={{ opacity: 0, scale: 0, rotate: item.rotate }}
-          animate={{
-            opacity: [0, 0.85, 0.85, 0],
-            scale: [0.6, 1, 1, 0.6],
-            y: [0, -22, -44, -22, 0],
-            x: [0, 8, 0, -8, 0],
-            rotate: [item.rotate, item.rotate + 6, item.rotate - 4, item.rotate],
-          }}
-          transition={{
-            duration: item.duration,
-            repeat: Infinity,
-            delay: item.delay,
-            ease: "easeInOut",
-            times: [0, 0.2, 0.8, 1],
-          }}
-        >
-          <div
-            style={{
-              filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.18)) drop-shadow(0 2px 6px rgba(0,0,0,0.10))",
-              transform: "perspective(200px) rotateY(8deg) rotateX(-6deg)",
-            }}
-          >
-            {item.emoji}
-          </div>
-        </motion.div>
-      ))}
-
-      {/* Small particles */}
-      {Array.from({ length: 8 }).map((_, i) => (
+      {Array.from({ length: 12 }).map((_, i) => (
         <motion.div
           key={`p-${i}`}
           className="absolute rounded-full"
           style={{
-            width: 4,
-            height: 4,
-            background: `hsl(var(--primary) / 0.25)`,
-            left: `${15 + i * 10}%`,
-            top: `${20 + (i % 3) * 25}%`,
+            width: i % 3 === 0 ? 6 : 4,
+            height: i % 3 === 0 ? 6 : 4,
+            background: i % 2 === 0
+              ? `hsl(var(--primary) / 0.2)`
+              : `rgba(72, 217, 164, 0.15)`,
+            left: `${8 + i * 7}%`,
+            top: `${15 + (i % 4) * 20}%`,
           }}
-          animate={{ y: [0, -30, 0], opacity: [0.15, 0.5, 0.15] }}
-          transition={{ duration: 4 + i * 0.5, repeat: Infinity, delay: i * 0.4, ease: "easeInOut" }}
+          animate={{ y: [0, -40, 0], opacity: [0.1, 0.4, 0.1] }}
+          transition={{ duration: 5 + i * 0.6, repeat: Infinity, delay: i * 0.5, ease: "easeInOut" }}
         />
       ))}
     </div>
@@ -645,10 +601,15 @@ export const LandingPage = ({
               initial={{ opacity: 0, x: 60 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="flex-1 w-full lg:w-auto"
-              style={{ minHeight: isMobile ? 280 : 420 }}
+              className="flex-1 w-full lg:w-auto relative"
+              style={{ minHeight: isMobile ? 300 : 500 }}
             >
               <CertificateScene3D />
+              {!isMobile && (
+                <p className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-muted-foreground/50 select-none pointer-events-none">
+                  🖱️ Sichqoncha bilan aylantiring
+                </p>
+              )}
             </motion.div>
 
           </div>
