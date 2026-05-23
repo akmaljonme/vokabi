@@ -545,7 +545,7 @@ export const LandingPage = ({
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.35 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 w-full sm:w-auto px-4 sm:px-0"
             >
               <motion.button
                 whileHover={{
@@ -557,7 +557,7 @@ export const LandingPage = ({
                   handleStartTest();
                   fireConfetti();
                 }}
-                className="btn-primary flex items-center gap-2.5 text-base px-8 py-4 shadow-glow group"
+                className="btn-primary flex items-center justify-center gap-2.5 text-base px-8 py-4 shadow-glow group w-full sm:w-auto"
               >
                 <Rocket className="w-4 h-4 group-hover:animate-bounce" />
                 {user ? "Testni Boshlash" : "Bepul Boshlash"}
@@ -567,7 +567,7 @@ export const LandingPage = ({
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => navigate(user ? "/games" : "/login")}
-                className="btn-outline flex items-center gap-2.5 text-base px-8 py-4"
+                className="btn-outline flex items-center justify-center gap-2.5 text-base px-8 py-4 w-full sm:w-auto"
               >
                 <Gamepad2 className="w-4 h-4" />
                 21+ O'yinlar
@@ -1357,7 +1357,7 @@ export const LandingPage = ({
                   handleStartTest();
                   fireConfetti();
                 }}
-                className="inline-flex items-center gap-2.5 bg-white text-foreground font-bold text-base px-8 py-4 rounded-2xl hover:bg-white/95 transition-colors shadow-xl border-2 border-white"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2.5 bg-white text-gray-900 font-bold text-base px-8 py-4 rounded-2xl hover:bg-white/95 transition-colors shadow-xl"
               >
                 {user ? "Testni Boshlash" : "Bepul Ro'yxatdan O'tish"}
                 <ArrowRight className="w-4 h-4" />
