@@ -29,6 +29,7 @@ const VideoLessons   = lazy(() => import("./pages/VideoLessons"));
 const Exams          = lazy(() => import("./pages/Exams"));
 const Pricing        = lazy(() => import("./pages/Pricing"));
 const WordBank       = lazy(() => import("./pages/WordBank"));
+const Tools          = lazy(() => import("./pages/Tools"));
 const StudyRoom      = lazy(() => import("./pages/StudyRoom"));
 const EssayChecker   = lazy(() => import("./pages/EssayChecker"));
 
@@ -72,6 +73,7 @@ const App = () => (
                     <Route path="/videos"    element={<ErrorBoundary><VideoLessons /></ErrorBoundary>} />
                     <Route path="/exams"     element={<ErrorBoundary><Exams /></ErrorBoundary>} />
                     <Route path="/pricing"   element={<ErrorBoundary><Pricing /></ErrorBoundary>} />
+                    <Route path="/tools"      element={<ErrorBoundary><Tools /></ErrorBoundary>} />
                     <Route path="/wordbank"   element={<ErrorBoundary><WordBank /></ErrorBoundary>} />
                     <Route path="/study-room" element={<ErrorBoundary><StudyRoom /></ErrorBoundary>} />
                     <Route path="/essay"      element={<ErrorBoundary><EssayChecker /></ErrorBoundary>} />

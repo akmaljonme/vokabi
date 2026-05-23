@@ -161,10 +161,10 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                   <ClipboardList className="w-3.5 h-3.5" /> Examlar
                 </button>
                 <button
-                  onClick={() => navigate("/wordbank")}
+                  onClick={() => navigate("/tools")}
                   className="px-4 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
                 >
-                  <BookOpen className="w-3.5 h-3.5" /> So'z Banki
+                  <Sparkles className="w-3.5 h-3.5" /> Tools
                 </button>
                 <button
                   onClick={() => navigate("/study-room")}
