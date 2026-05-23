@@ -1,13 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  MessageSquare,
-  X,
-  Send,
-  Loader2,
-  Bot,
-  User,
-  Sparkles,
+  X, Send, Loader2, Bot, User, Sparkles, RotateCcw,
+  BookOpen, Pen, Headphones, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,7 +11,24 @@ import ReactMarkdown from "react-markdown";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-tutor`;
+const SYSTEM_PROMPT = `Siz Vokabi platformasining AI English tutorsiz. Vazifangiz foydalanuvchilarga ingliz tilini o'rganishda yordam berish.
+
+Qoidalar:
+- Har doim O'zbek tilida javob bering (grammatik misollar inglizcha bo'lishi mumkin)
+- Qisqa, aniq va foydali javoblar bering
+- Grammatika, lug'at, reading, listening, writing va speaking bo'yicha maslahatlar bering
+- IELTS va CEFR darajalari (A1–C2) bo'yicha ma'lumot bering
+- Foydalanuvchi xatolarini muloyimlik bilan tuzating va tushuntiring
+- Markdown formatda javob bering (jadvallar, ro'yxatlar, qalin matn)
+- Savollar berib, foydalanuvchini faol qiling
+- Har bir javob oxirida kichik mashq yoki savol bering`;
+
+const QUICK_PROMPTS = [
+  { icon: BookOpen, text: "Grammar tushuntir", label: "Grammar" },
+  { icon: Pen, text: "IELTS Writing maslahat", label: "Writing" },
+  { icon: Headphones, text: "Listening qanday yaxshilanadi?", label: "Listening" },
+  { icon: MessageCircle, text: "Inglizcha gaplashishni o'rgat", label: "Speaking" },
+];
 
 export const AITutorChat = () => {
   const { user } = useAuth();
@@ -37,81 +49,49 @@ export const AITutorChat = () => {
     if (isOpen && inputRef.current) inputRef.current.focus();
   }, [isOpen]);
 
-  // Hide on games page
   if (location.pathname === "/games") return null;
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+  const sendMessage = async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
+    if (!text || isLoading) return;
+    if (!user) { navigate("/login"); return; }
 
-    const userMsg: Msg = { role: "user", content: input.trim() };
+    const userMsg: Msg = { role: "user", content: text };
     setInput("");
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setIsLoading(true);
 
-    let assistantSoFar = "";
-
-    const upsertAssistant = (chunk: string) => {
-      assistantSoFar += chunk;
-      setMessages((prev) => {
-        const last = prev[prev.length - 1];
-        if (last?.role === "assistant") {
-          return prev.map((m, i) =>
-            i === prev.length - 1 ? { ...m, content: assistantSoFar } : m,
-          );
-        }
-        return [...prev, { role: "assistant", content: assistantSoFar }];
-      });
-    };
-
     try {
-      const resp = await fetch(CHAT_URL, {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ messages: [...messages, userMsg] }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: SYSTEM_PROMPT,
+          messages: updatedMessages,
+        }),
       });
 
-      if (!resp.ok || !resp.body) throw new Error("Stream failed");
+      const data = await response.json();
+      const assistantText =
+        data.content?.find((b: any) => b.type === "text")?.text ||
+        "Xatolik yuz berdi. Qayta urinib ko'ring.";
 
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        let idx: number;
-        while ((idx = buffer.indexOf("\n")) !== -1) {
-          let line = buffer.slice(0, idx);
-          buffer = buffer.slice(idx + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const json = line.slice(6).trim();
-          if (json === "[DONE]") break;
-          try {
-            const parsed = JSON.parse(json);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) upsertAssistant(content);
-          } catch {
-            /* partial */
-          }
-        }
-      }
+      setMessages((prev) => [...prev, { role: "assistant", content: assistantText }]);
     } catch (e) {
       console.error(e);
-      upsertAssistant("Xatolik yuz berdi. Qayta urinib ko'ring.");
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Xatolik yuz berdi. Internet aloqangizni tekshiring." },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const clearChat = () => setMessages([]);
 
   return (
     <>
@@ -140,7 +120,7 @@ export const AITutorChat = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[560px] max-h-[calc(100vh-6rem)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[580px] max-h-[calc(100vh-6rem)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
@@ -150,42 +130,48 @@ export const AITutorChat = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm">AI Tutor</h3>
-                  <p className="text-[11px] text-muted-foreground">
-                    Ingliz tili bo'yicha yordam
-                  </p>
+                  <p className="text-[11px] text-muted-foreground">Ingliz tili bo'yicha yordam</p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-2 rounded-lg hover:bg-muted transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-1">
+                {messages.length > 0 && (
+                  <button
+                    onClick={clearChat}
+                    className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                    title="Suhbatni tozalash"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                )}
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 && (
-                <div className="text-center py-8">
-                  <Bot className="w-12 h-12 text-primary/20 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Salom! Men sizning AI tutoringizman. Ingliz tili bo'yicha
-                    savollaringizni bering!
+                <div className="text-center py-6">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                    <Bot className="w-7 h-7 text-primary" />
+                  </div>
+                  <p className="text-sm font-medium mb-1">AI Tutor</p>
+                  <p className="text-xs text-muted-foreground mb-5">
+                    Ingliz tili bo'yicha har qanday savolingizni bering!
                   </p>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {[
-                      "IELTS 7.0 uchun maslahat",
-                      "Grammatika tushuntir",
-                      "Writing yozishni o'rgat",
-                    ].map((q) => (
+                  <div className="grid grid-cols-2 gap-2">
+                    {QUICK_PROMPTS.map(({ icon: Icon, text, label }) => (
                       <button
-                        key={q}
-                        onClick={() => {
-                          setInput(q);
-                        }}
-                        className="px-3 py-1.5 rounded-lg bg-muted text-xs hover:bg-muted/80 transition-colors"
+                        key={label}
+                        onClick={() => sendMessage(text)}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-muted hover:bg-muted/80 transition-colors text-left"
                       >
-                        {q}
+                        <Icon className="w-4 h-4 text-primary shrink-0" />
+                        <span className="text-xs font-medium">{label}</span>
                       </button>
                     ))}
                   </div>
@@ -193,10 +179,7 @@ export const AITutorChat = () => {
               )}
 
               {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : ""}`}
-                >
+                <div key={i} className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : ""}`}>
                   {msg.role === "assistant" && (
                     <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                       <Bot className="w-4 h-4 text-primary" />
@@ -225,46 +208,41 @@ export const AITutorChat = () => {
                 </div>
               ))}
 
-              {isLoading &&
-                messages[messages.length - 1]?.role !== "assistant" && (
-                  <div className="flex gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <Bot className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
-                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                    </div>
+              {isLoading && (
+                <div className="flex gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Bot className="w-4 h-4 text-primary" />
                   </div>
-                )}
+                  <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Yozmoqda...</span>
+                  </div>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
 
             {/* Input */}
             <div className="px-4 py-3 border-t border-border bg-muted/20">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  sendMessage();
-                }}
-                className="flex gap-2"
-              >
+              <div className="flex gap-2">
                 <input
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
                   placeholder="Savolingizni yozing..."
                   className="flex-1 bg-background border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
                   disabled={isLoading}
                 />
                 <Button
-                  type="submit"
+                  onClick={() => sendMessage()}
                   size="icon"
                   disabled={isLoading || !input.trim()}
                   className="rounded-xl shrink-0"
                 >
                   <Send className="w-4 h-4" />
                 </Button>
-              </form>
+              </div>
             </div>
           </motion.div>
         )}
