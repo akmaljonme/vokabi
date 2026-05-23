@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CallProvider } from "@/contexts/CallContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AITutorChat } from "@/components/AITutorChat";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { useDMNotifications } from "@/hooks/useDMNotifications";
 import { GlobalCallOverlay } from "@/components/community/GlobalCallOverlay";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -40,7 +41,13 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      staleTime: 1000 * 60 * 2, // 2 daqiqa cache
+      staleTime: 1000 * 60 * 5,        // 5 daqiqa cache
+      gcTime: 1000 * 60 * 10,          // 10 daqiqa garbage collection
+      refetchOnWindowFocus: false,      // Window focus da qayta yuklamaslik
+      refetchOnReconnect: true,         // Internet qaytganda yangilash
+    },
+    mutations: {
+      retry: 1,
     },
   },
 });
@@ -91,6 +98,7 @@ const App = () => (
               <AITutorChat />
               <GlobalListeners />
               <GlobalCallOverlay />
+              <PWAInstallPrompt />
             </BrowserRouter>
           </TooltipProvider>
         </ThemeProvider>
