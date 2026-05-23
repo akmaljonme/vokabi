@@ -18,6 +18,7 @@ import {
   BookOpen,
   PenTool,
   Home,
+  LayoutDashboard,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -311,50 +312,50 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
               </button>
               {user && (
                 <>
-                  <button
-                    onClick={() => {
-                      navigate("/games");
-                      setIsMenuOpen(false);
-                    }}
+                  <button onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }}
                     className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
-                  >
-                    <Gamepad2 className="w-4 h-4" /> O'yinlar
-                  </button>
-                  <button
-                    onClick={() => {
-                      navigate("/videos");
-                      setIsMenuOpen(false);
-                    }}
+                  ><LayoutDashboard className="w-4 h-4" /> Dashboard</button>
+                  <button onClick={() => { navigate("/games"); setIsMenuOpen(false); }}
                     className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
-                  >
-                    <Video className="w-4 h-4" /> Video Darslar
-                  </button>
-                  <button
-                    onClick={() => {
-                      navigate("/exams");
-                      setIsMenuOpen(false);
-                    }}
+                  ><Gamepad2 className="w-4 h-4" /> O'yinlar</button>
+                  <button onClick={() => { navigate("/videos"); setIsMenuOpen(false); }}
                     className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
-                  >
-                    <ClipboardList className="w-4 h-4" /> Examlar
-                  </button>
-                  <button
-                    onClick={() => {
-                      navigate("/community");
-                      setIsMenuOpen(false);
-                    }}
+                  ><Video className="w-4 h-4" /> Video Darslar</button>
+                  <button onClick={() => { navigate("/exams"); setIsMenuOpen(false); }}
+                    className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
+                  ><ClipboardList className="w-4 h-4" /> Examlar</button>
+                  <button onClick={() => { navigate("/community"); setIsMenuOpen(false); }}
                     className="relative flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
                   >
                     <Users className="w-4 h-4" /> Hamjamiyat
                     {unreadCount > 0 && (
-                      <Badge
-                        variant="destructive"
-                        className="h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5"
-                      >
+                      <Badge variant="destructive" className="h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5">
                         {unreadCount > 99 ? "99+" : unreadCount}
                       </Badge>
                     )}
                   </button>
+
+                  {/* Separator */}
+                  <div className="my-1 border-t border-border/30" />
+                  <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest px-3 mb-1">Vositalar</p>
+
+                  <button onClick={() => { navigate("/school"); setIsMenuOpen(false); }}
+                    className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
+                  >🏫 School</button>
+                  <button onClick={() => { navigate("/study-room"); setIsMenuOpen(false); }}
+                    className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
+                  >🏠 Study Room</button>
+                  <button onClick={() => { navigate("/essay"); setIsMenuOpen(false); }}
+                    className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
+                  >✍️ Essay Checker</button>
+                  <button onClick={() => { navigate("/wordbank"); setIsMenuOpen(false); }}
+                    className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
+                  >📚 So'z Banki</button>
+                  <button onClick={() => { navigate("/tools"); setIsMenuOpen(false); }}
+                    className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
+                  >⚡ Tools</button>
+
+                  <div className="my-1 border-t border-border/30" />
                 </>
               )}
               <button
