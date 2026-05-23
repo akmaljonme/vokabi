@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import { Users, Clock, BookOpen, Send, Flame, Trophy, Volume2, VolumeX } from "lucide-react";
 
 interface RoomUser { id: string; name: string; avatar?: string; focus: number; joined: string; }
@@ -62,9 +63,8 @@ export default function StudyRoom() {
 
   if (!activeRoom) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-10 max-w-4xl">
+      <AppLayout>
+                <div className="container mx-auto px-4 py-10 max-w-4xl">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-display font-bold mb-3">🏫 Live Study Rooms</h1>
             <p className="text-muted-foreground">Real-time boshqalar bilan birga o'qing va motivatsiya oling</p>
@@ -95,16 +95,15 @@ export default function StudyRoom() {
             ))}
           </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   const room = ROOMS.find(r => r.id === activeRoom)!;
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+    <AppLayout>
+            <div className="container mx-auto px-4 py-6 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
           {/* Left: Timer + Stats */}
@@ -205,6 +204,6 @@ export default function StudyRoom() {
           </motion.div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

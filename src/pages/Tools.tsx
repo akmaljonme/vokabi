@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import {
   BookOpen, Home, PenTool, Brain, Flame,
   ArrowRight, Sparkles, Clock, Users, Star
@@ -55,9 +56,8 @@ export default function Tools() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="container mx-auto px-4 py-12 max-w-5xl">
+    <AppLayout>
+            <div className="container mx-auto px-4 py-12 max-w-5xl">
 
         {/* Hero */}
         <motion.div
@@ -167,6 +167,6 @@ export default function Tools() {
           </motion.button>
         </motion.div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

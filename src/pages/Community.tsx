@@ -1,3 +1,4 @@
+import { AppLayout } from "@/components/AppLayout";
 import { ArrowLeft, MessageCircle, Users } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +19,7 @@ export default function Community() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <AppLayout>
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center gap-4">
           <button
@@ -50,6 +51,6 @@ export default function Community() {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+    </AppLayout>
   );
 }

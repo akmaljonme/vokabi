@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import type { SchoolClass, SchoolStudent, Assignment } from "@/types/school";
 import {
   Plus, Users, ClipboardList, BarChart3, Copy, Check,
@@ -93,9 +94,8 @@ export default function TeacherPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <AppLayout>
+            <div className="container mx-auto px-4 py-8 max-w-6xl">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -344,6 +344,6 @@ export default function TeacherPanel() {
           </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

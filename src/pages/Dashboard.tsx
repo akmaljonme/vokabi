@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import { CEFRLevel } from "@/types/cefr";
 import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import { motion } from "framer-motion";
 import { useGamification } from "@/hooks/useGamification";
 import { AchievementToast } from "@/components/AchievementToast";
@@ -353,9 +354,7 @@ export default function Dashboard() {
   const levelDistribution = getLevelDistribution();
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header onNavigate={() => navigate("/")} />
-
+    <AppLayout>
       <main className="container mx-auto px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -937,6 +936,6 @@ export default function Dashboard() {
         achievement={newAchievement}
         onDismiss={dismissAchievement}
       />
-    </div>
+    </AppLayout>
   );
 }

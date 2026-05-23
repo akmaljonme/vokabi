@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   Plus, Search, BookOpen, Brain, Star, Trash2,
@@ -103,9 +104,8 @@ export default function WordBank() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <AppLayout>
+            <div className="container mx-auto px-4 py-8 max-w-4xl">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
@@ -298,6 +298,6 @@ export default function WordBank() {
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </AppLayout>
   );
 }

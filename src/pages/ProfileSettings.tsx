@@ -32,6 +32,7 @@ import {
   Download,
 } from "lucide-react";
 import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import { CertificateDownload } from "@/components/CertificateDownload";
 import { motion } from "framer-motion";
 
@@ -231,8 +232,7 @@ export default function ProfileSettings() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header onNavigate={() => navigate("/")} />
+    <AppLayout>
 
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <motion.div
@@ -574,6 +574,6 @@ export default function ProfileSettings() {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+    </AppLayout>
   );
 }

@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import type { School, SchoolTeacher, SchoolClass } from "@/types/school";
 import {
   School as SchoolIcon, Users, BookOpen, BarChart3,
@@ -78,9 +79,8 @@ export default function SchoolAdmin() {
   // No school yet — create
   if (!loading && !school) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-16 max-w-lg text-center">
+      <AppLayout>
+                <div className="container mx-auto px-4 py-16 max-w-lg text-center">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
             <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-6 text-4xl">🏫</div>
             <h1 className="text-3xl font-display font-bold mb-3">Maktab/Kurs yarating</h1>
@@ -97,14 +97,13 @@ export default function SchoolAdmin() {
             </div>
           </motion.div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <AppLayout>
+            <div className="container mx-auto px-4 py-8 max-w-6xl">
 
         {/* School header */}
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8 flex-wrap gap-4">
@@ -283,6 +282,6 @@ export default function SchoolAdmin() {
 
         </AnimatePresence>
       </div>
-    </div>
+    </AppLayout>
   );
 }

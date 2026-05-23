@@ -70,8 +70,7 @@ export default function VideoLessons() {
   }, [videos]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header onNavigate={() => navigate('/')} />
+    <AppLayout>
       <main className="container mx-auto px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4 mb-8">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
@@ -198,6 +197,6 @@ Eslatma : Ibrat Farzandlari tomonidan ruxsat olingan
           </div>
         }
       </main>
-    </div>);
+    </AppLayout>);
 
 }

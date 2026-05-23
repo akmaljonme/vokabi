@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import type { SchoolClass, SchoolStudent, Assignment } from "@/types/school";
 import { Flame, Star, Target, ClipboardList, Trophy, Users, ArrowRight, CheckCircle2, Clock, Zap } from "lucide-react";
 
@@ -63,9 +64,8 @@ export default function StudentPanel() {
 
   // Not joined
   if (!student) return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="container mx-auto px-4 py-16 max-w-md text-center">
+    <AppLayout>
+            <div className="container mx-auto px-4 py-16 max-w-md text-center">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
           <div className="text-6xl mb-5">👨‍🎓</div>
           <h1 className="text-3xl font-display font-bold mb-3">Sinfga qo'shiling</h1>
@@ -84,13 +84,12 @@ export default function StudentPanel() {
           </button>
         </motion.div>
       </div>
-    </div>
+    </AppLayout>
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+    <AppLayout>
+            <div className="container mx-auto px-4 py-8 max-w-5xl">
 
         {/* Student header */}
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="card-elevated rounded-2xl p-6 mb-6 border border-primary/20">
@@ -216,6 +215,6 @@ export default function StudentPanel() {
 
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

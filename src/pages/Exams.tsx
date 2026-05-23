@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import { Footer } from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -148,8 +149,7 @@ const Exams = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header onNavigate={() => navigate("/")} />
+    <AppLayout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
@@ -282,7 +282,7 @@ const Exams = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </AppLayout>
   );
 };
 

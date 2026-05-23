@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import { PenTool, Send, Loader2, Star, CheckCircle2, AlertCircle, Lightbulb, RefreshCw, Copy, Download } from "lucide-react";
 
 interface Feedback {
@@ -92,9 +93,8 @@ export default function EssayChecker() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+    <AppLayout>
+            <div className="container mx-auto px-4 py-8 max-w-5xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-display font-bold mb-2">✍️ AI Essay Checker</h1>
           <p className="text-muted-foreground">IELTS band score va batafsil tahlil — AI yordamida</p>
@@ -223,6 +223,6 @@ export default function EssayChecker() {
           </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

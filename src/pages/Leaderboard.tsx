@@ -1,3 +1,4 @@
+import { AppLayout } from "@/components/AppLayout";
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Trophy, Medal, Crown, Flame, Gamepad2, ChevronDown } from 'lucide-react';
@@ -138,7 +139,7 @@ export default function Leaderboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <AppLayout>
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center gap-4">
           <button onClick={() => navigate('/games')} className="p-2 rounded-xl hover:bg-muted transition-colors">
@@ -301,6 +302,6 @@ export default function Leaderboard() {
           </div>
         )}
       </main>
-    </div>
+    </AppLayout>
   );
 }

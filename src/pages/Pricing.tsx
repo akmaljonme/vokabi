@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Crown, Sparkles, Zap } from "lucide-react";
 import { Header } from "@/components/Header";
+import { AppLayout } from "@/components/AppLayout";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -44,9 +45,7 @@ const Pricing = () => {
   const [selected, setSelected] = useState<PlanKey | null>(null);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header onNavigate={(v) => navigate(v === "levels" ? "/" : "/")} isAdmin={isAdmin} />
-
+    <AppLayout>
       <main className="container mx-auto px-4 py-12 lg:py-20">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -151,7 +150,7 @@ const Pricing = () => {
           onClose={() => setSelected(null)}
         />
       )}
-    </div>
+    </AppLayout>
   );
 };
 

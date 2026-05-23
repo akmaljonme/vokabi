@@ -558,3 +558,9 @@
     0 8px 16px rgba(0,0,0,0.07),
     0 16px 32px rgba(0,0,0,0.07);
 }
+
+/* Sidebar layout */
+:root {
+  --sidebar-w: 220px;
+  --sidebar-collapsed-w: 64px;
+}

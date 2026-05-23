@@ -1,3 +1,4 @@
+import { AppLayout } from "@/components/AppLayout";
 import { useState, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
