@@ -12,6 +12,7 @@ import { GlobalCallOverlay } from "@/components/community/GlobalCallOverlay";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
 import { Background3D } from "@/components/Background3D";
+import { CustomCursor3D } from "@/components/CustomCursor3D";
 import { lazy, Suspense } from "react";
 
 // Lazy load all pages — faqat kerakli sahifa yuklanadi
@@ -52,6 +53,7 @@ const App = () => (
             <DefaultToaster />
             <SonnerToaster />
             <Background3D />
+            <CustomCursor3D />
 
             <BrowserRouter>
               <ErrorBoundary>

@@ -47,6 +47,10 @@ import { useRef, useEffect, useState, useCallback, lazy, Suspense } from "react"
 import { supabase } from "@/integrations/supabase/client";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { CertificateScene3D } from "@/components/CertificateScene3D";
+import { CustomCursor3D } from "@/components/CustomCursor3D";
+import { Scene3DStats } from "@/components/Scene3DStats";
+import { HowItWorks3D } from "@/components/HowItWorks3D";
+import { Tilt3DCard } from "@/components/Tilt3DCard";
 import type { Feedback } from "@/types/cefr";
 import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
@@ -454,6 +458,8 @@ export const LandingPage = ({
   ];
 
   return (
+    <>
+    <CustomCursor3D />
     <div className="overflow-x-clip relative z-10">
       {/* ═══════════ HERO ═══════════ */}
       <section
@@ -623,8 +629,14 @@ export const LandingPage = ({
       </section>
 
       {/* ═══════════ LIVE STATS ═══════════ */}
-      <section id="stats" className="py-16 border-b border-border/40 relative">
-        <div className="container mx-auto px-4">
+      <section id="stats" className="py-16 border-b border-border/40 relative overflow-hidden">
+        {/* 3D decoration background */}
+        {!isMobile && (
+          <div className="absolute inset-0 pointer-events-none opacity-30">
+            <Scene3DStats />
+          </div>
+        )}
+        <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 max-w-5xl mx-auto">
             {[
               {
@@ -758,9 +770,10 @@ export const LandingPage = ({
                 delay={i * 0.08}
                 className={feat.large ? "lg:col-span-2" : ""}
               >
-                <Card3D
-                  className="card-elevated group p-7 lg:p-8 h-full cursor-default"
-                  glowColor={feat.color}
+                <Tilt3DCard
+                  className="card-elevated group p-7 lg:p-8 h-full cursor-default rounded-2xl"
+                  glowColor={`hsl(${feat.color})`}
+                  intensity={8}
                 >
                   <div
                     className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-[0.04] -translate-y-1/2 translate-x-1/2"
@@ -790,7 +803,7 @@ export const LandingPage = ({
                       </span>
                     )}
                   </div>
-                </Card3D>
+                </Tilt3DCard>
               </FadeUp>
             ))}
           </div>
@@ -961,7 +974,13 @@ export const LandingPage = ({
 
       {/* ═══════════ HOW IT WORKS ═══════════ */}
       <section className="py-28 lg:py-36 relative overflow-hidden">
-        <div className="container mx-auto px-4">
+        {/* 3D node decoration */}
+        {!isMobile && (
+          <div className="absolute inset-0 pointer-events-none opacity-20" style={{ height: 200, top: "50%", transform: "translateY(-50%)" }}>
+            <HowItWorks3D />
+          </div>
+        )}
+        <div className="container mx-auto px-4 relative z-10">
           <FadeUp className="text-center mb-16">
             <span className="premium-badge mb-5 inline-flex">QANDAY ISHLAYDI</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
@@ -1384,5 +1403,6 @@ export const LandingPage = ({
         </div>
       </section>
     </div>
+    </>
   );
 };
