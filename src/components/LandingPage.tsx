@@ -46,6 +46,7 @@ import {
 import { useRef, useEffect, useState, useCallback, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
+import { CertificateScene3D } from "@/components/CertificateScene3D";
 import type { Feedback } from "@/types/cefr";
 import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
@@ -491,107 +492,123 @@ export const LandingPage = ({
           style={isMobile ? undefined : { y: heroY, opacity: heroOpacity, scale: heroScale }}
           className="container mx-auto px-4 relative z-10"
         >
-          <div className="max-w-5xl mx-auto text-center">
+          <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-0">
+
+            {/* ── LEFT: Text content ── */}
+            <div className="flex-1 text-center lg:text-left">
+              <motion.div
+                initial={{ opacity: 0, y: 16, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.6, type: "spring", stiffness: 200 }}
+                className="premium-badge mb-8 mx-auto lg:mx-0"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>#1 AI-Powered Language Learning Platform</span>
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.8,
+                  delay: 0.1,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem] font-display font-bold mb-7 leading-[1.05] tracking-tight text-balance"
+              >
+                Ingliz tilini
+                <br />
+                <motion.span
+                  className="text-gradient inline-block"
+                  animate={{
+                    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                  }}
+                  transition={{ duration: 5, repeat: Infinity }}
+                  style={{
+                    backgroundSize: "200% 200%",
+                    backgroundImage:
+                      "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--neon-purple)), hsl(var(--primary)))",
+                  }}
+                >
+                  mukammal o'rganing
+                </motion.span>
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.25 }}
+                className="text-base sm:text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed text-balance px-2 lg:px-0"
+              >
+                21+ o'yin, AI-powered testlar, Writing & Speaking baholash —
+                barchasi bir platformada. IELTS va CEFR imtihonlariga
+                tayyorlaning.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.35 }}
+                className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-4 w-full sm:w-auto px-4 sm:px-0"
+              >
+                <motion.button
+                  whileHover={{
+                    scale: 1.06,
+                    boxShadow: "0 0 40px -8px hsl(var(--primary) / 0.5)",
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => {
+                    handleStartTest();
+                    fireConfetti();
+                  }}
+                  className="btn-primary flex items-center justify-center gap-2.5 text-base px-8 py-4 shadow-glow group w-full sm:w-auto"
+                >
+                  <Rocket className="w-4 h-4 group-hover:animate-bounce" />
+                  {user ? "Testni Boshlash" : "Bepul Boshlash"}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => navigate(user ? "/games" : "/login")}
+                  className="btn-outline flex items-center justify-center gap-2.5 text-base px-8 py-4 w-full sm:w-auto"
+                >
+                  <Gamepad2 className="w-4 h-4" />
+                  21+ O'yinlar
+                </motion.button>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.55 }}
+                className="flex flex-wrap items-center justify-center lg:justify-start gap-6 mt-10"
+              >
+                {[
+                  "Kredit karta shart emas",
+                  "21+ o'yin",
+                  "AI bilan tahlil",
+                  "Tezkor natijalar",
+                ].map((text) => (
+                  <div key={text} className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-primary" />
+                    <span className="text-sm text-muted-foreground">{text}</span>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+
+            {/* ── RIGHT: 3D Certificates ── */}
             <motion.div
-              initial={{ opacity: 0, y: 16, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.6, type: "spring", stiffness: 200 }}
-              className="premium-badge mb-8 mx-auto"
+              initial={{ opacity: 0, x: 60 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="flex-1 w-full lg:w-auto"
+              style={{ minHeight: isMobile ? 280 : 420 }}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>#1 AI-Powered Language Learning Platform</span>
+              <CertificateScene3D />
             </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.8,
-                delay: 0.1,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem] font-display font-bold mb-7 leading-[1.05] tracking-tight text-balance"
-            >
-              Ingliz tilini
-              <br />
-              <motion.span
-                className="text-gradient inline-block"
-                animate={{
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                }}
-                transition={{ duration: 5, repeat: Infinity }}
-                style={{
-                  backgroundSize: "200% 200%",
-                  backgroundImage:
-                    "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--neon-purple)), hsl(var(--primary)))",
-                }}
-              >
-                mukammal o'rganing
-              </motion.span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.25 }}
-              className="text-base sm:text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed text-balance px-2"
-            >
-              21+ o'yin, AI-powered testlar, Writing & Speaking baholash —
-              barchasi bir platformada. IELTS va CEFR imtihonlariga
-              tayyorlaning.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.35 }}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 w-full sm:w-auto px-4 sm:px-0"
-            >
-              <motion.button
-                whileHover={{
-                  scale: 1.06,
-                  boxShadow: "0 0 40px -8px hsl(var(--primary) / 0.5)",
-                }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => {
-                  handleStartTest();
-                  fireConfetti();
-                }}
-                className="btn-primary flex items-center justify-center gap-2.5 text-base px-8 py-4 shadow-glow group w-full sm:w-auto"
-              >
-                <Rocket className="w-4 h-4 group-hover:animate-bounce" />
-                {user ? "Testni Boshlash" : "Bepul Boshlash"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => navigate(user ? "/games" : "/login")}
-                className="btn-outline flex items-center justify-center gap-2.5 text-base px-8 py-4 w-full sm:w-auto"
-              >
-                <Gamepad2 className="w-4 h-4" />
-                21+ O'yinlar
-              </motion.button>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.55 }}
-              className="flex flex-wrap items-center justify-center gap-6 mt-10"
-            >
-              {[
-                "Kredit karta shart emas",
-                "21+ o'yin",
-                "AI bilan tahlil",
-                "Tezkor natijalar",
-              ].map((text) => (
-                <div key={text} className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-primary" />
-                  <span className="text-sm text-muted-foreground">{text}</span>
-                </div>
-              ))}
-            </motion.div>
           </div>
         </motion.div>
 
