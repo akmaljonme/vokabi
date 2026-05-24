@@ -28,6 +28,7 @@ const mainItems: NavItem[] = [
 
 const toolItems: NavItem[] = [
   { label: "School",         path: "/school",       icon: School,        emoji: "🏫" },
+  { label: "Tillar",         path: "/languages",    icon: Globe,         emoji: "🌍" },
   { label: "Study Room",     path: "/study-room",   icon: Home,          emoji: "🏠" },
   { label: "Essay Checker",  path: "/essay",        icon: PenTool,       emoji: "✍️" },
   { label: "So'z Banki",     path: "/wordbank",     icon: BookOpen,      emoji: "📚" },

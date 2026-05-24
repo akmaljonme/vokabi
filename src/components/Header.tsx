@@ -167,6 +167,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                         {[
                           { label: "Video Darslar", icon: "🎬", path: "/videos" },
                           { label: "Examlar", icon: "📋", path: "/exams" },
+                          { label: "Tillar", icon: "🌍", path: "/languages" },
                           { label: "School", icon: "🏫", path: "/school" },
                           { label: "Study Room", icon: "🏠", path: "/study-room" },
                           { label: "Essay Checker", icon: "✍️", path: "/essay" },
@@ -339,6 +340,9 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                   <div className="my-1 border-t border-border/30" />
                   <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest px-3 mb-1">Vositalar</p>
 
+                  <button onClick={() => { navigate("/languages"); setIsMenuOpen(false); }}
+                    className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
+                  >🌍 Tillar</button>
                   <button onClick={() => { navigate("/school"); setIsMenuOpen(false); }}
                     className="flex items-center gap-2 py-2.5 px-3 rounded-xl hover:bg-muted transition-colors font-medium text-sm"
                   >🏫 School</button>
