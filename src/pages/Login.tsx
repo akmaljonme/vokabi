@@ -27,7 +27,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) navigate("/dashboard");
+    if (user) navigate("/dashboard", { replace: true });
   }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {

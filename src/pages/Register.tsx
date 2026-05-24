@@ -59,7 +59,7 @@ const Register = () => {
 
   // Allaqachon login bo'lgan bo'lsa, home ga yo'naltir
   useEffect(() => {
-    if (user) navigate("/dashboard");
+    if (user) navigate("/dashboard", { replace: true });
   }, [user, navigate]);
 
   // Username mavjudligini tekshirish
