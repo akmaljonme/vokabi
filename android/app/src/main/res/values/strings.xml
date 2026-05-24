@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Vokabi</string>
+    <string name="title_activity_main">Vokabi</string>
+    <string name="package_name">uz.vokabi.app</string>
+    <string name="custom_url_scheme">uz.vokabi.app</string>
+</resources>
