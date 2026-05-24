@@ -1,10 +1,11 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { Footer } from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -15,11 +16,15 @@ interface AppLayoutProps {
 export const AppLayout = ({ children, withSidebar = true, withFooter = false }: AppLayoutProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isAdmin } = useUserRole();
   const showSidebar = withSidebar && !!user;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header onNavigate={() => navigate("/")} />
+      <Header
+        onNavigate={(view) => navigate(view === "levels" ? "/#levels" : "/")}
+        isAdmin={isAdmin}
+      />
 
       <div className="flex flex-1 pt-[72px]">
         {showSidebar && <Sidebar />}
