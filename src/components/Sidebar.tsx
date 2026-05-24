@@ -98,15 +98,13 @@ export const Sidebar = () => {
       <div className="flex items-center justify-between px-3 py-4 border-b border-border/30">
         {!collapsed && (
           <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
+            <img src="/logo.svg" alt="Vokabi" className="w-8 h-8 rounded-xl shrink-0" />
             <span className="font-display font-bold text-lg">Vokabi</span>
           </button>
         )}
         {collapsed && (
-          <button onClick={() => navigate("/dashboard")} className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center mx-auto">
-            <Sparkles className="w-4 h-4 text-white" />
+          <button onClick={() => navigate("/dashboard")} className="mx-auto">
+            <img src="/logo.svg" alt="Vokabi" className="w-8 h-8 rounded-xl" />
           </button>
         )}
         {!collapsed && (
