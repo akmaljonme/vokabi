@@ -104,11 +104,11 @@ export const LanguageOnboarding = ({ onComplete }: LanguageOnboardingProps) => {
   const selectedLang = LANGUAGES.find(l => l.id === data.target_language);
 
   return (
-    <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg">
+    <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex flex-col items-center p-4">
+      <div className="w-full max-w-lg flex flex-col h-full">
 
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center py-6 shrink-0">
           <motion.div
             initial={{ scale: 0 }} animate={{ scale: 1 }}
             className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4"
@@ -120,7 +120,7 @@ export const LanguageOnboarding = ({ onComplete }: LanguageOnboardingProps) => {
         </div>
 
         {/* Progress */}
-        <div className="flex items-center gap-2 mb-8">
+        <div className="flex items-center gap-2 mb-4 shrink-0">
           {STEPS.map((s, i) => (
             <div key={s} className="flex-1 flex items-center gap-2">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all
@@ -136,7 +136,7 @@ export const LanguageOnboarding = ({ onComplete }: LanguageOnboardingProps) => {
           ))}
         </div>
 
-        {/* Step content */}
+        {/* Step content — scrollable */}
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -144,7 +144,7 @@ export const LanguageOnboarding = ({ onComplete }: LanguageOnboardingProps) => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
-            className="bg-card border border-border rounded-2xl p-6 mb-4"
+            className="bg-card border border-border rounded-2xl p-5 flex-1 overflow-y-auto mb-4 min-h-0"
           >
 
             {/* Step 0 — Til tanlash */}
@@ -265,8 +265,8 @@ export const LanguageOnboarding = ({ onComplete }: LanguageOnboardingProps) => {
           </motion.div>
         </AnimatePresence>
 
-        {/* Navigation */}
-        <div className="flex gap-3">
+        {/* Navigation — always visible at bottom */}
+        <div className="flex gap-3 shrink-0 pb-2">
           {step > 0 && (
             <button
               onClick={() => setStep(s => s - 1)}
@@ -292,8 +292,7 @@ export const LanguageOnboarding = ({ onComplete }: LanguageOnboardingProps) => {
           </button>
         </div>
 
-        {/* Step info */}
-        <p className="text-center text-xs text-muted-foreground mt-3">
+        <p className="text-center text-xs text-muted-foreground pb-4 shrink-0">
           {step + 1} / {STEPS.length} — {STEPS[step]}
         </p>
       </div>
