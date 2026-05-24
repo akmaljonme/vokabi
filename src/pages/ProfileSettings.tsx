@@ -31,7 +31,6 @@ import {
   Award,
   Download,
 } from "lucide-react";
-import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
 import { CertificateDownload } from "@/components/CertificateDownload";
 import { motion } from "framer-motion";

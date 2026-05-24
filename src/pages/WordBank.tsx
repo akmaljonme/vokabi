@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {

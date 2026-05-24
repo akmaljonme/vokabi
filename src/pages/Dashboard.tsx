@@ -53,7 +53,6 @@ import {
   Medal,
 } from "lucide-react";
 import { CEFRLevel } from "@/types/cefr";
-import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
 import { motion } from "framer-motion";
 import { useGamification } from "@/hooks/useGamification";

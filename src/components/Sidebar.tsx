@@ -44,7 +44,9 @@ export const Sidebar = () => {
   const { isAdmin } = useUserRole();
   const [collapsed, setCollapsed] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(true);
-  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains("dark"));
+  const [isDark, setIsDark] = useState(() => {
+    try { return document.documentElement.classList.contains("dark"); } catch { return false; }
+  });
 
   const toggleTheme = () => {
     const newDark = !isDark;

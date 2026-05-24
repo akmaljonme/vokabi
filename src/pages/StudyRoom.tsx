@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
 import { Users, Clock, BookOpen, Send, Flame, Trophy, Volume2, VolumeX } from "lucide-react";
 

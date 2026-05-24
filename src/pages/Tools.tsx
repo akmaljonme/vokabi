@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
 import {
   BookOpen, Home, PenTool, Brain, Flame,

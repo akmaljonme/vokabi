@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
 import { Footer } from "@/components/Footer";
 import { Card } from "@/components/ui/card";

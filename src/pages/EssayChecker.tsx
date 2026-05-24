@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
 import { PenTool, Send, Loader2, Star, CheckCircle2, AlertCircle, Lightbulb, RefreshCw, Copy, Download } from "lucide-react";
 

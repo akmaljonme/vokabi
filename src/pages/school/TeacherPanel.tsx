@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
 import type { SchoolClass, SchoolStudent, Assignment } from "@/types/school";
 import {

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Crown, Sparkles, Zap } from "lucide-react";
-import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
