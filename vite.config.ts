@@ -118,33 +118,7 @@ export default defineConfig(({ mode }) => ({
     target: "esnext",
     minify: "esbuild",
     cssMinify: true,
-    rollupOptions: {
-      output: {
-        // Manual chunk splitting — katta kutubxonalarni ajratish
-        manualChunks: {
-          // React core
-          "react-core": ["react", "react-dom", "react-router-dom"],
-          // UI components
-          "ui-vendor": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-tooltip",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-select",
-          ],
-          // Animation
-          "motion": ["framer-motion"],
-          // 3D
-          "three": ["three"],
-          // Data fetching
-          "query": ["@tanstack/react-query"],
-          // Supabase
-          "supabase": ["@supabase/supabase-js"],
-        },
-      },
-    },
-    // Chunk size ogohlantirish limiti
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1500,
   },
 
   // ── Dev server ────────────────────────────────────────────
