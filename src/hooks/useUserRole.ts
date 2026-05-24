@@ -26,7 +26,7 @@ export const useUserRole = () => {
         if (error) throw error;
         setRoles((data?.map(r => r.role) as AppRole[]) || []);
       } catch (error) {
-        console.error('Error fetching user roles:', error);
+        console.warn('user_roles fetch failed:', error);
         setRoles([]);
       } finally {
         setLoading(false);

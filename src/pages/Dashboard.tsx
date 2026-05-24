@@ -339,9 +339,11 @@ export default function Dashboard() {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent" />
-      </div>
+      <AppLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent" />
+        </div>
+      </AppLayout>
     );
   }
 

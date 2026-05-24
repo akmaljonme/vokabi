@@ -57,13 +57,12 @@ export const useLanguage = () => {
 
       if (error || !data) throw new Error('no data');
 
-      // DB da onboarding_done yo'q bo'lsa, localStorage ga qaray
       const merged: UserPreferences = {
-        target_language: data.target_language ?? localPrefs?.target_language ?? null,
-        learning_purpose: data.learning_purpose ?? localPrefs?.learning_purpose ?? null,
-        current_level: data.current_level ?? localPrefs?.current_level ?? null,
-        learning_goal: data.learning_goal ?? localPrefs?.learning_goal ?? null,
-        onboarding_done: data.onboarding_done ?? localPrefs?.onboarding_done ?? false,
+        target_language: (data as any).target_language ?? localPrefs?.target_language ?? null,
+        learning_purpose: (data as any).learning_purpose ?? localPrefs?.learning_purpose ?? null,
+        current_level: (data as any).current_level ?? localPrefs?.current_level ?? null,
+        learning_goal: (data as any).learning_goal ?? localPrefs?.learning_goal ?? null,
+        onboarding_done: (data as any).onboarding_done ?? localPrefs?.onboarding_done ?? true,
       };
       setPrefs(merged);
     } catch {
