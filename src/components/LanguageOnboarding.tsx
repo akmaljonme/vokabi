@@ -81,22 +81,34 @@ export const LanguageOnboarding = ({ onComplete }: LanguageOnboardingProps) => {
     if (step < 3) {
       setStep(s => s + 1);
     } else {
-      // Save to DB
       setSaving(true);
       try {
-        await supabase.from('profiles').update({
+        // Avval mavjud ustunlar bilan urinib ko'rish
+        const { error } = await supabase.from('profiles').update({
           target_language: data.target_language,
           learning_purpose: data.learning_purpose,
           current_level: data.current_level,
           learning_goal: data.learning_goal,
           onboarding_done: true,
         }).eq('user_id', user?.id);
-        onComplete(data);
+
+        if (error) {
+          // Ustunlar yo'q bo'lsa, faqat mavjud ustunlarni saqlash
+          console.warn('Full update failed, trying partial:', error.message);
+          await supabase.from('profiles').update({
+            target_language: data.target_language,
+          }).eq('user_id', user?.id).throwOnError();
+        }
       } catch (e) {
-        console.error(e);
-        onComplete(data);
+        console.warn('DB save failed, using localStorage fallback:', e);
       } finally {
+        // DB muvaffaqiyatli bo'lmasa ham — localStorage ga saqla va davom et
+        localStorage.setItem('vokabi_prefs', JSON.stringify({
+          ...data,
+          onboarding_done: true,
+        }));
         setSaving(false);
+        onComplete(data);
       }
     }
   };

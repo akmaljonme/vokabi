@@ -43,22 +43,36 @@ export const useLanguage = () => {
 
   const fetchPrefs = useCallback(async () => {
     if (!user) { setLoading(false); return; }
+
+    // LocalStorage fallback (DB ustunlari yo'q bo'lsa)
+    const localRaw = localStorage.getItem('vokabi_prefs');
+    const localPrefs = localRaw ? JSON.parse(localRaw) : null;
+
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('target_language, learning_purpose, current_level, learning_goal, onboarding_done')
         .eq('user_id', user.id)
         .single();
 
-      setPrefs(data as UserPreferences || {
-        target_language: null,
-        learning_purpose: null,
-        current_level: null,
-        learning_goal: null,
-        onboarding_done: false,
-      });
+      if (error || !data) throw new Error('no data');
+
+      // DB da onboarding_done yo'q bo'lsa, localStorage ga qaray
+      const merged: UserPreferences = {
+        target_language: data.target_language ?? localPrefs?.target_language ?? null,
+        learning_purpose: data.learning_purpose ?? localPrefs?.learning_purpose ?? null,
+        current_level: data.current_level ?? localPrefs?.current_level ?? null,
+        learning_goal: data.learning_goal ?? localPrefs?.learning_goal ?? null,
+        onboarding_done: data.onboarding_done ?? localPrefs?.onboarding_done ?? false,
+      };
+      setPrefs(merged);
     } catch {
-      setPrefs({ target_language: null, learning_purpose: null, current_level: null, learning_goal: null, onboarding_done: false });
+      // DB xato — localStorage dan ol
+      if (localPrefs) {
+        setPrefs(localPrefs);
+      } else {
+        setPrefs({ target_language: null, learning_purpose: null, current_level: null, learning_goal: null, onboarding_done: false });
+      }
     } finally {
       setLoading(false);
     }
