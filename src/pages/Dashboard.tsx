@@ -51,6 +51,7 @@ import {
   Medal,
 } from "lucide-react";
 import { CEFRLevel } from "@/types/cefr";
+import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
 import { motion } from "framer-motion";
 import { useGamification } from "@/hooks/useGamification";
@@ -363,7 +364,7 @@ export default function Dashboard() {
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className="flex-1">
+          <div>
             <h1 className="text-2xl font-display font-bold tracking-tight">
               Dashboard
             </h1>
