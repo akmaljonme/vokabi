@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/hooks/useLanguage";
+import { LanguageOnboarding } from "@/components/LanguageOnboarding";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Card,
@@ -99,6 +101,7 @@ const COLORS = [
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { prefs, loading: langLoading, refetch: refetchLang, needsOnboarding, languageName, languageFlag } = useLanguage();
   const [results, setResults] = useState<TestResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const {
@@ -337,11 +340,20 @@ export default function Dashboard() {
     return { totalTests, averageScore, totalTime, passedTests };
   };
 
-  if (loading || isLoading) {
+  if (loading || isLoading || langLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent" />
       </div>
+    );
+  }
+
+  // Yangi foydalanuvchi — onboarding ko'rsat
+  if (needsOnboarding) {
+    return (
+      <LanguageOnboarding
+        onComplete={() => refetchLang()}
+      />
     );
   }
 
@@ -364,10 +376,17 @@ export default function Dashboard() {
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-display font-bold tracking-tight">
-              Dashboard
-            </h1>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl font-display font-bold tracking-tight">
+                Dashboard
+              </h1>
+              {prefs?.target_language && (
+                <span className="flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full">
+                  {languageFlag} {languageName}
+                </span>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground">
               O'quv jarayoningizni kuzating
             </p>
