@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Gamepad2, Video, ClipboardList,
   Users, School, Home, PenTool, BookOpen, Zap,
   Trophy, Settings, ChevronLeft, ChevronRight,
-  Sparkles, BarChart3, Star, GraduationCap
+  Sparkles, BarChart3, Star, GraduationCap, Globe,
 } from "lucide-react";
 
 interface NavItem {
