@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -16,8 +17,9 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isAdmin } = useUserRole();
+  const isMobile = useIsMobile();
 
-  // Login bo'lmagan — oddiy layout
+  // Login bo'lmagan
   if (!user) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -27,26 +29,36 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background flex">
-      {/* Sidebar — faqat desktop (lg+) */}
-      <div className="hidden lg:block">
-        <Sidebar />
-      </div>
-
-      {/* Header — faqat mobil */}
-      <div className="lg:hidden">
+  // Mobil — faqat Header
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
         <Header
           onNavigate={(view) => navigate(view === "levels" ? "/#levels" : "/")}
           isAdmin={isAdmin}
         />
+        <motion.main
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex-1 overflow-x-hidden"
+        >
+          {children}
+          {withFooter && <Footer />}
+        </motion.main>
       </div>
+    );
+  }
 
+  // Desktop — Sidebar
+  return (
+    <div className="min-h-screen bg-background flex">
+      <Sidebar />
       <motion.main
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 min-h-screen overflow-x-hidden lg:ml-[var(--sidebar-w,220px)]"
+        className="flex-1 min-h-screen overflow-x-hidden"
+        style={{ marginLeft: "var(--sidebar-w, 220px)" }}
       >
         {children}
         {withFooter && <Footer />}
