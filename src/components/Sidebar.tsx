@@ -1,4 +1,4 @@
-import { LanguageBanner } from "@/components/LanguageBanner";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -182,7 +182,6 @@ export const Sidebar = () => {
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold truncate">{user.email?.split("@")[0]}</p>
             </div>
-            <LanguageBanner />
             <button onClick={handleSignOut} className="text-muted-foreground hover:text-destructive transition-colors">
               <LogOut className="w-4 h-4" />
             </button>
