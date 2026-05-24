@@ -8,17 +8,13 @@ import { SkillSelection } from '@/components/SkillSelection';
 import { TestInterface } from '@/components/TestInterface';
 import { ResultPage } from '@/components/ResultPage';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
-import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
 import { LearningPathMap } from '@/components/LearningPathMap';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { CEFRLevel, SkillType, ViewType, TestResult } from '@/types/cefr';
 
 const Index = () => {
   const { user } = useAuth();
-
-  // Login bo'lgan user → darhol /dashboard ga
   if (user) return <Navigate to="/dashboard" replace />;
 
   const [currentView, setCurrentView] = useState<ViewType>('landing');
@@ -29,8 +25,6 @@ const Index = () => {
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const { isAdmin } = useUserRole();
-  const { hasCompletedOnboarding } = useTheme();
-  const [showOnboarding, setShowOnboarding] = useState(!hasCompletedOnboarding);
 
   const handleNavigate = useCallback((view: ViewType) => {
     setCurrentView(view);
@@ -79,11 +73,6 @@ const Index = () => {
   const handleGoToVocabulary = useCallback(() => {
     setCurrentView('vocabulary');
   }, []);
-
-  // Show onboarding if not completed
-  if (showOnboarding) {
-    return <OnboardingFlow onComplete={() => setShowOnboarding(false)} />;
-  }
 
   // Show admin dashboard if user is admin and toggled
   if (showAdmin && isAdmin) {

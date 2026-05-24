@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
-import { LanguageOnboarding } from "@/components/LanguageOnboarding";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Card,
@@ -344,15 +343,6 @@ export default function Dashboard() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent" />
       </div>
-    );
-  }
-
-  // Yangi foydalanuvchi — onboarding ko'rsat
-  if (needsOnboarding) {
-    return (
-      <LanguageOnboarding
-        onComplete={() => refetchLang()}
-      />
     );
   }
 
