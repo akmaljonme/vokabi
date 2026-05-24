@@ -301,7 +301,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+              className="fixed inset-0 bg-black/60 z-[60] lg:hidden"
               onClick={() => setIsMenuOpen(false)}
             />
 
@@ -311,7 +311,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed top-0 left-0 h-full w-72 bg-background border-r border-border/50 z-50 lg:hidden flex flex-col shadow-2xl"
+              className="fixed top-0 left-0 h-full w-[280px] bg-background border-r border-border/50 z-[70] lg:hidden flex flex-col shadow-2xl"
             >
               {/* Drawer header */}
               <div className="flex items-center justify-between px-4 py-4 border-b border-border/40">

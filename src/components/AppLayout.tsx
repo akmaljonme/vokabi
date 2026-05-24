@@ -34,8 +34,8 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
         <Sidebar />
       </div>
 
-      {/* Header — faqat mobil (lg dan kichik) */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50">
+      {/* Header — faqat mobil */}
+      <div className="lg:hidden">
         <Header
           onNavigate={(view) => navigate(view === "levels" ? "/#levels" : "/")}
           isAdmin={isAdmin}
@@ -46,7 +46,7 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 min-h-screen overflow-x-hidden lg:ml-[var(--sidebar-w,220px)] pt-[72px] lg:pt-0"
+        className="flex-1 min-h-screen overflow-x-hidden lg:ml-[var(--sidebar-w,220px)]"
       >
         {children}
         {withFooter && <Footer />}
