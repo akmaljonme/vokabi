@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { LandingPage } from '@/components/LandingPage';
@@ -11,9 +11,18 @@ import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow';
 import { LearningPathMap } from '@/components/LearningPathMap';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { CEFRLevel, SkillType, ViewType, TestResult } from '@/types/cefr';
 
 const Index = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Login bo'lgan foydalanuvchini dashboard ga yuborish
+  useEffect(() => {
+    if (user) navigate("/dashboard", { replace: true });
+  }, [user, navigate]);
   const [currentView, setCurrentView] = useState<ViewType>('landing');
   const [selectedLevel, setSelectedLevel] = useState<CEFRLevel | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<SkillType | null>(null);
