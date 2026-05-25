@@ -65,7 +65,13 @@ export const Sidebar = () => {
   const sidebarW = collapsed ? 64 : 220;
 
   useEffect(() => {
-    document.documentElement.style.setProperty("--sidebar-w", `${sidebarW}px`);
+    // Faqat desktop da padding o'rnatamiz
+    if (window.innerWidth >= 1024) {
+      document.documentElement.style.setProperty("--sidebar-w", `${sidebarW}px`);
+      document.documentElement.style.setProperty("--app-content-offset", `${sidebarW}px`);
+    } else {
+      document.documentElement.style.setProperty("--app-content-offset", "0px");
+    }
   }, [sidebarW]);
 
   const NavBtn = ({ item }: { item: NavItem }) => (
