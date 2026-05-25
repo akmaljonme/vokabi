@@ -61,6 +61,16 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
       });
   }, [user]);
 
+  // Drawer ochiq bo'lganda body scroll ni bloklash
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isMenuOpen]);
+
   const toggleTheme = () => {
     const next = !isDark;
     document.documentElement.classList.toggle("dark", next);
@@ -74,6 +84,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
   };
 
   return (
+    <>
     <header
       className="sticky top-0 z-50 border-b border-border/50"
       style={{
@@ -290,28 +301,26 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
           </div>
         </div>
       </div>
+    </header>
 
-      {/* Mobile Drawer — chapdan chiqadi */}
+      {/* Mobile Drawer — header TASHQARISIDA, fixed full screen */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
-            {/* Overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 z-[60] lg:hidden"
+              className="fixed inset-0 bg-black/70 z-[9998] lg:hidden"
               onClick={() => setIsMenuOpen(false)}
             />
-
-            {/* Drawer */}
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed top-0 left-0 h-full w-[280px] bg-background border-r border-border/50 z-[70] lg:hidden flex flex-col shadow-2xl"
+              className="fixed top-0 left-0 h-full w-[280px] bg-background border-r border-border/50 z-[9999] lg:hidden flex flex-col shadow-2xl"
             >
               {/* Drawer header */}
               <div className="flex items-center justify-between px-4 py-4 border-b border-border/40">
@@ -453,6 +462,6 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
           </>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 };
