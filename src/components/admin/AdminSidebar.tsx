@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Users, FileText, BarChart3, Settings, 
-  ChevronLeft, ChevronRight, Shield, MessageSquare, Video, X, ClipboardList, CreditCard
+  ChevronLeft, ChevronRight, Shield, MessageSquare, Video, X, ClipboardList, CreditCard, Megaphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -14,15 +14,16 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
-  { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'users', label: 'Users', icon: Users },
-  { id: 'results', label: 'Results & Analytics', icon: BarChart3 },
-  { id: 'tests', label: 'Tests Management', icon: FileText },
-  { id: 'exams', label: 'Exams', icon: ClipboardList },
-  { id: 'payments', label: "To'lovlar", icon: CreditCard },
-  { id: 'feedbacks', label: 'Feedbacklar', icon: MessageSquare },
-  { id: 'videos', label: 'Video Darslar', icon: Video },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'overview',   label: 'Dashboard',          icon: LayoutDashboard },
+  { id: 'users',      label: 'Users',               icon: Users },
+  { id: 'results',    label: 'Results & Analytics', icon: BarChart3 },
+  { id: 'tests',      label: 'Tests Management',    icon: FileText },
+  { id: 'exams',      label: 'Exams',               icon: ClipboardList },
+  { id: 'payments',   label: "To'lovlar",           icon: CreditCard },
+  { id: 'feedbacks',  label: 'Feedbacklar',         icon: MessageSquare },
+  { id: 'videos',     label: 'Video Darslar',       icon: Video },
+  { id: 'ads',        label: 'Reklamalar',          icon: Megaphone },
+  { id: 'settings',   label: 'Settings',            icon: Settings },
 ];
 
 export const AdminSidebar = ({ 

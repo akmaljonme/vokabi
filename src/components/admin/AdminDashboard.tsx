@@ -10,6 +10,7 @@ import { ExamsTab } from './ExamsTab';
 import { PaymentsTab } from './PaymentsTab';
 import { SettingsTab } from './SettingsTab';
 import { VideoLessonsTab } from './VideoLessonsTab';
+import { AdsTab } from './AdsTab';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -33,6 +34,7 @@ export const AdminDashboard = ({ onExitAdmin }: AdminDashboardProps) => {
       case 'payments': return <PaymentsTab />;
       case 'feedbacks': return <FeedbacksTab />;
       case 'videos': return <VideoLessonsTab />;
+      case 'ads': return <AdsTab />;
       case 'settings': return <SettingsTab />;
       default: return <OverviewTab />;
     }
