@@ -29,7 +29,7 @@ export default function LanguageLevel() {
     { icon: Gamepad2,  label: "O'yinlar",      desc: "So'zlarni o'yin bilan mustahkamlang", action: () => navigate("/games"), color: "bg-green-500/10 text-green-500" },
     { icon: PenTool,   label: "Writing",       desc: "Essay yozing va AI baholaydi", action: () => navigate("/essay"),     color: "bg-purple-500/10 text-purple-500" },
     { icon: Volume2,   label: "Listening",     desc: "Video darslar tinglang",       action: () => navigate("/videos"),    color: "bg-orange-500/10 text-orange-500" },
-    { icon: Brain,     label: "Practice Test", desc: "Darajangizni sinab ko'ring",   action: () => navigate("/exams"),    color: "bg-red-500/10 text-red-500" },
+    { icon: Brain,     label: "Practice Test", desc: "Darajangizni sinab ko'ring",   action: () => navigate(`/tests?level=${lvl}`),    color: "bg-red-500/10 text-red-500" },
   ];
 
   return (
