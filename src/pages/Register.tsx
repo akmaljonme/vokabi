@@ -46,7 +46,7 @@ const GOALS = [
 const STEPS = ["Sabab", "Daraja", "Maqsad", "Hisob"];
 
 const Register = () => {
-  const { user, signUp } = useAuth();
+  const { user, signUp, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
@@ -68,8 +68,8 @@ const Register = () => {
   >("idle");
 
   useEffect(() => {
-    if (user) navigate("/dashboard", { replace: true });
-  }, [user, navigate]);
+    if (!authLoading && user) navigate("/dashboard", { replace: true });
+  }, [user, authLoading, navigate]);
 
   const checkUsername = useCallback(async (value: string) => {
     if (!value || value.length < 3) { setUsernameStatus("idle"); return; }

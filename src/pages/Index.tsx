@@ -14,7 +14,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { CEFRLevel, SkillType, ViewType, TestResult } from '@/types/cefr';
 
 const Index = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  // Auth yuklanayotganda bo'sh ekran ko'rsat
+  if (loading) return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
   if (user) return <Navigate to="/dashboard" replace />;
 
   const [currentView, setCurrentView] = useState<ViewType>('landing');
