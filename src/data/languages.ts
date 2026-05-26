@@ -1,16 +1,15 @@
 export interface Language {
   id: string;
-  name: string;          // O'zbekcha nomi
-  nativeName: string;    // O'z tilida
-  flag: string;          // Emoji
-  color: string;         // Gradient
-  levels: string[];      // CEFR darajalari
-  alphabet: string;      // Yozuv tizimi
+  name: string;
+  nativeName: string;
+  flag: string;
+  color: string;
+  levels: string[];
+  alphabet: string;
   difficulty: 'easy' | 'medium' | 'hard';
-  speakers: string;      // Gaplashuvchilar soni
-  greeting: string;      // "Salom" o'sha tilda
+  speakers: string;
+  greeting: string;
   commonPhrases: { phrase: string; translation: string; pronunciation: string }[];
-  alphabet_letters?: string[];
 }
 
 export const LANGUAGES: Language[] = [
@@ -29,196 +28,8 @@ export const LANGUAGES: Language[] = [
       { phrase: "Hello!", translation: "Salom!", pronunciation: "HEL-oh" },
       { phrase: "Thank you", translation: "Rahmat", pronunciation: "THANK yoo" },
       { phrase: "How are you?", translation: "Qanaqasiz?", pronunciation: "haw ar yoo" },
-    ],
-  },
-  {
-    id: "german",
-    name: "Nemis tili",
-    nativeName: "Deutsch",
-    flag: "🇩🇪",
-    color: "from-yellow-500 to-red-500",
-    levels: ["A1","A2","B1","B2","C1","C2"],
-    alphabet: "Lotin",
-    difficulty: "hard",
-    speakers: "130 mln",
-    greeting: "Hallo!",
-    commonPhrases: [
-      { phrase: "Hallo!", translation: "Salom!", pronunciation: "HA-lo" },
-      { phrase: "Danke", translation: "Rahmat", pronunciation: "DANK-uh" },
-      { phrase: "Wie geht es Ihnen?", translation: "Qanaqasiz?", pronunciation: "vee gayt es EE-nen" },
-      { phrase: "Guten Morgen", translation: "Xayrli tong", pronunciation: "GOO-ten MOR-gen" },
-      { phrase: "Auf Wiedersehen", translation: "Xayr", pronunciation: "owf VEE-der-zayn" },
-    ],
-  },
-  {
-    id: "french",
-    name: "Fransuz tili",
-    nativeName: "Français",
-    flag: "🇫🇷",
-    color: "from-blue-700 to-red-500",
-    levels: ["A1","A2","B1","B2","C1","C2"],
-    alphabet: "Lotin",
-    difficulty: "medium",
-    speakers: "280 mln",
-    greeting: "Bonjour!",
-    commonPhrases: [
-      { phrase: "Bonjour!", translation: "Salom!", pronunciation: "bon-ZHOOR" },
-      { phrase: "Merci", translation: "Rahmat", pronunciation: "mair-SEE" },
-      { phrase: "Comment allez-vous?", translation: "Qanaqasiz?", pronunciation: "kom-on tah-lay VOO" },
-      { phrase: "Bonne nuit", translation: "Xayrli tun", pronunciation: "bon NWEE" },
-      { phrase: "Au revoir", translation: "Xayr", pronunciation: "oh ruh-VWAR" },
-    ],
-  },
-  {
-    id: "spanish",
-    name: "Ispan tili",
-    nativeName: "Español",
-    flag: "🇪🇸",
-    color: "from-red-600 to-yellow-400",
-    levels: ["A1","A2","B1","B2","C1","C2"],
-    alphabet: "Lotin",
-    difficulty: "easy",
-    speakers: "500 mln",
-    greeting: "¡Hola!",
-    commonPhrases: [
-      { phrase: "¡Hola!", translation: "Salom!", pronunciation: "OH-lah" },
-      { phrase: "Gracias", translation: "Rahmat", pronunciation: "GRAH-syahs" },
-      { phrase: "¿Cómo estás?", translation: "Qanaqasiz?", pronunciation: "KOH-moh es-TAHS" },
-      { phrase: "Buenos días", translation: "Xayrli tong", pronunciation: "BWAY-nos DEE-as" },
-      { phrase: "Adiós", translation: "Xayr", pronunciation: "ah-DYOHS" },
-    ],
-  },
-  {
-    id: "italian",
-    name: "Italyan tili",
-    nativeName: "Italiano",
-    flag: "🇮🇹",
-    color: "from-green-600 to-red-500",
-    levels: ["A1","A2","B1","B2","C1"],
-    alphabet: "Lotin",
-    difficulty: "easy",
-    speakers: "85 mln",
-    greeting: "Ciao!",
-    commonPhrases: [
-      { phrase: "Ciao!", translation: "Salom!", pronunciation: "CHOW" },
-      { phrase: "Grazie", translation: "Rahmat", pronunciation: "GRAH-tsye" },
-      { phrase: "Come stai?", translation: "Qanaqasiz?", pronunciation: "KOH-meh STAH-ee" },
-      { phrase: "Buongiorno", translation: "Xayrli tong", pronunciation: "bwon-JOR-no" },
-      { phrase: "Arrivederci", translation: "Xayr", pronunciation: "ah-ree-veh-DAIR-chee" },
-    ],
-  },
-  {
-    id: "russian",
-    name: "Rus tili",
-    nativeName: "Русский",
-    flag: "🇷🇺",
-    color: "from-blue-700 to-red-600",
-    levels: ["A1","A2","B1","B2","C1"],
-    alphabet: "Kirill",
-    difficulty: "hard",
-    speakers: "260 mln",
-    greeting: "Привет!",
-    commonPhrases: [
-      { phrase: "Привет!", translation: "Salom!", pronunciation: "pri-VYET" },
-      { phrase: "Спасибо", translation: "Rahmat", pronunciation: "spa-SEE-ba" },
-      { phrase: "Как дела?", translation: "Qanaqasiz?", pronunciation: "kak dee-LAH" },
-      { phrase: "Доброе утро", translation: "Xayrli tong", pronunciation: "DOB-ra-ye OO-tra" },
-      { phrase: "До свидания", translation: "Xayr", pronunciation: "da svee-DAH-nya" },
-    ],
-  },
-  {
-    id: "turkish",
-    name: "Turk tili",
-    nativeName: "Türkçe",
-    flag: "🇹🇷",
-    color: "from-red-600 to-red-400",
-    levels: ["A1","A2","B1","B2","C1"],
-    alphabet: "Lotin",
-    difficulty: "medium",
-    speakers: "90 mln",
-    greeting: "Merhaba!",
-    commonPhrases: [
-      { phrase: "Merhaba!", translation: "Salom!", pronunciation: "mair-HA-ba" },
-      { phrase: "Teşekkür ederim", translation: "Rahmat", pronunciation: "teh-sheh-KYUR eh-deh-RIM" },
-      { phrase: "Nasılsınız?", translation: "Qanaqasiz?", pronunciation: "nah-SUL-suh-nuz" },
-      { phrase: "Günaydın", translation: "Xayrli tong", pronunciation: "gyoo-NAY-dun" },
-      { phrase: "Hoşça kalın", translation: "Xayr", pronunciation: "HOSH-cha kah-LUN" },
-    ],
-  },
-  {
-    id: "arabic",
-    name: "Arab tili",
-    nativeName: "العربية",
-    flag: "🇸🇦",
-    color: "from-green-700 to-green-500",
-    levels: ["A1","A2","B1","B2"],
-    alphabet: "Arab",
-    difficulty: "hard",
-    speakers: "420 mln",
-    greeting: "مرحبا!",
-    commonPhrases: [
-      { phrase: "مرحبا", translation: "Salom!", pronunciation: "mar-HA-ba" },
-      { phrase: "شكراً", translation: "Rahmat", pronunciation: "SHUK-ran" },
-      { phrase: "كيف حالك؟", translation: "Qanaqasiz?", pronunciation: "KAY-fa HA-lak" },
-      { phrase: "صباح الخير", translation: "Xayrli tong", pronunciation: "sa-BAH al-KHAYR" },
-      { phrase: "مع السلامة", translation: "Xayr", pronunciation: "ma-as-sa-LA-ma" },
-    ],
-  },
-  {
-    id: "japanese",
-    name: "Yapon tili",
-    nativeName: "日本語",
-    flag: "🇯🇵",
-    color: "from-red-600 to-pink-400",
-    levels: ["A1","A2","B1","B2"],
-    alphabet: "Hiragana/Kanji",
-    difficulty: "hard",
-    speakers: "130 mln",
-    greeting: "こんにちは!",
-    commonPhrases: [
-      { phrase: "こんにちは", translation: "Salom!", pronunciation: "kon-ni-CHI-wa" },
-      { phrase: "ありがとう", translation: "Rahmat", pronunciation: "a-ri-GA-to" },
-      { phrase: "お元気ですか？", translation: "Qanaqasiz?", pronunciation: "o-GEN-ki des-ka" },
-      { phrase: "おはようございます", translation: "Xayrli tong", pronunciation: "o-ha-YO go-ZAI-mas" },
-      { phrase: "さようなら", translation: "Xayr", pronunciation: "sa-YO-na-ra" },
-    ],
-  },
-  {
-    id: "chinese",
-    name: "Xitoy tili",
-    nativeName: "中文",
-    flag: "🇨🇳",
-    color: "from-red-700 to-yellow-500",
-    levels: ["A1","A2","B1","B2"],
-    alphabet: "Ierogliflar",
-    difficulty: "hard",
-    speakers: "1.1 mlrd",
-    greeting: "你好!",
-    commonPhrases: [
-      { phrase: "你好", translation: "Salom!", pronunciation: "nǐ hǎo" },
-      { phrase: "谢谢", translation: "Rahmat", pronunciation: "xiè xie" },
-      { phrase: "你好吗？", translation: "Qanaqasiz?", pronunciation: "nǐ hǎo ma" },
-      { phrase: "早上好", translation: "Xayrli tong", pronunciation: "zǎo shàng hǎo" },
-      { phrase: "再见", translation: "Xayr", pronunciation: "zài jiàn" },
-    ],
-  },
-  {
-    id: "korean",
-    name: "Koreys tili",
-    nativeName: "한국어",
-    flag: "🇰🇷",
-    color: "from-blue-600 to-red-500",
-    levels: ["A1","A2","B1","B2"],
-    alphabet: "Hangul",
-    difficulty: "hard",
-    speakers: "80 mln",
-    greeting: "안녕하세요!",
-    commonPhrases: [
-      { phrase: "안녕하세요", translation: "Salom!", pronunciation: "an-nyong-ha-SE-yo" },
-      { phrase: "감사합니다", translation: "Rahmat", pronunciation: "gam-sa-HAM-ni-da" },
-      { phrase: "어떻게 지내세요?", translation: "Qanaqasiz?", pronunciation: "o-TOK-ke ji-ne-SE-yo" },
-      { phrase: "안녕히 가세요", translation: "Xayr", pronunciation: "an-nyong-hi GA-se-yo" },
-      { phrase: "좋은 아침", translation: "Xayrli tong", pronunciation: "jo-EUN a-CHIM" },
+      { phrase: "Good morning", translation: "Xayrli tong", pronunciation: "gud MOR-ning" },
+      { phrase: "Goodbye", translation: "Xayr", pronunciation: "gud-BY" },
     ],
   },
 ];
