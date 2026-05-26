@@ -27,9 +27,11 @@ export default defineConfig(({ mode }) => ({
         lang: "uz",
         categories: ["education", "language"],
         icons: [
-          { src: "/favicon.ico",        sizes: "64x64",   type: "image/x-icon" },
-          { src: "/placeholder.svg",    sizes: "192x192", type: "image/svg+xml", purpose: "any" },
-          { src: "/placeholder.svg",    sizes: "512x512", type: "image/svg+xml", purpose: "maskable" },
+          { src: "/favicon.ico",        sizes: "48x48",   type: "image/x-icon" },
+          { src: "/icon-16x16.png",     sizes: "16x16",   type: "image/png" },
+          { src: "/icon-32x32.png",     sizes: "32x32",   type: "image/png" },
+          { src: "/icon-192x192.png",   sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "/icon-512x512.png",   sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
         shortcuts: [
           {

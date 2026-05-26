@@ -1,17 +1,55 @@
-<svg width="200" height="200" viewBox="0 0 200 200" role="img" xmlns="http://www.w3.org/2000/svg">
-  <title>Vokabi</title>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="iconG" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#7c3aed"/>
       <stop offset="100%" style="stop-color:#4f46e5"/>
     </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.25"/>
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0"/>
+    </linearGradient>
   </defs>
-  <rect width="200" height="200" fill="#09090b" rx="40"/>
-  <rect x="20" y="20" width="160" height="160" rx="32" fill="url(#iconG)"/>
-  <circle cx="100" cy="100" r="48" fill="none" stroke="white" stroke-width="2" opacity="0.25"/>
-  <circle cx="100" cy="52" r="7" fill="white" opacity="0.9"/>
-  <polyline points="64,76 100,132 136,76"
-            fill="none" stroke="white" stroke-width="11"
-            stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="100" cy="132" r="6" fill="white" opacity="0.5"/>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+
+  <!-- Shine overlay -->
+  <rect width="512" height="256" rx="110" fill="url(#shine)"/>
+
+  <!-- Book shape -->
+  <rect x="108" y="140" width="130" height="175" rx="12" fill="white" opacity="0.95"/>
+  <rect x="108" y="140" width="130" height="175" rx="12" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <!-- Book spine -->
+  <rect x="234" y="140" width="8" height="175" fill="rgba(0,0,0,0.12)"/>
+  <!-- Book pages lines -->
+  <line x1="126" y1="175" x2="224" y2="175" stroke="rgba(109,40,217,0.25)" stroke-width="3" stroke-linecap="round"/>
+  <line x1="126" y1="193" x2="224" y2="193" stroke="rgba(109,40,217,0.25)" stroke-width="3" stroke-linecap="round"/>
+  <line x1="126" y1="211" x2="200" y2="211" stroke="rgba(109,40,217,0.25)" stroke-width="3" stroke-linecap="round"/>
+  <!-- Right page -->
+  <rect x="248" y="148" width="118" height="167" rx="8" fill="white" opacity="0.85"/>
+  <!-- Right page lines -->
+  <line x1="264" y1="183" x2="352" y2="183" stroke="rgba(109,40,217,0.2)" stroke-width="3" stroke-linecap="round"/>
+  <line x1="264" y1="201" x2="352" y2="201" stroke="rgba(109,40,217,0.2)" stroke-width="3" stroke-linecap="round"/>
+  <line x1="264" y1="219" x2="330" y2="219" stroke="rgba(109,40,217,0.2)" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- V letter bold -->
+  <text x="256" y="375"
+    font-family="'Arial Black', 'Arial', sans-serif"
+    font-size="110"
+    font-weight="900"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="-4">V</text>
+
+  <!-- Sparkle top-right -->
+  <g transform="translate(368, 118)" opacity="0.9">
+    <line x1="0" y1="-18" x2="0" y2="18" stroke="white" stroke-width="4" stroke-linecap="round"/>
+    <line x1="-18" y1="0" x2="18" y2="0" stroke="white" stroke-width="4" stroke-linecap="round"/>
+    <line x1="-11" y1="-11" x2="11" y2="11" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="11" y1="-11" x2="-11" y2="11" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Small dot accent -->
+  <circle cx="148" cy="118" r="8" fill="white" opacity="0.5"/>
+  <circle cx="370" cy="390" r="5" fill="white" opacity="0.35"/>
 </svg>
