@@ -90,7 +90,7 @@ const App = () => (
                     <Route path="/tests"     element={<ErrorBoundary><Tests /></ErrorBoundary>} />
                     <Route path="/pricing"   element={<ErrorBoundary><Pricing /></ErrorBoundary>} />
                     <Route path="/tools"      element={<ErrorBoundary><Tools /></ErrorBoundary>} />
-                    <Route path="/languages"   element={<ErrorBoundary><Languages /></ErrorBoundary>} />
+                    <Route path="/languages"   element={<Navigate to="/learning-path" replace />} />
                     <Route path="/language/:langId/:level" element={<ErrorBoundary><LanguageLevel /></ErrorBoundary>} />
                     <Route path="/learning-path" element={<ErrorBoundary><LearningPath /></ErrorBoundary>} />
                     <Route path="/language/:langId" element={<ErrorBoundary><Languages /></ErrorBoundary>} />

@@ -178,7 +178,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                         {[
                           { label: "Video Darslar", icon: "🎬", path: "/videos" },
                           { label: "Examlar", icon: "📋", path: "/exams" },
-                          { label: "Tillar", icon: "🌍", path: "/languages" },
+                          { label: "Test Yechish", icon: "📝", path: "/learning-path" },
                           { label: "School", icon: "🏫", path: "/school" },
                           { label: "Study Room", icon: "🏠", path: "/study-room" },
                           { label: "Essay Checker", icon: "✍️", path: "/essay" },

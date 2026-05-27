@@ -6,8 +6,9 @@ import type { CEFRLevel } from "@/types/cefr";
 export default function LearningPath() {
   const navigate = useNavigate();
 
+  // Daraja tanlanganda test sahifasiga o'tish
   const handleSelectLevel = (level: CEFRLevel) => {
-    navigate(`/?level=${level}`);
+    navigate(`/?level=${level}&autostart=true`);
   };
 
   return (

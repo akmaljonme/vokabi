@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Gamepad2, Video, ClipboardList,
   Users, School, Home, PenTool, BookOpen,
   Trophy, Settings, ChevronLeft, ChevronRight,
-  Sparkles, Globe, LogOut, Moon, Sun,
+  Sparkles, Brain, LogOut, Moon, Sun,
   Shield, ChevronDown,
 } from "lucide-react";
 
@@ -29,7 +29,7 @@ const mainItems: NavItem[] = [
 ];
 
 const toolItems: NavItem[] = [
-  { label: "Tillar",        path: "/languages",   icon: Globe },
+  { label: "Test Yechish",  path: "/learning-path", icon: Brain },
   { label: "School",        path: "/school",      icon: School },
   { label: "Study Room",    path: "/study-room",  icon: Home },
   { label: "Essay Checker", path: "/essay",       icon: PenTool },

@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -32,6 +33,21 @@ const Index = () => {
   const [selectedTestId, setSelectedTestId] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  // URL parametrlardan daraja va autostart
+  useEffect(() => {
+    const level = searchParams.get('level') as CEFRLevel | null;
+    const autostart = searchParams.get('autostart');
+    if (level) {
+      setSelectedLevel(level);
+      if (autostart === 'true') {
+        setCurrentView('skills');
+      } else {
+        setCurrentView('levels');
+      }
+    }
+  }, []);
   const { isAdmin } = useUserRole();
 
   const handleNavigate = useCallback((view: ViewType) => {
