@@ -15,11 +15,11 @@ interface AppLayoutProps {
 export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { isAdmin } = useUserRole();
+  const { isAdmin } = useUserRole(); // user null bo'lsa hook o'zi [] qaytaradi
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header — mobilda har doim, desktopda faqat login bo'lmasa */}
+      {/* Header: login bo'lmasa har doim, login bo'lsa faqat mobil */}
       <div className={user ? "lg:hidden" : ""}>
         <Header
           onNavigate={(v) => navigate(v === "levels" ? "/#levels" : "/")}
@@ -27,14 +27,13 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
         />
       </div>
 
-      {/* Sidebar — faqat login + desktop */}
+      {/* Sidebar: faqat login + desktop */}
       {user && (
         <div className="hidden lg:block">
           <Sidebar />
         </div>
       )}
 
-      {/* Main content */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

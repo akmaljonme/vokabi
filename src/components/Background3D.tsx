@@ -21,13 +21,25 @@ export const Background3D = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
-    // CSS variable dan primary rang olish
-    const style = getComputedStyle(document.documentElement);
-    const primaryHSL = style.getPropertyValue("--primary").trim() || "217 91% 60%";
-    const [h, s, l] = primaryHSL.split(" ").map((v) => parseFloat(v));
-    const primaryColor = new THREE.Color().setHSL(h / 360, s / 100, l / 100);
-    const accentColor = new THREE.Color().setHSL((h + 60) / 360, s / 100, (l + 10) / 100);
-    const mutedColor = new THREE.Color().setHSL(h / 360, (s - 20) / 100, (l + 20) / 100);
+    // CSS variable dan primary rang olish — xavfsiz parsing
+    let primaryColor = new THREE.Color(0x6366f1); // default indigo
+    let accentColor = new THREE.Color(0x8b5cf6);
+    let mutedColor = new THREE.Color(0xa78bfa);
+    try {
+      const style = getComputedStyle(document.documentElement);
+      const primaryHSL = style.getPropertyValue("--primary").trim();
+      if (primaryHSL) {
+        const parts = primaryHSL.split(" ").map((v: string) => parseFloat(v));
+        if (parts.length >= 3 && !parts.some(isNaN)) {
+          const [h, s, l] = parts;
+          primaryColor = new THREE.Color().setHSL(h / 360, s / 100, l / 100);
+          accentColor = new THREE.Color().setHSL((h + 60) / 360, s / 100, l / 100);
+          mutedColor = new THREE.Color().setHSL(h / 360, (s - 20) / 100, (l + 20) / 100);
+        }
+      }
+    } catch {
+      // default ranglar ishlatiladi
+    }
 
     // --- Shapes ---
     const shapes: THREE.Mesh[] = [];
