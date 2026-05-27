@@ -6,7 +6,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Gamepad2, Video, ClipboardList,
-  Users, School, Home, PenTool, BookOpen,
+  Users, Home, PenTool, BookOpen,
   Trophy, Settings, ChevronLeft, ChevronRight,
   Sparkles, Brain, LogOut, Moon, Sun,
   Shield, ChevronDown,
@@ -30,7 +30,6 @@ const mainItems: NavItem[] = [
 
 const toolItems: NavItem[] = [
   { label: "Test Yechish",  path: "/learning-path", icon: Brain },
-  { label: "School",        path: "/school",      icon: School },
   { label: "Study Room",    path: "/study-room",  icon: Home },
   { label: "Essay Checker", path: "/essay",       icon: PenTool },
   { label: "So'z Banki",    path: "/wordbank",    icon: BookOpen },
