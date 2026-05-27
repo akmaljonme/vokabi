@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
+import { useSearchParams, Navigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { LandingPage } from '@/components/LandingPage';
