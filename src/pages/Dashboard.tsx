@@ -363,9 +363,6 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-4 mb-8"
         >
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
           <div>
             <h1 className="text-2xl font-display font-bold tracking-tight">
               Dashboard
@@ -922,7 +919,7 @@ export default function Dashboard() {
                     <Button
                       className="mt-4"
                       size="sm"
-                      onClick={() => navigate("/")}
+                      onClick={() => navigate("/tests")}
                     >
                       Testni boshlash
                     </Button>
