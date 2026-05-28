@@ -12,6 +12,8 @@ import {
   Shield, ChevronDown,
 } from "lucide-react";
 
+import { NotificationBell } from "@/components/NotificationBell";
+
 interface NavItem {
   label: string;
   path: string;
@@ -166,17 +168,20 @@ export const Sidebar = () => {
         )}
       </div>
 
-      {/* Bottom: user + theme */}
+      {/* Bottom: user + theme + notifications */}
       <div className="px-2 pb-3 pt-2 border-t border-border/30 space-y-1">
         <NavBtn item={{ label: "Sozlamalar", path: "/profile", icon: Settings }} />
 
-        {/* Theme toggle */}
-        <button onClick={toggleTheme}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
-        >
-          {isDark ? <Sun className="w-[18px] h-[18px] shrink-0" /> : <Moon className="w-[18px] h-[18px] shrink-0" />}
-          {!collapsed && (isDark ? "Light mode" : "Dark mode")}
-        </button>
+        {/* Theme + Notification row */}
+        <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between px-2"} gap-2`}>
+          <button onClick={toggleTheme}
+            className="flex items-center gap-3 px-2 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+          >
+            {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+            {!collapsed && (isDark ? "Light" : "Dark")}
+          </button>
+          {!collapsed && <NotificationBell />}
+        </div>
 
         {/* User card */}
         {!collapsed && user && (

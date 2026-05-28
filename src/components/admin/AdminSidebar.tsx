@@ -22,6 +22,7 @@ const menuItems = [
   { id: 'payments',   label: "To'lovlar",           icon: CreditCard },
   { id: 'feedbacks',  label: 'Feedbacklar',         icon: MessageSquare },
   { id: 'videos',     label: 'Video Darslar',       icon: Video },
+  { id: 'analytics',  label: 'Analytics',           icon: BarChart3 },
   { id: 'ads',        label: 'Reklamalar',          icon: Megaphone },
   { id: 'settings',   label: 'Settings',            icon: Settings },
 ];

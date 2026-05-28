@@ -13,6 +13,7 @@ import { GlobalCallOverlay } from "@/components/community/GlobalCallOverlay";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
 import { Background3D } from "@/components/Background3D";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { lazy, Suspense } from "react";
 
 // Lazy load all pages — faqat kerakli sahifa yuklanadi
@@ -109,6 +110,7 @@ const App = () => (
               <AITutorChat />
               <GlobalListeners />
               <GlobalCallOverlay />
+              <AnalyticsTracker />
               <PWAInstallPrompt />
             </BrowserRouter>
           </TooltipProvider>

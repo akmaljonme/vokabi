@@ -1,8 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /dashboard
-Disallow: /profile
-Disallow: /community
 Disallow: /admin
-
+Disallow: /profile
 Sitemap: https://vokabi.uz/sitemap.xml
