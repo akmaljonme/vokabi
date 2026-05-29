@@ -31,7 +31,7 @@ const mainItems: NavItem[] = [
 ];
 
 const toolItems: NavItem[] = [
-  { label: "Test Yechish",  path: "/learning-path", icon: Brain },
+  { label: "Test Yechish",  path: "/practice",      icon: Brain },
   { label: "Study Room",    path: "/study-room",  icon: Home },
   { label: "Essay Checker", path: "/essay",       icon: PenTool },
   { label: "So'z Banki",    path: "/wordbank",    icon: BookOpen },

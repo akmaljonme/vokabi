@@ -35,6 +35,7 @@ const Tools          = lazy(() => import("./pages/Tools"));
 const Languages      = lazy(() => import("./pages/Languages"));
 const LanguageLevel  = lazy(() => import("./pages/LanguageLevel"));
 const LearningPath   = lazy(() => import("./pages/LearningPath"));
+const PracticeTests  = lazy(() => import("./pages/PracticeTests"));
 const Tests          = lazy(() => import("./pages/Tests"));
 const SchoolAdmin    = lazy(() => import("./pages/school/SchoolAdmin"));
 const AdminPage      = lazy(() => import("./pages/AdminPage"));
@@ -94,6 +95,7 @@ const App = () => (
                     <Route path="/languages"   element={<Navigate to="/learning-path" replace />} />
                     <Route path="/language/:langId/:level" element={<ErrorBoundary><LanguageLevel /></ErrorBoundary>} />
                     <Route path="/learning-path" element={<ErrorBoundary><LearningPath /></ErrorBoundary>} />
+                    <Route path="/practice" element={<ErrorBoundary><PracticeTests /></ErrorBoundary>} />
                     <Route path="/language/:langId" element={<ErrorBoundary><Languages /></ErrorBoundary>} />
                     <Route path="/school"      element={<ErrorBoundary><SchoolAdmin /></ErrorBoundary>} />
                     <Route path="/admin"       element={<ErrorBoundary><AdminPage /></ErrorBoundary>} />

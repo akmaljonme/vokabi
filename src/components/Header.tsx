@@ -131,7 +131,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                     className="absolute top-full left-0 mt-1 w-52 bg-card rounded-xl shadow-xl border border-border p-1.5 z-50"
                   >
                     {["A1", "A2", "B1", "B2", "C1"].map((level) => (
-                      <button key={level} onClick={() => onNavigate("levels")}
+                      <button key={level} onClick={() => { try { navigate("/practice"); } catch { onNavigate("levels"); } }}
                         className="w-full px-3 py-2 text-left rounded-lg hover:bg-muted transition-colors text-sm font-medium"
                       >
                         {level} Level Tests
