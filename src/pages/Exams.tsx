@@ -100,8 +100,9 @@ const Exams = () => {
       toast.error("Urinishlar tugadi");
       return;
     }
-    if ((exam.question_count || 0) === 0) {
-      toast.error("Bu examda savollar yo'q");
+    // access_code yo'q bo'lsa to'g'ridan-to'g'ri kirish
+    if (!exam.access_code) {
+      setActiveExam(exam);
       return;
     }
     setCodeDialogExam(exam);
