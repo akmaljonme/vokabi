@@ -9,7 +9,7 @@ import {
   Users, Home, PenTool, BookOpen,
   Trophy, Settings, ChevronLeft, ChevronRight,
   Sparkles, Brain, LogOut, Moon, Sun,
-  Shield, ChevronDown,
+  Shield, ChevronDown, Crown,
 } from "lucide-react";
 
 import { NotificationBell } from "@/components/NotificationBell";
@@ -28,6 +28,7 @@ const mainItems: NavItem[] = [
   { label: "Examlar",       path: "/exams",       icon: ClipboardList },
   { label: "Hamjamiyat",    path: "/community",   icon: Users },
   { label: "Leaderboard",   path: "/leaderboard", icon: Trophy },
+  { label: "Pro",           path: "/pricing",     icon: Crown },
 ];
 
 const toolItems: NavItem[] = [
