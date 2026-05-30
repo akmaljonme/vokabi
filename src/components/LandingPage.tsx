@@ -1063,89 +1063,89 @@ export const LandingPage = ({
             </h2>
           </FadeUp>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+            {/* FREE */}
             <FadeUp delay={0}>
-              <Card3D
-                className="card-elevated p-8 h-full flex flex-col"
-                glowColor="215 16% 47%"
-              >
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                  Bepul
-                </h4>
-                <h3 className="text-4xl font-display font-bold tracking-tight mb-1">
-                  $0
-                </h3>
-                <p className="text-sm text-muted-foreground mb-8">
-                  Abadiy bepul
-                </p>
-                <ul className="space-y-3 mb-8 flex-1">
-                  {[
-                    "Kuniga 3 ta test",
-                    "Reading & Listening testlar",
-                    "Lug'at & Grammatika testlar",
-                    "21+ o'yin",
-                    "Natijalar tarixi",
-                  ].map((f) => (
-                    <li key={f} className="flex items-center gap-3 text-sm">
-                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
-                      {f}
+              <Card3D className="card-elevated p-7 h-full flex flex-col" glowColor="215 16% 47%">
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Bepul</h4>
+                <h3 className="text-4xl font-display font-bold tracking-tight mb-1">$0</h3>
+                <p className="text-sm text-muted-foreground mb-6">Abadiy bepul</p>
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {["Kuniga 3 ta test", "Reading & Listening", "Lug'at & Grammatika", "21+ o'yin", "Natijalar tarixi"].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleStartTest}
-                  className="w-full btn-outline py-3 text-sm mt-auto"
-                >
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  onClick={handleStartTest} className="w-full btn-outline py-3 text-sm mt-auto">
                   {user ? "Testni Boshlash" : "Bepul Boshlash"}
                 </motion.button>
               </Card3D>
             </FadeUp>
 
+            {/* 1 OY */}
             <FadeUp delay={0.1}>
-              <Card3D
-                className="relative card-elevated p-8 h-full flex flex-col border-primary/30 bg-primary/[0.02]"
-                glowColor="358 84% 50%"
-              >
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
-                  <span className="inline-flex items-center gap-1.5 px-4 py-1 rounded-full text-xs font-semibold bg-primary text-primary-foreground shadow-glow">
-                    <Crown className="w-3 h-3" /> Mashhur
-                  </span>
-                </div>
-                <h4 className="text-sm font-medium text-primary mb-2">Pro</h4>
-                <h3 className="text-4xl font-display font-bold tracking-tight mb-1">
-                  Pro
-                </h3>
-                <p className="text-sm text-muted-foreground mb-8">
-                  Admin tomonidan tayinlanadi
-                </p>
-                <ul className="space-y-3 mb-8 flex-1">
-                  {[
-                    "Cheksiz testlar",
-                    "AI tahlil & feedback",
-                    "Video tavsiyalar",
-                    "Writing AI baholash (9-ball)",
-                    "Speaking AI tahlil",
-                    "Sertifikat yuklab olish",
-                    "Priority support",
-                  ].map((f) => (
-                    <li key={f} className="flex items-center gap-3 text-sm">
-                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
-                      {f}
+              <Card3D className="card-elevated p-7 h-full flex flex-col" glowColor="358 84% 50%">
+                <h4 className="text-sm font-medium text-primary mb-2">Pro · 1 oy</h4>
+                <h3 className="text-4xl font-display font-bold tracking-tight mb-1">$1.99</h3>
+                <p className="text-sm text-muted-foreground mb-6">$1.99/oy</p>
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {["Cheksiz testlar", "AI tahlil & feedback", "Writing AI baholash", "Speaking AI tahlil", "Sertifikat yuklab olish"].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
-                <motion.a
-                  href="https://t.me/vokabi_bot"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full btn-primary py-3 text-sm shadow-glow block text-center"
-                >
-                  📩 Adminga yozish (@vokabi_bot)
-                </motion.a>
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate("/pricing")} className="w-full btn-outline py-3 text-sm mt-auto">
+                  Sotib olish
+                </motion.button>
+              </Card3D>
+            </FadeUp>
+
+            {/* 6 OY */}
+            <FadeUp delay={0.2}>
+              <Card3D className="relative card-elevated p-7 h-full flex flex-col border-primary/30 bg-primary/[0.02]" glowColor="358 84% 50%">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary text-primary-foreground shadow-glow">
+                    <Crown className="w-3 h-3" /> Mashhur
+                  </span>
+                </div>
+                <h4 className="text-sm font-medium text-primary mb-2">Pro · 6 oy</h4>
+                <h3 className="text-4xl font-display font-bold tracking-tight mb-1">$5.99</h3>
+                <p className="text-sm text-muted-foreground mb-6">$1.00/oy · 50% tejash</p>
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {["Cheksiz testlar", "AI tahlil & feedback", "Writing AI baholash", "Speaking AI tahlil", "Sertifikat yuklab olish"].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />{f}
+                    </li>
+                  ))}
+                </ul>
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate("/pricing")} className="w-full btn-primary py-3 text-sm shadow-glow mt-auto">
+                  Sotib olish
+                </motion.button>
+              </Card3D>
+            </FadeUp>
+
+            {/* 1 YIL */}
+            <FadeUp delay={0.3}>
+              <Card3D className="card-elevated p-7 h-full flex flex-col" glowColor="358 84% 50%">
+                <h4 className="text-sm font-medium text-primary mb-2">Pro · 1 yil</h4>
+                <h3 className="text-4xl font-display font-bold tracking-tight mb-1">$10.99</h3>
+                <p className="text-sm text-muted-foreground mb-6">$0.92/oy · 54% tejash</p>
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {["Cheksiz testlar", "AI tahlil & feedback", "Writing AI baholash", "Speaking AI tahlil", "Sertifikat yuklab olish"].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />{f}
+                    </li>
+                  ))}
+                </ul>
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate("/pricing")} className="w-full btn-outline py-3 text-sm mt-auto">
+                  Sotib olish
+                </motion.button>
               </Card3D>
             </FadeUp>
           </div>
