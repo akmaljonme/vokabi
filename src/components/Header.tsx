@@ -352,7 +352,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
               <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
 
                 {/* Main nav */}
-                <button onClick={() => { onNavigate("levels"); setIsMenuOpen(false); }}
+                <button onClick={() => { navigate("/practice"); setIsMenuOpen(false); }}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium text-left"
                 >📝 Practice Tests</button>
 
@@ -406,6 +406,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                           className="overflow-hidden space-y-0.5 pl-2"
                         >
                           {[
+                            { label: "Test Yechish", emoji: "🧠", path: "/practice" },
                             { label: "Video Darslar", emoji: "🎬", path: "/videos" },
                             { label: "Examlar", emoji: "📋", path: "/exams" },
                             { label: "Tillar", emoji: "🌍", path: "/languages" },

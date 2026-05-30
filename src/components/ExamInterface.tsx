@@ -153,6 +153,19 @@ export const ExamInterface = ({ exam, onFinish, onBack }: ExamInterfaceProps) =>
     );
   }
 
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <AlertTriangle className="w-12 h-12 mx-auto text-amber-500" />
+          <h2 className="text-xl font-bold">Savollar topilmadi</h2>
+          <p className="text-muted-foreground text-sm">Bu exam uchun savollar hali qo'shilmagan.</p>
+          <Button onClick={onBack}>Orqaga qaytish</Button>
+        </div>
+      </div>
+    );
+  }
+
   const currentQ = questions[currentIndex];
   const answeredCount = Object.keys(answers).length;
 
