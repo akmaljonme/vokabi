@@ -48,30 +48,24 @@ export default function PracticeTests() {
 
   if (view === 'test' && selectedLevel && selectedSkill && selectedMockId) {
     return (
-      <AppLayout>
-        <TestInterface
-          level={selectedLevel}
-          skill={selectedSkill}
-          mockId={selectedMockId}
-          testId={selectedTestId || undefined}
-          onComplete={handleTestComplete}
-          onBack={() => setView('skills')}
-        />
-      </AppLayout>
+      <TestInterface
+        level={selectedLevel}
+        skill={selectedSkill}
+        mockId={selectedMockId}
+        testId={selectedTestId || undefined}
+        onFinish={handleTestComplete}
+        onBack={() => setView('skills')}
+      />
     );
   }
 
   if (view === 'result' && testResult) {
     return (
-      <AppLayout>
-        <ResultPage
-          result={testResult}
-          level={selectedLevel || 'A1'}
-          onRetake={() => setView('skills')}
-          onBack={() => setView('map')}
-          onNavigate={(v) => v === 'landing' ? navigate('/') : setView('levels')}
-        />
-      </AppLayout>
+      <ResultPage
+        result={testResult}
+        onRetry={() => setView('skills')}
+        onBack={() => setView('map')}
+      />
     );
   }
 
@@ -80,7 +74,7 @@ export default function PracticeTests() {
       <AppLayout>
         <SkillSelection
           level={selectedLevel}
-          onSelectSkill={handleSkillSelect}
+          onSelectMock={handleSkillSelect}
           onBack={() => setView('levels')}
         />
       </AppLayout>
