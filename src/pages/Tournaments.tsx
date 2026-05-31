@@ -22,9 +22,9 @@ const PRIZES = [
 ];
 
 const TOURNAMENT_TYPES = [
-  { key: "weekly", label: "Haftalik", icon: "📅", desc: "Haftada bir marta, hamma ishtirok etadi" },
-  { key: "duel", label: "Duel", icon: "⚔️", desc: "2 kishi real vaqtda test yechadi" },
-  { key: "group", label: "Guruhli", icon: "👥", desc: "4–8 kishi, eng ko'p ball g'olib" },
+  { key: "weekly", label: "Haftalik", icon: "📅", desc: "Haftada bir marta, hamma ishtirok etadi", soon: false },
+  { key: "duel", label: "Duel", icon: "⚔️", desc: "2 kishi real vaqtda test yechadi", soon: true },
+  { key: "group", label: "Guruhli", icon: "👥", desc: "4–8 kishi, eng ko'p ball g'olib", soon: true },
 ];
 
 type TView = "list" | "detail";
@@ -186,13 +186,22 @@ export default function Tournaments() {
         {/* Tournament types */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
           {TOURNAMENT_TYPES.map(t => (
-            <button key={t.key} onClick={() => setActiveType(t.key)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
-                activeType === t.key
+            <button key={t.key}
+              onClick={() => !t.soon && setActiveType(t.key)}
+              className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+                t.soon
+                  ? "bg-card border border-border opacity-60 cursor-not-allowed"
+                  : activeType === t.key
                   ? "bg-primary text-primary-foreground"
                   : "bg-card border border-border hover:border-primary/40"
               }`}>
-              <span>{t.icon}</span> {t.label}
+              <span>{t.icon}</span>
+              {t.label}
+              {t.soon && (
+                <span className="ml-1 text-[10px] font-semibold bg-amber-400/20 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full">
+                  Tez orada
+                </span>
+              )}
             </button>
           ))}
         </div>
