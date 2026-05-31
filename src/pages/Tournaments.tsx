@@ -22,7 +22,7 @@ const PRIZES = [
 ];
 
 const TOURNAMENT_TYPES = [
-  { key: "weekly", label: "Haftalik", icon: "📅", desc: "Haftada bir marta, hamma ishtirok etadi", soon: false },
+  { key: "monthly", label: "Oylik", icon: "📅", desc: "Har oy, hamma ishtirok etadi", soon: false },
   { key: "duel", label: "Duel", icon: "⚔️", desc: "2 kishi real vaqtda test yechadi", soon: true },
   { key: "group", label: "Guruhli", icon: "👥", desc: "4–8 kishi, eng ko'p ball g'olib", soon: true },
 ];
@@ -33,7 +33,7 @@ export default function Tournaments() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [view, setView] = useState<TView>("list");
-  const [activeType, setActiveType] = useState("weekly");
+  const [activeType, setActiveType] = useState("monthly");
   const [tournaments, setTournaments] = useState<any[]>([]);
   const [selected, setSelected] = useState<any>(null);
   const [participants, setParticipants] = useState<any[]>([]);
@@ -53,12 +53,12 @@ export default function Tournaments() {
       setTournaments(data);
       selectTournament(data[0]);
     } else {
-      // Avtomatik haftalik turnir yaratish
+      // Avtomatik oylik turnir yaratish
       const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 7);
+      endDate.setDate(endDate.getDate() + 30);
       const { data: newT } = await (supabase.from("tournaments") as any).insert({
-        title: "Haftalik Grand Turnir 🏆",
-        game_type: "weekly",
+        title: "Oylik Grand Turnir 🏆",
+        game_type: "monthly",
         end_date: endDate.toISOString(),
         prize_xp: 500,
         status: "active",
@@ -288,7 +288,7 @@ export default function Tournaments() {
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-primary font-bold mt-0.5">3.</span>
-                    <span>Hafta oxirida eng yuqori balllılar mukofot oladi</span>
+                    <span>Oy oxirida eng yuqori balllılar mukofot oladi</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-primary font-bold mt-0.5">4.</span>

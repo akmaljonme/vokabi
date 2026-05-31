@@ -32,7 +32,7 @@ export const TournamentsTab = () => {
   // New tournament form
   const [form, setForm] = useState({
     title: '',
-    game_type: 'weekly',
+    game_type: 'monthly',
     end_date: '',
     prize_xp: 500,
   });
@@ -63,7 +63,7 @@ export const TournamentsTab = () => {
     if (error) { toast.error('Xato: ' + error.message); return; }
     toast.success('✅ Turnir yaratildi!');
     setShowForm(false);
-    setForm({ title: '', game_type: 'weekly', end_date: '', prize_xp: 500 });
+    setForm({ title: '', game_type: 'monthly', end_date: '', prize_xp: 500 });
     fetchTournaments();
   };
 
@@ -158,7 +158,7 @@ export const TournamentsTab = () => {
                 <label className="text-xs text-muted-foreground mb-1 block">Turnir nomi *</label>
                 <input value={form.title}
                   onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
-                  placeholder="Masalan: Haftalik Grand Turnir 🏆"
+                  placeholder="Masalan: Oylik Grand Turnir 🏆"
                   className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
               <div>
@@ -166,7 +166,7 @@ export const TournamentsTab = () => {
                 <select value={form.game_type}
                   onChange={e => setForm(p => ({ ...p, game_type: e.target.value }))}
                   className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none">
-                  <option value="weekly">📅 Haftalik</option>
+                  <option value="monthly">📅 Oylik</option>
                   <option value="duel">⚔️ Duel</option>
                   <option value="group">👥 Guruhli</option>
                   <option value="all">🏆 Barcha turlar</option>
@@ -247,7 +247,7 @@ export const TournamentsTab = () => {
                           <Gift className="w-3 h-3 text-amber-500" /> {t.prize_xp} XP
                         </span>
                         <span className="capitalize text-[10px] px-2 py-0.5 rounded-full bg-muted">
-                          {t.game_type === 'weekly' ? '📅 Haftalik' : t.game_type === 'duel' ? '⚔️ Duel' : t.game_type === 'group' ? '👥 Guruhli' : '🏆 Barcha'}
+                          {t.game_type === 'monthly' ? '📅 Oylik' : t.game_type === 'duel' ? '⚔️ Duel' : t.game_type === 'group' ? '👥 Guruhli' : '🏆 Barcha'}
                         </span>
                       </div>
                     </div>
