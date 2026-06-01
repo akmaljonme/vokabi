@@ -1023,7 +1023,10 @@ export type Database = {
           expires_at: string | null
           id: string
           plan: string
+          plan_key: string | null
           started_at: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           updated_at: string
           user_id: string
         }
@@ -1033,7 +1036,10 @@ export type Database = {
           expires_at?: string | null
           id?: string
           plan?: string
+          plan_key?: string | null
           started_at?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1043,7 +1049,10 @@ export type Database = {
           expires_at?: string | null
           id?: string
           plan?: string
+          plan_key?: string | null
           started_at?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
         }
