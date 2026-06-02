@@ -8,7 +8,6 @@ const CallContext = createContext<WebRTCReturn | null>(null);
 
 export const useCall = () => {
   const ctx = useContext(CallContext);
-  if (!ctx) throw new Error('useCall must be used within CallProvider');
   return ctx;
 };
 
