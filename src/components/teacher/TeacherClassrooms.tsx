@@ -63,7 +63,7 @@ export const TeacherClassrooms = () => {
     if (!user || !form.name.trim()) return;
     setCreating(true);
     try {
-      const { error } = await supabase.from('classrooms').insert({
+      const { error } = await (supabase as any).from('classrooms').insert({
         teacher_id: user.id,
         school_id: null,
         name: form.name,
@@ -92,7 +92,7 @@ export const TeacherClassrooms = () => {
 
   const deleteClassroom = async (id: string) => {
     if (!confirm("Sinfni o'chirishni tasdiqlaysizmi?")) return;
-    await supabase.from('classrooms').update({ is_active: false }).eq('id', id);
+    await (supabase as any).from('classrooms').update({ is_active: false }).eq('id', id);
     toast.success("Sinf o'chirildi");
     fetchClassrooms();
   };

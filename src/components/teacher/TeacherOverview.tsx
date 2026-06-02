@@ -76,7 +76,7 @@ export const TeacherOverview = () => {
           profiles:student_id(full_name, avatar_url)
         `)
         .in('assignment_id',
-          (await supabase.from('assignments').select('id').eq('teacher_id', user.id)).data?.map(a => a.id) || []
+          (await (supabase as any).from('assignments').select('id').eq('teacher_id', user.id)).data?.map(a => a.id) || []
         )
         .order('submitted_at', { ascending: false })
         .limit(5);

@@ -17,18 +17,18 @@ export const TeacherAnalytics = () => {
   const fetchAnalytics = async () => {
     if (!user) return;
     try {
-      const { data: cls } = await supabase.from('classrooms').select('id, name, level').eq('teacher_id', user.id).eq('is_active', true);
+      const { data: cls } = await (supabase as any).from('classrooms').select('id, name, level').eq('teacher_id', user.id).eq('is_active', true);
       const classroomIds = cls?.map(c => c.id) || [];
 
       let totalStudents = 0, totalSubmissions = 0, passedSubmissions = 0;
       const classroomStats: any[] = [];
 
       for (const c of cls || []) {
-        const { count: sc } = await supabase.from('classroom_students').select('*', { count: 'exact', head: true }).eq('classroom_id', c.id).eq('is_active', true);
-        const assignmentIds = (await supabase.from('assignments').select('id').eq('classroom_id', c.id)).data?.map(a => a.id) || [];
+        const { count: sc } = await (supabase as any).from('classroom_students').select('*', { count: 'exact', head: true }).eq('classroom_id', c.id).eq('is_active', true);
+        const assignmentIds = (await (supabase as any).from('assignments').select('id').eq('classroom_id', c.id)).data?.map(a => a.id) || [];
         let avg = 0, subs = 0, passed = 0;
         if (assignmentIds.length > 0) {
-          const { data: subData } = await supabase.from('assignment_submissions').select('percentage, passed').in('assignment_id', assignmentIds);
+          const { data: subData } = await (supabase as any).from('assignment_submissions').select('percentage, passed').in('assignment_id', assignmentIds);
           subs = subData?.length || 0;
           passed = subData?.filter(s => s.passed).length || 0;
           avg = subData?.length ? Math.round(subData.reduce((a, s) => a + (s.percentage || 0), 0) / subData.length) : 0;
@@ -119,11 +119,11 @@ export const TeacherAnnouncements = () => {
   const fetchData = async () => {
     if (!user) return;
     try {
-      const { data: cls } = await supabase.from('classrooms').select('id, name').eq('teacher_id', user.id).eq('is_active', true);
+      const { data: cls } = await (supabase as any).from('classrooms').select('id, name').eq('teacher_id', user.id).eq('is_active', true);
       setClassrooms(cls || []);
       const classroomIds = cls?.map(c => c.id) || [];
       if (classroomIds.length > 0) {
-        const { data } = await supabase.from('announcements').select('*, classrooms(name)').in('classroom_id', classroomIds).order('created_at', { ascending: false });
+        const { data } = await (supabase as any).from('announcements').select('*, classrooms(name)').in('classroom_id', classroomIds).order('created_at', { ascending: false });
         setAnnouncements(data || []);
       }
     } finally { setLoading(false); }
@@ -133,7 +133,7 @@ export const TeacherAnnouncements = () => {
     if (!form.classroom_id || !form.title.trim()) return;
     setCreating(true);
     try {
-      await supabase.from('announcements').insert({ ...form, teacher_id: user?.id });
+      await (supabase as any).from('announcements').insert({ ...form, teacher_id: user?.id });
       toast.success("E'lon yuborildi!");
       setShowCreate(false);
       setForm({ classroom_id: '', title: '', content: '', is_pinned: false });
@@ -217,13 +217,13 @@ export const TeacherNotifications = () => {
   const fetchNotifications = async () => {
     if (!user) return;
     try {
-      const { data } = await supabase.from('notifications').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30);
+      const { data } = await (supabase as any).from('notifications').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30);
       setNotifications(data || []);
     } finally { setLoading(false); }
   };
 
   const markAllRead = async () => {
-    await supabase.from('notifications').update({ is_read: true }).eq('user_id', user?.id).eq('is_read', false);
+    await (supabase as any).from('notifications').update({ is_read: true }).eq('user_id', user?.id).eq('is_read', false);
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
     toast.success("Hammasi o'qildi");
   };

@@ -16,7 +16,7 @@ export const LanguageBanner = () => {
     if (lang === language) { setOpen(false); return; }
     setChanging(true);
     try {
-      await supabase.from('profiles').update({ target_language: lang }).eq('user_id', user?.id);
+      await (supabase as any).from('profiles').update({ target_language: lang }).eq('user_id', user?.id);
       await refetch();
       toast.success(`${LANGUAGE_FLAGS[lang]} ${LANGUAGE_NAMES[lang]} tanlandi!`);
     } catch {
