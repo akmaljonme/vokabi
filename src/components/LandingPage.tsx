@@ -57,6 +57,52 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 let __isMobileGlobal = false;
 
+/* ─── Startup-Fest style wavy chunky heading ─── */
+const WavyHeading = ({
+  text,
+  className = "",
+  amber = false,
+  curve = 6,
+  delayBase = 0,
+}: {
+  text: string;
+  className?: string;
+  amber?: boolean;
+  curve?: number;
+  delayBase?: number;
+}) => {
+  const letters = Array.from(text);
+  const mid = (letters.length - 1) / 2;
+  return (
+    <span
+      className={`sf-chunky ${amber ? "sf-chunky-amber" : ""} ${className}`}
+      aria-label={text}
+    >
+      {letters.map((ch, i) => {
+        const t = mid === 0 ? 0 : (i - mid) / mid; // -1..1
+        const rotate = t * curve; // slight curve
+        const yOffset = -Math.cos(t * Math.PI * 0.5) * 8; // arc upward in middle
+        return (
+          <motion.span
+            key={i}
+            className="sf-letter"
+            initial={{ opacity: 0, y: 40, rotate: rotate * 2 }}
+            animate={{ opacity: 1, y: yOffset, rotate }}
+            transition={{
+              duration: 0.7,
+              delay: delayBase + i * 0.035,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            whileHover={{ y: yOffset - 8, scale: 1.08 }}
+          >
+            {ch === " " ? "\u00A0" : ch}
+          </motion.span>
+        );
+      })}
+    </span>
+  );
+};
+
 interface LandingPageProps {
   onStartTest: () => void;
   onGoToVocabulary?: () => void;
