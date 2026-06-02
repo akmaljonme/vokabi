@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as _sbClient } from "@/integrations/supabase/client";
+const supabase: any = _sbClient;
 import {
   LayoutDashboard, Gamepad2, Video, ClipboardList,
   Users, Home, PenTool, BookOpen,

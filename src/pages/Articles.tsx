@@ -5,7 +5,8 @@ import { BookOpen, Clock, Search, CheckCircle } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ARTICLES } from "@/data/articles";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as _sbClient } from "@/integrations/supabase/client";
+const supabase: any = _sbClient;
 import { useEffect } from "react";
 
 const LEVELS = ["Barchasi", "A1", "A2", "B1", "B2", "C1"];
