@@ -77,7 +77,7 @@ export const TeacherStudents = () => {
         };
       });
 
-      setStudents(merged);
+      setStudents(merged as any);
     } finally {
       setLoading(false);
     }

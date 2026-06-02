@@ -584,7 +584,7 @@ export default function Dashboard() {
                             borderRadius: "12px",
                             fontSize: "13px",
                           }}
-                          formatter={(value: number, _: string, props: { payload?: { level?: string } }) => [
+                          formatter={(value: number, _: string, props: any) => [
                             `${value}%`,
                             `${props.payload.skill} - ${props.payload.level}`,
                           ]}
