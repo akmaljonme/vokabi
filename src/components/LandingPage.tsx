@@ -650,6 +650,167 @@ export const LandingPage = ({
         </motion.a>
       </section>
 
+      {/* ═══════════ SF: BIZ HAQIMIZDA ═══════════ */}
+      <section className="relative py-20 sm:py-28 overflow-hidden">
+        <div className="absolute inset-0 sf-dot-bg opacity-60" aria-hidden />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center gap-4 mb-10">
+              <h2 className="text-5xl sm:text-7xl lg:text-8xl sf-section-heading">
+                BIZ<br/>HAQIMIZDA
+              </h2>
+              <Sparkles className="w-12 h-12 sm:w-16 sm:h-16 text-[hsl(45_100%_55%)] sf-spin-slow shrink-0 ml-auto" />
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="sf-card-blue px-6 sm:px-12 py-12 sm:py-16"
+            >
+              <div className="relative z-10 grid md:grid-cols-2 gap-10 items-center">
+                <div>
+                  <h3 className="text-3xl sm:text-4xl font-display font-extrabold mb-5 leading-tight">
+                    <span className="font-extrabold">Vokabi</span> — o'zbek o'quvchilari uchun ingliz tilini mukammal o'rganish platformasi.
+                  </h3>
+                  <p className="text-white/90 text-base sm:text-lg leading-relaxed font-semibold">
+                    Biz an'anaviy darsliklarni AI texnologiyalari bilan birlashtirib, har bir o'quvchiga o'z darajasiga mos shaxsiy yo'lni taqdim etamiz. CEFR standarti, 21+ interaktiv o'yin, real Writing & Speaking baholash — barchasi bitta joyda.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { n: "10K+", l: "Faol o'quvchi" },
+                    { n: "21+", l: "O'yin va test" },
+                    { n: "6", l: "CEFR daraja" },
+                    { n: "24/7", l: "AI yordamchi" },
+                  ].map((s) => (
+                    <div
+                      key={s.l}
+                      className="bg-white/15 backdrop-blur-sm border-2 border-white/30 rounded-2xl px-4 py-5 text-center"
+                      style={{ boxShadow: "0 6px 0 0 hsl(217 91% 28%)" }}
+                    >
+                      <div className="text-3xl sm:text-4xl sf-pill-num mb-1">{s.n}</div>
+                      <div className="text-white/85 text-xs sm:text-sm font-bold uppercase tracking-wide">{s.l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ SF: IMKONIYATLAR ═══════════ */}
+      <section className="relative py-20 sm:py-28 overflow-hidden">
+        <div className="absolute inset-0 sf-dot-bg-amber opacity-50" aria-hidden />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center gap-4 mb-12">
+              <Star className="w-12 h-12 sm:w-16 sm:h-16 text-[hsl(217_91%_55%)] sf-spin-slow shrink-0" />
+              <h2 className="text-5xl sm:text-7xl lg:text-8xl sf-section-heading sf-section-heading-blue text-right ml-auto">
+                IMKONI-<br/>YATLAR
+              </h2>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { icon: Brain, title: "AI Tahlil", desc: "Writing va Speaking javoblaringizni AI bir necha soniyada CEFR bo'yicha baholaydi.", color: "blue" },
+                { icon: Gamepad2, title: "21+ O'yin", desc: "So'z, grammatika va tinglash o'yinlari — o'rganishni o'yinga aylantiring.", color: "amber" },
+                { icon: Award, title: "CEFR Sertifikat", desc: "Test natijalari bo'yicha avtomatik PNG sertifikat — yuklab oling va ulashing.", color: "blue" },
+                { icon: Video, title: "Video Darslar", desc: "Tanlangan o'quv videolari — har bir CEFR darajasi uchun moslangan.", color: "amber" },
+                { icon: Bot, title: "AI Tutor", desc: "24/7 sun'iy intellekt yordamchisi — har qanday savolingizga javob.", color: "blue" },
+                { icon: Trophy, title: "Turnirlar", desc: "Real vaqt turnirlarida boshqa o'quvchilar bilan musobaqalashing.", color: "amber" },
+              ].map((f, i) => (
+                <motion.div
+                  key={f.title}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ y: -6 }}
+                  className={`${f.color === "blue" ? "sf-card-blue" : "sf-card-amber"} p-7 sm:p-8 relative`}
+                >
+                  <div className="relative z-10">
+                    <div className="w-14 h-14 rounded-2xl bg-white/20 border-2 border-white/40 flex items-center justify-center mb-5"
+                         style={{ boxShadow: `0 5px 0 0 ${f.color === "blue" ? "hsl(217 91% 28%)" : "hsl(28 95% 32%)"}` }}>
+                      <f.icon className="w-7 h-7 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-display font-extrabold mb-2 text-white">{f.title}</h3>
+                    <p className="text-white/90 text-sm sm:text-base font-semibold leading-relaxed">{f.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ SF: BOSQICHLAR ═══════════ */}
+      <section className="relative py-20 sm:py-28 overflow-hidden">
+        <div className="absolute inset-0 sf-dot-bg opacity-60" aria-hidden />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center gap-4 mb-12">
+              <h2 className="text-5xl sm:text-7xl lg:text-8xl sf-section-heading">
+                BOSQICHLAR
+              </h2>
+              <Rocket className="w-12 h-12 sm:w-16 sm:h-16 text-[hsl(28_95%_55%)] sf-spin-slow shrink-0 ml-auto" style={{ animationDuration: "24s" }} />
+            </div>
+
+            <div className="space-y-5">
+              {[
+                { n: "01", t: "Ro'yxatdan o'ting", d: "Bir necha soniyada hisob yarating va darajangizni tanlang." },
+                { n: "02", t: "Joriy darajangizni aniqlang", d: "Qisqa CEFR placement test bilan A1 dan C2 gacha darajangizni belgilang." },
+                { n: "03", t: "O'yinlar va testlar bilan o'rganing", d: "Har kuni 15 daqiqa — 21+ o'yin, AI Tutor va video darslar yordamida." },
+                { n: "04", t: "Sertifikat oling", d: "Yakuniy testdan o'tib, rasmiy CEFR sertifikatingizni yuklab oling." },
+              ].map((step, i) => (
+                <motion.div
+                  key={step.n}
+                  initial={{ opacity: 0, x: i % 2 === 0 ? -40 : 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  className={`${i % 2 === 0 ? "sf-card-blue" : "sf-card-amber"} px-6 sm:px-10 py-7 sm:py-9`}
+                >
+                  <div className="relative z-10 flex items-center gap-5 sm:gap-8">
+                    <div className="text-5xl sm:text-7xl sf-pill-num shrink-0"
+                         style={{ WebkitTextStroke: i % 2 === 0 ? "2px hsl(217 91% 30%)" : "2px hsl(28 95% 32%)" }}>
+                      {step.n}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl sm:text-2xl font-display font-extrabold text-white mb-1">{step.t}</h3>
+                      <p className="text-white/90 text-sm sm:text-base font-semibold">{step.d}</p>
+                    </div>
+                    <ArrowRight className="w-7 h-7 text-white/80 shrink-0 hidden sm:block" />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-center mt-12"
+            >
+              <motion.button
+                whileHover={{ y: -3 }}
+                whileTap={{ y: 2 }}
+                onClick={() => { handleStartTest(); fireConfetti(); }}
+                className="bg-[hsl(217_91%_50%)] text-white px-10 py-5 rounded-full font-display font-extrabold text-lg inline-flex items-center gap-3"
+                style={{ boxShadow: "0 7px 0 0 hsl(217 91% 30%)" }}
+              >
+                <Rocket className="w-6 h-6" />
+                Hozir boshlash
+                <ArrowRight className="w-6 h-6" />
+              </motion.button>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* ═══════════ LIVE STATS ═══════════ */}
       <section id="stats" className="py-16 border-b border-border/40 relative overflow-hidden">
         {/* 3D decoration background */}
