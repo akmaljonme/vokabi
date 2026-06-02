@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Copy, Check, Upload, Loader2, CreditCard } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as _sbClient } from "@/integrations/supabase/client";
+const supabase: any = _sbClient;
 import { useAuth } from "@/contexts/AuthContext";
 import type { PlanKey } from "@/pages/Pricing";
 

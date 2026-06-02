@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Search, TrendingUp, Award, Flame, ChevronDown } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Student {
@@ -76,7 +77,7 @@ export const TeacherStudents = () => {
         };
       });
 
-      setStudents(merged);
+      setStudents(merged as any);
     } finally {
       setLoading(false);
     }

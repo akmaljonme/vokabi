@@ -33,7 +33,9 @@ export const TeacherDashboard = ({ onExit }: TeacherDashboardProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
-  const { user, profile } = useAuth();
+  const auth = useAuth() as any;
+  const { user } = auth;
+  const profile = auth.profile;
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);

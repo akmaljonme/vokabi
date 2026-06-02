@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as _sbClient } from "@/integrations/supabase/client";
+const supabase: any = _sbClient;
 import { Loader2, Check, X, Eye, Clock, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";

@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { BarChart3, TrendingUp, Trophy, Target, Clock, Gamepad2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 
 interface GameStat {

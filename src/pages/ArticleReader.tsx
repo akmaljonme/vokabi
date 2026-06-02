@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Clock, BookOpen, CheckCircle, ChevronRight } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ARTICLES } from "@/data/articles";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as _sbClient } from "@/integrations/supabase/client";
+const supabase: any = _sbClient;
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 

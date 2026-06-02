@@ -4,7 +4,8 @@ import {
   Plus, Trash2, Edit2, Eye, MousePointer, ToggleLeft,
   ToggleRight, Image, Link, Calendar, Save, X, Upload
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';

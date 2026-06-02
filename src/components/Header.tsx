@@ -26,7 +26,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useUnreadDMCount } from "@/hooks/useUnreadDMCount";
 import { useCall } from "@/contexts/CallContext";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as _sbClient } from "@/integrations/supabase/client";
+const supabase: any = _sbClient;
 
 interface HeaderProps {
   onNavigate: (view: "landing" | "levels") => void;

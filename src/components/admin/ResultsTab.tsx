@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Download, Filter } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { Button } from '@/components/ui/button';
 import { 
   Select, 

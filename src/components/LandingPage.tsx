@@ -44,7 +44,8 @@ import {
   MotionValue,
 } from "framer-motion";
 import { useRef, useEffect, useState, useCallback, lazy, Suspense } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as _sbClient } from "@/integrations/supabase/client";
+const supabase: any = _sbClient;
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { CertificateScene3D } from "@/components/CertificateScene3D";
 import { Scene3DStats } from "@/components/Scene3DStats";

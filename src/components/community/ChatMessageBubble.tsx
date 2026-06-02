@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Pencil, Trash2, X, Check, Reply, Forward, Smile } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 

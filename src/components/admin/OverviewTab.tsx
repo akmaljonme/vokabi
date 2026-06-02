@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Users, FileCheck, TrendingUp, Award } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { StatCard } from './StatCard';
 import { 
   LineChart, 

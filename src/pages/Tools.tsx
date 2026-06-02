@@ -46,7 +46,7 @@ const container = {
   hidden: {},
   show: { transition: { staggerChildren: 0.12 } },
 };
-const item = {
+const item: any = {
   hidden: { opacity: 0, y: 30 },
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
 };

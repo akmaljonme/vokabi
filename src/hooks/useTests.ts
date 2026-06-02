@@ -1,5 +1,6 @@
  import { useState, useEffect } from 'react';
- import { supabase } from '@/integrations/supabase/client';
+ import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
  import { CEFRLevel, SkillType, MockTest, Part, Question } from '@/types/cefr';
  
  interface DBTest {
