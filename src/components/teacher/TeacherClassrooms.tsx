@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Users, Copy, Check, Trash2, GraduationCap, BookOpen } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -63,7 +64,7 @@ export const TeacherClassrooms = () => {
     if (!user || !form.name.trim()) return;
     setCreating(true);
     try {
-      const { error } = await (supabase as any).from('classrooms').insert({
+      const { error } = await supabase.from('classrooms').insert({
         teacher_id: user.id,
         school_id: null,
         name: form.name,
@@ -92,7 +93,7 @@ export const TeacherClassrooms = () => {
 
   const deleteClassroom = async (id: string) => {
     if (!confirm("Sinfni o'chirishni tasdiqlaysizmi?")) return;
-    await (supabase as any).from('classrooms').update({ is_active: false }).eq('id', id);
+    await supabase.from('classrooms').update({ is_active: false }).eq('id', id);
     toast.success("Sinf o'chirildi");
     fetchClassrooms();
   };

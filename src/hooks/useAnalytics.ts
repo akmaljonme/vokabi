@@ -1,7 +1,8 @@
 // Lightweight analytics — localStorage + Supabase
 import { useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as _sbClient } from "@/integrations/supabase/client";
+const supabase: any = _sbClient;
 
 type EventName =
   | "page_view"

@@ -2,7 +2,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, ClipboardList, Calendar, CheckCircle, Clock, ChevronDown, Trash2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -44,15 +45,15 @@ export const TeacherAssignments = () => {
     if (!user) return;
     try {
       const [{ data: cls }, { data: asgn }, { data: ts }] = await Promise.all([
-        (supabase as any).from('classrooms').select('id, name').eq('teacher_id', user.id).eq('is_active', true),
-        (supabase as any).from('assignments').select('*, classrooms(name)').eq('teacher_id', user.id).order('created_at', { ascending: false }),
-        (supabase as any).from('tests').select('id, title, level, skill').eq('is_active', true).limit(50),
+        supabase.from('classrooms').select('id, name').eq('teacher_id', user.id).eq('is_active', true),
+        supabase.from('assignments').select('*, classrooms(name)').eq('teacher_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('tests').select('id, title, level, skill').eq('is_active', true).limit(50),
       ]);
       setClassrooms(cls || []);
       setTests(ts || []);
       if (asgn) {
         const enriched = await Promise.all(asgn.map(async (a) => {
-          const { count } = await (supabase as any).from('assignment_submissions').select('*', { count: 'exact', head: true }).eq('assignment_id', a.id);
+          const { count } = await supabase.from('assignment_submissions').select('*', { count: 'exact', head: true }).eq('assignment_id', a.id);
           return { ...a, submission_count: count || 0, classroom_name: (a.classrooms as any)?.name };
         }));
         setAssignments(enriched);
@@ -64,7 +65,7 @@ export const TeacherAssignments = () => {
     if (!form.classroom_id || !form.title.trim()) return;
     setCreating(true);
     try {
-      const { error } = await (supabase as any).from('assignments').insert({
+      const { error } = await supabase.from('assignments').insert({
         classroom_id: form.classroom_id,
         teacher_id: user?.id,
         title: form.title,

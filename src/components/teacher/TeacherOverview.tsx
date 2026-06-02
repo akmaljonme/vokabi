@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { GraduationCap, ClipboardList, Users, TrendingUp, Clock, CheckCircle, AlertCircle, Star } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Stats {
@@ -76,7 +77,7 @@ export const TeacherOverview = () => {
           profiles:student_id(full_name, avatar_url)
         `)
         .in('assignment_id',
-          (await (supabase as any).from('assignments').select('id').eq('teacher_id', user.id)).data?.map(a => a.id) || []
+          (await supabase.from('assignments').select('id').eq('teacher_id', user.id)).data?.map(a => a.id) || []
         )
         .order('submitted_at', { ascending: false })
         .limit(5);

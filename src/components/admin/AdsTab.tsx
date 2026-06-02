@@ -4,7 +4,8 @@ import {
   Plus, Trash2, Edit2, Eye, MousePointer, ToggleLeft,
   ToggleRight, Image, Link, Calendar, Save, X, Upload
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -133,10 +134,10 @@ export const AdsTab = () => {
       };
 
       if (editing) {
-        await (supabase as any).from('advertisements').update(payload).eq('id', editing.id);
+        await supabase.from('advertisements').update(payload).eq('id', editing.id);
         toast.success("Reklama yangilandi!");
       } else {
-        await (supabase as any).from('advertisements').insert(payload);
+        await supabase.from('advertisements').insert(payload);
         toast.success("Reklama yaratildi!");
       }
       setShowForm(false);
@@ -146,14 +147,14 @@ export const AdsTab = () => {
   };
 
   const toggleActive = async (ad: Ad) => {
-    await (supabase as any).from('advertisements').update({ is_active: !ad.is_active }).eq('id', ad.id);
+    await supabase.from('advertisements').update({ is_active: !ad.is_active }).eq('id', ad.id);
     setAds(prev => prev.map(a => a.id === ad.id ? { ...a, is_active: !a.is_active } : a));
     toast.success(ad.is_active ? "Reklama o'chirildi" : "Reklama yoqildi");
   };
 
   const deleteAd = async (id: string) => {
     if (!confirm("Reklamani o'chirishni tasdiqlaysizmi?")) return;
-    await (supabase as any).from('advertisements').delete().eq('id', id);
+    await supabase.from('advertisements').delete().eq('id', id);
     setAds(prev => prev.filter(a => a.id !== id));
     toast.success("Reklama o'chirildi");
   };

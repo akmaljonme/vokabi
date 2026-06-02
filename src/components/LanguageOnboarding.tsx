@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 
 interface OnboardingData {
@@ -84,7 +85,7 @@ export const LanguageOnboarding = ({ onComplete }: LanguageOnboardingProps) => {
       setSaving(true);
       try {
         // Avval mavjud ustunlar bilan urinib ko'rish
-        const { error } = await (supabase as any).from('profiles').update({
+        const { error } = await supabase.from('profiles').update({
           target_language: data.target_language,
           learning_purpose: data.learning_purpose,
           current_level: data.current_level,
@@ -95,7 +96,7 @@ export const LanguageOnboarding = ({ onComplete }: LanguageOnboardingProps) => {
         if (error) {
           // Ustunlar yo'q bo'lsa, faqat mavjud ustunlarni saqlash
           console.warn('Full update failed, trying partial:', error.message);
-          await (supabase as any).from('profiles').update({
+          await supabase.from('profiles').update({
             target_language: data.target_language,
           }).eq('user_id', user?.id).throwOnError();
         }
