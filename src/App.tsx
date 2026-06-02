@@ -84,7 +84,7 @@ const App = () => (
                     <Route path="/"          element={<ErrorBoundary><Index /></ErrorBoundary>} />
                     <Route path="/login"     element={<ErrorBoundary><Login /></ErrorBoundary>} />
                     <Route path="/register"  element={<ErrorBoundary><Register /></ErrorBoundary>} />
-                    <Route path="/auth"      element={<ErrorBoundary><Auth /></ErrorBoundary>} />
+                    <Route path="/auth"      element={<Navigate to="/login" replace />} />
                     <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
                     <Route path="/profile"   element={<ErrorBoundary><ProfileSettings /></ErrorBoundary>} />
                     <Route path="/games"     element={<ErrorBoundary><Games /></ErrorBoundary>} />
