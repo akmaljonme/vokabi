@@ -3,8 +3,8 @@ import { AudioCallDialog } from './AudioCallDialog';
 
 export const GlobalCallOverlay = () => {
   const call = useCall();
-  
-  if (call.callState === 'idle') return null;
+
+  if (!call || call.callState === 'idle') return null;
 
   return (
     <AudioCallDialog
