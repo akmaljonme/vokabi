@@ -600,3 +600,80 @@
 .dark ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary) / 0.6);
 }
+
+/* ═════════ Startup-Fest style hero ═════════ */
+.sf-hero-card {
+  background:
+    radial-gradient(120% 80% at 50% 0%, hsl(199 100% 70%) 0%, hsl(210 95% 55%) 45%, hsl(217 91% 45%) 100%);
+  border-radius: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 12px 0 0 hsl(217 91% 32%),
+    0 30px 60px -20px hsl(217 91% 25% / 0.5);
+}
+.sf-hero-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(255,255,255,0.06) 0px,
+    rgba(255,255,255,0.06) 1px,
+    transparent 1px,
+    transparent 28px
+  );
+  pointer-events: none;
+}
+.sf-hero-card::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.35), transparent 30%);
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.sf-chunky {
+  font-family: 'Baloo 2', system-ui, sans-serif;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  -webkit-text-stroke: 3px hsl(217 91% 30%);
+  paint-order: stroke fill;
+  text-shadow:
+    0 6px 0 hsl(217 91% 28%),
+    0 8px 24px hsl(217 91% 18% / 0.4);
+  line-height: 0.95;
+}
+.sf-chunky-amber {
+  color: hsl(45 100% 96%);
+  -webkit-text-stroke: 3px hsl(28 95% 45%);
+  text-shadow:
+    0 6px 0 hsl(28 95% 42%),
+    0 10px 24px hsl(28 95% 32% / 0.35);
+}
+.sf-letter {
+  display: inline-block;
+  transform-origin: 50% 80%;
+  will-change: transform;
+}
+
+@keyframes sf-float-blob {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  50%      { transform: translate(20px,-15px) scale(1.08); }
+}
+.sf-blob { animation: sf-float-blob 9s ease-in-out infinite; }
+
+@keyframes sf-spin-slow {
+  to { transform: rotate(360deg); }
+}
+.sf-spin-slow { animation: sf-spin-slow 18s linear infinite; }
+
+@keyframes sf-pulse-ring {
+  0%   { transform: scale(0.9); opacity: 0.5; }
+  70%  { transform: scale(1.4); opacity: 0; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+.sf-pulse-ring { animation: sf-pulse-ring 2.4s ease-out infinite; }
