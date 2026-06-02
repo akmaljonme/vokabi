@@ -253,6 +253,43 @@ const FloatingParticles = () => {
   );
 };
 
+/* ─── Custom Cursor Trailer ─── */
+const CursorTrailer = () => {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const cursor = document.createElement('div');
+    const trail = document.createElement('div');
+    cursor.id = 'vk-cursor';
+    trail.id = 'vk-cursor-trail';
+    Object.assign(cursor.style, {
+      position: 'fixed', width: '16px', height: '16px', borderRadius: '50%',
+      background: 'hsl(88 78% 45% / 0.7)', pointerEvents: 'none',
+      zIndex: '9999', transform: 'translate(-50%,-50%)',
+      transition: 'width 0.3s, height 0.3s',
+    });
+    Object.assign(trail.style, {
+      position: 'fixed', width: '36px', height: '36px', borderRadius: '50%',
+      border: '2px solid hsl(88 78% 45% / 0.35)', pointerEvents: 'none',
+      zIndex: '9998', transform: 'translate(-50%,-50%)',
+      transition: 'left 0.12s ease, top 0.12s ease',
+    });
+    document.body.appendChild(cursor);
+    document.body.appendChild(trail);
+    let mx = 0, my = 0;
+    const move = (e: MouseEvent) => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+      setTimeout(() => { trail.style.left = mx + 'px'; trail.style.top = my + 'px'; }, 80);
+    };
+    document.addEventListener('mousemove', move);
+    return () => {
+      document.removeEventListener('mousemove', move);
+      cursor.remove(); trail.remove();
+    };
+  }, []);
+  return null;
+};
+
 /* ─── Marquee ticker ─── */
 const MarqueeTicker = ({
   items,
@@ -499,6 +536,7 @@ export const LandingPage = ({
 
   return (
     <>
+    <CursorTrailer />
     <div className="overflow-x-clip relative z-10">
       {/* ═══════════ HERO ═══════════ */}
       <section
@@ -936,12 +974,14 @@ export const LandingPage = ({
       <section id="features" className="py-28 lg:py-36 relative">
         <FloatingParticles />
         <div className="container mx-auto px-4 relative z-10">
-          <FadeUp className="text-center mb-20">
-            <span className="premium-badge mb-5 inline-flex">IMKONIYATLAR</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
-              Muvaffaqiyat uchun <span className="text-gradient">barcha vositalar</span>
-            </h2>
-            <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto text-balance px-4">
+          <FadeUp className="mb-16">
+            <div className="flex items-start justify-between mb-2">
+              <h2 className="font-display font-black text-[clamp(52px,9vw,110px)] leading-none tracking-tight text-primary" style={{WebkitTextStroke:'2px hsl(var(--primary))', color:'transparent'}}>
+                IMKONIYATLAR
+              </h2>
+              <span className="text-[clamp(40px,6vw,80px)] text-primary opacity-70 mt-2">↗</span>
+            </div>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl leading-relaxed">
               Har bir ko'nikma uchun maxsus tayyorlangan AI-powered testlar va tahlillar
             </p>
           </FadeUp>
@@ -997,14 +1037,11 @@ export const LandingPage = ({
       <section className="py-28 lg:py-36 relative overflow-hidden">
         <div className="absolute inset-0 mesh-gradient opacity-30" />
         <div className="container mx-auto px-4 relative z-10">
-          <FadeUp className="text-center mb-16">
-            <span className="premium-badge mb-5 inline-flex">
-              <Trophy className="w-3.5 h-3.5" /> TAQQOSLASH
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
-              Nima uchun <span className="text-gradient">Vokabi</span>?
+          <FadeUp className="mb-16">
+            <h2 className="font-display font-black text-[clamp(48px,8vw,100px)] leading-none tracking-tight mb-4" style={{WebkitTextStroke:'2px hsl(var(--primary))', color:'transparent'}}>
+              NIMA UCHUN<br/>VOKABI?
             </h2>
-            <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto text-balance px-4">
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl leading-relaxed">
               Boshqa platformalar bilan taqqoslang
             </p>
           </FadeUp>
@@ -1164,11 +1201,16 @@ export const LandingPage = ({
           </div>
         )}
         <div className="container mx-auto px-4 relative z-10">
-          <FadeUp className="text-center mb-16">
-            <span className="premium-badge mb-5 inline-flex">QANDAY ISHLAYDI</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
-              Uchta oddiy <span className="text-gradient">qadam</span>
-            </h2>
+          <FadeUp className="mb-16">
+            <div className="flex items-start justify-between">
+              <h2 className="font-display font-black text-[clamp(44px,7vw,90px)] leading-none tracking-tight text-foreground">
+                QANDAY<br/>ISHLAYDI?
+              </h2>
+              <span className="text-[clamp(32px,5vw,60px)] text-primary mt-2">✦</span>
+            </div>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-md mt-4 leading-relaxed">
+              Uchta oddiy qadam bilan boshlang
+            </p>
           </FadeUp>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -1242,11 +1284,13 @@ export const LandingPage = ({
       <section id="pricing" className="py-28 lg:py-36 relative overflow-hidden">
         <div className="absolute inset-0 mesh-gradient opacity-30" />
         <div className="container mx-auto px-4 relative">
-          <FadeUp className="text-center mb-16">
-            <span className="premium-badge mb-5 inline-flex">NARXLAR</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
-              Sizga mos <span className="text-gradient">rejani</span> tanlang
+          <FadeUp className="mb-16">
+            <h2 className="font-display font-black text-[clamp(52px,9vw,110px)] leading-none tracking-tight" style={{WebkitTextStroke:'2px hsl(var(--primary))', color:'transparent'}}>
+              NARXLAR
             </h2>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-md mt-3 leading-relaxed">
+              Sizga mos rejani tanlang — bepuldan boshlang
+            </p>
           </FadeUp>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
@@ -1343,14 +1387,11 @@ export const LandingPage = ({
         <FloatingParticles />
         <div className="absolute inset-0 mesh-gradient opacity-30" />
         <div className="container mx-auto px-4 relative z-10">
-          <FadeUp className="text-center mb-16">
-            <span className="premium-badge mb-5 inline-flex">
-              <Star className="w-3.5 h-3.5" /> IZOHLAR
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
-              Foydalanuvchilar <span className="text-gradient">fikrlari</span>
+          <FadeUp className="mb-16">
+            <h2 className="font-display font-black text-[clamp(44px,7vw,90px)] leading-none tracking-tight text-foreground">
+              FOYDALANUVCHILAR<br/>FIKRLARI
             </h2>
-            <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto text-balance px-4">
+            <p className="text-muted-foreground text-base sm:text-lg max-w-md mt-4 leading-relaxed">
               Minglab o'quvchilar Vokabi orqali ingliz tilini o'zlashtirdi
             </p>
           </FadeUp>
@@ -1449,11 +1490,16 @@ export const LandingPage = ({
       {/* ═══════════ FAQ ═══════════ */}
       <section id="faq" className="py-28 lg:py-36">
         <div className="container mx-auto px-4">
-          <FadeUp className="text-center mb-16">
-            <span className="premium-badge mb-5 inline-flex">SAVOL-JAVOB</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
-              Ko'p beriladigan <span className="text-gradient">savollar</span>
-            </h2>
+          <FadeUp className="mb-16">
+            <div className="flex items-start justify-between">
+              <h2 className="font-display font-black text-[clamp(52px,9vw,110px)] leading-none tracking-tight" style={{WebkitTextStroke:'2px hsl(var(--primary))', color:'transparent'}}>
+                SAVOL<br/>JAVOB
+              </h2>
+              <span className="text-[clamp(32px,5vw,60px)] text-primary mt-2">?</span>
+            </div>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-md mt-4 leading-relaxed">
+              Ko'p beriladigan savollar
+            </p>
           </FadeUp>
 
           <div className="max-w-2xl mx-auto space-y-3">
