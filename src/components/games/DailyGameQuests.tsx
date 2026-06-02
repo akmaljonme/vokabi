@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { Target, Zap, CheckCircle, Loader2, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 

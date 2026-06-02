@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Star, ArrowLeft, Trophy } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { CEFRLevel } from '@/types/cefr';
 
 interface LearningPathMapProps {

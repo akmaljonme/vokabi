@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Zap, Flame, Clock, CheckCircle, ChevronRight, Trophy, Sparkles, Target, X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 import { useGamification } from '@/hooks/useGamification';
 

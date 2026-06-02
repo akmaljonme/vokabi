@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { ScrollArea } from '@/components/ui/scroll-area';

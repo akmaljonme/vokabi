@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, Reorder } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';

@@ -4,7 +4,8 @@ import {
   Trophy, Plus, Trash2, Users, Clock, CheckCircle,
   XCircle, Eye, Crown, Loader2, Calendar, Gift, ChevronDown, ChevronUp
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 

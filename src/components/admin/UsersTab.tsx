@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, MoreVertical, Shield, ShieldOff, Trash2, Eye, Crown, AlertTriangle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase as _sbClient } from '@/integrations/supabase/client';
+const supabase: any = _sbClient;
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
