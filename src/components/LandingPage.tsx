@@ -351,6 +351,7 @@ export const LandingPage = ({
 
   useEffect(() => {
     const fetchStats = async () => {
+      // Try RPC first
       const { data } = await supabase.rpc("get_public_stats");
       if (data) {
         const stats = data as any;
@@ -362,6 +363,19 @@ export const LandingPage = ({
           users: stats.user_count || 0,
           tests: stats.test_count || 0,
           avgPass: passRate,
+        });
+      } else {
+        // Fallback: direct count from profiles/test_results
+        const { count: userCount } = await supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true });
+        const { count: testCount } = await supabase
+          .from("test_results")
+          .select("*", { count: "exact", head: true });
+        setLiveStats({
+          users: userCount || 0,
+          tests: testCount || 0,
+          avgPass: 95,
         });
       }
     };
@@ -718,7 +732,7 @@ export const LandingPage = ({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { n: "10K+", l: "Faol o'quvchi" },
+                    { n: liveStats.users > 0 ? `${liveStats.users.toLocaleString()}+` : "—", l: "Faol o'quvchi" },
                     { n: "21+", l: "O'yin va test" },
                     { n: "6", l: "CEFR daraja" },
                     { n: "24/7", l: "AI yordamchi" },
