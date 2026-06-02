@@ -8,7 +8,7 @@ const CallContext = createContext<WebRTCReturn | null>(null);
 
 export const useCall = () => {
   const ctx = useContext(CallContext);
-  return ctx;
+  return ctx as WebRTCReturn;
 };
 
 export const CallProvider = ({ children }: { children: ReactNode }) => {
