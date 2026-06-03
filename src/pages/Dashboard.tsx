@@ -920,7 +920,7 @@ export default function Dashboard() {
                     <Button
                       className="mt-4"
                       size="sm"
-                      onClick={() => navigate("/tests")}
+                      onClick={() => navigate("/practice")}
                     >
                       Testni boshlash
                     </Button>

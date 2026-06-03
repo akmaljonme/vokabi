@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Clock, BookOpen, CheckCircle, ChevronRight } from "lucide-react";
+import { ArrowLeft, Clock, BookOpen, CheckCircle, ChevronRight, Sparkles, Loader2, Send } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { ARTICLES } from "@/data/articles";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
@@ -17,6 +17,30 @@ export default function ArticleReader() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<{ score: number; total: number } | null>(null);
   const [savedProgress, setSavedProgress] = useState<any>(null);
+  const [aiQuestion, setAiQuestion] = useState("");
+  const [aiAnswer, setAiAnswer] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const askAI = async () => {
+    if (!aiQuestion.trim() || !article) return;
+    setAiLoading(true);
+    setAiAnswer("");
+    try {
+      const { data } = await supabase.functions.invoke("ai-tutor", {
+        body: {
+          messages: [{
+            role: "user",
+            content: `Maqola: "${article.title}"\n\nMaqola matni:\n${article.content}\n\nSavol: ${aiQuestion}\n\nIltimos, faqat maqola asosida qisqa, aniq javob bering.`
+          }]
+        }
+      });
+      const text = data?.response || data?.content?.[0]?.text || "Javob kelmadi";
+      setAiAnswer(text);
+    } catch {
+      setAiAnswer("Xatolik yuz berdi. Qayta urinib ko'ring.");
+    }
+    setAiLoading(false);
+  };
 
   const article = ARTICLES.find(a => a.id === id);
 
@@ -123,10 +147,35 @@ export default function ArticleReader() {
           {/* READING */}
           {view === "reading" && (
             <motion.div key="reading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="leading-relaxed text-base mb-8 bg-card p-6 lg:p-8 rounded-2xl border border-border space-y-4">
+              <div className="leading-relaxed text-base mb-6 bg-card p-6 lg:p-8 rounded-2xl border border-border space-y-4">
                 {article.content.split('\n').filter(p => p.trim()).map((para, i) => (
                   <p key={i}>{para}</p>
                 ))}
+              </div>
+
+              {/* AI Panel */}
+              <div className="mb-6 p-5 rounded-2xl border border-primary/20 bg-primary/5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold">Maqola haqida AI ga savol bering</span>
+                </div>
+                <div className="flex gap-2 mb-3">
+                  <input value={aiQuestion}
+                    onChange={e => setAiQuestion(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && askAI()}
+                    placeholder="Masalan: 'Maqolaning asosiy g'oyasi nima?'"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                  <button onClick={askAI} disabled={aiLoading || !aiQuestion.trim()}
+                    className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground disabled:opacity-50 flex items-center gap-2 text-sm font-medium">
+                    {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  </button>
+                </div>
+                {aiAnswer && (
+                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+                    className="p-4 rounded-xl bg-background border border-border text-sm leading-relaxed whitespace-pre-wrap">
+                    {aiAnswer}
+                  </motion.div>
+                )}
               </div>
               <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
                 onClick={markAsRead}

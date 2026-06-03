@@ -411,6 +411,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                         >
                           {[
                             { label: "Test Yechish", emoji: "🧠", path: "/practice" },
+                            { label: "Maqolalar", emoji: "📖", path: "/articles" },
                             { label: "Video Darslar", emoji: "🎬", path: "/videos" },
                             { label: "Examlar", emoji: "📋", path: "/exams" },
                             { label: "Tillar", emoji: "🌍", path: "/languages" },

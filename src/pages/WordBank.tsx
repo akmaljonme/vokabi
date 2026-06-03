@@ -8,8 +8,9 @@ import { AppLayout } from "@/components/AppLayout";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   Plus, Search, BookOpen, Brain, Star, Trash2,
-  ChevronRight, RefreshCw, CheckCircle2, XCircle, Volume2
+  ChevronRight, RefreshCw, CheckCircle2, XCircle, Volume2, Sparkles, Loader2
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Word {
   id: string;
@@ -55,7 +56,37 @@ export default function WordBank() {
     return { ...word, ease, interval, reps, nextReview: nextReview.toISOString() };
   };
 
-  const dueWords = words.filter(w => new Date(w.nextReview) <= new Date());
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const aiLookup = async () => {
+    if (!newWord.word.trim()) { toast.error("So'zni kiriting"); return; }
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-tutor", {
+        body: {
+          messages: [{
+            role: "user",
+            content: `"${newWord.word}" so'zi haqida quyidagilarni bering (faqat JSON format, boshqa hech narsa yo'q):
+{"meaning": "o'zbekcha ma'nosi (qisqa)", "example": "qisqa inglizcha misol jumla", "level": "CEFR darajasi (A1/A2/B1/B2/C1/C2)"}`
+          }]
+        }
+      });
+      if (error) throw error;
+      const text = data?.response || data?.content?.[0]?.text || "";
+      const clean = text.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+      setNewWord(p => ({
+        ...p,
+        meaning: parsed.meaning || p.meaning,
+        example: parsed.example || p.example,
+        level: parsed.level || p.level,
+      }));
+      toast.success("✨ AI ma'lumot to'ldirdi!");
+    } catch {
+      toast.error("AI xato qaytardi, qo'lda to'ldiring");
+    }
+    setAiLoading(false);
+  };
 
   const addWord = () => {
     if (!newWord.word.trim() || !newWord.meaning.trim()) return;
@@ -142,10 +173,18 @@ export default function WordBank() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">Inglizcha so'z *</label>
-                  <input value={newWord.word} onChange={e => setNewWord(p => ({ ...p, word: e.target.value }))}
-                    placeholder="e.g. Eloquent"
-                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  />
+                  <div className="flex gap-2">
+                    <input value={newWord.word} onChange={e => setNewWord(p => ({ ...p, word: e.target.value }))}
+                      placeholder="e.g. Eloquent"
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                    <button onClick={aiLookup} disabled={aiLoading || !newWord.word.trim()}
+                      title="AI bilan to'ldirish"
+                      className="px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50 flex items-center gap-1.5 text-xs font-medium whitespace-nowrap">
+                      {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                      {aiLoading ? "..." : "AI"}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">Ma'nosi (o'zbekcha) *</label>

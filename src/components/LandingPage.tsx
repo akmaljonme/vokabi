@@ -772,7 +772,7 @@ export const LandingPage = ({
                 { icon: Award, title: "CEFR Sertifikat", desc: "Test natijalari bo'yicha avtomatik PNG sertifikat — yuklab oling va ulashing.", color: "blue" },
                 { icon: Video, title: "Video Darslar", desc: "Tanlangan o'quv videolari — har bir CEFR darajasi uchun moslangan.", color: "amber" },
                 { icon: Bot, title: "AI Tutor", desc: "24/7 sun'iy intellekt yordamchisi — har qanday savolingizga javob.", color: "blue" },
-                { icon: Trophy, title: "Turnirlar", desc: "Real vaqt turnirlarida boshqa o'quvchilar bilan musobaqalashing.", color: "amber" },
+                { icon: Trophy, title: "Oylik Turnir", desc: "Har oy musobaqada qatnashing — 1-o'rin 200,000 so'm, 2-o'rin 1 yillik Pro obuna!", color: "amber" },
               ].map((f, i) => (
                 <motion.div
                   key={f.title}

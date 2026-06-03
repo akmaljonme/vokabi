@@ -70,7 +70,7 @@ const Exams = () => {
 
       const enriched = await Promise.all(
         ((examData || []) as ExamData[]).map(async (exam) => {
-          const { count: qCount } = await (supabase
+          const { count: qCount, error: qErr } = await (supabase
             .from("exam_questions" as any)
             .select("*", { count: "exact", head: true })
             .eq("exam_id", exam.id) as any);
@@ -81,8 +81,8 @@ const Exams = () => {
             .eq("user_id", user.id) as any);
           return {
             ...exam,
-            question_count: qCount || 0,
-            attempts_used: aCount || 0,
+            question_count: qErr ? (exam.question_count ?? 0) : (qCount ?? 0),
+            attempts_used: aCount ?? 0,
           };
         }),
       );
