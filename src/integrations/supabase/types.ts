@@ -1151,6 +1151,57 @@ export type Database = {
         }
         Relationships: []
       }
+      tournament_daily_progress: {
+        Row: {
+          box_opened: boolean
+          box_result: string | null
+          committed: boolean
+          created_at: string
+          daily_xp: number
+          id: string
+          listening_done: boolean
+          reading_done: boolean
+          speaking_done: boolean
+          task_date: string
+          tournament_id: string
+          updated_at: string
+          user_id: string
+          writing_done: boolean
+        }
+        Insert: {
+          box_opened?: boolean
+          box_result?: string | null
+          committed?: boolean
+          created_at?: string
+          daily_xp?: number
+          id?: string
+          listening_done?: boolean
+          reading_done?: boolean
+          speaking_done?: boolean
+          task_date?: string
+          tournament_id: string
+          updated_at?: string
+          user_id: string
+          writing_done?: boolean
+        }
+        Update: {
+          box_opened?: boolean
+          box_result?: string | null
+          committed?: boolean
+          created_at?: string
+          daily_xp?: number
+          id?: string
+          listening_done?: boolean
+          reading_done?: boolean
+          speaking_done?: boolean
+          task_date?: string
+          tournament_id?: string
+          updated_at?: string
+          user_id?: string
+          writing_done?: boolean
+        }
+        Relationships: []
+      }
       tournament_participants: {
         Row: {
           games_played: number
