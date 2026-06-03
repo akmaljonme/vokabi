@@ -43,31 +43,25 @@ export default function Tournaments() {
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
 
-  useEffect(() => { fetchTournaments(); }, []);
+  useEffect(() => { fetchTournaments(); }, [activeType]);
 
   const fetchTournaments = async () => {
     setLoading(true);
     const { data } = await (supabase.from("tournaments") as any)
-      .select("*").eq("status", "active").order("end_date", { ascending: true });
+      .select("*")
+      .eq("status", "active")
+      .in("game_type", [activeType, "all"])
+      .order("end_date", { ascending: true });
 
-    if (data && data.length > 0) {
-      setTournaments(data);
-      selectTournament(data[0]);
+    const list = data || [];
+    setTournaments(list);
+    if (list.length > 0) {
+      selectTournament(list[0]);
     } else {
-      // Avtomatik oylik turnir yaratish
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 30);
-      const { data: newT } = await (supabase.from("tournaments") as any).insert({
-        title: "Oylik Grand Turnir 🏆",
-        game_type: "monthly",
-        end_date: endDate.toISOString(),
-        prize_xp: 500,
-        status: "active",
-      }).select().single();
-      if (newT) {
-        setTournaments([newT]);
-        selectTournament(newT);
-      }
+      setSelected(null);
+      setParticipants([]);
+      setIsJoined(false);
+      setMyRank(null);
     }
     setLoading(false);
   };
