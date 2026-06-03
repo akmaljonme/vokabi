@@ -11,6 +11,7 @@ const supabase: any = _sbClient;
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TournamentDailyTasks } from "@/components/TournamentDailyTasks";
 
 // ─── Mukofotlar ──────────────────────────────────────────────────────────────
 const PRIZES = [
@@ -40,6 +41,7 @@ export default function Tournaments() {
   const [participants, setParticipants] = useState<any[]>([]);
   const [isJoined, setIsJoined] = useState(false);
   const [myRank, setMyRank] = useState<number | null>(null);
+  const [myParticipantId, setMyParticipantId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
 
@@ -69,7 +71,7 @@ export default function Tournaments() {
   const selectTournament = async (t: any) => {
     setSelected(t);
     const { data: parts } = await (supabase.from("tournament_participants") as any)
-      .select("user_id, total_score, games_played")
+      .select("id, user_id, total_score, games_played")
       .eq("tournament_id", t.id)
       .order("total_score", { ascending: false })
       .limit(100);
@@ -88,11 +90,13 @@ export default function Tournaments() {
         const idx = enriched.findIndex((p: any) => p.user_id === user.id);
         setMyRank(idx >= 0 ? idx + 1 : null);
         setIsJoined(idx >= 0);
+        setMyParticipantId(idx >= 0 ? enriched[idx].id : null);
       }
     } else {
       setParticipants([]);
       setIsJoined(false);
       setMyRank(null);
+      setMyParticipantId(null);
     }
   };
 
@@ -267,6 +271,15 @@ export default function Tournaments() {
                   <Trophy className="w-12 h-12 mx-auto mb-3 opacity-20" />
                   <p>Faol turnir yo'q</p>
                 </div>
+              )}
+
+              {/* Daily tasks (4 skills + mystery box) */}
+              {isJoined && selected && myParticipantId && (
+                <TournamentDailyTasks
+                  tournamentId={selected.id}
+                  participantId={myParticipantId}
+                  onXPCommitted={() => selectTournament(selected)}
+                />
               )}
 
               {/* How it works */}
