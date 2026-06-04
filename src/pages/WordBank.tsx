@@ -134,6 +134,8 @@ export default function WordBank() {
     return matchSearch && matchLevel;
   });
 
+  const dueWords = words.filter(w => new Date(w.nextReview) <= new Date());
+
   return (
     <AppLayout>
             <div className="container mx-auto px-4 py-8 max-w-4xl">
