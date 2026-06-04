@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useUserRole } from "@/hooks/useUserRole";
-import { SiteTour } from "@/components/SiteTour";
+
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -44,7 +44,6 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
         {children}
         {withFooter && <Footer />}
       </motion.div>
-      <SiteTour />
     </div>
   );
 };
