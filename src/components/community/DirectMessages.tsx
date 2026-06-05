@@ -246,7 +246,7 @@ export const DirectMessages = ({ openUserId }: { openUserId?: string | null }) =
         )}
         {!search.trim() && (
           <>
-            {chatPreviews.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">Hali suhbatlar yo'q. Yuqoridan foydalanuvchi qidiring!</p>}
+            {chatPreviews.length === 0 && <p className="text-xs text-muted-foreground text-center py-3">Hali suhbatlar yo'q. Quyidan foydalanuvchi tanlang.</p>}
             <div className="space-y-0.5">
               {chatPreviews.map(chat => (
                 <button key={chat.profile.user_id} onClick={() => setActiveContact(chat.profile)}
@@ -269,6 +269,27 @@ export const DirectMessages = ({ openUserId }: { openUserId?: string | null }) =
                 </button>
               ))}
             </div>
+            {allUsers.length > 0 && (
+              <div className="pt-3 mt-2 border-t border-border">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground px-3 mb-1">Barcha foydalanuvchilar ({allUsers.length})</p>
+                <div className="space-y-0.5">
+                  {allUsers
+                    .filter(u => !chatPreviews.some(c => c.profile.user_id === u.user_id))
+                    .map(u => (
+                    <button key={u.user_id} onClick={() => setActiveContact(u)}
+                      className="w-full p-3 rounded-xl hover:bg-muted flex items-center gap-3 text-left transition-colors">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        {u.avatar_url ? <img src={u.avatar_url} className="w-10 h-10 rounded-full object-cover" /> : <User className="w-5 h-5 text-primary" />}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-medium text-sm">{u.username ? `@${u.username}` : u.full_name || 'Foydalanuvchi'}</span>
+                        {u.username && u.full_name && <p className="text-xs text-muted-foreground">{u.full_name}</p>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
