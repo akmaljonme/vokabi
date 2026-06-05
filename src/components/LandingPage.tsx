@@ -257,6 +257,9 @@ const FloatingParticles = () => {
 const CursorTrailer = () => {
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // Skip on touch / mobile — otherwise the two dots get stuck at 0,0
+    const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+    if (isTouch || window.innerWidth < 1024) return;
     const cursor = document.createElement('div');
     const trail = document.createElement('div');
     cursor.id = 'vk-cursor';
