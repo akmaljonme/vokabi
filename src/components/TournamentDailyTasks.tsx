@@ -36,10 +36,21 @@ export const TournamentDailyTasks = ({ tournamentId, participantId, onXPCommitte
   const [loading, setLoading] = useState(true);
   const [row, setRow] = useState<any>(null);
   const [opening, setOpening] = useState<number | null>(null);
+  const [visited, setVisited] = useState<Record<string, boolean>>({});
 
   const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => { if (user && tournamentId) load(); /* eslint-disable-next-line */ }, [user, tournamentId]);
+
+  // Restore "visited" flags from sessionStorage so the confirm button appears after returning
+  useEffect(() => {
+    if (!tournamentId) return;
+    const v: Record<string, boolean> = {};
+    TASKS.forEach(t => {
+      if (sessionStorage.getItem(`tt_visit_${tournamentId}_${t.key}_${today}`)) v[t.key] = true;
+    });
+    setVisited(v);
+  }, [tournamentId, today]);
 
   const load = async () => {
     setLoading(true);
@@ -63,6 +74,13 @@ export const TournamentDailyTasks = ({ tournamentId, participantId, onXPCommitte
     setLoading(false);
   };
 
+  const startTask = (key: string, route: string) => {
+    if (!row || row[key] || row.box_opened) return;
+    sessionStorage.setItem(`tt_visit_${tournamentId}_${key}_${today}`, "1");
+    setVisited(v => ({ ...v, [key]: true }));
+    navigate(route);
+  };
+
   const toggleTask = async (key: string) => {
     if (!row || row[key] || row.box_opened) return;
     const updates: any = { [key]: true, daily_xp: (row.daily_xp || 0) + TASK_XP };
@@ -71,6 +89,7 @@ export const TournamentDailyTasks = ({ tournamentId, participantId, onXPCommitte
       .update(updates).eq("id", row.id).select().single();
     if (data) {
       setRow(data);
+      sessionStorage.removeItem(`tt_visit_${tournamentId}_${key}_${today}`);
       toast.success(`+${TASK_XP} XP — ${key.replace("_done", "")} bajarildi!`);
     }
   };
@@ -152,12 +171,17 @@ export const TournamentDailyTasks = ({ tournamentId, participantId, onXPCommitte
         {TASKS.map(t => {
           const done = row[t.key];
           const Icon = t.icon;
+          const canConfirm = !done && visited[t.key] && !row.box_opened;
           return (
             <motion.button
               key={t.key}
               whileHover={!done && !row.box_opened ? { scale: 1.02 } : {}}
               whileTap={!done && !row.box_opened ? { scale: 0.98 } : {}}
-              onClick={() => done ? navigate(t.route) : toggleTask(t.key)}
+              onClick={(e) => {
+                e.preventDefault();
+                if (done) navigate(t.route);
+                else startTask(t.key, t.route);
+              }}
               disabled={row.box_opened && !done}
               className={`relative p-3 rounded-xl border text-left overflow-hidden transition-all ${
                 done ? "border-emerald-500/40 bg-emerald-500/5" : "border-border hover:border-primary/40"
@@ -175,6 +199,15 @@ export const TournamentDailyTasks = ({ tournamentId, participantId, onXPCommitte
                   </p>
                   <p className="text-[10px] text-muted-foreground truncate">{t.desc}</p>
                   <p className="text-[10px] font-medium text-primary mt-0.5">+{TASK_XP} XP</p>
+                  {canConfirm && (
+                    <span
+                      role="button"
+                      onClick={(e) => { e.stopPropagation(); toggleTask(t.key); }}
+                      className="inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-white hover:bg-emerald-600"
+                    >
+                      ✓ Bajardim
+                    </span>
+                  )}
                 </div>
               </div>
             </motion.button>
