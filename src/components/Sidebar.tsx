@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { NotificationBell } from "@/components/NotificationBell";
+import { SidebarAd } from "@/components/ads/AdComponents";
 
 interface NavItem {
   label: string;
@@ -170,6 +171,7 @@ export const Sidebar = () => {
             <NavBtn item={{ label: "Admin Panel", path: "/admin", icon: Shield }} />
           </>
         )}
+        {!collapsed && <SidebarAd />}
       </div>
 
       {/* Bottom: user + theme + notifications */}

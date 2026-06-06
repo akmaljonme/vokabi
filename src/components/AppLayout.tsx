@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useUserRole } from "@/hooks/useUserRole";
+import { BannerAd, PopupAd } from "@/components/ads/AdComponents";
 
 
 interface AppLayoutProps {
@@ -20,6 +21,7 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background">
+      {user && <BannerAd position="top" />}
       {/* Header: login bo'lmasa har doim, login bo'lsa faqat mobil */}
       <div className={user ? "lg:hidden" : ""}>
         <Header
@@ -44,6 +46,7 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
         {children}
         {withFooter && <Footer />}
       </motion.div>
+      {user && <PopupAd />}
     </div>
   );
 };
