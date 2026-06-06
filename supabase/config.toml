@@ -1,1 +1,10 @@
 project_id = "jjepvaavxdddbjmqrytc"
+
+[functions.telegram-bot-webhook]
+verify_jwt = false
+
+[functions.send-phone-otp]
+verify_jwt = false
+
+[functions.verify-phone-otp]
+verify_jwt = false
