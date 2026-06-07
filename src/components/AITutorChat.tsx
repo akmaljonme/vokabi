@@ -1,23 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  X, Send, Loader2, Bot, User, Sparkles, RotateCcw,
-  BookOpen, Pen, Headphones, MessageCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { X, Send, Loader2, RotateCcw, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
-import ReactMarkdown from "react-markdown";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const QUICK_PROMPTS = [
-  { icon: BookOpen, text: "Grammar tushuntir", label: "Grammar" },
-  { icon: Pen, text: "IELTS Writing maslahat ber", label: "Writing" },
-  { icon: Headphones, text: "Listening qanday yaxshilanadi?", label: "Listening" },
-  { icon: MessageCircle, text: "Inglizcha gaplashishni o'rgat", label: "Speaking" },
+  { emoji: "📝", text: "IELTS Writing maslahat ber", label: "Writing" },
+  { emoji: "🗣️", text: "Speaking qanday yaxshilanadi?", label: "Speaking" },
+  { emoji: "📚", text: "Grammar tushuntir", label: "Grammar" },
+  { emoji: "🎧", text: "Listening qanday yaxshilanadi?", label: "Listening" },
+  { emoji: "🔤", text: "Vocabulary kengaytirish", label: "Vocabulary" },
+  { emoji: "🎯", text: "IELTS band 7 uchun nima kerak?", label: "IELTS 7+" },
 ];
 
 export const AITutorChat = () => {
@@ -56,17 +53,12 @@ export const AITutorChat = () => {
       const { data, error } = await supabase.functions.invoke("ai-tutor", {
         body: { messages: updatedMessages },
       });
-
       if (error) throw error;
-
       const assistantText = data?.text || "Javob olishda xatolik yuz berdi.";
       setMessages((prev) => [...prev, { role: "assistant", content: assistantText }]);
     } catch (e) {
       console.error(e);
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Xatolik yuz berdi. Qayta urinib ko'ring." },
-      ]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "Xatolik yuz berdi. Qayta urinib ko'ring. 😅" }]);
     } finally {
       setIsLoading(false);
     }
@@ -76,19 +68,98 @@ export const AITutorChat = () => {
 
   return (
     <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Caveat:wght@500;600&display=swap');
+        
+        .tutor-chat { font-family: 'Nunito', sans-serif; }
+        .tutor-bubble-font { font-family: 'Caveat', cursive; }
+        
+        .tutor-msg-ai {
+          background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+          border: 1.5px solid #86efac;
+          color: #14532d;
+        }
+        .dark .tutor-msg-ai {
+          background: linear-gradient(135deg, #052e16 0%, #14532d 100%);
+          border-color: #166534;
+          color: #bbf7d0;
+        }
+        .tutor-msg-user {
+          background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.85) 100%);
+          color: hsl(var(--primary-foreground));
+        }
+
+        .tutor-float-btn {
+          background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8));
+          box-shadow: 0 8px 32px hsl(var(--primary) / 0.4), 0 0 0 0 hsl(var(--primary) / 0.3);
+          animation: pulse-ring 2.5s ease-in-out infinite;
+        }
+        @keyframes pulse-ring {
+          0%, 100% { box-shadow: 0 8px 32px hsl(var(--primary) / 0.4), 0 0 0 0 hsl(var(--primary) / 0.3); }
+          50% { box-shadow: 0 8px 32px hsl(var(--primary) / 0.5), 0 0 0 10px hsl(var(--primary) / 0); }
+        }
+
+        .tutor-quick-btn {
+          background: hsl(var(--muted));
+          border: 1.5px solid hsl(var(--border));
+          transition: all 0.2s;
+        }
+        .tutor-quick-btn:hover {
+          background: hsl(var(--primary) / 0.1);
+          border-color: hsl(var(--primary) / 0.4);
+          transform: translateY(-1px);
+        }
+
+        .tutor-input {
+          font-family: 'Nunito', sans-serif;
+          font-weight: 600;
+        }
+        .tutor-input:focus { outline: none; }
+
+        .tutor-header {
+          background: linear-gradient(135deg, hsl(var(--primary) / 0.12), hsl(var(--primary) / 0.05));
+          border-bottom: 1.5px solid hsl(var(--primary) / 0.2);
+        }
+
+        .tutor-send-btn {
+          background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85));
+          transition: all 0.2s;
+        }
+        .tutor-send-btn:hover:not(:disabled) { transform: scale(1.05); }
+        .tutor-send-btn:disabled { opacity: 0.4; }
+
+        .tutor-typing span {
+          display: inline-block;
+          width: 7px; height: 7px;
+          border-radius: 50%;
+          background: hsl(var(--primary));
+          animation: bounce-dot 1.2s ease-in-out infinite;
+        }
+        .tutor-typing span:nth-child(2) { animation-delay: 0.15s; }
+        .tutor-typing span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes bounce-dot {
+          0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+          30% { transform: translateY(-6px); opacity: 1; }
+        }
+
+        .tutor-scrollbar::-webkit-scrollbar { width: 4px; }
+        .tutor-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .tutor-scrollbar::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 99px; }
+      `}</style>
+
       {/* Floating button */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
+            initial={{ scale: 0, opacity: 0, rotate: -180 }}
+            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+            exit={{ scale: 0, opacity: 0, rotate: 180 }}
+            whileHover={{ scale: 1.12, rotate: 10 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-2xl shadow-primary/30 flex items-center justify-center"
+            className="tutor-chat fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl text-white flex items-center justify-center tutor-float-btn"
           >
-            <Sparkles className="w-6 h-6" />
+            <span className="text-2xl">🤖</span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -97,138 +168,174 @@ export const AITutorChat = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 24, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[580px] max-h-[calc(100vh-6rem)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            exit={{ opacity: 0, y: 24, scale: 0.92 }}
+            transition={{ type: "spring", damping: 24, stiffness: 300 }}
+            className="tutor-chat fixed bottom-6 right-6 z-50 w-[390px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-5rem)] bg-card border border-border rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            style={{ boxShadow: "0 24px 80px hsl(var(--primary) / 0.2), 0 8px 32px rgba(0,0,0,0.15)" }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
+            <div className="tutor-header flex items-center justify-between px-5 py-3.5">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-primary" />
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-2xl bg-primary/15 flex items-center justify-center text-xl">🤖</div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-card" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-sm">AI Tutor</h3>
-                  <p className="text-[11px] text-muted-foreground">Ingliz tili bo'yicha yordam</p>
+                  <h3 className="font-black text-sm tracking-tight">AI Tutor</h3>
+                  <p className="text-[11px] text-muted-foreground font-semibold">Ingliz tili yordamchisi ✨</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 {messages.length > 0 && (
-                  <button
+                  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                     onClick={clearChat}
-                    className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-                    title="Suhbatni tozalash"
+                    className="w-8 h-8 rounded-xl hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </motion.button>
                 )}
-                <button
+                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                   onClick={() => setIsOpen(false)}
-                  className="p-2 rounded-lg hover:bg-muted transition-colors"
+                  className="w-8 h-8 rounded-xl hover:bg-muted flex items-center justify-center transition-colors"
                 >
-                  <X className="w-4 h-4" />
-                </button>
+                  <X className="w-3.5 h-3.5" />
+                </motion.button>
               </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 tutor-scrollbar">
               {messages.length === 0 && (
-                <div className="text-center py-6">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <Bot className="w-7 h-7 text-primary" />
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="py-4"
+                >
+                  {/* Welcome */}
+                  <div className="text-center mb-5">
+                    <motion.div
+                      animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
+                      transition={{ duration: 1.5, delay: 0.5 }}
+                      className="text-5xl mb-3"
+                    >🎓</motion.div>
+                    <p className="font-black text-base mb-1">Salom! Men AI Tutor 👋</p>
+                    <p className="text-xs text-muted-foreground font-semibold leading-relaxed max-w-[260px] mx-auto">
+                      Ingliz tili bo'yicha har qanday savolingizni bering. Yordam berishga tayyorman!
+                    </p>
                   </div>
-                  <p className="text-sm font-medium mb-1">AI Tutor</p>
-                  <p className="text-xs text-muted-foreground mb-5">
-                    Ingliz tili bo'yicha har qanday savolingizni bering!
-                  </p>
+
+                  {/* Quick prompts */}
                   <div className="grid grid-cols-2 gap-2">
-                    {QUICK_PROMPTS.map(({ icon: Icon, text, label }) => (
-                      <button
+                    {QUICK_PROMPTS.map(({ emoji, text, label }, i) => (
+                      <motion.button
                         key={label}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 + i * 0.06 }}
                         onClick={() => sendMessage(text)}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-muted hover:bg-muted/80 transition-colors text-left"
+                        className="tutor-quick-btn rounded-2xl px-3 py-2.5 text-left flex items-center gap-2"
                       >
-                        <Icon className="w-4 h-4 text-primary shrink-0" />
-                        <span className="text-xs font-medium">{label}</span>
-                      </button>
+                        <span className="text-lg">{emoji}</span>
+                        <span className="text-xs font-bold leading-tight">{label}</span>
+                      </motion.button>
                     ))}
                   </div>
-                </div>
+
+                  {/* Tip */}
+                  <div className="mt-4 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                    <p className="text-xs font-bold text-amber-700 dark:text-amber-400">
+                      💡 Maslahat: IELTS, CEFR, grammatika, lug'at haqida so'rashingiz mumkin!
+                    </p>
+                  </div>
+                </motion.div>
               )}
 
               {messages.map((msg, i) => (
-                <div key={i} className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : ""}`}>
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                  className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                >
                   {msg.role === "assistant" && (
-                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <Bot className="w-4 h-4 text-primary" />
-                    </div>
+                    <div className="w-8 h-8 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 text-base">🤖</div>
                   )}
-                  <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
-                      msg.role === "user"
-                        ? "bg-primary text-primary-foreground rounded-br-md"
-                        : "bg-muted rounded-bl-md"
-                    }`}
-                  >
-                    {msg.role === "assistant" ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_li]:my-0.5">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
-                      </div>
-                    ) : (
-                      msg.content
-                    )}
+                  <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm font-semibold leading-relaxed ${
+                    msg.role === "user"
+                      ? "tutor-msg-user rounded-br-md"
+                      : "tutor-msg-ai rounded-bl-md"
+                  }`}>
+                    {msg.content}
                   </div>
                   {msg.role === "user" && (
-                    <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center shrink-0 mt-0.5">
-                      <User className="w-4 h-4" />
-                    </div>
+                    <div className="w-8 h-8 rounded-2xl bg-muted flex items-center justify-center shrink-0 mt-0.5 text-base">🙋</div>
                   )}
-                </div>
+                </motion.div>
               ))}
 
               {isLoading && (
-                <div className="flex gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4 text-primary" />
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex gap-2.5"
+                >
+                  <div className="w-8 h-8 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 text-base">🤖</div>
+                  <div className="tutor-msg-ai rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5">
+                    <div className="tutor-typing flex gap-1">
+                      <span /><span /><span />
+                    </div>
+                    <span className="text-xs font-bold ml-1 opacity-60">Yozmoqda...</span>
                   </div>
-                  <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Yozmoqda...</span>
-                  </div>
-                </div>
+                </motion.div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Suggested replies after assistant message */}
+            {messages.length > 0 && messages[messages.length - 1].role === "assistant" && !isLoading && (
+              <div className="px-4 pb-2 flex gap-2 overflow-x-auto">
+                {["Ko'proq tushuntir 🔍", "Misol ber 💡", "Rahmat! ✅"].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => sendMessage(s)}
+                    className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors border border-primary/20"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Input */}
-            <div className="px-4 py-3 border-t border-border bg-muted/20">
-              <div className="flex gap-2">
+            <div className="px-4 py-3 border-t border-border">
+              <div className="flex gap-2 items-center bg-muted/50 rounded-2xl px-4 py-2 border border-border focus-within:border-primary/40 focus-within:bg-background transition-all">
                 <input
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
+                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
                   }}
-                  placeholder="Savolingizni yozing..."
-                  className="flex-1 bg-background border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
+                  placeholder="Savolingizni yozing... 💬"
+                  className="tutor-input flex-1 bg-transparent text-sm focus:outline-none placeholder:text-muted-foreground/60"
                   disabled={isLoading}
                 />
-                <Button
+                <motion.button
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => sendMessage()}
-                  size="icon"
                   disabled={isLoading || !input.trim()}
-                  className="rounded-xl shrink-0"
+                  className="tutor-send-btn w-8 h-8 rounded-xl flex items-center justify-center text-white shrink-0"
                 >
-                  <Send className="w-4 h-4" />
-                </Button>
+                  {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                </motion.button>
               </div>
+              <p className="text-center text-[10px] text-muted-foreground/50 mt-2 font-semibold">
+                Powered by Vokabi AI ✨
+              </p>
             </div>
           </motion.div>
         )}
