@@ -277,7 +277,9 @@ export interface TestInfo {
          } else {
            // Standard: 10 questions per part
            const questionsPerPart = dbTest.skill === 'vocabulary' || dbTest.skill === 'grammar' ? questions.length : 10;
-           const numParts = dbTest.skill === 'vocabulary' || dbTest.skill === 'grammar' ? 1 : (Math.ceil(questions.length / questionsPerPart) || 1);
+           const numParts = dbTest.skill === 'vocabulary' || dbTest.skill === 'grammar' || dbTest.skill === 'reading'
+             ? 1
+             : (Math.ceil(questions.length / questionsPerPart) || 1);
            
            for (let i = 0; i < numParts; i++) {
              const partQuestions = questions.slice(i * questionsPerPart, (i + 1) * questionsPerPart);
