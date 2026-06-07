@@ -44,11 +44,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
         data: { full_name: fullName, username },
       },
     });
-    return { error: error as Error | null };
+    if (error) return { error: error as Error | null };
+    // Auto sign-in immediately so user doesn't need to confirm email
+    await supabase.auth.signInWithPassword({ email, password });
+    return { error: null };
   };
 
   const signIn = async (email: string, password: string) => {
