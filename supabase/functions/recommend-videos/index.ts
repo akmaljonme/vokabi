@@ -154,35 +154,8 @@ RULES:
           { role: "system", content: systemPrompt },
           { role: "user", content: `Wrong questions:\n${JSON.stringify(wrongQuestions, null, 2)}` },
         ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "suggest_videos",
-            description: "Return matched video lesson numbers and analysis",
-            parameters: {
-              type: "object",
-              properties: {
-                weakTopics: { type: "array", items: { type: "string" }, description: "List of weak topics identified" },
-                selectedLessons: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      lessonNumber: { type: "integer", description: "Lesson number from the video list" },
-                      reason: { type: "string", description: "Why this video is relevant, in Uzbek" },
-                    },
-                    required: ["lessonNumber", "reason"],
-                  },
-                },
-                overallAdvice: { type: "string", description: "Overall learning advice in Uzbek" },
-              },
-              required: ["weakTopics", "selectedLessons", "overallAdvice"],
-              additionalProperties: false,
-            },
-          },
-        }],
-        tool_choice: { type: "function", function: { name: "suggest_videos" } },
-      }),
+        response_format: { type: "json_object" },
+        }),
     });
 
     if (!response.ok) {
@@ -193,7 +166,7 @@ RULES:
     }
 
     const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    
     const aiResult = toolCall ? JSON.parse(toolCall.function.arguments) : null;
 
     if (!aiResult) {

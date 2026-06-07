@@ -88,6 +88,8 @@ serve(async (req) => {
 
     const systemPrompt = `You are a certified IELTS Writing examiner with 15+ years of experience. Evaluate the essay STRICTLY using official IELTS Writing Band Descriptors at ${level} level.
 
+IMPORTANT: Respond with ONLY a valid JSON object, no markdown, no explanation.
+
 CRITICAL SCORING RULES — follow exactly:
 - Score each criterion from 1.0 to 9.0 in 0.5 increments (e.g. 5.5, 6.0, 6.5).
 - overallBand = average of 4 criteria, rounded to nearest 0.5.
@@ -124,34 +126,7 @@ FEEDBACK REQUIREMENTS:
           { role: "system", content: systemPrompt },
           { role: "user", content: `Question: ${question}\n\nEssay:\n${essay}` },
         ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "evaluate_writing",
-            description: "Return structured writing evaluation",
-            parameters: {
-              type: "object",
-              properties: {
-                overallBand: { type: "number" },
-                criteria: {
-                  type: "object",
-                  properties: {
-                    taskAchievement: { type: "object", properties: { score: { type: "number" }, feedback: { type: "string" } }, required: ["score", "feedback"] },
-                    coherenceAndCohesion: { type: "object", properties: { score: { type: "number" }, feedback: { type: "string" } }, required: ["score", "feedback"] },
-                    lexicalResource: { type: "object", properties: { score: { type: "number" }, feedback: { type: "string" } }, required: ["score", "feedback"] },
-                    grammaticalRange: { type: "object", properties: { score: { type: "number" }, feedback: { type: "string" } }, required: ["score", "feedback"] },
-                  },
-                  required: ["taskAchievement", "coherenceAndCohesion", "lexicalResource", "grammaticalRange"]
-                },
-                overallFeedback: { type: "string" },
-                correctedEssay: { type: "string" },
-              },
-              required: ["overallBand", "criteria", "overallFeedback", "correctedEssay"],
-              additionalProperties: false,
-            },
-          },
-        }],
-        tool_choice: { type: "function", function: { name: "evaluate_writing" } },
+        response_format: { type: "json_object" },
       }),
     });
 
@@ -167,8 +142,8 @@ FEEDBACK REQUIREMENTS:
     }
 
     const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    const result = toolCall ? JSON.parse(toolCall.function.arguments) : null;
+    const raw = data.choices?.[0]?.message?.content || "{}";
+    const result = JSON.parse(raw);
 
     return new Response(JSON.stringify({ result }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

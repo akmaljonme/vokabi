@@ -117,9 +117,10 @@ serve(async (req) => {
 
     const aiRes = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${GEMINI_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "gemini-2.0-flash",
+        response_format: { type: "json_object" },
         messages: [
           {
             role: "system",

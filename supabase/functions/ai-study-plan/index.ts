@@ -64,6 +64,7 @@ Analyze the actual results carefully:
       },
       body: JSON.stringify({
         model: "gemini-2.0-flash",
+        response_format: { type: "json_object" },
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
       }),

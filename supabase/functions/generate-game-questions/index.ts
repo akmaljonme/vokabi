@@ -61,6 +61,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "gemini-2.0-flash",
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: "You are a JSON generator. Only output valid JSON arrays. No markdown, no explanation." },
           { role: "user", content: promptFn(level || "A1") },

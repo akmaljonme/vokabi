@@ -92,6 +92,7 @@ Category should match the skill: "${test_config.skill}".`;
       },
       body: JSON.stringify({
         model: "gemini-2.0-flash",
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Here is the PDF text content to parse into test questions:\n\n${pdf_text}` },

@@ -120,35 +120,8 @@ FEEDBACK REQUIREMENTS:
           { role: "system", content: systemPrompt },
           { role: "user", content: `Question: ${question}\n\nStudent's response (transcript):\n${transcript}` },
         ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "evaluate_speaking",
-            description: "Return structured speaking evaluation",
-            parameters: {
-              type: "object",
-              properties: {
-                overallBand: { type: "number" },
-                criteria: {
-                  type: "object",
-                  properties: {
-                    fluencyAndCoherence: { type: "object", properties: { score: { type: "number" }, feedback: { type: "string" } }, required: ["score", "feedback"] },
-                    lexicalResource: { type: "object", properties: { score: { type: "number" }, feedback: { type: "string" } }, required: ["score", "feedback"] },
-                    grammaticalRange: { type: "object", properties: { score: { type: "number" }, feedback: { type: "string" } }, required: ["score", "feedback"] },
-                    pronunciation: { type: "object", properties: { score: { type: "number" }, feedback: { type: "string" } }, required: ["score", "feedback"] },
-                  },
-                  required: ["fluencyAndCoherence", "lexicalResource", "grammaticalRange", "pronunciation"]
-                },
-                overallFeedback: { type: "string" },
-                suggestedResponse: { type: "string" },
-              },
-              required: ["overallBand", "criteria", "overallFeedback", "suggestedResponse"],
-              additionalProperties: false,
-            },
-          },
-        }],
-        tool_choice: { type: "function", function: { name: "evaluate_speaking" } },
-      }),
+        response_format: { type: "json_object" },
+        }),
     });
 
     if (!response.ok) {
@@ -163,8 +136,8 @@ FEEDBACK REQUIREMENTS:
     }
 
     const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    const result = toolCall ? JSON.parse(toolCall.function.arguments) : null;
+    const raw = data.choices?.[0]?.message?.content || "{}";
+    const result = JSON.parse(raw);
 
     return new Response(JSON.stringify({ result }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

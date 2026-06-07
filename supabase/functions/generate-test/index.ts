@@ -134,12 +134,11 @@ IMPORTANT RULES:
       },
       body: JSON.stringify({
         model: "gemini-2.0-flash",
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Create a ${skill} test at ${level} level. ${prompt}` },
         ],
-        tools: [toolSchema],
-        tool_choice: { type: "function", function: { name: "create_test" } },
       }),
     });
 
@@ -150,10 +149,10 @@ IMPORTANT RULES:
     }
 
     const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) throw new Error("AI javob bermadi");
+    const raw = data.choices?.[0]?.message?.content || "{}";
+    if (!raw) throw new Error("AI javob bermadi");
 
-    const generated = JSON.parse(toolCall.function.arguments);
+    const generated = JSON.parse(raw);
 
     const validTypes = ['multiple-choice', 'true-false', 'fill-blank', 'matching-headings', 'matching-paragraph', 'matching-features', 'matching-endings', 'list-selection', 'choose-title'];
 

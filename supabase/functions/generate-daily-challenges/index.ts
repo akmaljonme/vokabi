@@ -45,6 +45,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "gemini-2.0-flash",
+        response_format: { type: "json_object" },
         messages: [
           {
             role: "system",
