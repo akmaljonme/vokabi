@@ -632,10 +632,10 @@ export const LandingPage = ({
                   AI-Powered • IELTS • CEFR
                 </motion.div>
 
-                <h1 className="text-[2.25rem] sm:text-6xl md:text-7xl lg:text-[6.5rem] font-display mb-3 sm:mb-4">
+                <h1 className="text-[1.9rem] sm:text-5xl md:text-6xl lg:text-[5.5rem] font-display mb-3 sm:mb-4">
                   <WavyHeading text="INGLIZ TILINI" curve={5} />
                 </h1>
-                <h1 className="text-[2.25rem] sm:text-6xl md:text-7xl lg:text-[6.5rem] font-display mb-8 sm:mb-10">
+                <h1 className="text-[1.9rem] sm:text-5xl md:text-6xl lg:text-[5.5rem] font-display mb-8 sm:mb-10">
                   <WavyHeading text="MUKAMMAL O'RGANING" curve={6} delayBase={0.25} />
                 </h1>
 
@@ -993,10 +993,10 @@ export const LandingPage = ({
         <div className="container mx-auto px-4 relative z-10">
           <FadeUp className="mb-16">
             <div className="flex items-start justify-between mb-2">
-              <h2 className="font-display font-black text-[clamp(52px,9vw,110px)] leading-none tracking-tight text-primary" style={{WebkitTextStroke:'2px hsl(var(--primary))', color:'transparent'}}>
+              <h2 className="font-display font-black text-[clamp(36px,6vw,80px)] leading-none tracking-tight text-primary" style={{WebkitTextStroke:'2px hsl(var(--primary))', color:'transparent'}}>
                 IMKONIYATLAR
               </h2>
-              <span className="text-[clamp(40px,6vw,80px)] text-primary opacity-70 mt-2">↗</span>
+              <span className="text-[clamp(28px,4vw,60px)] text-primary opacity-70 mt-2">↗</span>
             </div>
             <p className="text-muted-foreground text-base sm:text-lg max-w-xl leading-relaxed">
               Har bir ko'nikma uchun maxsus tayyorlangan AI-powered testlar va tahlillar
@@ -1398,111 +1398,6 @@ export const LandingPage = ({
           </div>
         </div>
       </section>
-
-      {/* ═══════════ TESTIMONIALS ═══════════ */}
-      <section className="py-28 lg:py-36 relative overflow-hidden">
-        <FloatingParticles />
-        <div className="absolute inset-0 mesh-gradient opacity-30" />
-        <div className="container mx-auto px-4 relative z-10">
-          <FadeUp className="mb-16">
-            <h2 className="font-display font-black text-[clamp(44px,7vw,90px)] leading-none tracking-tight text-foreground">
-              FOYDALANUVCHILAR<br/>FIKRLARI
-            </h2>
-            <p className="text-muted-foreground text-base sm:text-lg max-w-md mt-4 leading-relaxed">
-              Minglab o'quvchilar Vokabi orqali ingliz tilini o'zlashtirdi
-            </p>
-          </FadeUp>
-
-          {user && (
-            <FadeUp className="text-center mb-10">
-              <Button
-                variant="outline"
-                onClick={() => setShowFeedbackDialog(true)}
-                className="border-primary/30 hover:bg-primary/10"
-              >
-                <MessageSquarePlus className="w-4 h-4 mr-2" /> Fikr qoldirish
-              </Button>
-            </FadeUp>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
-            {(feedbacks.length > 0
-              ? feedbacks
-              : [
-                  {
-                    full_name: "Aziza Karimova",
-                    level_info: "B2 → IELTS 7.0",
-                    message:
-                      "AI tahlil funksiyasi juda kuchli — zaif tomonlarimni aniqlab, maxsus mashqlar tavsiya qildi. 3 oyda IELTS 7.0 oldim!",
-                    rating: 5,
-                  },
-                  {
-                    full_name: "Sardor Rahimov",
-                    level_info: "B1 → C1",
-                    message:
-                      "Speaking practice AI bilan juda qulay. Har kuni mashq qildim va 6 oyda B1 dan C1 ga o'tdim.",
-                    rating: 5,
-                  },
-                  {
-                    full_name: "Malika Usmanova",
-                    level_info: "A2 → B2",
-                    message:
-                      "Bepul versiyasi ham juda foydali, lekin Pro olganidan keyin AI writing baholash hayotimni o'zgartirdi.",
-                    rating: 5,
-                  },
-                ]
-            ).map((fb: Feedback, index: number) => {
-              const initials =
-                fb.full_name
-                  ?.split(" ")
-                  .map((n: string) => n[0])
-                  .join("")
-                  .toUpperCase() || "??";
-              return (
-                <FadeUp key={fb.id || index} delay={index * 0.08}>
-                  <motion.div
-                    whileHover={{ y: -6, scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    className="card-elevated rounded-2xl p-7 h-full flex flex-col gap-4 border border-border/50"
-                  >
-                    <div className="flex gap-0.5">
-                      {[...Array(fb.rating || 5)].map((_: unknown, i: number) => (
-                        <Star
-                          key={i}
-                          className="w-4 h-4 fill-primary text-primary"
-                        />
-                      ))}
-                    </div>
-                    <p className="text-foreground/80 text-sm leading-relaxed flex-1">
-                      "{fb.message}"
-                    </p>
-                    <div className="flex items-center gap-3 pt-2 border-t border-border/40">
-                      <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center font-bold text-xs text-primary shrink-0">
-                        {initials}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm text-foreground">
-                          {fb.full_name}
-                        </div>
-                        {fb.level_info && (
-                          <div className="text-xs text-muted-foreground">
-                            {fb.level_info}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                </FadeUp>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <FeedbackDialog
-        open={showFeedbackDialog}
-        onOpenChange={setShowFeedbackDialog}
-      />
 
       {/* ═══════════ FAQ ═══════════ */}
       <section id="faq" className="py-28 lg:py-36">
