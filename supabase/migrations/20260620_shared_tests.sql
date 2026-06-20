@@ -22,3 +22,19 @@ CREATE OR REPLACE FUNCTION increment_test_views(test_uuid UUID)
 RETURNS void AS $$
   UPDATE shared_tests SET view_count = view_count + 1 WHERE id = test_uuid;
 $$ LANGUAGE sql;
+
+-- Shared test results table
+CREATE TABLE IF NOT EXISTS shared_test_results (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  shared_test_id UUID REFERENCES shared_tests(id) ON DELETE CASCADE,
+  score INTEGER NOT NULL,
+  total INTEGER NOT NULL,
+  percentage INTEGER NOT NULL,
+  cheated BOOLEAN DEFAULT FALSE,
+  answers JSONB,
+  completed_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE shared_test_results ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can insert results" ON shared_test_results FOR INSERT WITH CHECK (true);
+CREATE POLICY "Admin can read results" ON shared_test_results FOR SELECT USING (true);
