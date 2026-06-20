@@ -195,6 +195,39 @@ const StandardResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
           <button onClick={() => generateResultPDF(result, mockTest)} className="btn-outline flex items-center justify-center gap-2 text-sm w-full sm:w-auto">
             <FileDown className="w-4 h-4" /> Natijalar PDF
           </button>
+          {/* Share buttons */}
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => {
+                const emoji = result.passed ? '🏆' : '💪';
+                const stars = result.percentage >= 90 ? '⭐⭐⭐' : result.percentage >= 70 ? '⭐⭐' : '⭐';
+                const text = `${emoji} Vokabi.uz da test yakunladim!\n\n${stars}\n📚 ${result.level} daraja — ${result.skill}\n📊 Natija: ${result.percentage}%\n✅ To'g'ri: ${result.correctAnswers}/${result.totalQuestions}\n🏅 Baho: ${gradeInfo.grade}\n\n🚀 Sen ham sinab ko'r 👇\nhttps://vokabi.uz`;
+                window.open(`https://t.me/share/url?url=https://vokabi.uz&text=${encodeURIComponent(text)}`, '_blank');
+              }}
+              className="flex items-center justify-center gap-2 text-sm px-4 py-2 rounded-xl font-semibold text-white transition-all"
+              style={{ background: 'linear-gradient(135deg, #2AABEE, #229ED9)' }}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.026 9.554c-.149.668-.537.83-1.088.517l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.085 14.6l-2.953-.924c-.642-.2-.655-.642.136-.951l11.527-4.445c.537-.194 1.006.131.767.968z"/>
+              </svg>
+              Telegram
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => {
+                const text = `🏆 Vokabi.uz — ${result.level} ${result.skill} | Natija: ${result.percentage}% | ${gradeInfo.grade} | https://vokabi.uz`;
+                navigator.clipboard.writeText(text);
+                const btn = document.getElementById('copy-result-btn');
+                if (btn) { btn.textContent = '✅ Nusxa olindi!'; setTimeout(() => { if(btn) btn.textContent = '🔗 Nusxa olish'; }, 2000); }
+              }}
+              className="btn-outline flex items-center justify-center gap-2 text-sm px-4 py-2"
+            >
+              <span id="copy-result-btn">🔗 Nusxa olish</span>
+            </motion.button>
+          </div>
           <button onClick={onBack} className="btn-outline text-sm w-full sm:w-auto">Boshqa test</button>
         </motion.div>
 

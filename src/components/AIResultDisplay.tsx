@@ -297,6 +297,22 @@ export const AIResultDisplay = ({ result, onRetry, onBack }: AIResultDisplayProp
           <button onClick={onRetry} className="btn-primary flex items-center gap-2 text-sm">
             <RotateCcw className="w-4 h-4" /> Qayta ishlash
           </button>
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              const emoji = passed ? '🏆' : '💪';
+              const text = `${emoji} Vokabi.uz da ${result.level} ${isWriting ? 'Writing' : 'Speaking'} testini yakunladim!\n\n📊 IELTS Band: ${overallBand}/9\n🤖 AI baholadi\n\n🚀 Sen ham sinab ko'r: https://vokabi.uz`;
+              window.open(`https://t.me/share/url?url=https://vokabi.uz&text=${encodeURIComponent(text)}`, '_blank');
+            }}
+            className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl font-semibold text-white"
+            style={{ background: 'linear-gradient(135deg, #2AABEE, #229ED9)' }}
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.026 9.554c-.149.668-.537.83-1.088.517l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.085 14.6l-2.953-.924c-.642-.2-.655-.642.136-.951l11.527-4.445c.537-.194 1.006.131.767.968z"/>
+            </svg>
+            Telegram da ulashish
+          </motion.button>
           <button onClick={onBack} className="btn-outline text-sm">Boshqa test</button>
         </motion.div>
       </div>
