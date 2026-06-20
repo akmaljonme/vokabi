@@ -35,13 +35,36 @@ const ShareTestPopup = ({ test, skill, level, mockId, onClose }: {
     setLoading(true);
     try {
       const mockTest = generateMockTest(mockId, level, skill);
+      const KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
       const questions = mockTest.parts.flatMap((p: any) =>
-        p.questions.map((q: any) => ({
-          question: q.question,
-          options: q.options,
-          correct: q.correctAnswer,
-          explanation: q.explanation || "",
-        }))
+        p.questions.map((q: any) => {
+          // Convert options array to {A: "...", B: "...", ...} format
+          let optionsObj: Record<string, string> = {};
+          let correctKey = '';
+          if (Array.isArray(q.options)) {
+            q.options.forEach((opt: string, i: number) => {
+              optionsObj[KEYS[i]] = opt;
+            });
+            // Find correct key by matching correctAnswer text
+            const correctIdx = q.options.findIndex((o: string) => o === q.correctAnswer);
+            correctKey = correctIdx >= 0 ? KEYS[correctIdx] : KEYS[0];
+          } else if (typeof q.options === 'object') {
+            optionsObj = q.options;
+            // correctAnswer might be a key already or a value
+            if (KEYS.includes(q.correctAnswer)) {
+              correctKey = q.correctAnswer;
+            } else {
+              const found = Object.entries(optionsObj).find(([, v]) => v === q.correctAnswer);
+              correctKey = found ? found[0] : 'A';
+            }
+          }
+          return {
+            question: q.question,
+            options: optionsObj,
+            correct: correctKey,
+            explanation: q.explanation || "",
+          };
+        })
       );
       const { data, error } = await supabase.from("shared_tests").insert({
         test_id: `${level}_${skill}_${mockId}`,
@@ -53,6 +76,7 @@ const ShareTestPopup = ({ test, skill, level, mockId, onClose }: {
       if (error) throw error;
       setShareUrl(`${window.location.origin}/shared-test/${data.id}`);
     } catch (e) {
+      console.error(e);
       toast.error("Xatolik yuz berdi");
     } finally {
       setLoading(false);
@@ -259,13 +283,22 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
               <div className="font-semibold text-sm">Unit {test.unitNumber || index + 1}</div>
               <div className="text-xs text-muted-foreground mt-1">{test.questionCount} ta savol</div>
             </button>
-            <button
-              onClick={(e) => handleDownloadPDF(e, skill, index)}
-              className="absolute top-2 right-2 p-1.5 rounded-lg bg-muted/80 hover:bg-primary/10 text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
-              title="PDF yuklab olish"
-            >
-              <FileDown className="w-3.5 h-3.5" />
-            </button>
+            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+              <button
+                onClick={(e) => { e.stopPropagation(); setSharePopup({ test, skill, mockId: index + 1 }); }}
+                className="p-1 rounded-lg bg-muted/80 hover:bg-violet-500/20 text-muted-foreground hover:text-violet-500 transition-all"
+                title="Ulashish"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={(e) => handleDownloadPDF(e, skill, index)}
+                className="p-1 rounded-lg bg-muted/80 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all"
+                title="PDF yuklab olish"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </motion.div>
         ))}
       </div>
