@@ -266,6 +266,21 @@ export default function ArticleReader() {
                   className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium">
                   Qayta urinish
                 </button>
+                <button
+                  onClick={() => {
+                    const pct = Math.round((result.score / result.total) * 100);
+                    const emoji = pct === 100 ? "🏆" : pct >= 70 ? "🎉" : "💪";
+                    const text = `${emoji} Vokabi.uz da maqola o'qib, testdan o'tdim!\n\n📖 "${article.title}"\n📊 Natija: ${result.score}/${result.total} (${pct}%)\n\n🚀 Sen ham o'qi: https://vokabi.uz/articles`;
+                    window.open(`https://t.me/share/url?url=https://vokabi.uz&text=${encodeURIComponent(text)}`, '_blank');
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-white"
+                  style={{ background: 'linear-gradient(135deg, #2AABEE, #229ED9)' }}
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.026 9.554c-.149.668-.537.83-1.088.517l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.085 14.6l-2.953-.924c-.642-.2-.655-.642.136-.951l11.527-4.445c.537-.194 1.006.131.767.968z"/>
+                  </svg>
+                  Ulashish
+                </button>
               </div>
             </motion.div>
           )}
