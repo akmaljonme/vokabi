@@ -330,13 +330,6 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
             </button>
             <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
               <button
-                onClick={(e) => { e.stopPropagation(); setSharePopup({ test, skill, mockId: index + 1 }); }}
-                className="p-1.5 rounded-lg bg-muted/80 hover:bg-violet-500/20 text-muted-foreground hover:text-violet-500 transition-all"
-                title="Ulashish"
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
-              <button
                 onClick={(e) => handleDownloadPDF(e, skill, index)}
                 className="p-1.5 rounded-lg bg-muted/80 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all"
                 title="PDF yuklab olish"
@@ -421,41 +414,50 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
 
         {/* Content */}
         <div className="max-w-5xl mx-auto">
-          {activeTab === 'vocabulary' && !selectedVocabBook && (
+          {activeTab === 'vocabulary' && (
             <div>
-              <h2 className="text-lg font-display font-bold mb-6 text-center tracking-tight">Kitobni Tanlang</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {BOOK_NAMES.map((name, i) => {
-                  const bookNum = i + 1;
-                  const unitCount = getVocabBookUnits(bookNum).length;
-                  return (
-                    <motion.button
-                      key={bookNum}
-                      initial={{ opacity: 0, y: 16 }}
+              <h2 className="text-lg font-display font-bold mb-6 text-center tracking-tight">Lug'at Testlari</h2>
+              {vocabularyTests.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground text-sm">Hali testlar qo'shilmagan</div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {vocabularyTests
+                    .sort((a, b) => (a.unitNumber || 0) - (b.unitNumber || 0))
+                    .map((test, index) => (
+                    <motion.div
+                      key={test.id}
+                      initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.06 }}
-                      whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                      onClick={() => setSelectedVocabBook(bookNum)}
-                      className="card-elevated flex flex-col items-center gap-3 p-6 hover:border-primary/50"
+                      transition={{ delay: index * 0.03 }}
+                      className="relative group"
                     >
-                      <BookMarked className="w-8 h-8 text-primary" />
-                      <div className="font-display font-bold">{name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {unitCount > 0 ? `${unitCount} ta unit` : "Hali bo'sh"}
+                      <button
+                        onClick={() => onSelectMock('vocabulary', index + 1, test.id)}
+                        className="w-full p-4 rounded-xl border border-border/50 bg-card text-left transition-all duration-200 hover:border-primary hover:shadow-md hover:-translate-y-0.5"
+                      >
+                        <div className="font-semibold text-sm">Unit {test.unitNumber || index + 1}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{test.questionCount} ta savol</div>
+                      </button>
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setSharePopup({ test, skill: 'vocabulary', mockId: index + 1 }); }}
+                          className="p-1 rounded-lg bg-muted/80 hover:bg-violet-500/20 text-muted-foreground hover:text-violet-500 transition-all"
+                          title="Ulashish"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDownloadPDF(e, 'vocabulary', index)}
+                          className="p-1 rounded-lg bg-muted/80 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all"
+                          title="PDF yuklab olish"
+                        >
+                          <FileDown className="w-3.5 h-3.5" />
+                        </button>
                       </div>
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'vocabulary' && selectedVocabBook && (
-            <div>
-              <h2 className="text-lg font-display font-bold mb-6 text-center tracking-tight">
-                {BOOK_NAMES[selectedVocabBook - 1]} — Unitlar
-              </h2>
-              {renderUnitList(getVocabBookUnits(selectedVocabBook), 'vocabulary')}
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -490,7 +492,41 @@ export const SkillSelection = ({ level, onSelectMock, onBack, hideVocabulary, vo
           {activeTab === 'speaking' && (
             <div>
               <h2 className="text-lg font-display font-bold mb-6 text-center tracking-tight">Speaking Testlari</h2>
-              {isLocked('speaking') ? <ProLockCard skill="Speaking" /> : renderTestList(speakingTests, 'speaking')}
+              {isLocked('speaking') ? <ProLockCard skill="Speaking" /> : (
+                speakingTests.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground text-sm">Hali testlar qo'shilmagan</div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {speakingTests.map((test, index) => (
+                      <motion.div key={test.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }} className="relative group">
+                        <button
+                          onClick={() => onSelectMock('speaking', index + 1, test.id)}
+                          className="w-full p-4 rounded-xl border border-border/50 bg-card text-left transition-all duration-200 hover:border-primary hover:shadow-md hover:-translate-y-0.5"
+                        >
+                          <div className="font-medium text-sm">{test.title}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{test.questionCount} ta savol • {Math.floor(test.timeLimit / 60)} daqiqa</div>
+                        </button>
+                        <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setSharePopup({ test, skill: 'speaking', mockId: index + 1 }); }}
+                            className="p-1.5 rounded-lg bg-muted/80 hover:bg-violet-500/20 text-muted-foreground hover:text-violet-500 transition-all"
+                            title="Ulashish"
+                          >
+                            <Share2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={(e) => handleDownloadPDF(e, 'speaking', index)}
+                            className="p-1.5 rounded-lg bg-muted/80 hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all"
+                            title="PDF"
+                          >
+                            <FileDown className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )
+              )}
             </div>
           )}
         </div>

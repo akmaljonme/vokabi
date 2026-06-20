@@ -893,7 +893,7 @@ export const LandingPage = ({
               {
                 value: liveStats.avgPass,
                 suffix: "%",
-                label: "Muvaffaqiyat",
+                label: "O'tish darajasi",
                 icon: Trophy,
               },
               { value: 4, suffix: ".9", label: "Reyting", icon: Star },
