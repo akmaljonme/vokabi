@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, Trophy, RotateCcw, Save, FileDown } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, Clock, Target, Trophy, RotateCcw, Save, FileDown, Share2, Copy, Check } from 'lucide-react';
 import { CertificateDownload } from '@/components/CertificateDownload';
 import { VideoRecommendations } from '@/components/AIResultsSection';
 import { AIResultDisplay } from '@/components/AIResultDisplay';
@@ -9,8 +9,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTestResults } from '@/hooks/useTestResults';
 import { useSubscription } from '@/hooks/useSubscription';
 import { generateTestPDF, generateResultPDF } from '@/utils/pdfGenerator';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, Lock } from 'lucide-react';
+import { supabase as _sb } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+const supabase: any = _sb;
 
 interface ResultPageProps {
   result: TestResult;
@@ -36,6 +39,50 @@ const StandardResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
   const { isPro } = useSubscription();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const shareTest = async () => {
+    if (!user) { toast.error("Testni ulashish uchun tizimga kiring"); return; }
+    setSharing(true);
+    try {
+      const questions = mockTest.parts.flatMap((p: any) =>
+        p.questions.map((q: any) => ({
+          question: q.question,
+          options: q.options,
+          correct: q.correctAnswer,
+          explanation: q.explanation || "",
+        }))
+      );
+      const { data, error } = await supabase.from("shared_tests").insert({
+        test_id: `${result.level}_${result.skill}_${result.mockId}`,
+        level: result.level,
+        skill: result.skill,
+        mock_id: result.mockId,
+        title: `${result.level} ${result.skill.charAt(0).toUpperCase() + result.skill.slice(1)} Test`,
+        questions,
+        created_by: user.id,
+      }).select("id").single();
+      if (error) throw error;
+      const url = `${window.location.origin}/shared-test/${data.id}`;
+      setShareUrl(url);
+      await navigator.clipboard.writeText(url);
+      toast.success("Havola nusxa olindi! 🎉");
+    } catch (e) {
+      console.error(e);
+      toast.error("Ulashishda xatolik");
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const copyShareUrl = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     const save = async () => {
@@ -195,6 +242,35 @@ const StandardResultPage = ({ result, onRetry, onBack }: ResultPageProps) => {
           <button onClick={() => generateResultPDF(result, mockTest)} className="btn-outline flex items-center justify-center gap-2 text-sm w-full sm:w-auto">
             <FileDown className="w-4 h-4" /> Natijalar PDF
           </button>
+
+          {/* Share Test button */}
+          <motion.button
+            whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+            onClick={shareTest}
+            disabled={sharing}
+            className="flex items-center justify-center gap-2 text-sm w-full sm:w-auto px-4 py-2 rounded-xl font-semibold bg-violet-600 hover:bg-violet-700 text-white transition-all disabled:opacity-60"
+          >
+            {sharing ? (
+              <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Ulashilmoqda...</>
+            ) : (
+              <><Share2 className="w-4 h-4" /> Testni ulashish</>
+            )}
+          </motion.button>
+
+          {/* Share URL display */}
+          <AnimatePresence>
+            {shareUrl && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                className="w-full flex items-center gap-2 p-3 rounded-xl bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800"
+              >
+                <input readOnly value={shareUrl} className="flex-1 text-xs bg-transparent text-violet-700 dark:text-violet-300 font-mono truncate outline-none" />
+                <button onClick={copyShareUrl} className="shrink-0 flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition-colors">
+                  {copied ? <><Check className="w-3 h-3" /> Nusxa!</> : <><Copy className="w-3 h-3" /> Nusxa</>}
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
           {/* Share buttons */}
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <motion.button
