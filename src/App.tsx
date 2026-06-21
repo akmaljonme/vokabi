@@ -38,7 +38,8 @@ const PracticeTests  = lazy(() => import("./pages/PracticeTests"));
 const Tests          = lazy(() => import("./pages/Tests"));
 const Articles       = lazy(() => import("./pages/Articles"));
 const ArticleReader  = lazy(() => import("./pages/ArticleReader"));
-const SharedTest     = lazy(() => import("./pages/SharedTest"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword  = lazy(() => import("./pages/ResetPassword"));
 const Tournaments    = lazy(() => import("./pages/Tournaments"));
 const SchoolAdmin    = lazy(() => import("./pages/school/SchoolAdmin"));
 const AdminPage      = lazy(() => import("./pages/AdminPage"));
@@ -97,6 +98,8 @@ const App = () => (
                     <Route path="/articles"  element={<ErrorBoundary><Articles /></ErrorBoundary>} />
                     <Route path="/articles/:id" element={<ErrorBoundary><ArticleReader /></ErrorBoundary>} />
                     <Route path="/shared-test/:id" element={<ErrorBoundary><SharedTest /></ErrorBoundary>} />
+                    <Route path="/forgot-password" element={<ErrorBoundary><ForgotPassword /></ErrorBoundary>} />
+                    <Route path="/reset-password"  element={<ErrorBoundary><ResetPassword /></ErrorBoundary>} />
                     <Route path="/tournaments" element={<ErrorBoundary><Tournaments /></ErrorBoundary>} />
                     <Route path="/tools"      element={<ErrorBoundary><Tools /></ErrorBoundary>} />
                     <Route path="/languages"   element={<Navigate to="/learning-path" replace />} />

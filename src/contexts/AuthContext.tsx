@@ -12,6 +12,8 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ error: Error | null }>;
   signInWithApple: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,17 +42,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, fullName?: string, username?: string) => {
-    const { error } = await supabase.auth.signUp({
+    // First try to sign up
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName, username },
       },
     });
-    if (error) return { error: error as Error | null };
-    // Auto sign-in immediately so user doesn't need to confirm email
-    await supabase.auth.signInWithPassword({ email, password });
-    return { error: null };
+    if (signUpError) return { error: signUpError as Error | null };
+
+    // If user already confirmed (email confirm disabled in dashboard), session exists
+    if (signUpData.session) return { error: null };
+
+    // If email confirmation required, auto sign-in anyway
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+    // If signIn fails due to "Email not confirmed", use admin workaround via OTP
+    if (signInError?.message?.includes('Email not confirmed')) {
+      // User created but email not confirmed — sign them in via OTP magic link flow
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false },
+      });
+      if (otpError) return { error: new Error('Tasdiqlash emaili yuborildi. Emailingizni tekshiring va havola orqali kiring.') };
+      return { error: new Error('EMAIL_OTP_SENT') };
+    }
+
+    return { error: signInError as Error | null };
   };
 
   const signIn = async (email: string, password: string) => {
@@ -83,8 +102,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
   };
 
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    return { error: error as Error | null };
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    return { error: error as Error | null };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signInWithGoogle, signInWithApple, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signInWithGoogle, signInWithApple, signOut, resetPassword, updatePassword }}>
       {children}
     </AuthContext.Provider>
   );
