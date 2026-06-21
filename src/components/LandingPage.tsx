@@ -632,12 +632,17 @@ export const LandingPage = ({
                   AI-Powered • IELTS • CEFR
                 </motion.div>
 
-                <h1 className="text-[1.9rem] sm:text-5xl md:text-6xl lg:text-[5.5rem] font-display mb-3 sm:mb-4">
-                  <WavyHeading text="INGLIZ TILINI" curve={5} />
-                </h1>
-                <h1 className="text-[1.9rem] sm:text-5xl md:text-6xl lg:text-[5.5rem] font-display mb-8 sm:mb-10">
-                  <WavyHeading text="MUKAMMAL O'RGANING" curve={6} delayBase={0.25} />
-                </h1>
+                <div className="mb-8 sm:mb-10">
+                  <h1 className="text-[1.75rem] sm:text-5xl md:text-6xl lg:text-[5rem] font-display mb-2 sm:mb-3">
+                    <WavyHeading text="INGLIZ TILINI" curve={5} />
+                  </h1>
+                  <h1 className="text-[1.75rem] sm:text-5xl md:text-6xl lg:text-[5rem] font-display">
+                    <WavyHeading text="MUKAMMAL" curve={4} delayBase={0.2} />
+                  </h1>
+                  <h1 className="text-[1.75rem] sm:text-5xl md:text-6xl lg:text-[5rem] font-display">
+                    <WavyHeading text="O'RGANING" curve={4} delayBase={0.4} />
+                  </h1>
+                </div>
 
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}

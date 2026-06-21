@@ -34,45 +34,77 @@ const ShareTestPopup = ({ test, skill, level, mockId, onClose }: {
     if (!user) { toast.error("Ulashish uchun tizimga kiring"); return; }
     setLoading(true);
     try {
-      const mockTest = generateMockTest(mockId, level, skill);
       const KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
-      const questions = mockTest.parts.flatMap((p: any) =>
-        p.questions.map((q: any) => {
-          // Convert options array to {A: "...", B: "...", ...} format
-          let optionsObj: Record<string, string> = {};
-          let correctKey = '';
-          if (Array.isArray(q.options)) {
-            q.options.forEach((opt: string, i: number) => {
-              optionsObj[KEYS[i]] = opt;
-            });
-            // Find correct key by matching correctAnswer text
-            const correctIdx = q.options.findIndex((o: string) => o === q.correctAnswer);
-            correctKey = correctIdx >= 0 ? KEYS[correctIdx] : KEYS[0];
-          } else if (typeof q.options === 'object') {
-            optionsObj = q.options;
-            // correctAnswer might be a key already or a value
-            if (KEYS.includes(q.correctAnswer)) {
-              correctKey = q.correctAnswer;
-            } else {
-              const found = Object.entries(optionsObj).find(([, v]) => v === q.correctAnswer);
-              correctKey = found ? found[0] : 'A';
+
+      let questions: any[] = [];
+
+      // Try to fetch real questions from Supabase
+      if (test.id) {
+        const { data: dbQuestions } = await supabase
+          .from('questions')
+          .select('*')
+          .eq('test_id', test.id)
+          .order('order_index', { ascending: true });
+
+        if (dbQuestions && dbQuestions.length > 0) {
+          questions = dbQuestions.map((q: any) => {
+            const opts: Record<string, string> = {};
+            const rawOptions = Array.isArray(q.options) ? q.options : [];
+            rawOptions.forEach((opt: string, i: number) => { opts[KEYS[i]] = opt; });
+
+            // Find correct key
+            let correctKey = 'A';
+            const rawCorrect = q.correct_answer;
+            if (rawCorrect && KEYS.includes(rawCorrect)) {
+              correctKey = rawCorrect;
+            } else if (rawCorrect) {
+              // Try matching by text
+              const found = rawOptions.findIndex((o: string) => o === rawCorrect);
+              correctKey = found >= 0 ? KEYS[found] : 'A';
             }
-          }
-          return {
-            question: q.question,
-            options: optionsObj,
-            correct: correctKey,
-            explanation: q.explanation || "",
-          };
-        })
-      );
+
+            return {
+              question: q.question_text,
+              options: opts,
+              correct: correctKey,
+              explanation: q.explanation || '',
+            };
+          });
+        }
+      }
+
+      // Fallback to mockData if no DB questions
+      if (questions.length === 0) {
+        const mockTest = generateMockTest(mockId, level, skill);
+        questions = mockTest.parts.flatMap((p: any) =>
+          p.questions.map((q: any) => {
+            const opts: Record<string, string> = {};
+            if (Array.isArray(q.options)) {
+              q.options.forEach((opt: string, i: number) => { opts[KEYS[i]] = opt; });
+            }
+            const correctIdx = Array.isArray(q.options)
+              ? q.options.findIndex((o: string) => o === q.correctAnswer)
+              : -1;
+            return {
+              question: q.question,
+              options: opts,
+              correct: correctIdx >= 0 ? KEYS[correctIdx] : 'A',
+              explanation: q.explanation || '',
+            };
+          })
+        );
+      }
+
       const { data, error } = await supabase.from("shared_tests").insert({
-        test_id: `${level}_${skill}_${mockId}`,
-        level, skill, mock_id: mockId,
-        title: `${level} ${skill.charAt(0).toUpperCase() + skill.slice(1)} — Unit ${mockId}`,
+        test_id: test.id || `${level}_${skill}_${mockId}`,
+        level,
+        skill,
+        mock_id: mockId,
+        title: test.title || `${level} ${skill.charAt(0).toUpperCase() + skill.slice(1)} — Unit ${mockId}`,
         questions,
         created_by: user.id,
       }).select("id").single();
+
       if (error) throw error;
       setShareUrl(`${window.location.origin}/shared-test/${data.id}`);
     } catch (e) {

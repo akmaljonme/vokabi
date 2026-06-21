@@ -481,7 +481,8 @@ export default function SharedTest() {
                 <h3 className="font-black text-base mb-4">📝 Javoblar tahlili</h3>
                 <div className="space-y-3">
                   {questions.map((q, i) => {
-                    const ok = answers[i] === q.correct;
+                    const userAns = answersRef.current[i];
+                    const ok = userAns === q.correct;
                     return (
                       <div key={i} className={`p-4 rounded-2xl border text-sm ${ok ? "border-green-500/30 bg-green-500/5" : "border-red-500/30 bg-red-500/5"}`}>
                         <div className="flex items-start gap-2 mb-1">
@@ -490,7 +491,7 @@ export default function SharedTest() {
                         </div>
                         {!ok && (
                           <div className="ml-6 space-y-0.5 text-xs">
-                            <p className="text-red-500">Sizning: {q.options[answers[i]] || "Javob berilmadi"}</p>
+                            <p className="text-red-500">Sizning: {q.options[userAns] || "Javob berilmadi"}</p>
                             <p className="text-green-500 font-bold">To'g'ri: {q.options[q.correct]}</p>
                           </div>
                         )}
