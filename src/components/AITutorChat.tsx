@@ -36,7 +36,7 @@ export const AITutorChat = () => {
     if (isOpen && inputRef.current) inputRef.current.focus();
   }, [isOpen]);
 
-  if (location.pathname === "/games" || location.pathname === "/admin") return null;
+  if (location.pathname === "/games" || location.pathname === "/admin" || location.pathname.startsWith("/shared-test")) return null;
 
   const sendMessage = async (overrideText?: string) => {
     const text = (overrideText ?? input).trim();

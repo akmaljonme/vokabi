@@ -9,105 +9,9 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
 
-    // ── PWA ──────────────────────────────────────────────────
+    // PWA o'chirilgan — service worker unregister qilinadi
     VitePWA({
-      registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "apple-touch-icon.png", "placeholder.svg"],
-      manifest: {
-        name: "Vokabi — Ingliz tilini o'rganing",
-        short_name: "Vokabi",
-        description:
-          "21+ o'yin, AI-powered testlar, Writing & Speaking baholash — IELTS va CEFR imtihonlariga tayyorlaning.",
-        theme_color: "#6c47ff",
-        background_color: "#0f0f13",
-        display: "standalone",
-        orientation: "portrait",
-        scope: "/",
-        start_url: "/",
-        lang: "uz",
-        categories: ["education", "language"],
-        icons: [
-          { src: "/favicon.ico",        sizes: "48x48",   type: "image/x-icon" },
-          { src: "/icon-16x16.png",     sizes: "16x16",   type: "image/png" },
-          { src: "/icon-32x32.png",     sizes: "32x32",   type: "image/png" },
-          { src: "/icon-192x192.png",   sizes: "192x192", type: "image/png", purpose: "any" },
-          { src: "/icon-512x512.png",   sizes: "512x512", type: "image/png", purpose: "maskable" },
-        ],
-        shortcuts: [
-          {
-            name: "Testlar",
-            short_name: "Test",
-            description: "IELTS mock testlarini boshlash",
-            url: "/?start=test",
-            icons: [{ src: "/favicon.ico", sizes: "96x96" }],
-          },
-          {
-            name: "O'yinlar",
-            short_name: "O'yin",
-            description: "Ingliz tili o'yinlari",
-            url: "/games",
-            icons: [{ src: "/favicon.ico", sizes: "96x96" }],
-          },
-        ],
-        screenshots: [
-          {
-            src: "https://storage.googleapis.com/gpt-engineer-file-uploads/7G7NqUyL4uWYavHRFEB4odxhxCF3/social-images/social-1773055423739-Screenshot_2026-03-09_162330.webp",
-            sizes: "1280x720",
-            type: "image/webp",
-            form_factor: "wide",
-            label: "Vokabi Dashboard",
-          },
-        ],
-      },
-      workbox: {
-        // Cache strategiyasi
-        globPatterns: ["**/*.{js,css,html,ico,svg}"],
-        runtimeCaching: [
-          {
-            // Supabase API — network first (har doim yangi ma'lumot)
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "supabase-api",
-              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 5 },
-              networkTimeoutSeconds: 10,
-            },
-          },
-          {
-            // YouTube thumbnails — cache first
-            urlPattern: /^https:\/\/img\.youtube\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "youtube-thumbnails",
-              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
-            },
-          },
-          {
-            // Google Fonts — cache first
-            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "google-fonts",
-              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
-            },
-          },
-          {
-            // CDN (cdnjs, fonts) — cache first
-            urlPattern: /^https:\/\/cdnjs\.cloudflare\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "cdn-cache",
-              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 7 },
-            },
-          },
-        ],
-        // Offline fallback
-        navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api/, /^\/supabase/],
-      },
-      devOptions: {
-        enabled: false,
-      },
+      selfDestroying: true,
     }),
   ].filter(Boolean),
 
@@ -115,7 +19,6 @@ export default defineConfig(({ mode }) => ({
     alias: { "@": path.resolve(__dirname, "./src") },
   },
 
-  // ── Build optimizatsiya ───────────────────────────────────
   build: {
     target: "esnext",
     minify: "esbuild",
@@ -123,7 +26,6 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1500,
   },
 
-  // ── Dev server ────────────────────────────────────────────
   server: {
     port: 8080,
     host: true,

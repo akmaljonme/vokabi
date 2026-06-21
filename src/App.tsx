@@ -7,7 +7,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CallProvider } from "@/contexts/CallContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AITutorChat } from "@/components/AITutorChat";
-import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { useDMNotifications } from "@/hooks/useDMNotifications";
 import { GlobalCallOverlay } from "@/components/community/GlobalCallOverlay";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -121,7 +120,6 @@ const App = () => (
               <GlobalListeners />
               <GlobalCallOverlay />
               <AnalyticsTracker />
-              <PWAInstallPrompt />
             </BrowserRouter>
           </TooltipProvider>
         </ThemeProvider>
