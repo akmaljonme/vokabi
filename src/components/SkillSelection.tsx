@@ -52,14 +52,21 @@ const ShareTestPopup = ({ test, skill, level, mockId, onClose }: {
             const rawOptions = Array.isArray(q.options) ? q.options : [];
             rawOptions.forEach((opt: string, i: number) => { opts[KEYS[i]] = opt; });
 
-            // Find correct key
+            const rawCorrect = String(q.correct_answer || '').trim();
             let correctKey = 'A';
-            const rawCorrect = q.correct_answer;
-            if (rawCorrect && KEYS.includes(rawCorrect)) {
+
+            if (KEYS.includes(rawCorrect)) {
+              // Already A/B/C/D format
               correctKey = rawCorrect;
+            } else if (/^[0-9]+$/.test(rawCorrect)) {
+              // Numeric index format "0", "1", "2", "3"
+              const idx = parseInt(rawCorrect);
+              correctKey = KEYS[idx] || 'A';
             } else if (rawCorrect) {
-              // Try matching by text
-              const found = rawOptions.findIndex((o: string) => o === rawCorrect);
+              // Full text — find by matching option text
+              const found = rawOptions.findIndex((o: string) =>
+                o?.toLowerCase().trim() === rawCorrect.toLowerCase()
+              );
               correctKey = found >= 0 ? KEYS[found] : 'A';
             }
 

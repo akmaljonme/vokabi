@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 const supabase: any = _sbClient;
 import {
   Mail, Lock, User, ArrowRight, ArrowLeft,
@@ -10,6 +11,7 @@ import {
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthLayout from "./Auth";
+import { toast } from "sonner";
 
 const emailSchema = z.string().trim().email().max(255);
 const passwordSchema = z.string().min(6).max(72);
@@ -64,6 +66,8 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
   const [usernameStatus, setUsernameStatus] = useState<
     "idle" | "checking" | "available" | "taken" | "invalid"
   >("idle");
@@ -117,7 +121,6 @@ const Register = () => {
         return;
       }
 
-      // Preferences saqlash
       localStorage.setItem("vokabi_prefs", JSON.stringify({
         target_language: "english",
         ...prefs,
@@ -137,13 +140,87 @@ const Register = () => {
         }
       } catch { /* localStorage fallback */ }
 
-      navigate("/dashboard", { replace: true });
+      // Email confirmation kerak bo'lsa shu screen, aks holda dashboard
+      setRegisteredEmail(email);
+      setRegistered(true);
     } catch {
       setError("Kutilmagan xatolik yuz berdi.");
     } finally {
       setLoading(false);
     }
   };
+
+  // ── Email tasdiqlash ekrani ───────────────────────────────
+  if (registered) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md text-center"
+        >
+          <div className="bg-card border border-border rounded-3xl p-10 shadow-2xl">
+            {/* Icon */}
+            <motion.div
+              animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
+              transition={{ duration: 1.2, delay: 0.3 }}
+              className="text-7xl mb-6"
+            >
+              📧
+            </motion.div>
+
+            <h1 className="text-2xl font-black mb-3">Emailingizni tasdiqlang!</h1>
+
+            <p className="text-muted-foreground text-sm leading-relaxed mb-2">
+              <span className="font-semibold text-foreground">{registeredEmail}</span> manziliga
+              tasdiqlash havolasi yuborildi.
+            </p>
+            <p className="text-muted-foreground text-sm leading-relaxed mb-8">
+              Emailingizni oching va havolaga bosing — keyin platformaga kira olasiz.
+            </p>
+
+            {/* Steps */}
+            <div className="text-left space-y-3 mb-8 bg-muted/50 rounded-2xl p-4">
+              {[
+                { n: "1", text: "Emailingizni oching" },
+                { n: "2", text: "Vokabi dan kelgan xatni toping" },
+                { n: "3", text: "\"Tasdiqlash\" havolasiga bosing" },
+                { n: "4", text: "Platformaga kiring va mashq boshlang 🚀" },
+              ].map(s => (
+                <div key={s.n} className="flex items-center gap-3 text-sm font-semibold">
+                  <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0 font-black">
+                    {s.n}
+                  </span>
+                  {s.text}
+                </div>
+              ))}
+            </div>
+
+            <motion.a
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+              href="/login"
+              className="btn-primary w-full flex items-center justify-center gap-2 py-3.5 mb-3"
+            >
+              Kirish sahifasiga o'tish
+            </motion.a>
+
+            <p className="text-xs text-muted-foreground">
+              Email kelmadimi?{" "}
+              <button
+                onClick={async () => {
+                  await supabase.auth.resend({ type: "signup", email: registeredEmail });
+                  toast.success("Qayta yuborildi!");
+                }}
+                className="text-primary hover:underline font-semibold"
+              >
+                Qayta yuborish
+              </button>
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   // ── Onboarding (0–2 qadam) ────────────────────────────────
   if (step < 3) {
