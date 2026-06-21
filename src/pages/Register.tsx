@@ -137,9 +137,7 @@ const Register = () => {
         }
       } catch { /* localStorage fallback */ }
 
-      navigate("/login", {
-        state: { message: "Hisob yaratildi! Emailingizni tasdiqlang va kiriting." },
-      });
+      navigate("/dashboard", { replace: true });
     } catch {
       setError("Kutilmagan xatolik yuz berdi.");
     } finally {
