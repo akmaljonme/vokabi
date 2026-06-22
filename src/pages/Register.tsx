@@ -3,7 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-const supabase: any = _sbClient;
 import {
   Mail, Lock, User, ArrowRight, ArrowLeft,
   Eye, EyeOff, AtSign, CheckCircle2, XCircle, Loader2, Check,
@@ -11,7 +10,7 @@ import {
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthLayout from "./Auth";
-import { toast } from "sonner";
+const supabase: any = _sbClient;
 
 const emailSchema = z.string().trim().email().max(255);
 const passwordSchema = z.string().min(6).max(72);
