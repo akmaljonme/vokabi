@@ -18,7 +18,14 @@ const ForgotPassword = () => {
     setLoading(true);
     try {
       const { error } = await resetPassword(email);
-      if (error) { setError(error.message); return; }
+      if (error) {
+        if (error.message?.includes('rate limit') || error.message?.includes('Rate limit')) {
+          setError("Juda ko'p urinish. Iltimos, 1 daqiqa kuting va qayta urining.");
+        } else {
+          setError(error.message);
+        }
+        return;
+      }
       setSent(true);
     } catch {
       setError("Kutilmagan xatolik yuz berdi.");
