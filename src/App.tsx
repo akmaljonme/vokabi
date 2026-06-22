@@ -47,6 +47,7 @@ const TeacherPanel   = lazy(() => import("./pages/school/TeacherPanel"));
 const StudentPanel   = lazy(() => import("./pages/school/StudentPanel"));
 const StudyRoom      = lazy(() => import("./pages/StudyRoom"));
 const EssayChecker   = lazy(() => import("./pages/EssayChecker"));
+const SharedTest     = lazy(() => import("./pages/SharedTest"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
