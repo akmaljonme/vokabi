@@ -5,7 +5,7 @@ import { supabase as _sbClient } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Mail, Lock, User, ArrowRight, ArrowLeft,
-  Eye, EyeOff, AtSign, CheckCircle2, XCircle, Loader2, Check,
+  Eye, EyeOff, AtSign, CheckCircle2, XCircle, Loader2, Check, Gift,
 } from "lucide-react";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -67,6 +67,9 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
+  const [promoCode, setPromoCode] = useState("");
+  const [promoStatus, setPromoStatus] = useState<"idle" | "valid" | "invalid">("idle");
+  const VALID_PROMO = "XCSQW39RTE21";
   const [usernameStatus, setUsernameStatus] = useState<
     "idle" | "checking" | "available" | "taken" | "invalid"
   >("idle");
@@ -118,6 +121,22 @@ const Register = () => {
           ? "Bu email allaqachon ro'yxatdan o'tgan."
           : signUpError.message);
         return;
+      }
+
+      // Promo kod tekshirish va Pro berish
+      if (promoCode.trim().toUpperCase() === VALID_PROMO) {
+        try {
+          const { data: { user: newUser } } = await supabase.auth.getUser();
+          if (newUser) {
+            const promoExpiry = new Date();
+            promoExpiry.setMonth(promoExpiry.getMonth() + 1);
+            await supabase.from("profiles").update({
+              is_pro: true,
+              pro_expires_at: promoExpiry.toISOString(),
+              promo_code_used: VALID_PROMO,
+            }).eq("user_id", newUser.id);
+          }
+        } catch { /* ignore */ }
       }
 
       localStorage.setItem("vokabi_prefs", JSON.stringify({
@@ -453,6 +472,46 @@ const Register = () => {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Promo kod <span className="text-muted-foreground font-normal">(ixtiyoriy)</span>
+          </label>
+          <div className="relative">
+            <Gift className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={promoCode}
+              onChange={e => {
+                const val = e.target.value.toUpperCase();
+                setPromoCode(val);
+                if (val.length === 0) setPromoStatus("idle");
+                else if (val === VALID_PROMO) setPromoStatus("valid");
+                else if (val.length >= VALID_PROMO.length) setPromoStatus("invalid");
+                else setPromoStatus("idle");
+              }}
+              placeholder="Promo kodingiz bo'lsa kiriting"
+              className={`w-full pl-10 pr-10 py-3 rounded-xl border bg-background text-sm font-mono tracking-wider focus:outline-none focus:ring-2 transition-all ${
+                promoStatus === "valid" ? "border-green-500 focus:ring-green-500/30" :
+                promoStatus === "invalid" ? "border-red-500 focus:ring-red-500/30" :
+                "border-border focus:ring-primary/50 focus:border-primary"
+              }`}
+            />
+            <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+              {promoStatus === "valid" && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+              {promoStatus === "invalid" && <XCircle className="w-4 h-4 text-red-500" />}
+            </div>
+          </div>
+          {promoStatus === "valid" && (
+            <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+              className="text-xs text-green-500 font-semibold mt-1.5 flex items-center gap-1">
+              🎉 1 oylik Pro obuna bepul aktivlanadi!
+            </motion.p>
+          )}
+          {promoStatus === "invalid" && (
+            <p className="text-xs text-red-500 mt-1.5">Noto'g'ri promo kod</p>
+          )}
         </div>
 
         {error && (
