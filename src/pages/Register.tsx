@@ -116,6 +116,8 @@ const Register = () => {
 
     try {
       const { error: signUpError } = await signUp(email, password, fullName, username);
+      
+      // Email already registered
       if (signUpError) {
         setError(signUpError.message.includes("already registered")
           ? "Bu email allaqachon ro'yxatdan o'tgan."
@@ -123,7 +125,7 @@ const Register = () => {
         return;
       }
 
-      // Promo kod tekshirish va Pro berish
+      // Promo kod - faqat session bo'lsa ishlaydi (email confirmed)
       if (promoCode.trim().toUpperCase() === VALID_PROMO) {
         try {
           const { data: { user: newUser } } = await supabase.auth.getUser();
@@ -135,8 +137,15 @@ const Register = () => {
               pro_expires_at: promoExpiry.toISOString(),
               promo_code_used: VALID_PROMO,
             }).eq("user_id", newUser.id);
+            // Store promo in localStorage too as backup
+            localStorage.setItem("pending_promo", VALID_PROMO);
+          } else {
+            // No session yet (email not confirmed) - store promo for later
+            localStorage.setItem("pending_promo", VALID_PROMO);
           }
-        } catch { /* ignore */ }
+        } catch {
+          localStorage.setItem("pending_promo", VALID_PROMO);
+        }
       }
 
       localStorage.setItem("vokabi_prefs", JSON.stringify({
@@ -155,6 +164,10 @@ const Register = () => {
             learning_goal: prefs.learning_goal,
             onboarding_done: true,
           }).eq("user_id", newUser.id);
+          // If already logged in (email confirmed off), go to dashboard
+          setRegisteredEmail(email);
+          setRegistered(true);
+          return;
         }
       } catch { /* localStorage fallback */ }
 

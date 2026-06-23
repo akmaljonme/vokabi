@@ -38,8 +38,27 @@ const Login = () => {
       if (error) {
         const msg = error.message || "";
         if (msg.includes("Invalid login credentials")) setError("Email yoki parol noto'g'ri.");
-        else if (msg.includes("Email not confirmed")) setError("Email tasdiqlanmagan. Emailingizni tekshiring.");
+        else if (msg.includes("Email not confirmed")) setError("Emailingizni tasdiqlang — pochta qutingizni tekshiring.");
         else setError(msg || "Kirish muvaffaqiyatsiz.");
+      } else {
+        // Apply pending promo code if any
+        const pendingPromo = localStorage.getItem("pending_promo");
+        if (pendingPromo === "XCSQW39RTE21") {
+          try {
+            const { data: { user: loggedUser } } = await (await import("@/integrations/supabase/client")).supabase.auth.getUser();
+            if (loggedUser) {
+              const promoExpiry = new Date();
+              promoExpiry.setMonth(promoExpiry.getMonth() + 1);
+              const sb = (await import("@/integrations/supabase/client")).supabase as any;
+              await sb.from("profiles").update({
+                is_pro: true,
+                pro_expires_at: promoExpiry.toISOString(),
+                promo_code_used: pendingPromo,
+              }).eq("user_id", loggedUser.id);
+              localStorage.removeItem("pending_promo");
+            }
+          } catch { /* ignore */ }
+        }
       }
     } catch {
       setError("Kutilmagan xatolik yuz berdi.");
