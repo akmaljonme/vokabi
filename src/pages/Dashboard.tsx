@@ -60,6 +60,7 @@ import { AchievementToast } from "@/components/AchievementToast";
 import { StudyHeatmap } from "@/components/dashboard/StudyHeatmap";
 import { AIStudyPlan } from "@/components/dashboard/AIStudyPlan";
 import { DailyChallenges } from "@/components/dashboard/DailyChallenges";
+import { ReferralWidget } from "@/components/ReferralWidget";
 import { VideoRecommendations } from "@/components/dashboard/VideoRecommendations";
 
 interface TestResult {
@@ -546,6 +547,9 @@ export default function Dashboard() {
           <TabsContent value="overview" className="space-y-6">
             {/* Daily Challenges */}
             <DailyChallenges />
+
+            {/* Referral Widget */}
+            <ReferralWidget />
 
             {/* Study Heatmap */}
             <StudyHeatmap results={results} />

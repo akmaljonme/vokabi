@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  Clock,
   BookOpen,
   Headphones,
   Award,
@@ -1400,6 +1401,58 @@ export const LandingPage = ({
                 </motion.button>
               </Card3D>
             </FadeUp>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════ BLOG ═══════════ */}
+      <section className="py-20 lg:py-28">
+        <div className="container mx-auto px-4">
+          <FadeUp className="mb-12">
+            <div className="flex items-end justify-between">
+              <div>
+                <h2 className="font-display font-black text-[clamp(36px,6vw,72px)] leading-none tracking-tight mb-3">
+                  FOYDALI<br/>MAQOLALAR
+                </h2>
+                <p className="text-muted-foreground text-base max-w-md leading-relaxed">
+                  IELTS, CEFR va ingliz tili haqida ekspertlar maslahati
+                </p>
+              </div>
+              <a href="/blog" className="hidden sm:flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+                Barchasi <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </FadeUp>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+            {[
+              { slug: "ielts-7-ball-olish", emoji: "🎯", title: "IELTS 7 ball olish uchun 30 kunlik reja", cat: "IELTS", time: 8 },
+              { slug: "cefr-darajalari", emoji: "📊", title: "CEFR darajalari: A1 dan C2 gacha to'liq qo'llanma", cat: "CEFR", time: 6 },
+              { slug: "ingliz-tili-orgatish-usullari", emoji: "🧠", title: "Ingliz tilini o'rganishning 7 ta samarali usuli", cat: "O'rganish", time: 7 },
+            ].map((post, i) => (
+              <FadeUp key={post.slug} delay={i * 0.1}>
+                <a href={`/blog/${post.slug}`} className="block h-full">
+                  <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}
+                    className="h-full rounded-2xl border border-border bg-card p-6 hover:border-primary/40 hover:shadow-lg transition-all group">
+                    <span className="text-4xl block mb-4">{post.emoji}</span>
+                    <span className="text-xs font-bold px-2 py-1 rounded-full bg-primary/10 text-primary mb-3 inline-block">{post.cat}</span>
+                    <h3 className="font-display font-bold text-base mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                      {post.title}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-auto">
+                      <Clock className="w-3 h-3" />{post.time} daqiqa
+                      <ArrowRight className="w-3.5 h-3.5 ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </motion.div>
+                </a>
+              </FadeUp>
+            ))}
+          </div>
+
+          <div className="text-center sm:hidden">
+            <a href="/blog" className="btn-outline inline-flex items-center gap-2 px-6 py-2.5 text-sm">
+              Barcha maqolalar <ArrowRight className="w-4 h-4" />
+            </a>
           </div>
         </div>
       </section>

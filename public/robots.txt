@@ -1,6 +1,20 @@
 User-agent: *
 Allow: /
+Allow: /blog
+Allow: /articles
+Allow: /pricing
+Allow: /games
+Allow: /for-schools
+
 Disallow: /dashboard
 Disallow: /admin
 Disallow: /profile
+Disallow: /settings
+Disallow: /shared-test/
+Disallow: /reset-password
+
+# Crawl delay
+Crawl-delay: 10
+
+# Sitemaps
 Sitemap: https://vokabi.uz/sitemap.xml

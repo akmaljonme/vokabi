@@ -38,6 +38,8 @@ const PracticeTests  = lazy(() => import("./pages/PracticeTests"));
 const Tests          = lazy(() => import("./pages/Tests"));
 const Articles       = lazy(() => import("./pages/Articles"));
 const ArticleReader  = lazy(() => import("./pages/ArticleReader"));
+const Blog         = lazy(() => import("./pages/Blog"));
+const BlogPost     = lazy(() => import("./pages/BlogPost"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword  = lazy(() => import("./pages/ResetPassword"));
 const Tournaments    = lazy(() => import("./pages/Tournaments"));
@@ -98,6 +100,8 @@ const App = () => (
                     <Route path="/pricing"   element={<ErrorBoundary><Pricing /></ErrorBoundary>} />
                     <Route path="/articles"  element={<ErrorBoundary><Articles /></ErrorBoundary>} />
                     <Route path="/articles/:id" element={<ErrorBoundary><ArticleReader /></ErrorBoundary>} />
+                    <Route path="/blog"        element={<ErrorBoundary><Blog /></ErrorBoundary>} />
+                    <Route path="/blog/:slug"  element={<ErrorBoundary><BlogPost /></ErrorBoundary>} />
                     <Route path="/shared-test/:id" element={<ErrorBoundary><SharedTest /></ErrorBoundary>} />
                     <Route path="/forgot-password" element={<ErrorBoundary><ForgotPassword /></ErrorBoundary>} />
                     <Route path="/reset-password"  element={<ErrorBoundary><ResetPassword /></ErrorBoundary>} />
