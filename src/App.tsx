@@ -40,6 +40,7 @@ const Articles       = lazy(() => import("./pages/Articles"));
 const ArticleReader  = lazy(() => import("./pages/ArticleReader"));
 const Blog         = lazy(() => import("./pages/Blog"));
 const BlogPost     = lazy(() => import("./pages/BlogPost"));
+const ForSchools   = lazy(() => import("./pages/ForSchools"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword  = lazy(() => import("./pages/ResetPassword"));
 const Tournaments    = lazy(() => import("./pages/Tournaments"));
@@ -102,6 +103,7 @@ const App = () => (
                     <Route path="/articles/:id" element={<ErrorBoundary><ArticleReader /></ErrorBoundary>} />
                     <Route path="/blog"        element={<ErrorBoundary><Blog /></ErrorBoundary>} />
                     <Route path="/blog/:slug"  element={<ErrorBoundary><BlogPost /></ErrorBoundary>} />
+                    <Route path="/for-schools" element={<ErrorBoundary><ForSchools /></ErrorBoundary>} />
                     <Route path="/shared-test/:id" element={<ErrorBoundary><SharedTest /></ErrorBoundary>} />
                     <Route path="/forgot-password" element={<ErrorBoundary><ForgotPassword /></ErrorBoundary>} />
                     <Route path="/reset-password"  element={<ErrorBoundary><ResetPassword /></ErrorBoundary>} />

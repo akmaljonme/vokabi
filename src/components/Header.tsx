@@ -205,6 +205,9 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
             <button onClick={() => navigate("/blog")}
               className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
             >Blog</button>
+            <button onClick={() => navigate("/for-schools")}
+              className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
+            >B2B</button>
             <a href="#faq"
               className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
             >FAQ</a>
