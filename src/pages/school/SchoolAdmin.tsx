@@ -44,15 +44,29 @@ export default function SchoolAdmin() {
   const fetchSchool = async () => {
     setLoading(true); setError(null);
     try {
-      const { data, error } = await supabase.from("schools").select("*").eq("owner_id", user?.id).maybeSingle();
-      if (error) throw error;
-      if (data) {
-        setSchool(data);
-        await Promise.all([fetchTeachers(data.id), fetchClasses(data.id)]);
+      const { data, error } = await supabase
+        .from("schools")
+        .select("*")
+        .eq("owner_id", user?.id)
+        .limit(1);
+
+      if (error) {
+        console.error("Schools fetch error:", error);
+        setError("Jadval topilmadi. SQL da jadvallarni yarating.");
+        setLoading(false);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setSchool(data[0]);
+        await Promise.all([fetchTeachers(data[0].id), fetchClasses(data[0].id)]);
       }
     } catch (e: any) {
-      setError("Ma'lumotlarni yuklashda xato. Supabase da jadvallar yaratilganligini tekshiring.");
-    } finally { setLoading(false); }
+      console.error("fetchSchool error:", e);
+      setError("Xatolik: " + (e?.message || "Noma'lum xato"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchTeachers = async (schoolId: string) => {
