@@ -10,7 +10,7 @@ import {
   Users, Home, PenTool, BookOpen,
   Trophy, Settings, ChevronLeft, ChevronRight,
   Sparkles, Brain, LogOut, Moon, Sun,
-  Shield, ChevronDown, Crown, Sword,
+  Shield, ChevronDown, Crown, Sword, School,
 } from "lucide-react";
 
 import { NotificationBell } from "@/components/NotificationBell";
@@ -35,12 +35,13 @@ const mainItems: NavItem[] = [
 ];
 
 const toolItems: NavItem[] = [
-  { label: "Test Yechish",  path: "/practice",   icon: Brain },
-  { label: "Maqolalar",     path: "/articles",   icon: BookOpen },
-  { label: "Study Room",    path: "/study-room",  icon: Home },
-  { label: "Essay Checker", path: "/essay",       icon: PenTool },
-  { label: "So'z Banki",    path: "/wordbank",    icon: BookOpen },
-  { label: "Tools",         path: "/tools",       icon: Sparkles },
+  { label: "Test Yechish",  path: "/practice",      icon: Brain },
+  { label: "Maqolalar",     path: "/articles",      icon: BookOpen },
+  { label: "Study Room",    path: "/study-room",    icon: Home },
+  { label: "Essay Checker", path: "/essay",         icon: PenTool },
+  { label: "So'z Banki",    path: "/wordbank",      icon: BookOpen },
+  { label: "Tools",         path: "/tools",         icon: Sparkles },
+  { label: "B2B Admin",     path: "/school/admin",  icon: School },
 ];
 
 export const Sidebar = () => {
