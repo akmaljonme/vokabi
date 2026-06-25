@@ -114,7 +114,8 @@ const App = () => (
                     <Route path="/learning-path" element={<ErrorBoundary><LearningPath /></ErrorBoundary>} />
                     <Route path="/practice" element={<ErrorBoundary><PracticeTests /></ErrorBoundary>} />
                     <Route path="/language/:langId" element={<ErrorBoundary><Languages /></ErrorBoundary>} />
-                    <Route path="/school"      element={<ErrorBoundary><SchoolAdmin /></ErrorBoundary>} />
+                    <Route path="/school"       element={<ErrorBoundary><SchoolAdmin /></ErrorBoundary>} />
+                    <Route path="/school/admin" element={<ErrorBoundary><SchoolAdmin /></ErrorBoundary>} />
                     <Route path="/admin"       element={<ErrorBoundary><AdminPage /></ErrorBoundary>} />
                     <Route path="/school/teacher" element={<ErrorBoundary><TeacherPanel /></ErrorBoundary>} />
                     <Route path="/school/student" element={<ErrorBoundary><StudentPanel /></ErrorBoundary>} />
