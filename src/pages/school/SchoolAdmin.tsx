@@ -39,7 +39,13 @@ export default function SchoolAdmin() {
 
   const totalStudents = Object.values(studentCounts).reduce((a, b) => a + b, 0);
 
-  useEffect(() => { if (user) fetchSchool(); }, [user]);
+  useEffect(() => {
+    if (user) {
+      fetchSchool();
+    } else if (!user) {
+      setLoading(false);
+    }
+  }, [user]);
 
   const fetchSchool = async () => {
     setLoading(true); setError(null);
@@ -169,6 +175,11 @@ export default function SchoolAdmin() {
       </div>
     </AppLayout>
   );
+
+  if (!user) {
+    navigate("/login");
+    return null;
+  }
 
   if (!school) return (
     <AppLayout>
