@@ -47,6 +47,12 @@ export default function SchoolAdmin() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (tab === "analytics" && school) {
+      fetchAnalytics(school.id);
+    }
+  }, [tab, school]);
+
   const fetchSchool = async () => {
     setLoading(true); setError(null);
     try {
@@ -141,24 +147,96 @@ export default function SchoolAdmin() {
     window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  // Mock analytics data
-  const weeklyData = [
-    { day: "Du", tests: 12, xp: 450 },
-    { day: "Se", tests: 19, xp: 720 },
-    { day: "Ch", tests: 8, xp: 310 },
-    { day: "Pa", tests: 25, xp: 950 },
-    { day: "Ju", tests: 31, xp: 1200 },
-    { day: "Sh", tests: 18, xp: 680 },
-    { day: "Ya", tests: 5, xp: 190 },
-  ];
+  const [weeklyData, setWeeklyData] = useState<any[]>([]);
+  const [skillData, setSkillData] = useState<any[]>([]);
+  const [topStudents, setTopStudents] = useState<any[]>([]);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
-  const skillData = [
-    { name: "Reading", value: 68, color: "#6c47ff" },
-    { name: "Grammar", value: 74, color: "#0ea5e9" },
-    { name: "Vocabulary", value: 82, color: "#10b981" },
-    { name: "Speaking", value: 45, color: "#f59e0b" },
-    { name: "Writing", value: 51, color: "#ef4444" },
-  ];
+  const fetchAnalytics = async (schoolId: string) => {
+    setAnalyticsLoading(true);
+    try {
+      // Get all student user_ids in this school
+      const { data: classIds } = await supabase
+        .from("school_classes")
+        .select("id")
+        .eq("school_id", schoolId);
+
+      if (!classIds?.length) { setAnalyticsLoading(false); return; }
+
+      const { data: studentIds } = await supabase
+        .from("school_students")
+        .select("user_id")
+        .in("class_id", classIds.map((c: any) => c.id));
+
+      if (!studentIds?.length) { setAnalyticsLoading(false); return; }
+
+      const userIds = studentIds.map((s: any) => s.user_id);
+
+      // Weekly test data (last 7 days)
+      const days = ["Ya", "Du", "Se", "Ch", "Pa", "Ju", "Sh"];
+      const weekData = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dayStart = new Date(date.setHours(0,0,0,0)).toISOString();
+        const dayEnd = new Date(date.setHours(23,59,59,999)).toISOString();
+        const { count } = await supabase
+          .from("test_results")
+          .select("*", { count: "exact", head: true })
+          .in("user_id", userIds)
+          .gte("created_at", dayStart)
+          .lte("created_at", dayEnd);
+        weekData.push({ day: days[new Date(dayStart).getDay()], tests: count || 0, xp: (count || 0) * 38 });
+      }
+      setWeeklyData(weekData);
+
+      // Skill breakdown from test_results
+      const skills = ["reading", "grammar", "vocabulary", "speaking", "writing"];
+      const colors = ["#6c47ff", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444"];
+      const skillLabels: Record<string, string> = { reading: "Reading", grammar: "Grammar", vocabulary: "Vocabulary", speaking: "Speaking", writing: "Writing" };
+      const skillStats = await Promise.all(skills.map(async (skill, i) => {
+        const { data: results } = await supabase
+          .from("test_results")
+          .select("percentage")
+          .in("user_id", userIds)
+          .eq("skill", skill)
+          .limit(50);
+        const avg = results?.length
+          ? Math.round(results.reduce((s: number, r: any) => s + (r.percentage || 0), 0) / results.length)
+          : 0;
+        return { name: skillLabels[skill], value: avg || 0, color: colors[i] };
+      }));
+      setSkillData(skillStats);
+
+      // Top students by XP
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, username, xp, streak")
+        .in("user_id", userIds)
+        .order("xp", { ascending: false })
+        .limit(5);
+
+      // Match with class name
+      const studentsWithClass = await Promise.all((profiles || []).map(async (p: any) => {
+        const { data: sc } = await supabase
+          .from("school_students")
+          .select("class_id, school_classes(name)")
+          .eq("user_id", p.user_id)
+          .single();
+        return {
+          name: p.full_name || p.username || "Foydalanuvchi",
+          xp: p.xp || 0,
+          streak: p.streak || 0,
+          class: (sc as any)?.school_classes?.name || "—",
+        };
+      }));
+      setTopStudents(studentsWithClass);
+    } catch (e) {
+      console.error("Analytics error:", e);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
 
   const tabs = [
     { id: "overview", label: "Umumiy", icon: BarChart3 },
@@ -448,47 +526,62 @@ export default function SchoolAdmin() {
           {/* ANALYTICS */}
           {tab === "analytics" && (
             <motion.div key="an" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
+              {analyticsLoading ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Ma'lumotlar yuklanmoqda...</p>
+                </div>
+              ) : (
+              <>
               {/* XP trend */}
               <div className="rounded-2xl border border-border bg-card p-6">
-                <h3 className="font-bold mb-1">Haftalik XP trenди</h3>
-                <p className="text-xs text-muted-foreground mb-4">O'quvchilar tomonidan ishlab topilgan XP</p>
-                <ResponsiveContainer width="100%" height={220}>
-                  <LineChart data={weeklyData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="day" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
-                    <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
-                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
-                    <Line type="monotone" dataKey="xp" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 4 }} name="XP" />
-                  </LineChart>
-                </ResponsiveContainer>
+                <h3 className="font-bold mb-1">Haftalik test faolligi</h3>
+                <p className="text-xs text-muted-foreground mb-4">O'quvchilar topshirgan testlar soni</p>
+                {weeklyData.length === 0 || weeklyData.every(d => d.tests === 0) ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">Hali test natijalari yo'q</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <LineChart data={weeklyData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="day" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
+                      <YAxis tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
+                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
+                      <Line type="monotone" dataKey="tests" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 4 }} name="Testlar" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
               </div>
 
               {/* Skill breakdown */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="rounded-2xl border border-border bg-card p-6">
                   <h3 className="font-bold mb-4">Ko'nikmalar bo'yicha o'rtacha ball</h3>
-                  <div className="space-y-3">
-                    {skillData.map((s) => (
-                      <div key={s.name}>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="font-medium">{s.name}</span>
-                          <span className="font-bold" style={{ color: s.color }}>{s.value}%</span>
+                  {skillData.every(s => s.value === 0) ? (
+                    <div className="text-center py-8 text-muted-foreground text-sm">Hali test natijalari yo'q</div>
+                  ) : (
+                    <div className="space-y-3">
+                      {skillData.map((s) => (
+                        <div key={s.name}>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="font-medium">{s.name}</span>
+                            <span className="font-bold" style={{ color: s.color }}>{s.value}%</span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <motion.div initial={{ width: 0 }} animate={{ width: `${s.value}%` }} transition={{ duration: 0.8, delay: 0.1 }}
+                              className="h-full rounded-full" style={{ background: s.color }} />
+                          </div>
                         </div>
-                        <div className="h-2 bg-muted rounded-full overflow-hidden">
-                          <motion.div initial={{ width: 0 }} animate={{ width: `${s.value}%` }} transition={{ duration: 0.8, delay: 0.1 }}
-                            className="h-full rounded-full" style={{ background: s.color }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="rounded-2xl border border-border bg-card p-6">
                   <h3 className="font-bold mb-4">Ko'nikmalar taqsimoti</h3>
                   <ResponsiveContainer width="100%" height={200}>
                     <PieChart>
-                      <Pie data={skillData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value">
-                        {skillData.map((s, i) => <Cell key={i} fill={s.color} />)}
+                      <Pie data={skillData.filter(s => s.value > 0)} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value">
+                        {skillData.filter(s => s.value > 0).map((s, i) => <Cell key={i} fill={s.color} />)}
                       </Pie>
                       <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
                     </PieChart>
@@ -507,28 +600,29 @@ export default function SchoolAdmin() {
               {/* Top students */}
               <div className="rounded-2xl border border-border bg-card p-6">
                 <h3 className="font-bold mb-4 flex items-center gap-2"><Trophy className="w-4 h-4 text-amber-500" /> Top o'quvchilar</h3>
-                <div className="space-y-2">
-                  {[
-                    { name: "Aziz Karimov", xp: 2450, class: "9-A", streak: 14 },
-                    { name: "Malika Yusupova", xp: 2180, class: "10-B", streak: 10 },
-                    { name: "Jamshid Toshev", xp: 1920, class: "9-A", streak: 7 },
-                    { name: "Dilnoza Rashidova", xp: 1750, class: "11-A", streak: 12 },
-                    { name: "Sardor Mirzayev", xp: 1640, class: "10-B", streak: 5 },
-                  ].map((s, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${i === 0 ? "bg-amber-500 text-white" : i === 1 ? "bg-slate-400 text-white" : i === 2 ? "bg-orange-600 text-white" : "bg-muted text-muted-foreground"}`}>{i+1}</span>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold">{s.name}</p>
-                        <p className="text-xs text-muted-foreground">{s.class}</p>
+                {analyticsLoading ? (
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+                ) : topStudents.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">Hali ma'lumot yo'q</div>
+                ) : (
+                  <div className="space-y-2">
+                    {topStudents.map((s, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${i === 0 ? "bg-amber-500 text-white" : i === 1 ? "bg-slate-400 text-white" : i === 2 ? "bg-orange-600 text-white" : "bg-muted text-muted-foreground"}`}>{i+1}</span>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold">{s.name}</p>
+                          <p className="text-xs text-muted-foreground">{s.class}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-primary">{s.xp.toLocaleString()} XP</p>
+                          <p className="text-xs text-amber-500">🔥 {s.streak} kun</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-primary">{s.xp.toLocaleString()} XP</p>
-                        <p className="text-xs text-amber-500">🔥 {s.streak} kun</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
+              </>)}
             </motion.div>
           )}
 
