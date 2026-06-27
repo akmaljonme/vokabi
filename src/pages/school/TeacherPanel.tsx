@@ -5,344 +5,446 @@ import { useNavigate } from "react-router-dom";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
 import { AppLayout } from "@/components/AppLayout";
-import type { SchoolClass, SchoolStudent, Assignment } from "@/types/school";
 import {
-  Plus, Users, ClipboardList, BarChart3, Copy, Check,
-  Send, Calendar, FileText, Trash2, ChevronRight,
-  Star, TrendingUp, Award, Download, Loader2
+  Users, ClipboardList, BarChart3, Plus, Loader2,
+  Send, Copy, Check, Trash2, Clock, BookOpen,
+  Trophy, TrendingUp, CheckCircle2, XCircle, ChevronRight
 } from "lucide-react";
+import { toast } from "sonner";
 
-type Tab = "classes" | "assignments" | "results";
+type Tab = "classes" | "assignments" | "students" | "stats";
 
 export default function TeacherPanel() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [classes, setClasses] = useState<SchoolClass[]>([]);
-  const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
-  const [students, setStudents] = useState<SchoolStudent[]>([]);
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [tab, setTab] = useState<Tab>("classes");
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
-  const [newClass, setNewClass] = useState({ name: "", level: "B1" });
-  const [newAssignment, setNewAssignment] = useState({ title: "", description: "", type: "test" as Assignment["type"], due_date: "" });
-  const [showCreateClass, setShowCreateClass] = useState(false);
-  const [showCreateAssignment, setShowCreateAssignment] = useState(false);
+  const [teacherData, setTeacherData] = useState<any>(null);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [selectedClass, setSelectedClass] = useState<any>(null);
+  const [students, setStudents] = useState<any[]>([]);
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [copied, setCopied] = useState<string | null>(null);
 
-  useEffect(() => { if (user) fetchClasses(); }, [user]);
-  useEffect(() => { if (selectedClass) { fetchStudents(selectedClass.id); fetchAssignments(selectedClass.id); } }, [selectedClass]);
+  // New assignment form
+  const [showNewTask, setShowNewTask] = useState(false);
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDesc, setTaskDesc] = useState("");
+  const [taskSkill, setTaskSkill] = useState("grammar");
+  const [taskDue, setTaskDue] = useState("");
+  const [creating, setCreating] = useState(false);
 
-  const fetchClasses = async () => {
+  useEffect(() => {
+    if (user) fetchTeacherData();
+    else setLoading(false);
+  }, [user]);
+
+  const fetchTeacherData = async () => {
     setLoading(true);
-    // Get teacher record
-    const { data: teacher } = await (supabase.from("school_teachers") as any).select("*").eq("user_id", user?.id).single();
-    if (teacher) {
-      const { data } = await (supabase.from("school_classes") as any).select("*").eq("teacher_id", teacher.id);
-      if (data) { setClasses(data); if (data.length > 0) setSelectedClass(data[0]); }
-    } else {
-      // Check if user is school owner
-      const { data: school } = await (supabase.from("schools") as any).select("*").eq("owner_id", user?.id).single();
-      if (school) {
-        const { data } = await (supabase.from("school_classes") as any).select("*").eq("school_id", school.id);
-        if (data) { setClasses(data); if (data.length > 0) setSelectedClass(data[0]); }
+    try {
+      // Find teacher record
+      const { data: teacher } = await supabase
+        .from("school_teachers")
+        .select("*, schools(name)")
+        .eq("user_id", user?.id)
+        .limit(1);
+
+      if (teacher?.length) {
+        setTeacherData(teacher[0]);
+        await fetchClasses(teacher[0].school_id);
       }
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  };
+
+  const fetchClasses = async (schoolId: string) => {
+    const { data } = await supabase
+      .from("school_classes")
+      .select("*")
+      .eq("school_id", schoolId)
+      .order("created_at", { ascending: false });
+    setClasses(data || []);
+    if (data?.length) selectClass(data[0]);
+  };
+
+  const selectClass = async (cls: any) => {
+    setSelectedClass(cls);
+    // Fetch students
+    const { data: studs } = await supabase
+      .from("school_students")
+      .select("user_id, joined_at")
+      .eq("class_id", cls.id);
+
+    if (studs?.length) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, username, xp, streak, current_level")
+        .in("user_id", studs.map((s: any) => s.user_id));
+
+      // Fetch test results for each student
+      const withResults = await Promise.all((profiles || []).map(async (p: any) => {
+        const { count } = await supabase
+          .from("test_results")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", p.user_id);
+        return { ...p, testCount: count || 0 };
+      }));
+      setStudents(withResults.sort((a, b) => (b.xp || 0) - (a.xp || 0)));
+    } else {
+      setStudents([]);
     }
-    setLoading(false);
-  };
 
-  const fetchStudents = async (classId: string) => {
-    const { data } = await (supabase.from("school_students") as any).select("*").eq("class_id", classId).order("xp", { ascending: false });
-    if (data) setStudents(data);
-  };
-
-  const fetchAssignments = async (classId: string) => {
-    const { data } = await (supabase.from("school_assignments") as any).select("*").eq("class_id", classId).order("created_at", { ascending: false });
-    if (data) setAssignments(data);
-  };
-
-  const createClass = async () => {
-    if (!newClass.name.trim()) return;
-    const { data: school } = await (supabase.from("schools") as any).select("*").eq("owner_id", user?.id).single();
-    const { data: teacher } = await (supabase.from("school_teachers") as any).select("*").eq("user_id", user?.id).single();
-    const teacherId = teacher?.id;
-    const schoolId = school?.id || teacher?.school_id;
-    if (!schoolId) return;
-    const { data } = await (supabase.from("school_classes") as any)
-      .insert({ ...newClass, school_id: schoolId, ...(teacherId ? { teacher_id: teacherId } : {}) }).select().single();
-    if (data) { setClasses(p => [data, ...p]); setSelectedClass(data); setShowCreateClass(false); setNewClass({ name: "", level: "B1" }); }
+    // Fetch assignments
+    const { data: asgn } = await supabase
+      .from("school_assignments")
+      .select("*")
+      .eq("class_id", cls.id)
+      .order("created_at", { ascending: false });
+    setAssignments(asgn || []);
   };
 
   const createAssignment = async () => {
-    if (!newAssignment.title.trim() || !selectedClass) return;
-    const { data: teacher } = await (supabase.from("school_teachers") as any).select("*").eq("user_id", user?.id).single();
-    const { data } = await (supabase.from("school_assignments") as any)
-      .insert({ ...newAssignment, class_id: selectedClass.id, ...(teacher ? { teacher_id: teacher.id } : {}) }).select().single();
-    if (data) { setAssignments(p => [data, ...p]); setShowCreateAssignment(false); setNewAssignment({ title: "", description: "", type: "test", due_date: "" }); }
+    if (!taskTitle.trim() || !selectedClass) return;
+    setCreating(true);
+    try {
+      const { data, error } = await supabase
+        .from("school_assignments")
+        .insert({
+          class_id: selectedClass.id,
+          title: taskTitle,
+          description: taskDesc,
+          skill: taskSkill,
+          due_date: taskDue || null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      setAssignments(prev => [data, ...prev]);
+      setTaskTitle(""); setTaskDesc(""); setTaskDue("");
+      setShowNewTask(false);
+      toast.success("Vazifa yaratildi! ✅");
+    } catch (e: any) {
+      toast.error("Xatolik: " + e.message);
+    } finally { setCreating(false); }
   };
+
+  const deleteAssignment = async (id: string) => {
+    if (!confirm("Vazifani o'chirmoqchimisiz?")) return;
+    await supabase.from("school_assignments").delete().eq("id", id);
+    setAssignments(prev => prev.filter(a => a.id !== id));
+    toast.info("Vazifa o'chirildi");
+  };
+
+  const copyInviteLink = (cls: any) => {
+    const link = `${window.location.origin}/school/student?class=${cls.invite_code}`;
+    navigator.clipboard.writeText(link);
+    setCopied(cls.id);
+    setTimeout(() => setCopied(null), 2000);
+    toast.success("Invite havola nusxa olindi! 🔗");
+  };
+
+  const shareViaTelegram = (cls: any) => {
+    const link = `${window.location.origin}/register?class=${cls.invite_code}`;
+    const text = `📚 ${teacherData?.schools?.name} — ${cls.name} sinfiga qo'shiling!\n\nVokabi platformasida ingliz tilini o'rganing 🚀\n\n🔗 ${link}`;
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  if (loading) return (
+    <AppLayout>
+      <div className="flex items-center justify-center min-h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    </AppLayout>
+  );
+
+  if (!user) { navigate("/login"); return null; }
+
+  if (!teacherData) return (
+    <AppLayout>
+      <div className="max-w-md mx-auto px-4 py-20 text-center">
+        <div className="text-6xl mb-4">👨‍🏫</div>
+        <h1 className="text-2xl font-bold mb-2">O'qituvchi hisobi topilmadi</h1>
+        <p className="text-muted-foreground text-sm mb-6">
+          Siz hali hech qanday maktabga o'qituvchi sifatida qo'shilmagansiz.
+          Maktab admini sizni qo'shishi kerak.
+        </p>
+        <button onClick={() => navigate("/school/admin")} className="btn-primary px-6 py-3">
+          Admin panelga o'tish
+        </button>
+      </div>
+    </AppLayout>
+  );
 
   const tabs = [
-    { id: "classes", label: "Sinflar", icon: Users },
+    { id: "classes", label: "Sinflar", icon: BookOpen },
+    { id: "students", label: "O'quvchilar", icon: Users },
     { id: "assignments", label: "Vazifalar", icon: ClipboardList },
-    { id: "results", label: "Natijalar", icon: BarChart3 },
-  ] as const;
-
-  const typeColors: Record<string, string> = {
-    test: "bg-blue-500/10 text-blue-500",
-    essay: "bg-purple-500/10 text-purple-500",
-    game: "bg-green-500/10 text-green-500",
-    vocabulary: "bg-yellow-500/10 text-yellow-500",
-  };
+    { id: "stats", label: "Statistika", icon: BarChart3 },
+  ];
 
   return (
     <AppLayout>
-            <div className="container mx-auto px-4 py-8 max-w-6xl">
-
+      <div className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-display font-bold flex items-center gap-2">👨‍🏫 O'qituvchi Paneli</h1>
-            <p className="text-muted-foreground text-sm mt-0.5">{classes.length} ta sinf</p>
+            <h1 className="text-2xl font-display font-bold mb-1">O'qituvchi paneli</h1>
+            <p className="text-sm text-muted-foreground">
+              {teacherData?.schools?.name} · {teacherData?.subject || "Ingliz tili"}
+            </p>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => navigate("/school")} className="btn-outline px-4 py-2 text-sm">🏫 Admin Panel</button>
-            <button onClick={() => setShowCreateClass(true)} className="btn-primary px-4 py-2 text-sm flex items-center gap-2">
-              <Plus className="w-4 h-4" /> Sinf yaratish
-            </button>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Users className="w-4 h-4" />
+            <span>{students.length} o'quvchi</span>
           </div>
         </div>
 
-        {/* Create class modal */}
-        <AnimatePresence>
-          {showCreateClass && (
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              className="card-elevated rounded-2xl p-5 mb-5 border border-primary/20"
-            >
-              <h3 className="font-bold mb-4">Yangi sinf yaratish</h3>
-              <div className="flex gap-3 flex-wrap">
-                <input value={newClass.name} onChange={e => setNewClass(p => ({ ...p, name: e.target.value }))}
-                  placeholder="Sinf nomi (masalan: 9A, Intermediate)"
-                  className="flex-1 min-w-48 px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-                <select value={newClass.level} onChange={e => setNewClass(p => ({ ...p, level: e.target.value }))}
-                  className="px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                >
-                  {["A1","A2","B1","B2","C1","C2"].map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
-                <button onClick={createClass} className="btn-primary px-5 py-2.5 text-sm">Yaratish</button>
-                <button onClick={() => setShowCreateClass(false)} className="btn-outline px-5 py-2.5 text-sm">Bekor</button>
+        {/* Class selector */}
+        {classes.length > 1 && (
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+            {classes.map(cls => (
+              <button key={cls.id} onClick={() => selectClass(cls)}
+                className={`shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  selectedClass?.id === cls.id ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"
+                }`}>
+                {cls.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Tabs */}
+        <div className="flex gap-1 p-1 bg-muted rounded-2xl mb-6">
+          {tabs.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id as Tab)}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+                tab === t.id ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}>
+              <t.icon className="w-3.5 h-3.5" />{t.label}
+            </button>
+          ))}
+        </div>
+
+        <AnimatePresence mode="wait">
+
+          {/* CLASSES */}
+          {tab === "classes" && (
+            <motion.div key="cl" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
+              {classes.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                  <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p>Hali sinf yo'q</p>
+                </div>
+              ) : (
+                classes.map((cls, i) => (
+                  <motion.div key={cls.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
+                    className="rounded-2xl border border-border bg-card p-5">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="font-bold">{cls.name}</h3>
+                        <p className="text-xs text-muted-foreground">{cls.level} daraja</p>
+                      </div>
+                      <span className="text-xs px-2 py-1 rounded-lg bg-muted font-mono font-bold">{cls.invite_code}</span>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      {[
+                        { label: "O'quvchi", value: students.length },
+                        { label: "Vazifa", value: assignments.length },
+                        { label: "Faol bugun", value: "—" },
+                      ].map((s, j) => (
+                        <div key={j} className="text-center p-2 rounded-xl bg-muted/50">
+                          <p className="font-black text-lg text-primary">{s.value}</p>
+                          <p className="text-xs text-muted-foreground">{s.label}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <button onClick={() => copyInviteLink(cls)}
+                        className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border hover:border-primary/40 text-xs font-semibold transition-all">
+                        {copied === cls.id ? <><Check className="w-3 h-3 text-green-500" /> Nusxa!</> : <><Copy className="w-3 h-3" /> Invite link</>}
+                      </button>
+                      <button onClick={() => shareViaTelegram(cls)}
+                        className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold text-white"
+                        style={{ background: "linear-gradient(135deg,#2AABEE,#229ED9)" }}>
+                        <Send className="w-3 h-3" /> Telegram
+                      </button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </motion.div>
+          )}
+
+          {/* STUDENTS */}
+          {tab === "students" && (
+            <motion.div key="st" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+              {students.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                  <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p className="font-medium mb-1">Hali o'quvchi yo'q</p>
+                  <p className="text-xs">Invite havolani yuboring</p>
+                  <button onClick={() => setTab("classes")} className="mt-4 btn-primary text-sm px-4 py-2">
+                    Invite link olish
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {students.map((s, i) => (
+                    <motion.div key={s.user_id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
+                      className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:border-primary/20 transition-all">
+                      <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                        i === 0 ? "bg-amber-500 text-white" : i === 1 ? "bg-slate-400 text-white" : i === 2 ? "bg-orange-600 text-white" : "bg-muted text-muted-foreground"
+                      }`}>{i + 1}</span>
+                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-sm shrink-0">
+                        {(s.full_name || s.username || "?")[0]?.toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm truncate">{s.full_name || s.username || "Foydalanuvchi"}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>{s.current_level || "A1"}</span>
+                          <span>·</span>
+                          <span>🔥 {s.streak || 0} kun</span>
+                          <span>·</span>
+                          <span>{s.testCount} test</span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-black text-primary text-sm">{(s.xp || 0).toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">XP</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* ASSIGNMENTS */}
+          {tab === "assignments" && (
+            <motion.div key="as" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="font-bold">Vazifalar ({assignments.length})</h2>
+                <button onClick={() => setShowNewTask(s => !s)} className="btn-primary px-4 py-2 text-sm flex items-center gap-2">
+                  <Plus className="w-4 h-4" /> Yangi vazifa
+                </button>
+              </div>
+
+              <AnimatePresence>
+                {showNewTask && (
+                  <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                    className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-5 space-y-3">
+                    <h3 className="font-bold text-sm">Yangi vazifa yaratish</h3>
+                    <input value={taskTitle} onChange={e => setTaskTitle(e.target.value)}
+                      placeholder="Vazifa nomi (masalan: B2 Grammar Test)"
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                    <textarea value={taskDesc} onChange={e => setTaskDesc(e.target.value)}
+                      placeholder="Qo'shimcha tavsif (ixtiyoriy)"
+                      rows={2}
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
+                    <div className="grid grid-cols-2 gap-3">
+                      <select value={taskSkill} onChange={e => setTaskSkill(e.target.value)}
+                        className="px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none">
+                        {["grammar", "reading", "listening", "writing", "speaking", "vocabulary"].map(s => (
+                          <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                        ))}
+                      </select>
+                      <input type="date" value={taskDue} onChange={e => setTaskDue(e.target.value)}
+                        className="px-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none" />
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={createAssignment} disabled={creating || !taskTitle.trim()}
+                        className="btn-primary flex-1 py-3 text-sm flex items-center justify-center gap-2 disabled:opacity-50">
+                        {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /> Yaratish</>}
+                      </button>
+                      <button onClick={() => setShowNewTask(false)} className="btn-outline flex-1 py-3 text-sm">Bekor</button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {assignments.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <ClipboardList className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p>Hali vazifa berilmagan</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {assignments.map((a, i) => (
+                    <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+                      className="rounded-2xl border border-border bg-card p-4 flex items-start gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <ClipboardList className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm">{a.title}</p>
+                        {a.description && <p className="text-xs text-muted-foreground mt-0.5 truncate">{a.description}</p>}
+                        <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
+                          {a.skill && <span className="px-2 py-0.5 rounded-full bg-muted font-medium capitalize">{a.skill}</span>}
+                          {a.due_date && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{new Date(a.due_date).toLocaleDateString("uz")}</span>}
+                        </div>
+                      </div>
+                      <button onClick={() => deleteAssignment(a.id)}
+                        className="p-2 rounded-xl hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors shrink-0">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* STATS */}
+          {tab === "stats" && (
+            <motion.div key="stats" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { label: "O'quvchilar", value: students.length, icon: "👨‍🎓", color: "text-blue-500" },
+                  { label: "Vazifalar", value: assignments.length, icon: "📋", color: "text-purple-500" },
+                  { label: "O'rt. XP", value: students.length ? Math.round(students.reduce((s, u) => s + (u.xp || 0), 0) / students.length).toLocaleString() : "0", icon: "⚡", color: "text-primary" },
+                  { label: "O'rt. Streak", value: students.length ? Math.round(students.reduce((s, u) => s + (u.streak || 0), 0) / students.length) + " kun" : "0", icon: "🔥", color: "text-amber-500" },
+                ].map((s, i) => (
+                  <div key={i} className="rounded-2xl border border-border bg-card p-4 text-center">
+                    <p className="text-2xl mb-1">{s.icon}</p>
+                    <p className={`text-xl font-black ${s.color}`}>{s.value}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Top students in class */}
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-amber-500" /> Sinf reytingi
+                </h3>
+                {students.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">Hali o'quvchi yo'q</p>
+                ) : (
+                  <div className="space-y-2">
+                    {students.slice(0, 10).map((s, i) => (
+                      <div key={s.user_id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                          i === 0 ? "bg-amber-500 text-white" : i === 1 ? "bg-slate-400 text-white" : i === 2 ? "bg-orange-600 text-white" : "bg-muted text-muted-foreground"
+                        }`}>{i + 1}</span>
+                        <p className="flex-1 text-sm font-medium truncate">{s.full_name || s.username || "Foydalanuvchi"}</p>
+                        <div className="text-right shrink-0">
+                          <p className="text-sm font-black text-primary">{(s.xp || 0).toLocaleString()} XP</p>
+                          <p className="text-xs text-muted-foreground">{s.testCount} test</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
+
         </AnimatePresence>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
-          {/* Sidebar: class list */}
-          <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Sinflar</p>
-            {classes.map(cls => (
-              <button key={cls.id} onClick={() => setSelectedClass(cls)}
-                className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${selectedClass?.id === cls.id ? "border-primary bg-primary/5 text-primary" : "border-border/40 hover:border-primary/30 text-foreground"}`}
-              >
-                <p className="font-medium text-sm">{cls.name}</p>
-                <p className="text-xs text-muted-foreground">{cls.level} · {cls.invite_code}</p>
-              </button>
-            ))}
-            {classes.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground text-sm">
-                <Users className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                Sinf yo'q
-              </div>
-            )}
-          </div>
-
-          {/* Main content */}
-          <div className="lg:col-span-3">
-            {!selectedClass ? (
-              <div className="card-elevated rounded-2xl p-12 text-center text-muted-foreground">
-                <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>Sinf tanlang yoki yangi sinf yarating</p>
-              </div>
-            ) : (
-              <>
-                {/* Class header */}
-                <div className="card-elevated rounded-2xl p-5 mb-4 flex items-center justify-between flex-wrap gap-3 border border-border/40">
-                  <div>
-                    <h2 className="font-bold text-lg">{selectedClass.name}</h2>
-                    <p className="text-sm text-muted-foreground">{selectedClass.level} daraja · {students.length} o'quvchi</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 text-sm font-mono">
-                      {selectedClass.invite_code}
-                      <button onClick={() => { navigator.clipboard.writeText(selectedClass.invite_code); setCopied(true); setTimeout(() => setCopied(false), 2000); }}>
-                        {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground" />}
-                      </button>
-                    </div>
-                    <span className="text-xs text-muted-foreground">Taklif kodi</span>
-                  </div>
-                </div>
-
-                {/* Tabs */}
-                <div className="flex gap-1 mb-4 bg-muted/30 p-1 rounded-xl w-fit">
-                  {tabs.map(t => (
-                    <button key={t.id} onClick={() => setTab(t.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${tab === t.id ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                    >
-                      <t.icon className="w-3.5 h-3.5" /> {t.label}
-                    </button>
-                  ))}
-                </div>
-
-                <AnimatePresence mode="wait">
-
-                  {/* Students list */}
-                  {tab === "classes" && (
-                    <motion.div key="st" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
-                      {students.length === 0 ? (
-                        <div className="card-elevated rounded-xl p-10 text-center text-muted-foreground border border-border/40">
-                          <Users className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                          <p>O'quvchilar hali qo'shilmagan</p>
-                          <p className="text-xs mt-1">Taklif kodini o'quvchilarga yuboring: <strong>{selectedClass.invite_code}</strong></p>
-                        </div>
-                      ) : (
-                        students.map((s, i) => (
-                          <motion.div key={s.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
-                            className="card-elevated rounded-xl p-4 flex items-center gap-4 border border-border/40"
-                          >
-                            <span className="text-lg font-bold text-muted-foreground w-6 text-center">#{i + 1}</span>
-                            <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center font-bold text-primary">
-                              {(s.full_name || "?")[0].toUpperCase()}
-                            </div>
-                            <div className="flex-1">
-                              <p className="font-semibold text-sm">{s.full_name || "Nomsiz"}</p>
-                              <p className="text-xs text-muted-foreground">{s.xp} XP · 🔥 {s.streak} kun streak</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {i === 0 && <span className="text-yellow-500 text-lg">🥇</span>}
-                              {i === 1 && <span className="text-gray-400 text-lg">🥈</span>}
-                              {i === 2 && <span className="text-orange-500 text-lg">🥉</span>}
-                              <span className="text-xs font-bold text-primary">{s.xp} XP</span>
-                            </div>
-                          </motion.div>
-                        ))
-                      )}
-                    </motion.div>
-                  )}
-
-                  {/* Assignments */}
-                  {tab === "assignments" && (
-                    <motion.div key="as" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-                      <div className="flex justify-end">
-                        <button onClick={() => setShowCreateAssignment(s => !s)} className="btn-primary px-4 py-2 text-sm flex items-center gap-2">
-                          <Plus className="w-4 h-4" /> Vazifa berish
-                        </button>
-                      </div>
-
-                      <AnimatePresence>
-                        {showCreateAssignment && (
-                          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                            className="card-elevated rounded-xl p-5 border border-primary/20 space-y-3"
-                          >
-                            <h3 className="font-bold">Yangi vazifa</h3>
-                            <input value={newAssignment.title} onChange={e => setNewAssignment(p => ({ ...p, title: e.target.value }))}
-                              placeholder="Vazifa nomi"
-                              className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                            />
-                            <textarea value={newAssignment.description} onChange={e => setNewAssignment(p => ({ ...p, description: e.target.value }))}
-                              placeholder="Vazifa tavsifi (ixtiyoriy)"
-                              rows={2}
-                              className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
-                            />
-                            <div className="flex gap-3 flex-wrap">
-                              <select value={newAssignment.type} onChange={e => setNewAssignment(p => ({ ...p, type: e.target.value as Assignment["type"] }))}
-                                className="px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                              >
-                                <option value="test">Test</option>
-                                <option value="essay">Essay</option>
-                                <option value="game">O'yin</option>
-                                <option value="vocabulary">So'z</option>
-                              </select>
-                              <input type="date" value={newAssignment.due_date} onChange={e => setNewAssignment(p => ({ ...p, due_date: e.target.value }))}
-                                className="px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                              />
-                              <button onClick={createAssignment} className="btn-primary px-5 py-2.5 text-sm">Yuborish</button>
-                              <button onClick={() => setShowCreateAssignment(false)} className="btn-outline px-5 py-2.5 text-sm">Bekor</button>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-
-                      {assignments.length === 0 ? (
-                        <div className="card-elevated rounded-xl p-10 text-center text-muted-foreground border border-border/40">
-                          <ClipboardList className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                          <p>Hali vazifa berilmagan</p>
-                        </div>
-                      ) : (
-                        assignments.map((a, i) => (
-                          <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-                            className="card-elevated rounded-xl p-4 border border-border/40 flex items-center gap-4"
-                          >
-                            <span className={`text-xs px-2.5 py-1 rounded-lg font-semibold ${typeColors[a.type]}`}>{a.type}</span>
-                            <div className="flex-1">
-                              <p className="font-semibold text-sm">{a.title}</p>
-                              {a.due_date && <p className="text-xs text-muted-foreground">📅 {new Date(a.due_date).toLocaleDateString("uz-UZ")}</p>}
-                            </div>
-                            <span className="text-xs text-muted-foreground">0/{students.length} topshirdi</span>
-                          </motion.div>
-                        ))
-                      )}
-                    </motion.div>
-                  )}
-
-                  {/* Results */}
-                  {tab === "results" && (
-                    <motion.div key="re" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <div className="card-elevated rounded-xl p-6 border border-border/40">
-                        <div className="flex items-center justify-between mb-5">
-                          <h3 className="font-bold">Sinf statistikasi</h3>
-                          <button className="btn-outline px-4 py-2 text-xs flex items-center gap-1.5">
-                            <Download className="w-3.5 h-3.5" /> PDF hisobot
-                          </button>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4 mb-5">
-                          {[
-                            { label: "O'rtacha ball", value: "—", icon: "📊" },
-                            { label: "Faol o'quvchilar", value: students.length, icon: "✅" },
-                            { label: "Topshirilgan", value: "0", icon: "📝" },
-                          ].map((s, i) => (
-                            <div key={i} className="text-center p-3 rounded-xl bg-muted/20">
-                              <p className="text-xl">{s.icon}</p>
-                              <p className="text-xl font-bold">{s.value}</p>
-                              <p className="text-xs text-muted-foreground">{s.label}</p>
-                            </div>
-                          ))}
-                        </div>
-                        {students.length === 0 ? (
-                          <p className="text-center text-muted-foreground text-sm py-4">O'quvchilar qo'shilgach statistika ko'rinadi</p>
-                        ) : (
-                          <div className="space-y-2">
-                            {students.map((s, i) => (
-                              <div key={s.id} className="flex items-center gap-3">
-                                <span className="text-xs text-muted-foreground w-4">{i + 1}</span>
-                                <div className="flex-1 flex items-center gap-2">
-                                  <span className="text-sm font-medium w-28 truncate">{s.full_name || "Nomsiz"}</span>
-                                  <div className="flex-1 h-2 bg-muted/30 rounded-full overflow-hidden">
-                                    <div className="h-full bg-primary/60 rounded-full" style={{ width: `${Math.min((s.xp / 1000) * 100, 100)}%` }} />
-                                  </div>
-                                  <span className="text-xs text-primary font-semibold w-14 text-right">{s.xp} XP</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-
-                </AnimatePresence>
-              </>
-            )}
-          </div>
-        </div>
       </div>
     </AppLayout>
   );
