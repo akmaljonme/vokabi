@@ -17,7 +17,7 @@ import {
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell
 } from "recharts";
 
-type Tab = "overview" | "teachers" | "classes" | "analytics" | "payments";
+type Tab = "overview" | "teachers" | "classes" | "analytics" | "payments" | "telegram";
 
 export default function SchoolAdmin() {
   const { user } = useAuth();
@@ -36,6 +36,9 @@ export default function SchoolAdmin() {
   const [newClassLevel, setNewClassLevel] = useState("B1");
   const [showNewClass, setShowNewClass] = useState(false);
   const [inviteSent, setInviteSent] = useState<string | null>(null);
+  const [telegramChatId, setTelegramChatId] = useState("");
+  const [savingTelegram, setSavingTelegram] = useState(false);
+  const [sendingReport, setSendingReport] = useState(false);
 
   const totalStudents = Object.values(studentCounts).reduce((a, b) => a + b, 0);
 
@@ -238,12 +241,36 @@ export default function SchoolAdmin() {
     }
   };
 
+  const saveTelegramChatId = async () => {
+    if (!telegramChatId.trim() || !school) return;
+    setSavingTelegram(true);
+    await supabase.from("schools").update({ telegram_chat_id: telegramChatId.trim() }).eq("id", school.id);
+    setSchool((s: any) => ({ ...s, telegram_chat_id: telegramChatId.trim() }));
+    setSavingTelegram(false);
+    toast.success("Telegram ulandi! ✅");
+  };
+
+  const sendDailyReport = async () => {
+    if (!school) return;
+    setSendingReport(true);
+    try {
+      const { error } = await supabase.functions.invoke("school-telegram-bot", {
+        body: { action: "daily_report", school_id: school.id },
+      });
+      if (error) throw error;
+      toast.success("Hisobot yuborildi! 📊");
+    } catch (e: any) {
+      toast.error("Xatolik: " + e.message);
+    } finally { setSendingReport(false); }
+  };
+
   const tabs = [
     { id: "overview", label: "Umumiy", icon: BarChart3 },
     { id: "classes", label: "Sinflar", icon: BookOpen },
     { id: "teachers", label: "O'qituvchilar", icon: GraduationCap },
     { id: "analytics", label: "Analytics", icon: TrendingUp },
     { id: "payments", label: "To'lovlar", icon: CreditCard },
+    { id: "telegram", label: "Telegram", icon: Send },
   ];
 
   if (loading) return (
@@ -678,6 +705,92 @@ export default function SchoolAdmin() {
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground text-center mt-4">To'lov haqida: <a href="mailto:support@vokabi.uz" className="text-primary hover:underline">support@vokabi.uz</a></p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* TELEGRAM */}
+          {tab === "telegram" && (
+            <motion.div key="tg" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-5">
+              <h2 className="font-bold text-lg">Telegram integratsiya</h2>
+
+              {/* Status */}
+              <div className={`rounded-2xl p-5 border-2 ${school?.telegram_chat_id ? "border-green-500/30 bg-green-500/5" : "border-border bg-card"}`}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${school?.telegram_chat_id ? "bg-green-500/15" : "bg-muted"}`}>
+                    <Send className={`w-5 h-5 ${school?.telegram_chat_id ? "text-green-500" : "text-muted-foreground"}`} />
+                  </div>
+                  <div>
+                    <p className="font-bold">{school?.telegram_chat_id ? "Telegram ulangan ✅" : "Telegram ulanmagan"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {school?.telegram_chat_id ? `Chat ID: ${school.telegram_chat_id}` : "Kunlik hisobot olish uchun ulang"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 1: Get chat ID */}
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <h3 className="font-bold mb-3 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-black flex items-center justify-center">1</span>
+                  Chat ID olish
+                </h3>
+                <div className="space-y-2 text-sm text-muted-foreground mb-4">
+                  <p>1. Telegram da <strong className="text-foreground">@vokabi_bot</strong> ga yozing</p>
+                  <p>2. <code className="px-1.5 py-0.5 rounded bg-muted font-mono">/start</code> bosing</p>
+                  <p>3. Bot sizga Chat ID yuboradi</p>
+                </div>
+                <a href="https://t.me/vokabi_bot" target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white"
+                  style={{ background: "linear-gradient(135deg,#2AABEE,#229ED9)" }}>
+                  <Send className="w-4 h-4" /> @vokabi_bot ga o'tish
+                </a>
+              </div>
+
+              {/* Step 2: Enter chat ID */}
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <h3 className="font-bold mb-3 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-black flex items-center justify-center">2</span>
+                  Chat ID kiriting
+                </h3>
+                <div className="flex gap-3">
+                  <input
+                    value={telegramChatId || school?.telegram_chat_id || ""}
+                    onChange={e => setTelegramChatId(e.target.value)}
+                    placeholder="Masalan: -1001234567890"
+                    className="flex-1 px-4 py-3 rounded-xl border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  <button onClick={saveTelegramChatId} disabled={savingTelegram}
+                    className="btn-primary px-5 py-3 text-sm flex items-center gap-2 disabled:opacity-50">
+                    {savingTelegram ? <Loader2 className="w-4 h-4 animate-spin" /> : "Saqlash"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Step 3: Send report */}
+              {school?.telegram_chat_id && (
+                <div className="rounded-2xl border border-border bg-card p-5">
+                  <h3 className="font-bold mb-3 flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-black flex items-center justify-center">3</span>
+                    Hisobot yuborish
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Kunlik hisobotni hozir Telegram ga yuboring. Hisobotda: faol o'quvchilar soni, topshirilgan testlar, eng yaxshi natija.
+                  </p>
+                  <button onClick={sendDailyReport} disabled={sendingReport}
+                    className="btn-primary px-6 py-3 text-sm flex items-center gap-2 disabled:opacity-50">
+                    {sendingReport ? <><Loader2 className="w-4 h-4 animate-spin" /> Yuborilmoqda...</> : <><Send className="w-4 h-4" /> Hozir hisobot yuborish</>}
+                  </button>
+                </div>
+              )}
+
+              {/* Auto schedule info */}
+              <div className="rounded-2xl bg-amber-500/5 border border-amber-500/20 p-5">
+                <h3 className="font-bold mb-2 text-amber-600">⏰ Avtomatik hisobot</h3>
+                <p className="text-sm text-muted-foreground">
+                  Har kuni <strong className="text-foreground">soat 20:00 da</strong> kunlik hisobot avtomatik yuboriladi.
+                  O'quvchilar test topshirmagan bo'lsa ular ham reminder oladi.
+                </p>
               </div>
             </motion.div>
           )}
