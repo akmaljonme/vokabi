@@ -16,6 +16,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell
 } from "recharts";
+import { toast } from "sonner";
 
 type Tab = "overview" | "teachers" | "classes" | "analytics" | "payments" | "telegram";
 
@@ -39,6 +40,7 @@ export default function SchoolAdmin() {
   const [telegramChatId, setTelegramChatId] = useState("");
   const [savingTelegram, setSavingTelegram] = useState(false);
   const [sendingReport, setSendingReport] = useState(false);
+  const [weeklyTestCount, setWeeklyTestCount] = useState<number>(0);
 
   const totalStudents = Object.values(studentCounts).reduce((a, b) => a + b, 0);
 
@@ -74,7 +76,11 @@ export default function SchoolAdmin() {
 
       if (data && data.length > 0) {
         setSchool(data[0]);
-        await Promise.all([fetchTeachers(data[0].id), fetchClasses(data[0].id)]);
+        await Promise.all([
+          fetchTeachers(data[0].id),
+          fetchClasses(data[0].id),
+          fetchWeeklyTests(data[0].id),
+        ]);
       }
     } catch (e: any) {
       console.error("fetchSchool error:", e);
@@ -102,6 +108,25 @@ export default function SchoolAdmin() {
     }
   };
 
+  const fetchWeeklyTests = async (schoolId: string) => {
+    try {
+      const { data: cls } = await supabase
+        .from("school_classes").select("id").eq("school_id", schoolId);
+      if (!cls?.length) { setWeeklyTestCount(0); return; }
+      const { data: studs } = await supabase
+        .from("school_students").select("user_id")
+        .in("class_id", cls.map((c: any) => c.id));
+      if (!studs?.length) { setWeeklyTestCount(0); return; }
+      const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { count } = await supabase
+        .from("test_results")
+        .select("*", { count: "exact", head: true })
+        .in("user_id", studs.map((s: any) => s.user_id))
+        .gte("created_at", since);
+      setWeeklyTestCount(count || 0);
+    } catch (e) { console.error("weekly tests fetch:", e); }
+  };
+
   const createSchool = async () => {
     if (!schoolName.trim() || !user) return;
     setCreating(true);
@@ -120,7 +145,9 @@ export default function SchoolAdmin() {
 
   const createClass = async () => {
     if (!newClassName.trim() || !school) return;
-    const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const inviteCode = Array.from({ length: 6 }, () =>
+      String.fromCharCode(65 + Math.floor(Math.random() * 26))
+    ).join("");
     const { data, error } = await supabase.from("school_classes").insert({
       school_id: school.id, name: newClassName, level: newClassLevel, invite_code: inviteCode,
     }).select().single();
@@ -357,7 +384,7 @@ export default function SchoolAdmin() {
                   { label: "Jami o'quvchilar", value: totalStudents, icon: "👨‍🎓", color: "text-blue-500", bg: "bg-blue-500/10", trend: "+12%" },
                   { label: "Faol sinflar", value: classes.length, icon: "📚", color: "text-green-500", bg: "bg-green-500/10", trend: "+2" },
                   { label: "O'qituvchilar", value: teachers.length, icon: "👨‍🏫", color: "text-purple-500", bg: "bg-purple-500/10", trend: null },
-                  { label: "Bu hafta testlar", value: "118", icon: "✅", color: "text-amber-500", bg: "bg-amber-500/10", trend: "+23%" },
+                  { label: "Bu hafta testlar", value: weeklyTestCount, icon: "✅", color: "text-amber-500", bg: "bg-amber-500/10", trend: null },
                 ].map((s, i) => (
                   <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
                     className="rounded-2xl p-5 border border-border bg-card hover:border-primary/20 transition-all">
