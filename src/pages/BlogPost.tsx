@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Tag, Share2, Copy, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, Tag, Share2, Copy, Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 

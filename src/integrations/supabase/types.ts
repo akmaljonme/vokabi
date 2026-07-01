@@ -917,7 +917,10 @@ export type Database = {
           email_notifications: boolean | null
           full_name: string | null
           id: string
+          is_pro: boolean | null
+          pro_expires_at: string | null
           progress_updates: boolean | null
+          promo_code_used: string | null
           test_reminders: boolean | null
           updated_at: string
           user_id: string
@@ -929,7 +932,10 @@ export type Database = {
           email_notifications?: boolean | null
           full_name?: string | null
           id?: string
+          is_pro?: boolean | null
+          pro_expires_at?: string | null
           progress_updates?: boolean | null
+          promo_code_used?: string | null
           test_reminders?: boolean | null
           updated_at?: string
           user_id: string
@@ -941,7 +947,10 @@ export type Database = {
           email_notifications?: boolean | null
           full_name?: string | null
           id?: string
+          is_pro?: boolean | null
+          pro_expires_at?: string | null
           progress_updates?: boolean | null
+          promo_code_used?: string | null
           test_reminders?: boolean | null
           updated_at?: string
           user_id?: string
@@ -1045,6 +1054,265 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      school_assignments: {
+        Row: {
+          class_id: string | null
+          completed: boolean | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          skill: string | null
+          title: string
+        }
+        Insert: {
+          class_id?: string | null
+          completed?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          skill?: string | null
+          title: string
+        }
+        Update: {
+          class_id?: string | null
+          completed?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          skill?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_assignments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "school_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_classes: {
+        Row: {
+          created_at: string | null
+          id: string
+          invite_code: string | null
+          level: string | null
+          name: string
+          school_id: string | null
+          teacher_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          invite_code?: string | null
+          level?: string | null
+          name: string
+          school_id?: string | null
+          teacher_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          invite_code?: string | null
+          level?: string | null
+          name?: string
+          school_id?: string | null
+          teacher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_classes_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_students: {
+        Row: {
+          class_id: string | null
+          id: string
+          joined_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          class_id?: string | null
+          id?: string
+          joined_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          class_id?: string | null
+          id?: string
+          joined_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "school_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_teachers: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string | null
+          school_id: string | null
+          subject: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name?: string | null
+          school_id?: string | null
+          subject?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string | null
+          school_id?: string | null
+          subject?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_teachers_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schools: {
+        Row: {
+          created_at: string | null
+          id: string
+          logo_url: string | null
+          max_students: number | null
+          max_teachers: number | null
+          name: string
+          owner_id: string | null
+          plan: string | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          max_students?: number | null
+          max_teachers?: number | null
+          name: string
+          owner_id?: string | null
+          plan?: string | null
+          slug: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          max_students?: number | null
+          max_teachers?: number | null
+          name?: string
+          owner_id?: string | null
+          plan?: string | null
+          slug?: string
+        }
+        Relationships: []
+      }
+      shared_test_results: {
+        Row: {
+          answers: Json | null
+          cheated: boolean | null
+          completed_at: string | null
+          id: string
+          percentage: number
+          score: number
+          shared_test_id: string | null
+          total: number
+        }
+        Insert: {
+          answers?: Json | null
+          cheated?: boolean | null
+          completed_at?: string | null
+          id?: string
+          percentage: number
+          score: number
+          shared_test_id?: string | null
+          total: number
+        }
+        Update: {
+          answers?: Json | null
+          cheated?: boolean | null
+          completed_at?: string | null
+          id?: string
+          percentage?: number
+          score?: number
+          shared_test_id?: string | null
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_test_results_shared_test_id_fkey"
+            columns: ["shared_test_id"]
+            isOneToOne: false
+            referencedRelation: "shared_tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_tests: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          level: string
+          mock_id: number | null
+          questions: Json
+          skill: string
+          test_id: string
+          title: string | null
+          view_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          level: string
+          mock_id?: number | null
+          questions: Json
+          skill: string
+          test_id: string
+          title?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          level?: string
+          mock_id?: number | null
+          questions?: Json
+          skill?: string
+          test_id?: string
+          title?: string | null
+          view_count?: number | null
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {
@@ -1577,6 +1845,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_test_views: { Args: { test_uuid: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
