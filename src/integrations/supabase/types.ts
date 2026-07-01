@@ -50,6 +50,69 @@ export type Database = {
         }
         Relationships: []
       }
+      advertisements: {
+        Row: {
+          click_count: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          link_text: string
+          link_url: string | null
+          position: string
+          priority: number
+          show_to: string
+          start_date: string | null
+          title: string
+          type: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          click_count?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_text?: string
+          link_url?: string | null
+          position?: string
+          priority?: number
+          show_to?: string
+          start_date?: string | null
+          title: string
+          type?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          click_count?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_text?: string
+          link_url?: string | null
+          position?: string
+          priority?: number
+          show_to?: string
+          start_date?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       audio_files: {
         Row: {
           created_at: string
@@ -1844,6 +1907,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_ad_stat: {
+        Args: { ad_id: string; stat_type: string }
+        Returns: undefined
       }
       increment_test_views: { Args: { test_uuid: string }; Returns: undefined }
     }
