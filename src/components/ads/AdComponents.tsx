@@ -40,7 +40,12 @@ export const BannerAd = ({ position = 'top' }: { position?: 'top' | 'bottom' }) 
       >
         <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3">
           {ad.image_url && (
-            <img src={ad.image_url} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0 shadow-sm" />
+            <img
+              src={ad.image_url}
+              alt=""
+              className="w-10 h-10 rounded-lg object-cover shrink-0 shadow-sm"
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
           )}
           <div className="flex-1 min-w-0 flex items-center gap-2">
             <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">Reklama</span>
