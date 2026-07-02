@@ -9,8 +9,10 @@ export const BannerAd = ({ position = 'top' }: { position?: 'top' | 'bottom' }) 
   const [current, setCurrent] = useState(0);
   const [dismissed, setDismissed] = useState(false);
   const tracked = useRef<Set<string>>(new Set());
+  const bannerRef = useRef<HTMLDivElement>(null);
 
   const visibleAds = ads.filter(a => a.position === position || !a.position);
+  const isVisible = !loading && !dismissed && visibleAds.length > 0;
 
   useEffect(() => {
     if (visibleAds[current] && !tracked.current.has(visibleAds[current].id)) {
@@ -25,12 +27,34 @@ export const BannerAd = ({ position = 'top' }: { position?: 'top' | 'bottom' }) 
     return () => clearInterval(t);
   }, [visibleAds.length]);
 
-  if (loading || dismissed || visibleAds.length === 0) return null;
+  // Banner balandligini o'lchab, --banner-h CSS o'zgaruvchisiga yozamiz.
+  // Shu orqali fixed sidebar banner balandligicha pastga suriladi,
+  // lekin ular orasidagi joylashuv (tartib) o'zgarmaydi.
+  useEffect(() => {
+    if (position !== 'top') return;
+    const root = document.documentElement;
+    if (!isVisible) {
+      root.style.setProperty('--banner-h', '0px');
+      return;
+    }
+    const el = bannerRef.current;
+    if (!el) return;
+    const update = () => root.style.setProperty('--banner-h', `${el.offsetHeight}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.setProperty('--banner-h', '0px');
+    };
+  }, [isVisible, position]);
+
+  if (!isVisible) return null;
 
   const ad = visibleAds[current];
 
   return (
-    <div className="w-full px-4 py-3 bg-background border-b border-border">
+    <div ref={bannerRef} className="w-full px-4 py-3 bg-background border-b border-border relative z-50">
       <div className="max-w-4xl mx-auto">
         <div className="relative bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
           <div className="flex items-center gap-5 px-6 py-5">

@@ -105,7 +105,8 @@ export const Sidebar = () => {
     <motion.aside
       animate={{ width: sidebarW }}
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed left-0 top-0 bottom-0 z-40 flex flex-col border-r border-border/50 bg-background/98 backdrop-blur-xl overflow-hidden"
+      style={{ top: 'var(--banner-h, 0px)', height: 'calc(100dvh - var(--banner-h, 0px))' }}
+      className="fixed left-0 z-40 flex flex-col border-r border-border/50 bg-background/98 backdrop-blur-xl overflow-hidden"
     >
       {/* Logo */}
       <div className="flex items-center justify-between px-3 py-4 border-b border-border/30">
