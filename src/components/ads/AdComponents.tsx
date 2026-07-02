@@ -38,15 +38,15 @@ export const BannerAd = ({ position = 'top' }: { position?: 'top' | 'bottom' }) 
         exit={{ opacity: 0, y: position === 'top' ? -20 : 20 }}
         className={`w-full bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-primary/20 ${position === 'bottom' ? 'border-t border-b-0' : ''}`}
       >
-        <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-3">
+        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3">
           {ad.image_url && (
-            <img src={ad.image_url} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />
+            <img src={ad.image_url} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0 shadow-sm" />
           )}
-          <div className="flex-1 min-w-0">
-            <span className="text-xs font-semibold text-primary mr-2">Reklama</span>
-            <span className="text-sm font-medium truncate">{ad.title}</span>
+          <div className="flex-1 min-w-0 flex items-center gap-2">
+            <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">Reklama</span>
+            <span className="text-sm font-semibold truncate">{ad.title}</span>
             {ad.description && (
-              <span className="text-xs text-muted-foreground ml-2 hidden sm:inline">{ad.description}</span>
+              <span className="text-xs text-muted-foreground truncate hidden sm:block">{ad.description}</span>
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
