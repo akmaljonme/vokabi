@@ -126,9 +126,10 @@ export const PopupAd = () => {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+            style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100vw - 2rem)', maxWidth: '360px' }}
+            className="z-50"
           >
-          <div className="w-full max-w-[360px] pointer-events-auto">
+          <div>
             <div className="bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
               {/* Image */}
               {ad.image_url ? (
