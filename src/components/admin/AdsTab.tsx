@@ -107,8 +107,11 @@ export const AdsTab = () => {
       const path = `${user?.id}/${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from('ad-images').upload(path, file);
       if (error) throw error;
-      const { data } = supabase.storage.from('ad-images').getPublicUrl(path);
-      setForm(f => ({ ...f, image_url: data.publicUrl }));
+      const { data, error: signErr } = await supabase.storage
+        .from('ad-images')
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10); // 10 yil
+      if (signErr) throw signErr;
+      setForm(f => ({ ...f, image_url: data.signedUrl }));
       toast.success('Rasm yuklandi!');
     } catch (e: any) { toast.error(e.message); }
     finally { setUploading(false); }
