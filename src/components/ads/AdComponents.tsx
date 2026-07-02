@@ -91,9 +91,10 @@ export const PopupAd = () => {
 
   useEffect(() => {
     if (ads.length === 0) return;
-    const key = `popup_ad_${new Date().toDateString()}`;
-    if (localStorage.getItem(key)) return; // Bugun ko'rsatilgan
-    const t = setTimeout(() => setShow(true), 3000);
+    // Har bir reklama uchun alohida kalit — yangi reklama qo'shilsa qayta chiqadi
+    const key = `popup_ad_${ads[0].id}_${new Date().toDateString()}`;
+    if (localStorage.getItem(key)) return;
+    const t = setTimeout(() => setShow(true), 2000);
     return () => clearTimeout(t);
   }, [ads]);
 
@@ -106,7 +107,9 @@ export const PopupAd = () => {
 
   const handleClose = () => {
     setShow(false);
-    localStorage.setItem(`popup_ad_${new Date().toDateString()}`, '1');
+    if (ads[0]) {
+      localStorage.setItem(`popup_ad_${ads[0].id}_${new Date().toDateString()}`, '1');
+    }
   };
 
   if (ads.length === 0) return null;
