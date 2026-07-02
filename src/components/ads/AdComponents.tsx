@@ -19,7 +19,6 @@ export const BannerAd = ({ position = 'top' }: { position?: 'top' | 'bottom' }) 
     }
   }, [current, visibleAds]);
 
-  // Auto-slide
   useEffect(() => {
     if (visibleAds.length <= 1) return;
     const t = setInterval(() => setCurrent(c => (c + 1) % visibleAds.length), 5000);
@@ -31,27 +30,26 @@ export const BannerAd = ({ position = 'top' }: { position?: 'top' | 'bottom' }) 
   const ad = visibleAds[current];
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: position === 'top' ? -20 : 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: position === 'top' ? -20 : 20 }}
-        className={`w-full bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-primary/20 ${position === 'bottom' ? 'border-t border-b-0' : ''}`}
-      >
-        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-3">
+    <>
+      {/* Spacer — banner fixed bo'lgani uchun content pastga siljiydi */}
+      <div className="h-[72px]" />
+      <div className="fixed top-0 left-0 right-0 z-[100] bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 h-[72px] flex items-center gap-4">
           {ad.image_url && (
             <img
               src={ad.image_url}
               alt=""
-              className="w-14 h-14 rounded-xl object-cover shrink-0 shadow-md border border-border"
+              className="w-12 h-12 rounded-xl object-cover shrink-0 shadow border border-border"
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           )}
-          <div className="flex-1 min-w-0 flex items-center gap-2">
-            <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">Reklama</span>
-            <span className="text-sm font-semibold truncate">{ad.title}</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-[10px] font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded uppercase tracking-wide shrink-0">Reklama</span>
+              <span className="text-sm font-bold truncate">{ad.title}</span>
+            </div>
             {ad.description && (
-              <span className="text-xs text-muted-foreground truncate hidden sm:block">{ad.description}</span>
+              <p className="text-xs text-muted-foreground truncate">{ad.description}</p>
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -71,19 +69,19 @@ export const BannerAd = ({ position = 'top' }: { position?: 'top' | 'bottom' }) 
             {ad.link_url && (
               <a href={ad.link_url} target="_blank" rel="noopener noreferrer"
                 onClick={() => trackClick(ad.id)}
-                className="flex items-center gap-1 text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors font-medium whitespace-nowrap">
+                className="flex items-center gap-1 text-xs bg-primary text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary/90 transition-colors font-semibold whitespace-nowrap">
                 {ad.link_text || 'Batafsil'}
                 <ExternalLink className="w-3 h-3" />
               </a>
             )}
             <button onClick={() => setDismissed(true)}
-              className="p-1 hover:bg-muted rounded-lg transition-colors text-muted-foreground">
-              <X className="w-3.5 h-3.5" />
+              className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground">
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
-      </motion.div>
-    </AnimatePresence>
+      </div>
+    </>
   );
 };
 
@@ -96,7 +94,6 @@ export const PopupAd = () => {
 
   useEffect(() => {
     if (ads.length === 0) return;
-    // Har bir reklama uchun alohida kalit — yangi reklama qo'shilsa qayta chiqadi
     const key = `popup_ad_${ads[0].id}_${new Date().toDateString()}`;
     if (localStorage.getItem(key)) return;
     const t = setTimeout(() => setShow(true), 2000);
@@ -136,7 +133,6 @@ export const PopupAd = () => {
           >
           <div>
             <div className="bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
-              {/* Image */}
               {ad.image_url ? (
                 <div className="relative">
                   <img src={ad.image_url} alt={ad.title} className="w-full h-48 object-cover" />
@@ -175,7 +171,6 @@ export const PopupAd = () => {
                 </div>
               </div>
 
-              {/* Multiple ads navigation */}
               {ads.length > 1 && (
                 <div className="flex justify-center gap-1.5 pb-3">
                   {ads.map((_, i) => (
