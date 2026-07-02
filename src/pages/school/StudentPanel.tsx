@@ -116,37 +116,18 @@ export default function StudentPanel() {
     try {
       const code = joinCode.trim().toUpperCase();
 
-      // Find class by invite code
-      const { data: classData, error: classErr } = await supabase
-        .from("school_classes")
-        .select("*")
-        .eq("invite_code", code)
-        .single();
+      // Server tomonidagi funksiya orqali qo'shilamiz — bu RLS
+      // cheklovlarini xavfsiz chetlab o'tib, kodni tekshiradi va
+      // dublikatlarni oldini oladi.
+      const { data, error } = await supabase.rpc("join_school_class_by_code", {
+        p_invite_code: code,
+      });
 
-      if (classErr || !classData) {
-        setJoinError("Noto'g'ri kod. O'qituvchingizdan so'rang.");
+      if (error) throw error;
+      if (!data?.success) {
+        setJoinError(data?.error || "Xatolik yuz berdi.");
         return;
       }
-
-      // Check already joined
-      const { data: existing } = await supabase
-        .from("school_students")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("class_id", classData.id)
-        .single();
-
-      if (existing) {
-        setJoinError("Siz allaqachon bu sinfga qo'shilgansiz.");
-        return;
-      }
-
-      // Join class
-      const { error: joinErr } = await supabase
-        .from("school_students")
-        .insert({ class_id: classData.id, user_id: user.id });
-
-      if (joinErr) throw joinErr;
 
       toast.success("Sinfga muvaffaqiyatli qo'shildingiz! 🎉");
       await fetchStudent();

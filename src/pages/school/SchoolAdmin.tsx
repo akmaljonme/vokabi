@@ -531,9 +531,9 @@ export default function SchoolAdmin() {
               <div className="flex items-center justify-between">
                 <h2 className="font-bold text-lg">O'qituvchilar ({teachers.length}/{school.max_teachers})</h2>
                 <button onClick={() => {
-                  const link = `${window.location.origin}/register?school=${school.id}&role=teacher`;
+                  const link = `${window.location.origin}/school/teacher?code=${school.teacher_invite_code}`;
                   navigator.clipboard.writeText(link);
-                  alert("O'qituvchi invite havolasi nusxa olindi!");
+                  toast.success("O'qituvchi invite havolasi nusxa olindi!");
                 }} className="btn-primary px-4 py-2 text-sm flex items-center gap-2">
                   <Link2 className="w-4 h-4" /> Invite link
                 </button>
@@ -543,18 +543,21 @@ export default function SchoolAdmin() {
               <div className="rounded-2xl border-2 border-dashed border-border p-6 text-center bg-muted/20">
                 <GraduationCap className="w-10 h-10 mx-auto mb-3 text-muted-foreground opacity-50" />
                 <p className="font-semibold mb-1">O'qituvchi qo'shish</p>
-                <p className="text-sm text-muted-foreground mb-4">Invite havolasini yuboring — o'qituvchi ro'yxatdan o'tib avtomatik qo'shiladi</p>
+                <p className="text-sm text-muted-foreground mb-4">Invite havolasini yuboring — o'qituvchi kirib avtomatik qo'shiladi</p>
                 <div className="flex gap-2 max-w-sm mx-auto">
-                  <input readOnly value={`${window.location.origin}/register?school=${school.id}&role=teacher`}
+                  <input readOnly value={`${window.location.origin}/school/teacher?code=${school.teacher_invite_code}`}
                     className="flex-1 text-xs px-3 py-2 rounded-xl border border-border bg-background font-mono truncate" />
                   <button onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/register?school=${school.id}&role=teacher`);
+                    navigator.clipboard.writeText(`${window.location.origin}/school/teacher?code=${school.teacher_invite_code}`);
                     setCopied("teacher");
                     setTimeout(() => setCopied(null), 2000);
                   }} className="px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold">
                     {copied === "teacher" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                   </button>
                 </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Yoki shu kodni to'g'ridan-to'g'ri bering: <code className="font-mono font-bold text-foreground">{school.teacher_invite_code}</code>
+                </p>
               </div>
 
               {teachers.length === 0 ? (

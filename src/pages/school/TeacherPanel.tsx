@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
 import { AppLayout } from "@/components/AppLayout";
@@ -17,9 +17,13 @@ type Tab = "classes" | "assignments" | "students" | "stats";
 export default function TeacherPanel() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [tab, setTab] = useState<Tab>("classes");
   const [loading, setLoading] = useState(true);
   const [teacherData, setTeacherData] = useState<any>(null);
+  const [teacherJoinCode, setTeacherJoinCode] = useState(searchParams.get("code") || "");
+  const [teacherJoining, setTeacherJoining] = useState(false);
+  const [teacherJoinError, setTeacherJoinError] = useState("");
   const [classes, setClasses] = useState<any[]>([]);
   const [selectedClass, setSelectedClass] = useState<any>(null);
   const [students, setStudents] = useState<any[]>([]);
@@ -144,6 +148,29 @@ export default function TeacherPanel() {
     toast.success("Invite havola nusxa olindi! 🔗");
   };
 
+  const joinAsTeacher = async () => {
+    if (!teacherJoinCode.trim() || !user) return;
+    setTeacherJoining(true); setTeacherJoinError("");
+    try {
+      const { data, error } = await supabase.rpc("join_school_as_teacher", {
+        p_invite_code: teacherJoinCode.trim().toUpperCase(),
+      });
+
+      if (error) throw error;
+      if (!data?.success) {
+        setTeacherJoinError(data?.error || "Xatolik yuz berdi.");
+        return;
+      }
+
+      toast.success("Maktabga o'qituvchi sifatida qo'shildingiz! 🎉");
+      await fetchTeacherData();
+    } catch (e: any) {
+      setTeacherJoinError(e.message || "Xatolik yuz berdi.");
+    } finally {
+      setTeacherJoining(false);
+    }
+  };
+
   const shareViaTelegram = (cls: any) => {
     const link = `${window.location.origin}/register?class=${cls.invite_code}`;
     const text = `📚 ${teacherData?.schools?.name} — ${cls.name} sinfiga qo'shiling!\n\nVokabi platformasida ingliz tilini o'rganing 🚀\n\n🔗 ${link}`;
@@ -166,10 +193,31 @@ export default function TeacherPanel() {
         <div className="text-6xl mb-4">👨‍🏫</div>
         <h1 className="text-2xl font-bold mb-2">O'qituvchi hisobi topilmadi</h1>
         <p className="text-muted-foreground text-sm mb-6">
-          Siz hali hech qanday maktabga o'qituvchi sifatida qo'shilmagansiz.
-          Maktab admini sizni qo'shishi kerak.
+          Maktab admini bergan taklif kodini kiriting, shunda avtomatik
+          o'qituvchi sifatida qo'shilasiz.
         </p>
-        <button onClick={() => navigate("/school/admin")} className="btn-primary px-6 py-3">
+
+        <div className="space-y-3 mb-8">
+          <input
+            value={teacherJoinCode}
+            onChange={e => setTeacherJoinCode(e.target.value.toUpperCase())}
+            onKeyDown={e => e.key === "Enter" && joinAsTeacher()}
+            placeholder="Taklif kod (masalan: ABC123)"
+            className="w-full px-4 py-4 rounded-2xl border-2 border-border bg-background text-center text-lg font-mono font-bold tracking-widest focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all uppercase"
+          />
+
+          {teacherJoinError && (
+            <p className="text-sm text-destructive font-medium">{teacherJoinError}</p>
+          )}
+
+          <button onClick={joinAsTeacher} disabled={teacherJoining || !teacherJoinCode.trim()}
+            className="btn-primary w-full py-4 text-base font-bold flex items-center justify-center gap-2 disabled:opacity-50">
+            {teacherJoining ? <Loader2 className="w-5 h-5 animate-spin" /> : "O'qituvchi sifatida qo'shilish"}
+          </button>
+        </div>
+
+        <p className="text-xs text-muted-foreground mb-3">yoki o'zingiz maktab yaratmoqchimisiz?</p>
+        <button onClick={() => navigate("/school/admin")} className="text-sm text-primary font-semibold hover:underline">
           Admin panelga o'tish
         </button>
       </div>

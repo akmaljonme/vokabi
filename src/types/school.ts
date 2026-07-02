@@ -9,6 +9,7 @@ export interface School {
   max_students: number;
   created_at: string;
   telegram_chat_id?: string | null;
+  teacher_invite_code?: string;
 }
 
 export interface SchoolTeacher {
