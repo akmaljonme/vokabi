@@ -30,58 +30,60 @@ export const BannerAd = ({ position = 'top' }: { position?: 'top' | 'bottom' }) 
   const ad = visibleAds[current];
 
   return (
-    <>
-      {/* Spacer — banner fixed bo'lgani uchun content pastga siljiydi */}
-      <div className="h-[72px]" />
-      <div className="fixed top-0 left-0 right-0 z-[100] bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 h-[72px] flex items-center gap-4">
-          {ad.image_url && (
-            <img
-              src={ad.image_url}
-              alt=""
-              className="w-12 h-12 rounded-xl object-cover shrink-0 shadow border border-border"
-              onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
-          )}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-[10px] font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded uppercase tracking-wide shrink-0">Reklama</span>
-              <span className="text-sm font-bold truncate">{ad.title}</span>
+    <div className="w-full px-4 py-3 bg-background border-b border-border">
+      <div className="max-w-4xl mx-auto">
+        <div className="relative bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+          <div className="flex items-center gap-5 px-6 py-5">
+            {ad.image_url && (
+              <img
+                src={ad.image_url}
+                alt=""
+                className="w-16 h-16 rounded-xl object-cover shrink-0 shadow"
+                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-bold mb-0.5">{ad.title}</p>
+              {ad.description && (
+                <p className="text-sm text-muted-foreground">{ad.description}</p>
+              )}
+              {visibleAds.length > 1 && (
+                <div className="flex items-center gap-1 mt-1">
+                  <button onClick={() => setCurrent(c => (c - 1 + visibleAds.length) % visibleAds.length)}
+                    className="p-0.5 hover:bg-muted rounded transition-colors">
+                    <ChevronLeft className="w-3 h-3" />
+                  </button>
+                  <span className="text-xs text-muted-foreground">{current + 1}/{visibleAds.length}</span>
+                  <button onClick={() => setCurrent(c => (c + 1) % visibleAds.length)}
+                    className="p-0.5 hover:bg-muted rounded transition-colors">
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
             </div>
-            {ad.description && (
-              <p className="text-xs text-muted-foreground truncate">{ad.description}</p>
-            )}
+            <div className="flex items-center gap-3 shrink-0">
+              {ad.link_url && (
+                <a href={ad.link_url} target="_blank" rel="noopener noreferrer"
+                  onClick={() => trackClick(ad.id)}
+                  className="flex items-center gap-1.5 bg-foreground text-background text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap">
+                  {ad.link_text || 'Batafsil'}
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {visibleAds.length > 1 && (
-              <div className="flex items-center gap-1">
-                <button onClick={() => setCurrent(c => (c - 1 + visibleAds.length) % visibleAds.length)}
-                  className="p-1 hover:bg-muted rounded-lg transition-colors">
-                  <ChevronLeft className="w-3 h-3" />
-                </button>
-                <span className="text-xs text-muted-foreground">{current + 1}/{visibleAds.length}</span>
-                <button onClick={() => setCurrent(c => (c + 1) % visibleAds.length)}
-                  className="p-1 hover:bg-muted rounded-lg transition-colors">
-                  <ChevronRight className="w-3 h-3" />
-                </button>
-              </div>
-            )}
-            {ad.link_url && (
-              <a href={ad.link_url} target="_blank" rel="noopener noreferrer"
-                onClick={() => trackClick(ad.id)}
-                className="flex items-center gap-1 text-xs bg-primary text-primary-foreground px-3 py-2 rounded-lg hover:bg-primary/90 transition-colors font-semibold whitespace-nowrap">
-                {ad.link_text || 'Batafsil'}
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            )}
-            <button onClick={() => setDismissed(true)}
-              className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground">
-              <X className="w-4 h-4" />
-            </button>
+          {/* Reklama label pastda chap tomonda */}
+          <div className="absolute bottom-2 left-6">
+            <span className="text-[10px] text-muted-foreground/60">Reklama</span>
           </div>
+          {/* Yopish tugmasi */}
+          <button onClick={() => setDismissed(true)}
+            className="absolute top-3 right-3 p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -131,7 +133,6 @@ export const PopupAd = () => {
             style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100vw - 2rem)', maxWidth: '360px' }}
             className="z-50"
           >
-          <div>
             <div className="bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
               {ad.image_url ? (
                 <div className="relative">
@@ -151,7 +152,6 @@ export const PopupAd = () => {
                   </button>
                 </div>
               )}
-
               <div className="p-5">
                 <h3 className="font-bold text-base mb-1">{ad.title}</h3>
                 {ad.description && <p className="text-sm text-muted-foreground mb-4">{ad.description}</p>}
@@ -170,7 +170,6 @@ export const PopupAd = () => {
                   </button>
                 </div>
               </div>
-
               {ads.length > 1 && (
                 <div className="flex justify-center gap-1.5 pb-3">
                   {ads.map((_, i) => (
@@ -180,7 +179,6 @@ export const PopupAd = () => {
                 </div>
               )}
             </div>
-          </div>
           </motion.div>
         </>
       )}
@@ -220,11 +218,9 @@ export const SidebarAd = () => {
             className="absolute top-2 right-2 w-5 h-5 bg-background/80 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors z-10">
             <X className="w-3 h-3" />
           </button>
-
           {ad.image_url && (
             <img src={ad.image_url} alt={ad.title} className="w-full h-24 object-cover" />
           )}
-
           <div className="p-3">
             <p className="text-xs font-semibold mb-0.5 pr-5">{ad.title}</p>
             {ad.description && (
