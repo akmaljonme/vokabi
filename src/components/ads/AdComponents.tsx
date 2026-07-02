@@ -43,7 +43,7 @@ export const BannerAd = ({ position = 'top' }: { position?: 'top' | 'bottom' }) 
             <img
               src={ad.image_url}
               alt=""
-              className="w-10 h-10 rounded-lg object-cover shrink-0 shadow-sm"
+              className="w-14 h-14 rounded-xl object-cover shrink-0 shadow-md border border-border"
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           )}
