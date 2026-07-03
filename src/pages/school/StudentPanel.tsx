@@ -27,19 +27,32 @@ export default function StudentPanel() {
   const [joinError, setJoinError] = useState("");
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"overview" | "assignments" | "classmates">("overview");
+  const [autoJoinTried, setAutoJoinTried] = useState(false);
 
   useEffect(() => {
     if (user) fetchStudent();
     else setLoading(false);
   }, [user]);
 
-  // Auto-join if class param in URL
+  // Auto-join if class param in URL — real qo'shilish, faqat pre-fill emas
   useEffect(() => {
     const classCode = searchParams.get("class");
-    if (classCode && user && !student && !loading) {
-      setJoinCode(classCode);
+    if (classCode && user && !student && !loading && !autoJoinTried && !joining) {
+      setJoinCode(classCode.toUpperCase());
+      setAutoJoinTried(true);
+      // kichik tayimer — state yangilanishi uchun
+      setTimeout(() => joinClassWithCode(classCode.toUpperCase()), 50);
     }
-  }, [searchParams, user, student, loading]);
+  }, [searchParams, user, student, loading, autoJoinTried, joining]);
+
+  // Login qilmagan bo'lsa — invite kodni saqlab, login sahifaga yo'naltiramiz
+  useEffect(() => {
+    const classCode = searchParams.get("class");
+    if (!loading && !user && classCode) {
+      sessionStorage.setItem("pending_class_code", classCode.toUpperCase());
+      navigate(`/register?class=${classCode.toUpperCase()}`, { replace: true });
+    }
+  }, [user, loading, searchParams, navigate]);
 
   const fetchStudent = async () => {
     setLoading(true);
@@ -110,25 +123,20 @@ export default function StudentPanel() {
     }
   };
 
-  const joinClass = async () => {
-    if (!joinCode.trim() || !user) return;
+  const joinClassWithCode = async (rawCode: string) => {
+    if (!rawCode.trim() || !user) return;
     setJoining(true); setJoinError("");
     try {
-      const code = joinCode.trim().toUpperCase();
-
-      // Server tomonidagi funksiya orqali qo'shilamiz — bu RLS
-      // cheklovlarini xavfsiz chetlab o'tib, kodni tekshiradi va
-      // dublikatlarni oldini oladi.
+      const code = rawCode.trim().toUpperCase();
       const { data, error } = await supabase.rpc("join_school_class_by_code", {
         p_invite_code: code,
       });
-
       if (error) throw error;
       if (!data?.success) {
         setJoinError(data?.error || "Xatolik yuz berdi.");
         return;
       }
-
+      sessionStorage.removeItem("pending_class_code");
       toast.success("Sinfga muvaffaqiyatli qo'shildingiz! 🎉");
       await fetchStudent();
     } catch (e: any) {
@@ -137,6 +145,8 @@ export default function StudentPanel() {
       setJoining(false);
     }
   };
+
+  const joinClass = () => joinClassWithCode(joinCode);
 
   const leaveClass = async () => {
     if (!student || !confirm("Sinfdan chiqmoqchimisiz?")) return;
