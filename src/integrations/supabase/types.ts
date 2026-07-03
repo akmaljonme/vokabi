@@ -898,6 +898,120 @@ export type Database = {
         }
         Relationships: []
       }
+      mock_test_series: {
+        Row: {
+          color: string | null
+          created_at: string
+          exam_type: string
+          id: string
+          is_active: boolean
+          name: string
+          order_index: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          exam_type?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          order_index?: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          exam_type?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          order_index?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      mock_tests: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          listening_test_id: string | null
+          reading_test_id: string | null
+          series_id: string
+          speaking_test_id: string | null
+          test_number: number
+          title: string | null
+          updated_at: string
+          writing_test_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          listening_test_id?: string | null
+          reading_test_id?: string | null
+          series_id: string
+          speaking_test_id?: string | null
+          test_number: number
+          title?: string | null
+          updated_at?: string
+          writing_test_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          listening_test_id?: string | null
+          reading_test_id?: string | null
+          series_id?: string
+          speaking_test_id?: string | null
+          test_number?: number
+          title?: string | null
+          updated_at?: string
+          writing_test_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_tests_listening_test_id_fkey"
+            columns: ["listening_test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_tests_reading_test_id_fkey"
+            columns: ["reading_test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_tests_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "mock_test_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_tests_speaking_test_id_fkey"
+            columns: ["speaking_test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_tests_writing_test_id_fkey"
+            columns: ["writing_test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_requests: {
         Row: {
           admin_note: string | null
