@@ -1272,6 +1272,7 @@ export type Database = {
           owner_id: string | null
           plan: string | null
           slug: string
+          teacher_invite_code: string | null
         }
         Insert: {
           created_at?: string | null
@@ -1283,6 +1284,7 @@ export type Database = {
           owner_id?: string | null
           plan?: string | null
           slug: string
+          teacher_invite_code?: string | null
         }
         Update: {
           created_at?: string | null
@@ -1294,6 +1296,7 @@ export type Database = {
           owner_id?: string | null
           plan?: string | null
           slug?: string
+          teacher_invite_code?: string | null
         }
         Relationships: []
       }
@@ -1913,6 +1916,14 @@ export type Database = {
         Returns: undefined
       }
       increment_test_views: { Args: { test_uuid: string }; Returns: undefined }
+      join_school_as_teacher: {
+        Args: { p_invite_code: string; p_subject?: string }
+        Returns: Json
+      }
+      join_school_class_by_code: {
+        Args: { p_invite_code: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
