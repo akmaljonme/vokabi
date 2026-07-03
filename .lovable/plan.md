@@ -1,25 +1,67 @@
-## Bosqich 1: Asosiy infratuzilma
-1. **lottie-react** kutubxonasini o'rnatish
-2. **index.css** da yangi glassmorphism/neumorphism token'lar qo'shish (3 ta yosh guruh temalari: kid, teen, adult)
-3. **tailwind.config.ts** ga yangi ranglar va animatsiyalar qo'shish
+# Reja — Mock Tests + Dashboard + Invite Link Fix
 
-## Bosqich 2: Cinematic Onboarding
-4. `src/components/onboarding/OnboardingFlow.tsx` - asosiy oqim boshqaruvchisi
-5. 4 ta interaktiv savol kartasi (Goal, Level, Age, Daily Time)
-6. Progress bar va AI motivatsion xabarlar
-7. Onboarding ma'lumotlarini saqlash (localStorage yoki DB)
+## 1. Invite Link tuzatish (birinchi — tez fix)
 
-## Bosqich 3: Dizayn tizimi yangilanishi
-8. Landing sahifasini glassmorphism uslubida qayta dizayn qilish
-9. Button, Card komponentlariga "pop" hover effekt qo'shish
-10. Dashboard'ni yangilash (streak, XP, daily goals)
+**Muammo:** Havolalar (`/register?class=CODE`, `/school/student?class=CODE`, `/school/teacher?code=CODE`) bosilganda foydalanuvchi avtomatik qo'shilmayapti.
 
-## Bosqich 4: Learning Path xaritasi
-11. `src/components/LearningPathMap.tsx` - 3D yo'l ko'rinishidagi daraja xaritasi
-12. 90% ball bilan qulf tizimi logikasi
+**Yechim:**
+- **StudentPanel** — `?class=CODE` bo'lsa va user login qilingan bo'lsa, avtomatik `joinClass()` chaqirilsin (hozir faqat inputga to'ldiradi)
+- **TeacherPanel** — `?code=CODE` bo'lsa avtomatik `joinAsTeacher()` chaqirilsin
+- **Register.tsx** — `?class=CODE` va `?school-code=CODE` paramlarni sessionStorage'ga saqlab, ro'yxatdan o'tgach mos panelga (`/school/student?class=...` yoki `/school/teacher?code=...`) yo'naltirsin
+- **Login.tsx** — xuddi shu paramlarni saqlab, login'dan keyin yo'naltirsin
+- Foydalanuvchi email tasdiqlashdan keyin ham kodni yo'qotmasligi uchun sessionStorage ishlatiladi
 
-## Bosqich 5: Confetti va animatsiyalar
-13. Lottie confetti muvaffaqiyat ekranlarida
-14. Barcha sahifa o'tishlarida Framer Motion animatsiyalar
+## 2. Mock Test tizimi (Jumpinto uslubida)
 
-*Eslatma: Har bir bosqich alohida xabarda amalga oshiriladi*
+**Yangi jadval:** `mock_test_series`
+```text
+- id, name (masalan "IELTS 21 Academic 2026"), year, exam_type ('ielts'|'cefr')
+- is_active, order_index, color (yil rangi)
+```
+
+**Yangi jadval:** `mock_tests`
+```text
+- id, series_id, test_number (1-4), title
+- listening_test_id, reading_test_id, writing_test_id, speaking_test_id (mavjud `tests` jadvalidan FK — ixtiyoriy)
+- duration_minutes, is_active
+```
+
+Ikkala jadval uchun GRANT + RLS:
+- `SELECT` — hamma authenticated ko'ra oladi
+- `INSERT/UPDATE/DELETE` — faqat admin (has_role)
+
+**Yangi sahifa** `/mock-tests`:
+- Jumpinto uslubidagi grid: har yil uchun 4 ta test kartochkasi
+- Har karta ichida Listening/Reading/Writing/Speaking havolalari (mavjud `TestInterface`ga ulanadi)
+- Sidebar'ga "Mock Tests" havolasi qo'shiladi
+
+**Admin panel** — yangi tab `MockTestsTab`:
+- Series yaratish/tahrirlash (yil, rang, tartib)
+- Har series ichida 4 test slotini mavjud testlar bilan bog'lash
+- Faol/faolsizga o'tkazish
+
+## 3. Dashboard vizual yangilash
+
+Umumiy vizual yangilanish:
+- Gradient hero banner (streak + XP + darajani birlashtirgan)
+- Bento-style widget tartibi
+- Glassmorphism kartalar (loyihaning `visual-identity` memoriysiga mos)
+- Silliqroq animatsiyalar (motion stagger)
+- Reyting/tavsiya bloklari — ranglar iyerarxiyasi
+- Mobil optimizatsiya saqlanadi
+- Semantik design tokens ishlatiladi (hech qanday `bg-white`, `text-black` yo'q)
+
+**Muhim:** Funksionallik o'zgarmaydi, faqat vizual qatlam.
+
+## Ish tartibi
+
+1. Invite link fix (kichik, tez) — 4-5 fayl
+2. Mock tests migration (jadvallar + RLS + GRANT)
+3. Migration tasdiqlanganidan keyin — `/mock-tests` sahifa + admin tab
+4. Dashboard vizual redesign
+
+## Tekshirish
+
+- Playwright orqali invite link flow'ni real testlash
+- Mock test sahifasi rendering
+- Dashboard vizual snapshot

@@ -359,24 +359,70 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        {/* Hero gradient banner */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-8"
+          className="relative overflow-hidden rounded-3xl mb-6 border border-border/60"
         >
-          <div>
-            <h1 className="text-2xl font-display font-bold tracking-tight">
-              Dashboard
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              O'quv jarayoningizni kuzating
-            </p>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent" />
+          <div
+            className="absolute -top-16 -right-16 w-64 h-64 rounded-full blur-3xl opacity-40"
+            style={{ background: "hsl(var(--primary) / 0.4)" }}
+          />
+          <div className="absolute -bottom-20 -left-10 w-52 h-52 rounded-full blur-3xl opacity-30 bg-amber-500/40" />
+
+          <div className="relative p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-1">
+                Xush kelibsiz qaytib
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight mb-1">
+                {user?.email?.split("@")[0] || "Do'stim"} 👋
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {progress?.current_streak
+                  ? `${progress.current_streak} kunlik streak — davom eting!`
+                  : "Bugun yangi o'quv jarayonini boshlang"}
+              </p>
+            </div>
+
+            {progress && (
+              <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
+                <div className="text-center">
+                  <p className="text-2xl sm:text-3xl font-display font-black text-primary">
+                    {progress.level}
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+                    Daraja
+                  </p>
+                </div>
+                <div className="w-px h-10 bg-border" />
+                <div className="text-center">
+                  <p className="text-2xl sm:text-3xl font-display font-black">
+                    {progress.xp.toLocaleString()}
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+                    XP
+                  </p>
+                </div>
+                <div className="w-px h-10 bg-border" />
+                <div className="text-center">
+                  <p className="text-2xl sm:text-3xl font-display font-black text-orange-500">
+                    {progress.current_streak}
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+                    Streak
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        {/* Stats — glass cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           {[
             {
               icon: Target,
@@ -412,8 +458,9 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
+              whileHover={{ y: -2 }}
             >
-              <Card className="border-border/50">
+              <Card className="border-border/50 bg-card/60 backdrop-blur-md hover:border-primary/30 hover:shadow-lg transition-all">
                 <CardContent className="pt-5 pb-4">
                   <div className="flex items-center gap-3">
                     <div className={`p-2.5 ${stat.bgColor} rounded-xl`}>
