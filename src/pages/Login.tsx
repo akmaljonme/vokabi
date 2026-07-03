@@ -20,8 +20,23 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!authLoading && user) navigate("/dashboard", { replace: true });
+    if (!authLoading && user) {
+      const pendingClass = sessionStorage.getItem("pending_class_code");
+      const pendingTeacher = sessionStorage.getItem("pending_teacher_code");
+      if (pendingClass) navigate(`/school/student?class=${pendingClass}`, { replace: true });
+      else if (pendingTeacher) navigate(`/school/teacher?code=${pendingTeacher}`, { replace: true });
+      else navigate("/dashboard", { replace: true });
+    }
   }, [user, authLoading, navigate]);
+
+  // URL'dan invite kodni saqlab qolamiz — /login?class=CODE bo'lsa
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cls = params.get("class");
+    const teacher = params.get("teacher-code");
+    if (cls) sessionStorage.setItem("pending_class_code", cls.toUpperCase());
+    if (teacher) sessionStorage.setItem("pending_teacher_code", teacher.toUpperCase());
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
