@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Users, FileText, BarChart3, Settings, 
-  ChevronLeft, ChevronRight, Shield, MessageSquare, Video, X, ClipboardList, CreditCard, Megaphone, Trophy
+  ChevronLeft, ChevronRight, Shield, MessageSquare, Video, X, ClipboardList, CreditCard, Megaphone, Trophy, BookMarked
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +18,7 @@ const menuItems = [
   { id: 'users',      label: 'Users',               icon: Users },
   { id: 'results',    label: 'Results & Analytics', icon: BarChart3 },
   { id: 'tests',      label: 'Tests Management',    icon: FileText },
+  { id: 'mock-tests', label: 'Mock Testlar',        icon: BookMarked },
   { id: 'exams',      label: 'Exams',               icon: ClipboardList },
   { id: 'payments',   label: "To'lovlar",           icon: CreditCard },
   { id: 'tournaments',label: 'Turnirlar',            icon: Trophy },
