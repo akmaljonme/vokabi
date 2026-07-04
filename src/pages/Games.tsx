@@ -69,9 +69,35 @@ type GameType =
   | "friends"
   | "stats";
 
+const CATEGORY_META: Record<string, { label: string; icon: string }> = {
+  vocab:     { label: "Lug'at boyligi",   icon: "📚" },
+  grammar:   { label: "Grammatika",       icon: "📐" },
+  listening: { label: "Tinglash",         icon: "🎧" },
+  speed:     { label: "Tezlik va xotira", icon: "⚡" },
+};
+
+const CATEGORY_ORDER = ["vocab", "grammar", "listening", "speed"];
+
+// Tailwind gradient nomidan (masalan "from-blue-500 to-cyan-500") asosiy
+// rangni ajratib, uni hex qiymatga aylantiramiz — kartaning porlash
+// (glow) effekti uchun ishlatiladi.
+const COLOR_HEX: Record<string, string> = {
+  blue: "#3b82f6", cyan: "#06b6d4", amber: "#f59e0b", orange: "#f97316",
+  purple: "#a855f7", pink: "#ec4899", emerald: "#10b981", teal: "#14b8a6",
+  red: "#ef4444", rose: "#f43f5e", indigo: "#6366f1", green: "#22c55e",
+  fuchsia: "#d946ef", sky: "#0ea5e9", violet: "#8b5cf6", lime: "#84cc16",
+  yellow: "#eab308",
+};
+
+const glowColor = (gradient: string) => {
+  const match = gradient.match(/from-(\w+)-\d+/);
+  return (match && COLOR_HEX[match[1]]) || "#6366f1";
+};
+
 const games = [
   {
     id: "wordmatch" as const,
+    category: "vocab",
     title: "Word Match",
     desc: "Inglizcha-O'zbekcha so'zlarni juftlang",
     icon: "🔗",
@@ -79,6 +105,7 @@ const games = [
   },
   {
     id: "spelling" as const,
+    category: "vocab",
     title: "Spelling Bee",
     desc: "So'zlarni to'g'ri yozing",
     icon: "🐝",
@@ -86,6 +113,7 @@ const games = [
   },
   {
     id: "grammar" as const,
+    category: "grammar",
     title: "Grammar Battle",
     desc: "Grammatika bo'yicha savol-javob",
     icon: "⚔️",
@@ -93,6 +121,7 @@ const games = [
   },
   {
     id: "flashcards" as const,
+    category: "vocab",
     title: "Flashcards",
     desc: "Lug'at kartochkalari bilan o'rganing",
     icon: "🃏",
@@ -100,6 +129,7 @@ const games = [
   },
   {
     id: "hangman" as const,
+    category: "vocab",
     title: "Hangman",
     desc: "Harflarni topib, so'zni aniqlang",
     icon: "💀",
@@ -107,6 +137,7 @@ const games = [
   },
   {
     id: "sentence" as const,
+    category: "grammar",
     title: "Sentence Builder",
     desc: "So'zlarni tartibga qo'yib gap yasang",
     icon: "📝",
@@ -114,6 +145,7 @@ const games = [
   },
   {
     id: "listening" as const,
+    category: "listening",
     title: "Listening Quiz",
     desc: "Eshiting va savolga javob bering",
     icon: "🎧",
@@ -121,6 +153,7 @@ const games = [
   },
   {
     id: "idiom" as const,
+    category: "vocab",
     title: "Idiom Master",
     desc: "Ingliz tili iboralarini o'rganing",
     icon: "🎭",
@@ -128,6 +161,7 @@ const games = [
   },
   {
     id: "lastword" as const,
+    category: "speed",
     title: "Last Word",
     desc: "Oxirgi harf bilan so'z toping — AI!",
     icon: "🔤",
@@ -136,6 +170,7 @@ const games = [
   },
   {
     id: "crossword" as const,
+    category: "speed",
     title: "Crossword",
     desc: "Krossword jumboqini yeching",
     icon: "🧩",
@@ -144,6 +179,7 @@ const games = [
   },
   {
     id: "scramble" as const,
+    category: "speed",
     title: "Word Scramble",
     desc: "Aralash harflardan so'z toping",
     icon: "🔀",
@@ -152,6 +188,7 @@ const games = [
   },
   {
     id: "fillblank" as const,
+    category: "grammar",
     title: "Fill in the Blank",
     desc: "Bo'sh joyni to'ldiring",
     icon: "✏️",
@@ -160,6 +197,7 @@ const games = [
   },
   {
     id: "synonym" as const,
+    category: "vocab",
     title: "Synonyms",
     desc: "Sinonimlarni toping",
     icon: "🔄",
@@ -167,6 +205,7 @@ const games = [
   },
   {
     id: "preposition" as const,
+    category: "grammar",
     title: "Preposition Master",
     desc: "Predloglarni to'g'ri ishlating",
     icon: "📍",
@@ -174,6 +213,7 @@ const games = [
   },
   {
     id: "verbtense" as const,
+    category: "grammar",
     title: "Verb Tenses",
     desc: "Fe'l zamonlarini o'rganing",
     icon: "⏰",
@@ -182,6 +222,7 @@ const games = [
   },
   {
     id: "phrasal" as const,
+    category: "vocab",
     title: "Phrasal Verbs",
     desc: "Phrasal verblarni o'rganing",
     icon: "🔥",
@@ -189,6 +230,7 @@ const games = [
   },
   {
     id: "collocations" as const,
+    category: "vocab",
     title: "Collocations",
     desc: "So'z birikmalarini o'rganing",
     icon: "🧲",
@@ -196,6 +238,7 @@ const games = [
   },
   {
     id: "tonguetwister" as const,
+    category: "vocab",
     title: "Tongue Twisters",
     desc: "Til o'gishtiruvchilarni mashq qiling",
     icon: "👅",
@@ -203,6 +246,7 @@ const games = [
   },
   {
     id: "readingspeed" as const,
+    category: "speed",
     title: "Reading Speed",
     desc: "O'qish tezligingizni oshiring",
     icon: "⚡",
@@ -210,6 +254,7 @@ const games = [
   },
   {
     id: "memory" as const,
+    category: "speed",
     title: "Memory Cards",
     desc: "Juft kartalarni toping",
     icon: "🧠",
@@ -217,6 +262,7 @@ const games = [
   },
   {
     id: "truefalse" as const,
+    category: "grammar",
     title: "True or False",
     desc: "To'g'ri yoki noto'g'ri?",
     icon: "✅",
@@ -277,56 +323,72 @@ export default function Games() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-display font-bold mb-2">
-                  🎮 O'yin tanlang
+              <div className="text-center mb-8 relative">
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 14 }}
+                  className="inline-block text-5xl mb-2"
+                >
+                  🎮
+                </motion.div>
+                <h2 className="text-3xl sm:text-4xl font-display font-black mb-2 bg-gradient-to-r from-primary via-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
+                  O'yin tanlang
                 </h2>
-                <p className="text-muted-foreground mb-4">
-                  O'yin orqali ingliz tilini o'rganing!
+                <p className="text-muted-foreground">
+                  O'ynab, ingliz tilini mustahkamlang — har bir g'alaba XP va streak keltiradi 🔥
                 </p>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-5xl mx-auto mb-8">
-                <button
+                <motion.button
+                  whileHover={{ y: -4, transition: { type: "spring", stiffness: 400, damping: 15 } }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => handleSetGame("tournament")}
-                  className="group p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 transition-all text-center"
+                  className="group p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 hover:shadow-lg hover:shadow-amber-500/20 transition-colors text-center"
                 >
-                  <Crown className="w-6 h-6 text-amber-500 mx-auto mb-1.5" />
+                  <Crown className="w-6 h-6 text-amber-500 mx-auto mb-1.5 group-hover:scale-110 group-hover:-rotate-6 transition-transform" />
                   <p className="text-sm font-bold">Turnir</p>
                   <p className="text-[10px] text-muted-foreground">
                     Haftalik musobaqa
                   </p>
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ y: -4, transition: { type: "spring", stiffness: 400, damping: 15 } }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => handleSetGame("friends")}
-                  className="group p-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all text-center"
+                  className="group p-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-colors text-center"
                 >
-                  <Users className="w-6 h-6 text-primary mx-auto mb-1.5" />
+                  <Users className="w-6 h-6 text-primary mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
                   <p className="text-sm font-bold">Do'stlar</p>
                   <p className="text-[10px] text-muted-foreground">
                     Birga o'ynash
                   </p>
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ y: -4, transition: { type: "spring", stiffness: 400, damping: 15 } }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => handleSetGame("stats")}
-                  className="group p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all text-center"
+                  className="group p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 hover:shadow-lg hover:shadow-emerald-500/20 transition-colors text-center"
                 >
-                  <BarChart3 className="w-6 h-6 text-emerald-500 mx-auto mb-1.5" />
+                  <BarChart3 className="w-6 h-6 text-emerald-500 mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
                   <p className="text-sm font-bold">Statistika</p>
                   <p className="text-[10px] text-muted-foreground">
                     Batafsil tahlil
                   </p>
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ y: -4, transition: { type: "spring", stiffness: 400, damping: 15 } }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => navigate("/leaderboard")}
-                  className="group p-4 rounded-2xl border border-fuchsia-500/30 bg-fuchsia-500/5 hover:bg-fuchsia-500/10 transition-all text-center"
+                  className="group p-4 rounded-2xl border border-fuchsia-500/30 bg-fuchsia-500/5 hover:bg-fuchsia-500/10 hover:shadow-lg hover:shadow-fuchsia-500/20 transition-colors text-center"
                 >
-                  <Trophy className="w-6 h-6 text-fuchsia-500 mx-auto mb-1.5" />
+                  <Trophy className="w-6 h-6 text-fuchsia-500 mx-auto mb-1.5 group-hover:scale-110 group-hover:rotate-6 transition-transform" />
                   <p className="text-sm font-bold">Leaderboard</p>
                   <p className="text-[10px] text-muted-foreground">
                     Top o'yinchilar
                   </p>
-                </button>
+                </motion.button>
               </div>
 
               <div className="max-w-5xl mx-auto mb-8">
@@ -355,40 +417,72 @@ export default function Games() {
                 </motion.div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-5xl mx-auto">
-                {games.map((game, i) => (
-                  <motion.button
-                    key={game.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.03 }}
-                    onClick={() => setActiveGame(game.id)}
-                    className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 text-left hover:shadow-xl transition-all duration-300"
-                  >
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${game.color} opacity-0 group-hover:opacity-5 transition-opacity`}
-                    />
-                    <div className="flex items-start justify-between">
-                      <div className="text-2xl mb-2">{game.icon}</div>
-                      {"badge" in game && game.badge && (
-                        <span
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${game.badge === "AI" ? "bg-primary text-primary-foreground" : "bg-emerald-500 text-white"}`}
-                        >
-                          {game.badge}
-                        </span>
-                      )}
+              {CATEGORY_ORDER.map((cat) => {
+                const catGames = games.filter((g) => g.category === cat);
+                if (catGames.length === 0) return null;
+                const meta = CATEGORY_META[cat];
+                return (
+                  <div key={cat} className="max-w-5xl mx-auto mb-8">
+                    <div className="flex items-center gap-2 mb-3 px-1">
+                      <span className="text-xl">{meta.icon}</span>
+                      <h3 className="font-display font-bold text-base">{meta.label}</h3>
+                      <span className="text-xs text-muted-foreground">({catGames.length})</span>
+                      <div className="flex-1 h-px bg-border/60 ml-1" />
                     </div>
-                    <h3 className="text-sm font-bold mb-0.5">{game.title}</h3>
-                    <p className="text-[11px] text-muted-foreground">
-                      {game.desc}
-                    </p>
-                    <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
-                      <Trophy className="w-3 h-3" /> XP
-                      <Zap className="w-3 h-3 ml-1" /> Streak
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {catGames.map((game, i) => {
+                        const glow = glowColor(game.color);
+                        return (
+                          <motion.button
+                            key={game.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.03, type: "spring", stiffness: 300, damping: 22 }}
+                            whileHover={{ y: -6 }}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={() => setActiveGame(game.id)}
+                            style={{ ["--glow" as any]: glow }}
+                            className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 text-left transition-shadow duration-300 hover:shadow-[0_10px_30px_-10px_var(--glow)]"
+                          >
+                            {/* Yuqori porloq chiziq — o'yin rangiga mos */}
+                            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${game.color} opacity-70`} />
+                            <div
+                              className={`absolute inset-0 bg-gradient-to-br ${game.color} opacity-0 group-hover:opacity-[0.07] transition-opacity`}
+                            />
+                            <div className="flex items-start justify-between relative">
+                              <motion.div
+                                whileHover={{ scale: 1.15, rotate: [0, -8, 8, 0] }}
+                                transition={{ duration: 0.4 }}
+                                className={`w-10 h-10 rounded-xl bg-gradient-to-br ${game.color} flex items-center justify-center text-xl shadow-sm mb-2`}
+                              >
+                                {game.icon}
+                              </motion.div>
+                              {"badge" in game && game.badge && (
+                                <span
+                                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${game.badge === "AI" ? "bg-primary text-primary-foreground" : "bg-emerald-500 text-white animate-pulse"}`}
+                                >
+                                  {game.badge}
+                                </span>
+                              )}
+                            </div>
+                            <h3 className="text-sm font-bold mb-0.5 relative">{game.title}</h3>
+                            <p className="text-[11px] text-muted-foreground relative">
+                              {game.desc}
+                            </p>
+                            <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground relative">
+                              <Trophy className="w-3 h-3" /> XP
+                              <Zap className="w-3 h-3 ml-1" /> Streak
+                              <span className="ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                                O'ynash →
+                              </span>
+                            </div>
+                          </motion.button>
+                        );
+                      })}
                     </div>
-                  </motion.button>
-                ))}
-              </div>
+                  </div>
+                );
+              })}
             </motion.div>
           )}
 
