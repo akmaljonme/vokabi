@@ -898,6 +898,288 @@ export type Database = {
         }
         Relationships: []
       }
+      mock_test_attempts: {
+        Row: {
+          ai_feedback: Json | null
+          answers: Json
+          band_score: number | null
+          created_at: string
+          id: string
+          mock_test_id: string
+          score: number | null
+          skill: Database["public"]["Enums"]["mock_skill"]
+          submitted_at: string | null
+          time_taken_seconds: number | null
+          total: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_feedback?: Json | null
+          answers?: Json
+          band_score?: number | null
+          created_at?: string
+          id?: string
+          mock_test_id: string
+          score?: number | null
+          skill: Database["public"]["Enums"]["mock_skill"]
+          submitted_at?: string | null
+          time_taken_seconds?: number | null
+          total?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_feedback?: Json | null
+          answers?: Json
+          band_score?: number | null
+          created_at?: string
+          id?: string
+          mock_test_id?: string
+          score?: number | null
+          skill?: Database["public"]["Enums"]["mock_skill"]
+          submitted_at?: string | null
+          time_taken_seconds?: number | null
+          total?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_test_attempts_mock_test_id_fkey"
+            columns: ["mock_test_id"]
+            isOneToOne: false
+            referencedRelation: "mock_tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_test_parts: {
+        Row: {
+          audio_url: string | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          image_url: string | null
+          instruction: string | null
+          mock_test_id: string
+          order_index: number
+          part_number: number
+          passage_text: string | null
+          skill: Database["public"]["Enums"]["mock_skill"]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          audio_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          image_url?: string | null
+          instruction?: string | null
+          mock_test_id: string
+          order_index?: number
+          part_number?: number
+          passage_text?: string | null
+          skill: Database["public"]["Enums"]["mock_skill"]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audio_url?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          image_url?: string | null
+          instruction?: string | null
+          mock_test_id?: string
+          order_index?: number
+          part_number?: number
+          passage_text?: string | null
+          skill?: Database["public"]["Enums"]["mock_skill"]
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_test_parts_mock_test_id_fkey"
+            columns: ["mock_test_id"]
+            isOneToOne: false
+            referencedRelation: "mock_tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_test_questions: {
+        Row: {
+          correct_answer: Json
+          created_at: string
+          extra: Json
+          group_label: string | null
+          id: string
+          options: Json
+          order_index: number
+          part_id: string
+          points: number
+          question_number: number
+          question_text: string
+          question_type: Database["public"]["Enums"]["mock_question_type"]
+          updated_at: string
+        }
+        Insert: {
+          correct_answer?: Json
+          created_at?: string
+          extra?: Json
+          group_label?: string | null
+          id?: string
+          options?: Json
+          order_index?: number
+          part_id: string
+          points?: number
+          question_number?: number
+          question_text?: string
+          question_type: Database["public"]["Enums"]["mock_question_type"]
+          updated_at?: string
+        }
+        Update: {
+          correct_answer?: Json
+          created_at?: string
+          extra?: Json
+          group_label?: string | null
+          id?: string
+          options?: Json
+          order_index?: number
+          part_id?: string
+          points?: number
+          question_number?: number
+          question_text?: string
+          question_type?: Database["public"]["Enums"]["mock_question_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_test_questions_part_id_fkey"
+            columns: ["part_id"]
+            isOneToOne: false
+            referencedRelation: "mock_test_parts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_test_series: {
+        Row: {
+          color: string | null
+          created_at: string
+          exam_type: string
+          id: string
+          is_active: boolean
+          name: string
+          order_index: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          exam_type?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          order_index?: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          exam_type?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          order_index?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      mock_tests: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          listening_test_id: string | null
+          reading_test_id: string | null
+          series_id: string
+          speaking_test_id: string | null
+          test_number: number
+          title: string | null
+          updated_at: string
+          writing_test_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          listening_test_id?: string | null
+          reading_test_id?: string | null
+          series_id: string
+          speaking_test_id?: string | null
+          test_number: number
+          title?: string | null
+          updated_at?: string
+          writing_test_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          listening_test_id?: string | null
+          reading_test_id?: string | null
+          series_id?: string
+          speaking_test_id?: string | null
+          test_number?: number
+          title?: string | null
+          updated_at?: string
+          writing_test_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_tests_listening_test_id_fkey"
+            columns: ["listening_test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_tests_reading_test_id_fkey"
+            columns: ["reading_test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_tests_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "mock_test_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_tests_speaking_test_id_fkey"
+            columns: ["speaking_test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_tests_writing_test_id_fkey"
+            columns: ["writing_test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_requests: {
         Row: {
           admin_note: string | null
@@ -1272,6 +1554,7 @@ export type Database = {
           owner_id: string | null
           plan: string | null
           slug: string
+          teacher_invite_code: string | null
         }
         Insert: {
           created_at?: string | null
@@ -1283,6 +1566,7 @@ export type Database = {
           owner_id?: string | null
           plan?: string | null
           slug: string
+          teacher_invite_code?: string | null
         }
         Update: {
           created_at?: string | null
@@ -1294,6 +1578,7 @@ export type Database = {
           owner_id?: string | null
           plan?: string | null
           slug?: string
+          teacher_invite_code?: string | null
         }
         Relationships: []
       }
@@ -1913,9 +2198,31 @@ export type Database = {
         Returns: undefined
       }
       increment_test_views: { Args: { test_uuid: string }; Returns: undefined }
+      join_school_as_teacher: {
+        Args: { p_invite_code: string; p_subject?: string }
+        Returns: Json
+      }
+      join_school_class_by_code: {
+        Args: { p_invite_code: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      mock_question_type:
+        | "multiple_choice"
+        | "multiple_choice_multi"
+        | "true_false_notgiven"
+        | "yes_no_notgiven"
+        | "matching_headings"
+        | "matching_features"
+        | "matching_information"
+        | "sentence_completion"
+        | "note_completion"
+        | "short_answer"
+        | "writing_task"
+        | "speaking_question"
+      mock_skill: "listening" | "reading" | "writing" | "speaking"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2044,6 +2351,21 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      mock_question_type: [
+        "multiple_choice",
+        "multiple_choice_multi",
+        "true_false_notgiven",
+        "yes_no_notgiven",
+        "matching_headings",
+        "matching_features",
+        "matching_information",
+        "sentence_completion",
+        "note_completion",
+        "short_answer",
+        "writing_task",
+        "speaking_question",
+      ],
+      mock_skill: ["listening", "reading", "writing", "speaking"],
     },
   },
 } as const

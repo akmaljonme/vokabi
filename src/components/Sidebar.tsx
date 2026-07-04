@@ -11,7 +11,7 @@ import {
   Users, Home, PenTool, BookOpen,
   Trophy, Settings, ChevronLeft, ChevronRight,
   Sparkles, Brain, LogOut, Moon, Sun,
-  Shield, ChevronDown, Crown, Sword, School,
+  Shield, ChevronDown, Crown, Sword, School, BookMarked,
 } from "lucide-react";
 
 import { NotificationBell } from "@/components/NotificationBell";
@@ -27,6 +27,7 @@ interface NavItem {
 
 const mainItems: NavItem[] = [
   { label: "Dashboard",     path: "/dashboard",   icon: LayoutDashboard },
+  { label: "Mock Testlar",  path: "/mock-tests",  icon: BookMarked },
   { label: "O'yinlar",      path: "/games",       icon: Gamepad2 },
   { label: "Video Darslar", path: "/videos",      icon: Video },
   { label: "Examlar",       path: "/exams",       icon: ClipboardList, soon: true },

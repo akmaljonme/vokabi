@@ -51,6 +51,20 @@ const Register = () => {
   const { user, signUp, signInWithGoogle, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Invite kodlarni URL yoki sessionStorage'dan olamiz — signup jarayonida
+  // email tasdiqlash bo'lsa ham yo'qolmasin
+  const urlParams = new URLSearchParams(window.location.search);
+  const inviteClassCode =
+    urlParams.get("class") || sessionStorage.getItem("pending_class_code") || "";
+  const inviteTeacherCode =
+    urlParams.get("teacher-code") || sessionStorage.getItem("pending_teacher_code") || "";
+
+  // URL'dan kelsa — sessionStorage'ga saqlab qo'yamiz
+  useEffect(() => {
+    if (inviteClassCode) sessionStorage.setItem("pending_class_code", inviteClassCode);
+    if (inviteTeacherCode) sessionStorage.setItem("pending_teacher_code", inviteTeacherCode);
+  }, [inviteClassCode, inviteTeacherCode]);
+
   const [step, setStep] = useState(0);
   const [prefs, setPrefs] = useState({
     learning_purpose: "",
@@ -75,7 +89,18 @@ const Register = () => {
   >("idle");
 
   useEffect(() => {
-    if (!authLoading && user) navigate("/dashboard", { replace: true });
+    if (!authLoading && user) {
+      // Agar invite kod bor bo'lsa — mos panelga yo'naltiramiz (u yerda auto-join ishlaydi)
+      const pendingClass = sessionStorage.getItem("pending_class_code");
+      const pendingTeacher = sessionStorage.getItem("pending_teacher_code");
+      if (pendingClass) {
+        navigate(`/school/student?class=${pendingClass}`, { replace: true });
+      } else if (pendingTeacher) {
+        navigate(`/school/teacher?code=${pendingTeacher}`, { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    }
   }, [user, authLoading, navigate]);
 
   const checkUsername = useCallback(async (value: string) => {

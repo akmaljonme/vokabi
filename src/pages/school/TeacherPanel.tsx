@@ -27,6 +27,7 @@ export default function TeacherPanel() {
   const [teacherJoinCode, setTeacherJoinCode] = useState(searchParams.get("code") || "");
   const [teacherJoining, setTeacherJoining] = useState(false);
   const [teacherJoinError, setTeacherJoinError] = useState("");
+  const [autoJoinTried, setAutoJoinTried] = useState(false);
   const [classes, setClasses] = useState<any[]>([]);
   const [selectedClass, setSelectedClass] = useState<any>(null);
   const [students, setStudents] = useState<any[]>([]);
@@ -45,6 +46,25 @@ export default function TeacherPanel() {
     if (user) fetchTeacherData();
     else setLoading(false);
   }, [user]);
+
+  // URL da ?code=... bo'lsa avtomatik qo'shilamiz
+  useEffect(() => {
+    const code = searchParams.get("code");
+    if (code && user && !loading && !teacherData && !autoJoinTried && !teacherJoining) {
+      setTeacherJoinCode(code.toUpperCase());
+      setAutoJoinTried(true);
+      setTimeout(() => joinAsTeacherWithCode(code.toUpperCase()), 50);
+    }
+  }, [searchParams, user, loading, teacherData, autoJoinTried, teacherJoining]);
+
+  // Login qilmagan bo'lsa — kodni saqlab, register'ga yo'naltiramiz
+  useEffect(() => {
+    const code = searchParams.get("code");
+    if (!loading && !user && code) {
+      sessionStorage.setItem("pending_teacher_code", code.toUpperCase());
+      navigate(`/register?teacher-code=${code.toUpperCase()}`, { replace: true });
+    }
+  }, [user, loading, searchParams, navigate]);
 
   const fetchTeacherData = async () => {
     setLoading(true);
@@ -151,12 +171,12 @@ export default function TeacherPanel() {
     toast.success("Invite havola nusxa olindi! 🔗");
   };
 
-  const joinAsTeacher = async () => {
-    if (!teacherJoinCode.trim() || !user) return;
+  const joinAsTeacherWithCode = async (rawCode: string) => {
+    if (!rawCode.trim() || !user) return;
     setTeacherJoining(true); setTeacherJoinError("");
     try {
       const { data, error } = await supabase.rpc("join_school_as_teacher", {
-        p_invite_code: teacherJoinCode.trim().toUpperCase(),
+        p_invite_code: rawCode.trim().toUpperCase(),
       });
 
       if (error) throw error;
@@ -165,6 +185,7 @@ export default function TeacherPanel() {
         return;
       }
 
+      sessionStorage.removeItem("pending_teacher_code");
       toast.success("Maktabga o'qituvchi sifatida qo'shildingiz! 🎉");
       await fetchTeacherData();
     } catch (e: any) {
@@ -173,6 +194,8 @@ export default function TeacherPanel() {
       setTeacherJoining(false);
     }
   };
+
+  const joinAsTeacher = () => joinAsTeacherWithCode(teacherJoinCode);
 
   const shareViaTelegram = (cls: any) => {
     const link = `${window.location.origin}/register?class=${cls.invite_code}`;

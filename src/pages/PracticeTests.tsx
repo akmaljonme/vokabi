@@ -23,6 +23,19 @@ export default function PracticeTests() {
   useEffect(() => {
     const level = searchParams.get('level') as CEFRLevel | null;
     const autostart = searchParams.get('autostart');
+    const urlTestId = searchParams.get('testId');
+    const urlSkill = searchParams.get('skill') as SkillType | null;
+
+    if (urlTestId && urlSkill) {
+      // Mock test'dan to'g'ridan-to'g'ri ochiladi
+      setSelectedLevel((level as CEFRLevel) || 'B1');
+      setSelectedSkill(urlSkill);
+      setSelectedTestId(urlTestId);
+      setSelectedMockId(1);
+      setView('test');
+      return;
+    }
+
     if (level) {
       setSelectedLevel(level);
       setView(autostart === 'true' ? 'skills' : 'levels');
