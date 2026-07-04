@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { ComingSoon } from "@/components/ComingSoon";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
@@ -14,6 +16,7 @@ import { toast } from "sonner";
 
 export default function StudentPanel() {
   const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [student, setStudent] = useState<any>(null);
@@ -146,6 +149,12 @@ export default function StudentPanel() {
   };
 
   const myRank = classmates.findIndex((c: any) => c.user_id === user?.id) + 1;
+
+  if (roleLoading) return null;
+
+  if (!isAdmin) {
+    return <ComingSoon title="O'quvchi paneli" description="Maktablar uchun o'quvchi paneli tez orada ochiladi." />;
+  }
 
   if (loading) return (
     <AppLayout>

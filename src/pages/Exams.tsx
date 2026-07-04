@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { ComingSoon } from "@/components/ComingSoon";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
 import { useNavigate } from "react-router-dom";
@@ -44,6 +46,7 @@ interface ExamData {
 
 const Exams = () => {
   const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [exams, setExams] = useState<ExamData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,6 +126,12 @@ const Exams = () => {
       toast.error("Kod noto'g'ri!");
     }
   };
+
+  if (roleLoading) return null;
+
+  if (!isAdmin) {
+    return <ComingSoon title="Examlar" description="To'liq hajmli mock imtihonlar tez orada ochiladi. Hozircha 'Test Yechish' bo'limidan foydalaning!" />;
+  }
 
   if (activeExam) {
     return (

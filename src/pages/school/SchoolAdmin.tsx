@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { ComingSoon } from "@/components/ComingSoon";
 import { useNavigate } from "react-router-dom";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
@@ -22,6 +24,7 @@ type Tab = "overview" | "teachers" | "classes" | "analytics" | "payments" | "tel
 
 export default function SchoolAdmin() {
   const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [school, setSchool] = useState<School | null>(null);
   const [teachers, setTeachers] = useState<SchoolTeacher[]>([]);
@@ -299,6 +302,12 @@ export default function SchoolAdmin() {
     { id: "payments", label: "To'lovlar", icon: CreditCard },
     { id: "telegram", label: "Telegram", icon: Send },
   ];
+
+  if (roleLoading) return null;
+
+  if (!isAdmin) {
+    return <ComingSoon title="B2B Admin" description="Maktablar va o'quv markazlari uchun boshqaruv paneli tez orada ochiladi." />;
+  }
 
   if (loading) return (
     <AppLayout>

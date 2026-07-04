@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { ComingSoon } from "@/components/ComingSoon";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
@@ -16,6 +18,7 @@ type Tab = "classes" | "assignments" | "students" | "stats";
 
 export default function TeacherPanel() {
   const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState<Tab>("classes");
@@ -176,6 +179,12 @@ export default function TeacherPanel() {
     const text = `📚 ${teacherData?.schools?.name} — ${cls.name} sinfiga qo'shiling!\n\nVokabi platformasida ingliz tilini o'rganing 🚀\n\n🔗 ${link}`;
     window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, "_blank");
   };
+
+  if (roleLoading) return null;
+
+  if (!isAdmin) {
+    return <ComingSoon title="O'qituvchi paneli" description="Maktablar uchun o'qituvchi paneli tez orada ochiladi." />;
+  }
 
   if (loading) return (
     <AppLayout>

@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 const supabase: any = _sbClient;
 import {
   LayoutDashboard, Gamepad2, Video, ClipboardList,
@@ -21,13 +22,14 @@ interface NavItem {
   path: string;
   icon: React.ElementType;
   badge?: number;
+  soon?: boolean;
 }
 
 const mainItems: NavItem[] = [
   { label: "Dashboard",     path: "/dashboard",   icon: LayoutDashboard },
   { label: "O'yinlar",      path: "/games",       icon: Gamepad2 },
   { label: "Video Darslar", path: "/videos",      icon: Video },
-  { label: "Examlar",       path: "/exams",       icon: ClipboardList },
+  { label: "Examlar",       path: "/exams",       icon: ClipboardList, soon: true },
   { label: "Hamjamiyat",    path: "/community",   icon: Users },
   { label: "Leaderboard",   path: "/leaderboard", icon: Trophy },
   { label: "Turnirlar",     path: "/tournaments", icon: Sword },
@@ -41,7 +43,7 @@ const toolItems: NavItem[] = [
   { label: "Essay Checker", path: "/essay",         icon: PenTool },
   { label: "So'z Banki",    path: "/wordbank",      icon: BookOpen },
   { label: "Tools",         path: "/tools",         icon: Sparkles },
-  { label: "B2B Admin",     path: "/school/admin",  icon: School },
+  { label: "B2B Admin",     path: "/school/admin",  icon: School, soon: true },
 ];
 
 export const Sidebar = () => {
@@ -81,25 +83,42 @@ export const Sidebar = () => {
     }
   }, [sidebarW]);
 
-  const NavBtn = ({ item }: { item: NavItem }) => (
-    <motion.button
-      whileTap={{ scale: 0.97 }}
-      onClick={() => navigate(item.path)}
-      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group relative
-        ${isActive(item.path)
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-        }`}
-    >
-      <item.icon className="w-[18px] h-[18px] shrink-0" />
-      {!collapsed && <span className="truncate">{item.label}</span>}
-      {collapsed && (
-        <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-popover border border-border rounded-lg text-xs font-medium text-foreground shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none z-50 whitespace-nowrap">
-          {item.label}
-        </div>
-      )}
-    </motion.button>
-  );
+  const NavBtn = ({ item }: { item: NavItem }) => {
+    const isLocked = item.soon && !isAdmin;
+
+    return (
+      <motion.button
+        whileTap={{ scale: isLocked ? 1 : 0.97 }}
+        onClick={() => {
+          if (isLocked) {
+            toast.info("Bu bo'lim tez kunda ochiladi 🚀");
+            return;
+          }
+          navigate(item.path);
+        }}
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group relative
+          ${isLocked
+            ? "text-muted-foreground/50 cursor-default"
+            : isActive(item.path)
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+          }`}
+      >
+        <item.icon className="w-[18px] h-[18px] shrink-0" />
+        {!collapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
+        {!collapsed && isLocked && (
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground/70 shrink-0">
+            SOON
+          </span>
+        )}
+        {collapsed && (
+          <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-popover border border-border rounded-lg text-xs font-medium text-foreground shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none z-50 whitespace-nowrap">
+            {item.label}{isLocked ? " (tez kunda)" : ""}
+          </div>
+        )}
+      </motion.button>
+    );
+  };
 
   return (
     <motion.aside
