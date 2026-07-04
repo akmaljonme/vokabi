@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 export interface MockQuestion {
   id: string;
   part_id: string;
@@ -134,8 +132,7 @@ export function QuestionRenderer({ q, value, onChange, readOnly, showCorrect }: 
     case "sentence_completion":
     case "note_completion":
     case "short_answer": {
-      // Render question_text; if it contains ___ replace with input; otherwise show single input below.
-      const parts = useMemo(() => q.question_text.split(/_{2,}/), [q.question_text]);
+      const parts = q.question_text.split(/_{2,}/);
       if (parts.length > 1) {
         return (
           <p className="text-sm leading-relaxed">
