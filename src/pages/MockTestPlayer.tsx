@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { ComingSoon } from "@/components/ComingSoon";
 import {
   QuestionRenderer,
   isCorrect,
@@ -45,6 +47,7 @@ export default function MockTestPlayer() {
   const { mockId, skill } = useParams<{ mockId: string; skill: Skill }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
 
   const [mock, setMock] = useState<any>(null);
   const [parts, setParts] = useState<Part[]>([]);
@@ -157,6 +160,12 @@ export default function MockTestPlayer() {
 
   const nextSkill = SKILL_ORDER[SKILL_ORDER.indexOf(skill as Skill) + 1];
   const prevSkill = SKILL_ORDER[SKILL_ORDER.indexOf(skill as Skill) - 1];
+
+  if (roleLoading) return null;
+
+  if (!isAdmin) {
+    return <ComingSoon title="Mock Testlar" description="To'liq hajmli IELTS mock testlari tez orada ochiladi." />;
+  }
 
   if (loading) {
     return (

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/AppLayout";
+import { useUserRole } from "@/hooks/useUserRole";
+import { ComingSoon } from "@/components/ComingSoon";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 import { Loader2, Headphones, BookOpen, PenLine, Mic, Sparkles } from "lucide-react";
 
@@ -38,6 +40,7 @@ const SKILL_META = [
 
 export default function MockTests() {
   const navigate = useNavigate();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const [series, setSeries] = useState<MockSeries[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,6 +66,12 @@ export default function MockTests() {
   const openSkill = (mockId: string, skill: string) => {
     navigate(`/mock/${mockId}/${skill}`);
   };
+
+  if (roleLoading) return null;
+
+  if (!isAdmin) {
+    return <ComingSoon title="Mock Testlar" description="To'liq hajmli IELTS mock testlari tez orada ochiladi. Hozircha 'Test Yechish' bo'limidan foydalaning!" />;
+  }
 
   return (
     <AppLayout>

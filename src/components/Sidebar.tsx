@@ -27,10 +27,10 @@ interface NavItem {
 
 const mainItems: NavItem[] = [
   { label: "Dashboard",     path: "/dashboard",   icon: LayoutDashboard },
-  { label: "Mock Testlar",  path: "/mock-tests",  icon: BookMarked },
+  { label: "Mock Testlar",  path: "/mock-tests",  icon: BookMarked, soon: true },
   { label: "O'yinlar",      path: "/games",       icon: Gamepad2 },
   { label: "Video Darslar", path: "/videos",      icon: Video },
-  { label: "Examlar",       path: "/exams",       icon: ClipboardList, soon: true },
+  { label: "Examlar",       path: "/exams",       icon: ClipboardList },
   { label: "Hamjamiyat",    path: "/community",   icon: Users },
   { label: "Leaderboard",   path: "/leaderboard", icon: Trophy },
   { label: "Turnirlar",     path: "/tournaments", icon: Sword },
