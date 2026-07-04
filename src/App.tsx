@@ -36,6 +36,7 @@ const LanguageLevel  = lazy(() => import("./pages/LanguageLevel"));
 const LearningPath   = lazy(() => import("./pages/LearningPath"));
 const PracticeTests  = lazy(() => import("./pages/PracticeTests"));
 const MockTests      = lazy(() => import("./pages/MockTests"));
+const MockTestPlayer = lazy(() => import("./pages/MockTestPlayer"));
 const Tests          = lazy(() => import("./pages/Tests"));
 const Articles       = lazy(() => import("./pages/Articles"));
 const ArticleReader  = lazy(() => import("./pages/ArticleReader"));
@@ -115,6 +116,7 @@ const App = () => (
                     <Route path="/learning-path" element={<ErrorBoundary><LearningPath /></ErrorBoundary>} />
                     <Route path="/practice" element={<ErrorBoundary><PracticeTests /></ErrorBoundary>} />
                     <Route path="/mock-tests" element={<ErrorBoundary><MockTests /></ErrorBoundary>} />
+                    <Route path="/mock/:mockId/:skill" element={<ErrorBoundary><MockTestPlayer /></ErrorBoundary>} />
                     <Route path="/language/:langId" element={<ErrorBoundary><Languages /></ErrorBoundary>} />
                     <Route path="/school"       element={<ErrorBoundary><SchoolAdmin /></ErrorBoundary>} />
                     <Route path="/school/admin" element={<ErrorBoundary><SchoolAdmin /></ErrorBoundary>} />

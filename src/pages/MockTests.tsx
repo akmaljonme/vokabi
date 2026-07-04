@@ -60,10 +60,8 @@ export default function MockTests() {
     })();
   }, []);
 
-  const openSkill = (testId: string | null, skill: string) => {
-    if (!testId) return;
-    // Mavjud test yechish sahifasiga yo'naltiramiz — testId orqali
-    navigate(`/practice?testId=${testId}&skill=${skill}`);
+  const openSkill = (mockId: string, skill: string) => {
+    navigate(`/mock/${mockId}/${skill}`);
   };
 
   return (
@@ -125,25 +123,16 @@ export default function MockTests() {
                           {t.title || `Test ${t.test_number}`}
                         </p>
                         <div className="space-y-1.5">
-                          {SKILL_META.map((sk) => {
-                            const testId = (t as any)[sk.key] as string | null;
-                            const enabled = !!testId;
-                            return (
-                              <button
-                                key={sk.key}
-                                onClick={() => openSkill(testId, sk.skill)}
-                                disabled={!enabled}
-                                className={`w-full flex items-center gap-2 text-xs font-medium px-2 py-1.5 rounded-lg transition-all ${
-                                  enabled
-                                    ? "text-foreground hover:bg-primary/10 hover:text-primary"
-                                    : "text-muted-foreground/50 cursor-not-allowed"
-                                }`}
-                              >
-                                <sk.icon className="w-3.5 h-3.5" />
-                                {sk.label}
-                              </button>
-                            );
-                          })}
+                          {SKILL_META.map((sk) => (
+                            <button
+                              key={sk.key}
+                              onClick={() => openSkill(t.id, sk.skill)}
+                              className="w-full flex items-center gap-2 text-xs font-medium px-2 py-1.5 rounded-lg text-foreground hover:bg-primary/10 hover:text-primary transition-all"
+                            >
+                              <sk.icon className="w-3.5 h-3.5" />
+                              {sk.label}
+                            </button>
+                          ))}
                         </div>
                       </div>
                     ))
