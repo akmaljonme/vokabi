@@ -61,9 +61,8 @@ export default function MockTests() {
   }, []);
 
   const openSkill = (testId: string | null, skill: string) => {
-    if (!testId) return;
-    // Mavjud test yechish sahifasiga yo'naltiramiz — testId orqali
-    navigate(`/practice?testId=${testId}&skill=${skill}`);
+    // Endi mock playerga yo'naltiramiz (testId endi ishlatilmaydi — kontent mock ichida)
+    navigate(`/mock/${(arguments[2] as string) || testId}/${skill}`);
   };
 
   return (
