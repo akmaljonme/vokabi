@@ -15,6 +15,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { DailyGameQuests } from "@/components/games/DailyGameQuests";
+import { Tilt3D } from "@/components/Tilt3D";
 
 // Lazy load — faqat bosilganda yuklanadi
 const WordMatchGame     = lazy(() => import("@/components/games/WordMatchGame").then(m => ({ default: m.WordMatchGame })));
@@ -341,54 +342,38 @@ export default function Games() {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-5xl mx-auto mb-8">
-                <motion.button
-                  whileHover={{ y: -4, transition: { type: "spring", stiffness: 400, damping: 15 } }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleSetGame("tournament")}
-                  className="group p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 hover:shadow-lg hover:shadow-amber-500/20 transition-colors text-center"
-                >
+                <Tilt3D glow="#f59e0b" onClick={() => handleSetGame("tournament")}
+                  className="group p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 text-center">
                   <Crown className="w-6 h-6 text-amber-500 mx-auto mb-1.5 group-hover:scale-110 group-hover:-rotate-6 transition-transform" />
                   <p className="text-sm font-bold">Turnir</p>
                   <p className="text-[10px] text-muted-foreground">
                     Haftalik musobaqa
                   </p>
-                </motion.button>
-                <motion.button
-                  whileHover={{ y: -4, transition: { type: "spring", stiffness: 400, damping: 15 } }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleSetGame("friends")}
-                  className="group p-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-colors text-center"
-                >
+                </Tilt3D>
+                <Tilt3D glow="#6366f1" onClick={() => handleSetGame("friends")}
+                  className="group p-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 text-center">
                   <Users className="w-6 h-6 text-primary mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
                   <p className="text-sm font-bold">Do'stlar</p>
                   <p className="text-[10px] text-muted-foreground">
                     Birga o'ynash
                   </p>
-                </motion.button>
-                <motion.button
-                  whileHover={{ y: -4, transition: { type: "spring", stiffness: 400, damping: 15 } }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleSetGame("stats")}
-                  className="group p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 hover:shadow-lg hover:shadow-emerald-500/20 transition-colors text-center"
-                >
+                </Tilt3D>
+                <Tilt3D glow="#10b981" onClick={() => handleSetGame("stats")}
+                  className="group p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-center">
                   <BarChart3 className="w-6 h-6 text-emerald-500 mx-auto mb-1.5 group-hover:scale-110 transition-transform" />
                   <p className="text-sm font-bold">Statistika</p>
                   <p className="text-[10px] text-muted-foreground">
                     Batafsil tahlil
                   </p>
-                </motion.button>
-                <motion.button
-                  whileHover={{ y: -4, transition: { type: "spring", stiffness: 400, damping: 15 } }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate("/leaderboard")}
-                  className="group p-4 rounded-2xl border border-fuchsia-500/30 bg-fuchsia-500/5 hover:bg-fuchsia-500/10 hover:shadow-lg hover:shadow-fuchsia-500/20 transition-colors text-center"
-                >
+                </Tilt3D>
+                <Tilt3D glow="#d946ef" onClick={() => navigate("/leaderboard")}
+                  className="group p-4 rounded-2xl border border-fuchsia-500/30 bg-fuchsia-500/5 hover:bg-fuchsia-500/10 text-center">
                   <Trophy className="w-6 h-6 text-fuchsia-500 mx-auto mb-1.5 group-hover:scale-110 group-hover:rotate-6 transition-transform" />
                   <p className="text-sm font-bold">Leaderboard</p>
                   <p className="text-[10px] text-muted-foreground">
                     Top o'yinchilar
                   </p>
-                </motion.button>
+                </Tilt3D>
               </div>
 
               <div className="max-w-5xl mx-auto mb-8">
@@ -433,50 +418,52 @@ export default function Games() {
                       {catGames.map((game, i) => {
                         const glow = glowColor(game.color);
                         return (
-                          <motion.button
+                          <motion.div
                             key={game.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.03, type: "spring", stiffness: 300, damping: 22 }}
-                            whileHover={{ y: -6 }}
-                            whileTap={{ scale: 0.97 }}
-                            onClick={() => setActiveGame(game.id)}
-                            style={{ ["--glow" as any]: glow }}
-                            className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 text-left transition-shadow duration-300 hover:shadow-[0_10px_30px_-10px_var(--glow)]"
                           >
-                            {/* Yuqori porloq chiziq — o'yin rangiga mos */}
-                            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${game.color} opacity-70`} />
-                            <div
-                              className={`absolute inset-0 bg-gradient-to-br ${game.color} opacity-0 group-hover:opacity-[0.07] transition-opacity`}
-                            />
-                            <div className="flex items-start justify-between relative">
-                              <motion.div
-                                whileHover={{ scale: 1.15, rotate: [0, -8, 8, 0] }}
-                                transition={{ duration: 0.4 }}
-                                className={`w-10 h-10 rounded-xl bg-gradient-to-br ${game.color} flex items-center justify-center text-xl shadow-sm mb-2`}
-                              >
-                                {game.icon}
-                              </motion.div>
-                              {"badge" in game && game.badge && (
-                                <span
-                                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${game.badge === "AI" ? "bg-primary text-primary-foreground" : "bg-emerald-500 text-white animate-pulse"}`}
+                            <Tilt3D
+                              glow={glow}
+                              onClick={() => setActiveGame(game.id)}
+                              className="group overflow-hidden rounded-2xl border border-border bg-card p-4 text-left"
+                            >
+                              {/* Yuqori porloq chiziq — o'yin rangiga mos */}
+                              <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${game.color} opacity-70`} />
+                              <div
+                                className={`absolute inset-0 bg-gradient-to-br ${game.color} opacity-0 group-hover:opacity-[0.07] transition-opacity`}
+                              />
+                              <div className="flex items-start justify-between relative">
+                                <motion.div
+                                  whileHover={{ rotateY: 360 }}
+                                  transition={{ duration: 0.7, ease: "easeInOut" }}
+                                  style={{ transformStyle: "preserve-3d" }}
+                                  className={`w-10 h-10 rounded-xl bg-gradient-to-br ${game.color} flex items-center justify-center text-xl shadow-md mb-2`}
                                 >
-                                  {game.badge}
+                                  {game.icon}
+                                </motion.div>
+                                {"badge" in game && game.badge && (
+                                  <span
+                                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${game.badge === "AI" ? "bg-primary text-primary-foreground" : "bg-emerald-500 text-white animate-pulse"}`}
+                                  >
+                                    {game.badge}
+                                  </span>
+                                )}
+                              </div>
+                              <h3 className="text-sm font-bold mb-0.5 relative">{game.title}</h3>
+                              <p className="text-[11px] text-muted-foreground relative">
+                                {game.desc}
+                              </p>
+                              <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground relative">
+                                <Trophy className="w-3 h-3" /> XP
+                                <Zap className="w-3 h-3 ml-1" /> Streak
+                                <span className="ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                                  O'ynash →
                                 </span>
-                              )}
-                            </div>
-                            <h3 className="text-sm font-bold mb-0.5 relative">{game.title}</h3>
-                            <p className="text-[11px] text-muted-foreground relative">
-                              {game.desc}
-                            </p>
-                            <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground relative">
-                              <Trophy className="w-3 h-3" /> XP
-                              <Zap className="w-3 h-3 ml-1" /> Streak
-                              <span className="ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                                O'ynash →
-                              </span>
-                            </div>
-                          </motion.button>
+                              </div>
+                            </Tilt3D>
+                          </motion.div>
                         );
                       })}
                     </div>
