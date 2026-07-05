@@ -42,7 +42,6 @@ async function assertAllowed(authHeader: string, mode: string | undefined): Prom
     return { ok: false, status: 429, error: "Kunlik ovozli limit tugadi" };
   }
   return { ok: false, status: 403, error: "Pro obuna kerak" };
-  return { ok: true };
 }
 
 serve(async (req) => {
