@@ -1,130 +1,92 @@
-# Jumpinto-style Mock Test Tizimi + Dashboard Redesign
+# Alisa — Vokabi ovozli AI yordamchisi
 
-## 1. Yangi Mock Test Ma'lumotlar Modeli
+## Umumiy oqim
 
-Hozirgi `mock_tests` faqat mavjud `tests` ga link qiladi — buni to'liq o'zgartirmiz. Mock test o'ziga alohida kontent egasi bo'ladi.
+```text
+[Mic tugma] → useVoiceRecognition (Web Speech API, uz-UZ→en-US fallback)
+        │
+        ├─ Buyruq rejimi ─► voice-assistant-command edge (Gemini JSON intent)
+        │                     ├─ navigate → react-router
+        │                     ├─ action   → local handler
+        │                     └─ chat     → reply
+        │
+        └─ Speaking rejimi ─► voice-speaking-practice edge (Gemini examiner)
+                                └─ 4-savoldan keyin → check-speaking (mavjud)
 
-### Yangi jadvallar (migration)
+Har bir reply → elevenlabs-tts (mavjud, keshlangan)
+```
 
-**`mock_test_parts`** — har bir mock test uchun bo'limlar
-- `mock_test_id` (FK → mock_tests.id)
-- `skill` enum: listening | reading | writing | speaking
-- `part_number` (1..N — admin belgilaydi)
-- `title`, `instruction`
-- `passage_text` (reading uchun)
-- `audio_url` (listening uchun)
-- `image_url` (writing task 1 grafik uchun)
-- `duration_seconds` (skill uchun umumiy vaqt part 1 da)
+## 1. Backend
 
-**`mock_test_questions`** — har xil savol turlari
-- `part_id` (FK → mock_test_parts.id)
-- `question_number`
-- `question_type` enum:
-  - `multiple_choice` (bitta javob)
-  - `multiple_choice_multi` (bir nechta)
-  - `true_false_notgiven`
-  - `yes_no_notgiven`
-  - `matching_headings`
-  - `matching_features`
-  - `matching_information`
-  - `sentence_completion` (bo'sh joy to'ldirish)
-  - `note_completion` (jadval/notes)
-  - `short_answer`
-  - `writing_task` (task 1 / task 2 — javob = insho matni)
-  - `speaking_question` (audio yozib topshirish)
-- `question_text`
-- `options` jsonb (variantlar uchun)
-- `correct_answer` jsonb (matn, massiv yoki accepted answers)
-- `points` (default 1)
-- `group_label` (masalan "Questions 1-6" sarlavhasi uchun)
+### Migration
+Yangi jadval `voice_usage` (user_id, used_date, count) + `increment_voice_usage(_user_id)` RPC. Kunlik limit: free = 20, pro = cheksiz.
 
-Grants + RLS: admin CRUD, autentifikatsiyalanganlar `SELECT` faol seriyadagilarga.
+### Yangi edge function: `voice-assistant-command`
+- Kirish: `{ transcript, currentPath, conversationHistory? }`
+- Auth tekshiruvi + kunlik limit (RPC orqali)
+- Gemini `gemini-2.0-flash` chaqiriladi, JSON tizim prompti (loyihadagi ` /dashboard /games /practice /exams /leaderboard /pricing /articles` yo'llari) bilan
+- Javobni JSON code fence'dan tozalash, `try/catch` bilan fallback intent `chat`
+- Chiqish: `{ intent, path, action, reply }`
 
-**`mock_test_attempts`** — foydalanuvchi urinishlari
-- `user_id`, `mock_test_id`, `skill`
-- `answers` jsonb
-- `score`, `band_score`, `ai_feedback` (writing/speaking uchun)
-- `submitted_at`
+### Yangi edge function: `voice-speaking-practice`
+- Kirish: `{ history, part (1|2|3), topic? }`
+- Gemini IELTS examiner tizim prompti — qisqa, tabiiy, keyingi savol
+- Chiqish: `{ reply, shouldAssess: boolean }` (4 turdan keyin `true`)
+- Auth + kunlik limit tekshiruvi
 
-## 2. Admin — Yangi Mock Test Builder
+Ikkala funksiya CORS sarlavhalarini `elevenlabs-tts`dan takrorlaydi.
 
-`MockTestsTab.tsx` ni to'liq qayta yozamiz:
+### `elevenlabs-tts` keshi
+Xotira ichida `Map<hash, ArrayBuffer>` — bir instansiya davomida takroriy matn qayta TTS'ga bormasin (100 tagacha, LRU).
 
-- Series (yaratish/o'chirish/rang) — hozirgi qismi qoladi
-- Har mock ichida: **4 skill karta** (Listening / Reading / Writing / Speaking)
-- Har skill ochilganda: **Parts** paneli (Part qo'shish, o'chirish, tartib)
-- Har Part ichida:
-  - Skillga qarab: matn / audio yuklash / rasm yuklash / instruction
-  - **Questions builder** — savol turini tanlash → dinamik forma:
-    - multiple_choice: variant qatorlari + to'g'ri javobni tanlash
-    - true_false_notgiven: to'g'ri javobni radio
-    - matching: chap tomon banki + o'ng tomon items
-    - sentence_completion: matn ichida `___` (yoki `{{1}}`) + accepted answers
-    - writing_task: rubrik + minimal so'zlar
-    - speaking_question: audio prompt (optional) + savol
-  - Savollarni tartib bilan qayta ko'rish
+## 2. Frontend
 
-Mavjud `tests` bilan bog'liq ustunlarni (`listening_test_id` va h.k.) ishlatishni to'xtatamiz — sof mock kontenti.
+### `src/hooks/useVoiceRecognition.ts`
+- `SpeechRecognition | webkitSpeechRecognition` mavjudligini tekshiradi
+- `isSupported`, `isListening`, `transcript`, `error`, `start(lang)`, `stop()`
+- `uz-UZ` bilan boshlaydi; bo'sh natija yoki `no-speech` xatosida `en-US` bilan qayta urinadi
+- Push-to-talk: har `start` alohida sessiya, doimiy tinglash yo'q
 
-## 3. Mock Test Player (Jumpinto-style)
+### `src/hooks/useVoicePlayback.ts`
+- Blob URL keshi (`Map<text, string>`) + `audio.play()`
+- `elevenlabs-tts` funksiyasiga `supabase.functions.invoke` bilan
 
-Yangi sahifa: `/mock/:mockId/:skill`
+### `src/components/VoiceAssistant.tsx`
+Suzuvchi widget (ekranning past-o'ng burchagi, `AppLayout`ga qo'shiladi):
+- **Yopiq holat:** doira tugma, Mic ikonkasi, `framer-motion` bilan pulse
+- **Ochiq holat:** kengaygan panel (`Card`, `bg-card/95 backdrop-blur`, semantik ranglar):
+  - Rejim toggle: `Buyruq | Speaking`
+  - Jonli transkript
+  - Oxirgi 4 xabar (foydalanuvchi + Alisa) — pufakchalar
+  - Katta mikrofon tugmasi (push-to-talk): bosilganda tinglash animatsiyasi (to'lqinli 3 nuqta)
+  - Yordamchi holatlari: mikrofon ruxsati yo'q → "Ruxsat berish" tugmasi; STT qo'llab-quvvatlanmaydi → matn kiritish maydoni; limit tugadi → AI Tutor'ga link
+- Har javob geliyar TTS orqali o'qiladi va matn sifatida ham ko'rsatiladi
 
-Layout (screenshotlarga qarab):
-- Yuqorida: logo + "Mock Test" + timer + tema/til
-- Chap: **PART N** + audio player (listening) yoki passage (reading) yoki task brief (writing) yoki savollar ro'yxati (speaking)
-- O'ng: **Questions X-Y** paneli — savol turiga qarab render
-- Pastda: navigator bar — `Scores | 1 2 3 4 | Reading →` (skill oralig'ida navigatsiya)
-- Timer tugagach yoki "Submit" bosilganda:
-  - Listening/Reading: avtomatik ball hisoblanadi (accepted answers bilan solishtirish, case-insensitive)
-  - Writing/Speaking: `check-writing` / `check-speaking` edge function orqali AI baholash
-- Scores ekrani: to'g'ri/noto'g'ri, band score konvertatsiyasi
+### `AppLayout.tsx`ga integratsiya
+Login qilingan foydalanuvchilar uchun `<VoiceAssistant />` qo'shiladi. `/tests/:id` va `/exams` da faol testda yashiriladi (test interfeysida focus buzilmasin).
 
-Har savol turi uchun renderer (`QuestionRenderer.tsx`):
-- Radio (MC / TFNG / YNNG)
-- Checkbox (MC-multi)
-- Text input (completion, short answer)
-- Drag/select matching
-- Textarea + word counter (writing)
-- MediaRecorder (speaking)
+## 3. Sifat nazorati
 
-## 4. Practice Testlarni Ham Kengaytirish
+- Har edge deploydan keyin `curl_edge_functions` bilan smoke test
+- `tsgo` bilan tip-check (harness avtomatik bajaradi)
+- Mobil Safari fallback: STT yo'q bo'lsa matn input paneli avtomatik ko'rinadi
 
-Mavjud `questions` jadvaliga yangi `question_type` qiymatlarini qo'shamiz (yuqoridagi ro'yxatdagilar). `TestInterface.tsx` va `QuestionFormDialog.tsx` yangi turlarni qo'llasin. Admin practice test yaratishda ham xuddi shu builder komponentidan foydalanadi (`QuestionEditor.tsx` — umumiy komponent).
+## Fayllar
 
-## 5. Dashboard Redesign — "1 Milliardlik"
+**Yangi**
+- `supabase/migrations/<ts>_voice_usage.sql`
+- `supabase/functions/voice-assistant-command/index.ts`
+- `supabase/functions/voice-speaking-practice/index.ts`
+- `src/hooks/useVoiceRecognition.ts`
+- `src/hooks/useVoicePlayback.ts`
+- `src/components/VoiceAssistant.tsx`
 
-`Dashboard.tsx` ni premium darajaga ko'taramiz:
+**O'zgartiriladi**
+- `supabase/functions/elevenlabs-tts/index.ts` (kesh + kunlik limit inkrementi)
+- `src/components/AppLayout.tsx` (widget mount)
 
-- **Hero:** Katta gradient mesh fon (radial + conic), foydalanuvchi ismi, level ring (SVG animated), streak flame ikonasi (Lottie-style pulse), Pro badge
-- **Bento grid** (12-col):
-  - Katta karta: Haftalik AI study plan preview + progress ring
-  - O'rta karta: Band score bashorati (chart)
-  - Kichik kartalar: XP, streak, tests taken, mock hisobi
-  - "Continue mock test" resume banneri (agar tugallanmagan attempt bo'lsa)
-- **Study heatmap** — GitHub uslubidagi (mavjud, redizayn)
-- **Motion:** framer-motion stagger, hover 3D tilt, glassmorphism `backdrop-blur-xl`, border gradient
-- Semantic tokenlar (`index.css`), yangi `--gradient-hero`, `--shadow-premium` qo'shamiz
-- To'liq responsive, mobile-first
-
-## Texnik amalga oshirish tartibi
-
-1. **Migration** — yangi 3 jadval + eski `mock_tests` skill_id ustunlarini `nullable` qoldiramiz (backward compat)
-2. **Admin builder** — `MockTestsTab` qayta yozish + skill/part/question editor
-3. **Player** — `/mock/:id/:skill` route, `QuestionRenderer` komponenti, timer, scoring
-4. **Auto-grade + AI grade** — edge funksiyalardan foydalanish
-5. **Practice** — `questions.question_type` kengaytirish, `TestInterface` yangi renderer
-6. **Dashboard** — hero + bento + tokens
-7. Sidebar/route: mavjud `/mock-tests` sahifasidan yangi player ga link
-
-## Fayllar (asosiy)
-
-- `supabase/migrations/…_mock_test_content.sql`
-- `src/components/admin/MockTestsTab.tsx` (rewrite)
-- `src/components/admin/mock/PartsEditor.tsx`, `QuestionEditor.tsx`, `QuestionTypeForms.tsx` (new)
-- `src/pages/MockTestPlayer.tsx` (new)
-- `src/components/mock/QuestionRenderer.tsx`, `MockTimer.tsx`, `MockNavBar.tsx` (new)
-- `src/pages/MockTests.tsx` — yangi playerga yo'naltirish
-- `src/pages/Dashboard.tsx` — redesign
-- `src/index.css` — yangi tokenlar
-- `src/components/TestInterface.tsx` + `QuestionFormDialog.tsx` — yangi savol turlari
+## Muhim qarorlar
+- Faqat push-to-talk (doimiy tinglash yo'q — batareya, maxfiylik, brauzer siyosati)
+- STT butunlay klientda (bepul, past kechikish)
+- Intent klassifikatori server tarafda (prompt injection'dan himoya + versiyalash oson)
+- Kunlik limit RPC `SECURITY DEFINER` orqali — mijoz aylanib o'tolmaydi
