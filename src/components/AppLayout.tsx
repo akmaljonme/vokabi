@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useUserRole } from "@/hooks/useUserRole";
 import { BannerAd, PopupAd } from "@/components/ads/AdComponents";
+import { VoiceAssistant } from "@/components/VoiceAssistant";
 
 
 interface AppLayoutProps {
@@ -47,6 +48,7 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
         {withFooter && <Footer />}
       </motion.div>
       {user && <PopupAd />}
+      {user && <VoiceAssistant />}
     </div>
   );
 };
