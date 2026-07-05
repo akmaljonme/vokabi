@@ -37,7 +37,8 @@ interface ExamData {
   time_limit: number;
   max_attempts: number;
   is_active: boolean;
-  access_code: string | null;
+  access_code?: string | null;
+  requires_code?: boolean;
   question_count?: number;
   attempts_used?: number;
 }
@@ -63,7 +64,7 @@ const Exams = () => {
     if (!user) return;
     try {
       const { data: examData } = await (supabase
-        .from("exams" as any)
+        .from("exams_public" as any)
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false }) as any);
@@ -83,6 +84,7 @@ const Exams = () => {
             ...exam,
             question_count: qErr ? (exam.question_count ?? 0) : (qCount ?? 0),
             attempts_used: aCount ?? 0,
+            requires_code: true,
           };
         }),
       );
@@ -101,27 +103,23 @@ const Exams = () => {
       toast.error("Urinishlar tugadi");
       return;
     }
-    // access_code yo'q bo'lsa to'g'ridan-to'g'ri kirish
-    if (!exam.access_code) {
-      setActiveExam(exam);
-      return;
-    }
     setCodeDialogExam(exam);
     setEnteredCode("");
   };
 
-  const verifyCode = () => {
+  const verifyCode = async () => {
     if (!codeDialogExam) return;
-    if (
-      enteredCode.trim().toUpperCase() ===
-      (codeDialogExam.access_code || "").toUpperCase()
-    ) {
-      setActiveExam(codeDialogExam);
-      setCodeDialogExam(null);
-      setEnteredCode("");
-    } else {
+    const { data, error } = await supabase.rpc("verify_exam_access" as any, {
+      _exam_id: codeDialogExam.id,
+      _code: enteredCode.trim(),
+    });
+    if (error || data !== true) {
       toast.error("Kod noto'g'ri!");
+      return;
     }
+    setActiveExam(codeDialogExam);
+    setCodeDialogExam(null);
+    setEnteredCode("");
   };
 
   if (activeExam) {
