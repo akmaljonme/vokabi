@@ -1,6 +1,8 @@
 import { useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`;
+
 const cache = new Map<string, string>();
 
 export function useVoicePlayback() {
@@ -26,11 +28,22 @@ export function useVoicePlayback() {
       stop();
       let url = cache.get(key);
       if (!url) {
-        const { data, error } = await supabase.functions.invoke("elevenlabs-tts", {
-          body: { text: key, mode: "voice_assistant" },
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        const res = await fetch(TTS_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ text: key, mode: "voice_assistant" }),
         });
-        if (error) throw error;
-        const blob = data instanceof Blob ? data : new Blob([data as ArrayBuffer], { type: "audio/mpeg" });
+        if (!res.ok) {
+          const err = await res.text().catch(() => "");
+          throw new Error(err || `TTS ${res.status}`);
+        }
+        const blob = await res.blob();
         url = URL.createObjectURL(blob);
         // Limit cache
         if (cache.size > 30) {
