@@ -433,6 +433,13 @@ export type Database = {
             referencedRelation: "exams"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "exam_attempts_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       exam_audio_files: {
@@ -472,6 +479,13 @@ export type Database = {
             columns: ["exam_id"]
             isOneToOne: false
             referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_audio_files_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams_public"
             referencedColumns: ["id"]
           },
         ]
@@ -530,6 +544,13 @@ export type Database = {
             columns: ["exam_id"]
             isOneToOne: false
             referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_group_permissions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams_public"
             referencedColumns: ["id"]
           },
           {
@@ -619,6 +640,13 @@ export type Database = {
             referencedRelation: "exams"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "exam_questions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       exam_reading_passages: {
@@ -657,6 +685,13 @@ export type Database = {
             referencedRelation: "exams"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "exam_reading_passages_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       exam_user_assignments: {
@@ -684,6 +719,13 @@ export type Database = {
             columns: ["exam_id"]
             isOneToOne: false
             referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_user_assignments_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2167,7 +2209,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      exams_public: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string | null
+          is_active: boolean | null
+          level: string | null
+          max_attempts: number | null
+          skill: string | null
+          time_limit: number | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          level?: string | null
+          max_attempts?: number | null
+          skill?: string | null
+          time_limit?: number | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          level?: string | null
+          max_attempts?: number | null
+          skill?: string | null
+          time_limit?: number | null
+          title?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_username_available: {
@@ -2205,6 +2285,10 @@ export type Database = {
       join_school_class_by_code: {
         Args: { p_invite_code: string }
         Returns: Json
+      }
+      verify_exam_access: {
+        Args: { _code: string; _exam_id: string }
+        Returns: boolean
       }
     }
     Enums: {
