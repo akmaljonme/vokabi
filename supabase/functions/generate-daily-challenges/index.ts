@@ -16,12 +16,24 @@ serve(async (req) => {
     if (!userRes.ok) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+    const { id: userId } = await userRes.json();
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Only admins may trigger regeneration of daily challenges (prevents credit abuse)
+    const { data: existingToday } = await supabase.from("daily_challenges").select("id").eq("challenge_date", new Date().toISOString().split("T")[0]);
+    if (existingToday && existingToday.length >= 3) {
+      return new Response(JSON.stringify({ challenges: existingToday }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const { data: roleRow } = await supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
+    if (!roleRow) {
+      return new Response(JSON.stringify({ error: "Admin ruxsati kerak" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const today = new Date().toISOString().split("T")[0];
 
     // Check if challenges already exist for today

@@ -1,9 +1,24 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+async function assertProUser(authHeader: string): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+  const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: { Authorization: authHeader, apikey: SUPABASE_ANON_KEY } });
+  if (!userRes.ok) return { ok: false, status: 401, error: "Unauthorized" };
+  const { id: userId } = await userRes.json();
+  const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  const { data: sub } = await admin.from("subscriptions").select("plan, expires_at").eq("user_id", userId).maybeSingle();
+  const active = sub && sub.plan === "pro" && (!sub.expires_at || new Date(sub.expires_at) > new Date());
+  if (!active) return { ok: false, status: 403, error: "Pro obuna kerak" };
+  return { ok: true };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -12,10 +27,8 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization") || "";
-    const userRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/auth/v1/user`, { headers: { Authorization: authHeader, apikey: Deno.env.get("SUPABASE_ANON_KEY") || "" } });
-    if (!userRes.ok) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    const gate = await assertProUser(authHeader);
+    if (!gate.ok) return new Response(JSON.stringify({ error: gate.error }), { status: gate.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const { text, voiceId = "JBFqnCBsd6RMkjVDRZzb" } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 

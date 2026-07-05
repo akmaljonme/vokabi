@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,6 +7,18 @@ const corsHeaders = {
 };
 
 const clampBand = (value: number) => Math.max(1, Math.min(9, Math.round(value * 2) / 2));
+
+async function assertProUser(authHeader: string) {
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+  const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: { Authorization: authHeader, apikey: Deno.env.get("SUPABASE_ANON_KEY") || "" } });
+  if (!userRes.ok) return { ok: false as const, status: 401, error: "Unauthorized" };
+  const { id: userId } = await userRes.json();
+  const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const { data: sub } = await admin.from("subscriptions").select("plan, expires_at").eq("user_id", userId).maybeSingle();
+  const active = sub && sub.plan === "pro" && (!sub.expires_at || new Date(sub.expires_at) > new Date());
+  if (!active) return { ok: false as const, status: 403, error: "Pro obuna kerak" };
+  return { ok: true as const };
+}
 
 const buildFallbackSpeakingEvaluation = (transcript: string, question: string, level: string) => {
   const cleaned = (transcript || "").trim();
@@ -62,8 +75,8 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization") || "";
-    const userRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/auth/v1/user`, { headers: { Authorization: authHeader, apikey: Deno.env.get("SUPABASE_ANON_KEY") || "" } });
-    if (!userRes.ok) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const gate = await assertProUser(authHeader);
+    if (!gate.ok) return new Response(JSON.stringify({ error: gate.error }), { status: gate.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     const { transcript, question, level } = await req.json();
     if (typeof transcript === "string" && transcript.length > 8000) {
       return new Response(JSON.stringify({ error: "Transcript too long (max 8000 chars)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
