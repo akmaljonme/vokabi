@@ -6,7 +6,25 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-async function assertProUser(authHeader: string): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
+const FREE_VOICE_DAILY_LIMIT = 20;
+
+// Simple in-memory LRU cache for repeated phrases within a warm instance
+const ttsCache = new Map<string, ArrayBuffer>();
+const CACHE_MAX = 100;
+function cacheGet(key: string): ArrayBuffer | undefined {
+  const v = ttsCache.get(key);
+  if (v) { ttsCache.delete(key); ttsCache.set(key, v); }
+  return v;
+}
+function cacheSet(key: string, buf: ArrayBuffer) {
+  if (ttsCache.size >= CACHE_MAX) {
+    const first = ttsCache.keys().next().value;
+    if (first) ttsCache.delete(first);
+  }
+  ttsCache.set(key, buf);
+}
+
+async function assertAllowed(authHeader: string, mode: string | undefined): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
   const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -16,8 +34,14 @@ async function assertProUser(authHeader: string): Promise<{ ok: true } | { ok: f
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
   const { data: sub } = await admin.from("subscriptions").select("plan, expires_at").eq("user_id", userId).maybeSingle();
   const active = sub && sub.plan === "pro" && (!sub.expires_at || new Date(sub.expires_at) > new Date());
-  if (!active) return { ok: false, status: 403, error: "Pro obuna kerak" };
-  return { ok: true };
+  if (active) return { ok: true };
+  // Voice-assistant mode: free users can use TTS within the daily voice quota
+  if (mode === "voice_assistant") {
+    const { data: row } = await admin.from("voice_usage").select("count").eq("user_id", userId).eq("used_date", new Date().toISOString().split("T")[0]).maybeSingle();
+    if ((row?.count ?? 0) <= FREE_VOICE_DAILY_LIMIT) return { ok: true };
+    return { ok: false, status: 429, error: "Kunlik ovozli limit tugadi" };
+  }
+  return { ok: false, status: 403, error: "Pro obuna kerak" };
 }
 
 serve(async (req) => {
@@ -27,9 +51,10 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization") || "";
-    const gate = await assertProUser(authHeader);
+    const body = await req.json();
+    const { text, voiceId = "JBFqnCBsd6RMkjVDRZzb", mode } = body || {};
+    const gate = await assertAllowed(authHeader, mode);
     if (!gate.ok) return new Response(JSON.stringify({ error: gate.error }), { status: gate.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    const { text, voiceId = "JBFqnCBsd6RMkjVDRZzb" } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
     if (!ELEVENLABS_API_KEY) {
@@ -49,7 +74,11 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Text too long (max 2000 chars)" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    console.log(`Generating TTS for text: ${text.substring(0, 100)}...`);
+    const cacheKey = `${voiceId}::${text}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) {
+      return new Response(cached, { headers: { ...corsHeaders, "Content-Type": "audio/mpeg", "X-Cache": "HIT" } });
+    }
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
@@ -83,7 +112,7 @@ serve(async (req) => {
     }
 
     const audioBuffer = await response.arrayBuffer();
-    console.log(`Successfully generated audio: ${audioBuffer.byteLength} bytes`);
+    cacheSet(cacheKey, audioBuffer.slice(0));
 
     return new Response(audioBuffer, {
       headers: {

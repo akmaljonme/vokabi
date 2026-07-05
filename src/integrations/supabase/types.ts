@@ -2207,6 +2207,33 @@ export type Database = {
         }
         Relationships: []
       }
+      voice_usage: {
+        Row: {
+          count: number
+          created_at: string
+          id: string
+          updated_at: string
+          used_date: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          used_date?: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          used_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       exams_public: {
@@ -2278,6 +2305,7 @@ export type Database = {
         Returns: undefined
       }
       increment_test_views: { Args: { test_uuid: string }; Returns: undefined }
+      increment_voice_usage: { Args: { _user_id: string }; Returns: number }
       join_school_as_teacher: {
         Args: { p_invite_code: string; p_subject?: string }
         Returns: Json
