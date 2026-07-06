@@ -9,6 +9,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { BannerAd, PopupAd } from "@/components/ads/AdComponents";
 import { VoiceAssistant } from "@/components/VoiceAssistant";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 
 interface AppLayoutProps {
@@ -49,8 +50,16 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
         {withFooter && <Footer />}
       </motion.div>
       {user && <PopupAd />}
-      {user && <VoiceAssistant />}
-      {user && <WhatsNewModal />}
+      {user && (
+        <ErrorBoundary fallback={null}>
+          <VoiceAssistant />
+        </ErrorBoundary>
+      )}
+      {user && (
+        <ErrorBoundary fallback={null}>
+          <WhatsNewModal />
+        </ErrorBoundary>
+      )}
     </div>
   );
 };

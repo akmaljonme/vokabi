@@ -32,8 +32,8 @@ const mainKeyboard = {
       { text: "💎 Pro rejasi", callback_data: "pro" },
     ],
     [
+      { text: "📱 Raqamni ulash", callback_data: "link_phone" },
       { text: "❓ Yordam", callback_data: "help" },
-      { text: "📞 Bog'lanish", callback_data: "contact" },
     ],
   ],
 };
@@ -377,6 +377,8 @@ Endi Vokabi ilovasida shu raqam bilan kirishingiz mumkin. OTP kod shu yerga kela
       await sendTests(chatId);
     } else if (text.startsWith("/top")) {
       await sendLeaderboard(chatId, supabase);
+    } else if (text.startsWith("/link")) {
+      await sendPhoneRequest(chatId);
     } else if (text.startsWith("/pro")) {
       await sendPro(chatId);
     } else if (text.startsWith("/help")) {
