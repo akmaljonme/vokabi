@@ -24,19 +24,9 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Only admins may trigger regeneration of daily challenges (prevents credit abuse)
-    const { data: existingToday } = await supabase.from("daily_challenges").select("id").eq("challenge_date", new Date().toISOString().split("T")[0]);
-    if (existingToday && existingToday.length >= 3) {
-      return new Response(JSON.stringify({ challenges: existingToday }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-    const { data: roleRow } = await supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
-    if (!roleRow) {
-      return new Response(JSON.stringify({ error: "Admin ruxsati kerak" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
     const today = new Date().toISOString().split("T")[0];
 
-    // Check if challenges already exist for today
+    // Anyone authenticated can read today's challenges
     const { data: existing } = await supabase
       .from("daily_challenges")
       .select("*")
@@ -44,6 +34,20 @@ serve(async (req) => {
 
     if (existing && existing.length >= 3) {
       return new Response(JSON.stringify({ challenges: existing }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Only admins may trigger AI generation (prevents credit abuse).
+    // Non-admins get whatever exists (possibly empty) without error.
+    const { data: roleRow } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!roleRow) {
+      return new Response(JSON.stringify({ challenges: existing || [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
