@@ -28,17 +28,17 @@ serve(async (req) => {
       });
     }
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY sozlanmagan");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY sozlanmagan");
 
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${GEMINI_API_KEY}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gemini-2.0-flash",
+        model: "google/gemini-2.5-flash",
         max_tokens: 1024,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
@@ -49,8 +49,18 @@ serve(async (req) => {
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Gemini error:", response.status, err);
-      throw new Error(`Gemini API error: ${response.status} ${err}`);
+      console.error("AI Gateway error:", response.status, err);
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Juda ko'p so'rov. Bir oz kuting va qayta urinib ko'ring." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "AI kreditlari tugadi. Workspace'ga kredit qo'shing." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      throw new Error(`AI Gateway error: ${response.status}`);
     }
 
     const data = await response.json();
