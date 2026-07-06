@@ -165,60 +165,70 @@ export const PopupAd = () => {
       {show && (
         <>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
+            className="fixed inset-0 bg-background/70 z-[65] backdrop-blur-md"
             onClick={handleClose} />
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.92, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100vw - 2rem)', maxWidth: '360px' }}
-            className="z-50"
+            exit={{ opacity: 0, scale: 0.92, y: 30 }}
+            transition={{ type: 'spring', damping: 24, stiffness: 260 }}
+            className="fixed left-1/2 top-1/2 z-[66] w-[calc(100vw-1.5rem)] max-w-[400px] -translate-x-1/2 -translate-y-1/2 max-h-[90vh] overflow-y-auto"
           >
-            <div className="bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
+            <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-card/80 shadow-2xl">
+              {/* Aurora glow */}
+              <div className="pointer-events-none absolute -top-20 -right-20 h-52 w-52 rounded-full bg-primary/25 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-20 -left-20 h-52 w-52 rounded-full bg-accent/25 blur-3xl" />
+
               {ad.image_url ? (
                 <div className="relative">
-                  <img src={ad.image_url} alt={ad.title} className="w-full h-48 object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <button onClick={handleClose}
-                    className="absolute top-3 right-3 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors">
-                    <X className="w-4 h-4" />
-                  </button>
-                  <span className="absolute top-3 left-3 text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">Reklama</span>
+                  <img src={ad.image_url} alt={ad.title} className="w-full h-44 sm:h-52 object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
+                  <span className="absolute top-3 left-3 text-[10px] font-semibold uppercase tracking-wider bg-background/70 text-foreground backdrop-blur px-2.5 py-1 rounded-full">
+                    Reklama
+                  </span>
                 </div>
               ) : (
-                <div className="flex items-center justify-between p-4 border-b border-border">
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Reklama</span>
-                  <button onClick={handleClose} className="p-1.5 hover:bg-muted rounded-lg transition-colors">
-                    <X className="w-4 h-4" />
-                  </button>
+                <div className="relative pt-6 px-6">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary px-2.5 py-1 rounded-full">
+                    Reklama
+                  </span>
                 </div>
               )}
-              <div className="p-5">
-                <h3 className="font-bold text-base mb-1">{ad.title}</h3>
-                {ad.description && <p className="text-sm text-muted-foreground mb-4">{ad.description}</p>}
-                <div className="flex gap-2">
+
+              <button onClick={handleClose}
+                aria-label="Yopish"
+                className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-background/70 text-foreground backdrop-blur transition hover:bg-background">
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="relative p-5 sm:p-6">
+                <h3 className="font-bold text-lg sm:text-xl mb-1.5 leading-tight">{ad.title}</h3>
+                {ad.description && (
+                  <p className="text-sm text-muted-foreground mb-5 leading-relaxed">{ad.description}</p>
+                )}
+                <div className="flex flex-col-reverse sm:flex-row gap-2">
+                  <button onClick={handleClose}
+                    className="sm:flex-none px-4 py-3 sm:py-2.5 rounded-xl border border-border/60 hover:bg-muted transition-colors text-sm font-medium">
+                    Yopish
+                  </button>
                   {ad.link_url && (
                     <a href={ad.link_url} target="_blank" rel="noopener noreferrer"
                       onClick={() => trackClick(ad.id)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-medium py-2.5 rounded-xl hover:bg-primary/90 transition-colors">
+                      className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-sm font-semibold py-3 sm:py-2.5 rounded-xl shadow-lg shadow-primary/20 hover:opacity-95 transition-opacity">
                       {ad.link_text || 'Batafsil'}
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   )}
-                  <button onClick={handleClose}
-                    className="px-4 py-2.5 rounded-xl border border-border hover:bg-muted transition-colors text-sm">
-                    Yopish
-                  </button>
                 </div>
+                {ads.length > 1 && (
+                  <div className="flex justify-center gap-1.5 pt-4">
+                    {ads.map((_, i) => (
+                      <button key={i} onClick={() => setCurrent(i)}
+                        className={`h-1.5 rounded-full transition-all ${i === current ? 'bg-primary w-5' : 'bg-muted-foreground/30 w-1.5'}`} />
+                    ))}
+                  </div>
+                )}
               </div>
-              {ads.length > 1 && (
-                <div className="flex justify-center gap-1.5 pb-3">
-                  {ads.map((_, i) => (
-                    <button key={i} onClick={() => setCurrent(i)}
-                      className={`w-1.5 h-1.5 rounded-full transition-all ${i === current ? 'bg-primary w-4' : 'bg-muted-foreground/30'}`} />
-                  ))}
-                </div>
-              )}
             </div>
           </motion.div>
         </>
