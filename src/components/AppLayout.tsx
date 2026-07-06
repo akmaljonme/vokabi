@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { useUserRole } from "@/hooks/useUserRole";
 import { BannerAd, PopupAd } from "@/components/ads/AdComponents";
 import { VoiceAssistant } from "@/components/VoiceAssistant";
+import { WhatsNewModal } from "@/components/WhatsNewModal";
 
 
 interface AppLayoutProps {
@@ -49,6 +50,7 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
       </motion.div>
       {user && <PopupAd />}
       {user && <VoiceAssistant />}
+      {user && <WhatsNewModal />}
     </div>
   );
 };
