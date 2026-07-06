@@ -258,29 +258,31 @@ export const SidebarAd = () => {
 
   return (
     <div className="space-y-3 p-3">
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium px-1">Reklama</p>
+      <p className="text-[10px] text-muted-foreground/70 uppercase tracking-widest font-semibold px-1">Reklama</p>
       {visibleAds.map(ad => (
         <motion.div key={ad.id}
           initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -8 }}
-          className="relative bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-xl overflow-hidden"
+          className="group relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/5 shadow-sm backdrop-blur-xl transition hover:border-primary/40 hover:shadow-md"
         >
+          <div className="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full bg-primary/15 blur-2xl opacity-70" />
           <button onClick={() => setDismissed(d => new Set([...d, ad.id]))}
-            className="absolute top-2 right-2 w-5 h-5 bg-background/80 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors z-10">
+            aria-label="Yopish"
+            className="absolute top-2 right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-background/80 text-muted-foreground backdrop-blur hover:text-foreground transition-colors">
             <X className="w-3 h-3" />
           </button>
           {ad.image_url && (
             <img src={ad.image_url} alt={ad.title} className="w-full h-24 object-cover" />
           )}
-          <div className="p-3">
-            <p className="text-xs font-semibold mb-0.5 pr-5">{ad.title}</p>
+          <div className="relative p-3">
+            <p className="text-xs font-bold mb-0.5 pr-5 leading-snug">{ad.title}</p>
             {ad.description && (
               <p className="text-[11px] text-muted-foreground mb-2 line-clamp-2">{ad.description}</p>
             )}
             {ad.link_url && (
               <a href={ad.link_url} target="_blank" rel="noopener noreferrer"
                 onClick={() => trackClick(ad.id)}
-                className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline">
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:gap-1.5 transition-all">
                 {ad.link_text || 'Batafsil'}
                 <ExternalLink className="w-3 h-3" />
               </a>
