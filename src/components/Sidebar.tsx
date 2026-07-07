@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 const supabase: any = _sbClient;
@@ -52,9 +53,10 @@ export const Sidebar = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
+  const { isPro: isProActive } = useSubscription();
   const [collapsed, setCollapsed] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(true);
-  const [subscription, setSubscription] = useState<{ plan: string; expires_at: string | null } | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(() => {
     try { return document.documentElement.classList.contains("dark"); } catch { return false; }
   });
@@ -63,21 +65,14 @@ export const Sidebar = () => {
     if (!user) return;
     supabase
       .from("subscriptions")
-      .select("plan, expires_at")
+      .select("expires_at")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
       .maybeSingle()
-      .then(({ data }: any) => setSubscription(data || null));
+      .then(({ data }: any) => setExpiresAt(data?.expires_at || null));
   }, [user]);
 
-  const isProActive =
-    !!subscription &&
-    subscription.plan !== "free" &&
-    (!subscription.expires_at || new Date(subscription.expires_at).getTime() > Date.now());
-
-  const daysLeft = subscription?.expires_at
-    ? Math.max(0, Math.ceil((new Date(subscription.expires_at).getTime() - Date.now()) / 86400000))
+  const daysLeft = expiresAt
+    ? Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86400000))
     : null;
 
   const toggleTheme = () => {

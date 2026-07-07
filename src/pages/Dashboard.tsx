@@ -69,6 +69,7 @@ import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
 import { motion } from "framer-motion";
 import { useGamification } from "@/hooks/useGamification";
+import { useSubscription } from "@/hooks/useSubscription";
 import { AchievementToast } from "@/components/AchievementToast";
 import { StudyHeatmap } from "@/components/dashboard/StudyHeatmap";
 import { HeroIllustration, RobotAvatar, TreasureChestIcon } from "@/components/dashboard/DashboardIllustrations";
@@ -136,6 +137,7 @@ export default function Dashboard() {
     XP_PER_TEST,
     XP_PER_CORRECT,
   } = useGamification();
+  const { isPro, loading: subLoading } = useSubscription();
 
   // Real "today's mission" data: daily challenges + mock test attempts
   const [todayChallenges, setTodayChallenges] = useState<
@@ -1039,6 +1041,72 @@ export default function Dashboard() {
           </Card>
         </div>
 
+        {/* Business row: Pro Plan CTA + Referral */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5 items-stretch">
+          {!subLoading && !isPro ? (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-6 flex flex-col justify-between"
+            >
+              <div
+                className="absolute -top-16 -right-16 w-56 h-56 rounded-full blur-3xl opacity-30 bg-amber-500/40"
+              />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/15 flex items-center justify-center shrink-0">
+                    <Crown className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-black text-base">Pro Planga o'ting</h3>
+                    <p className="text-xs text-muted-foreground">Barcha imkoniyatlarni oching</p>
+                  </div>
+                </div>
+                <div className="space-y-2 mb-5">
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span>
+                      <Mic className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Speaking testlari — hozir qulflangan
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span>
+                      <PenTool className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Writing testlari — hozir qulflangan
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    Cheksiz mock testlar va reklamasiz tajriba
+                  </div>
+                </div>
+              </div>
+              <Button
+                onClick={() => navigate("/pricing")}
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-90 text-white border-0"
+              >
+                Pro'ga yangilash <Crown className="w-4 h-4 ml-2" />
+              </Button>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-6 flex flex-col justify-center items-center text-center"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/15 flex items-center justify-center mb-3">
+                <Crown className="w-7 h-7 text-amber-500" />
+              </div>
+              <h3 className="font-display font-black text-base mb-1">Siz Pro foydalanuvchisiz! 👑</h3>
+              <p className="text-sm text-muted-foreground">
+                Barcha Speaking, Writing va mock testlardan cheklovsiz foydalanmoqdasiz. Rahmat!
+              </p>
+            </motion.div>
+          )}
+
+          <ReferralWidget />
+        </div>
+
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="flex-wrap">
             <TabsTrigger value="overview">Umumiy</TabsTrigger>
@@ -1051,9 +1119,6 @@ export default function Dashboard() {
           <TabsContent value="overview" className="space-y-6">
             {/* Daily Challenges */}
             <DailyChallenges />
-
-            {/* Referral Widget */}
-            <ReferralWidget />
 
             {/* AI Study Plan */}
             <AIStudyPlan results={results} />
