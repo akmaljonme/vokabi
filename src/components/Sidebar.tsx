@@ -54,9 +54,31 @@ export const Sidebar = () => {
   const { isAdmin } = useUserRole();
   const [collapsed, setCollapsed] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(true);
+  const [subscription, setSubscription] = useState<{ plan: string; expires_at: string | null } | null>(null);
   const [isDark, setIsDark] = useState(() => {
     try { return document.documentElement.classList.contains("dark"); } catch { return false; }
   });
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("subscriptions")
+      .select("plan, expires_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }: any) => setSubscription(data || null));
+  }, [user]);
+
+  const isProActive =
+    !!subscription &&
+    subscription.plan !== "free" &&
+    (!subscription.expires_at || new Date(subscription.expires_at).getTime() > Date.now());
+
+  const daysLeft = subscription?.expires_at
+    ? Math.max(0, Math.ceil((new Date(subscription.expires_at).getTime() - Date.now()) / 86400000))
+    : null;
 
   const toggleTheme = () => {
     const newDark = !isDark;
@@ -227,13 +249,23 @@ export const Sidebar = () => {
             </div>
             <button
               onClick={() => navigate("/pricing")}
-              className="w-full flex items-center gap-1.5 text-[10px] font-semibold text-amber-500"
+              className={`w-full flex items-center gap-1.5 text-[10px] font-semibold ${isProActive ? "text-amber-500" : "text-muted-foreground"}`}
             >
-              <Crown className="w-3 h-3 shrink-0" /> Pro Plan
+              <Crown className="w-3 h-3 shrink-0" />
+              {isProActive ? `Pro Plan${daysLeft !== null ? ` · ${daysLeft} kun qoldi` : ""}` : "Free Plan · Yangilash"}
             </button>
-            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-amber-500 to-primary rounded-full" style={{ width: "62%" }} />
-            </div>
+            {isProActive ? (
+              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-500 to-primary rounded-full"
+                  style={{ width: daysLeft !== null ? `${Math.min(100, Math.round((daysLeft / 30) * 100))}%` : "100%" }}
+                />
+              </div>
+            ) : (
+              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                <div className="h-full bg-muted-foreground/30 rounded-full" style={{ width: "0%" }} />
+              </div>
+            )}
           </div>
         )}
         {collapsed && (

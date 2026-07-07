@@ -51,7 +51,6 @@ import {
   Crown,
   Medal,
   Search,
-  Bell,
   Bot,
   Gift,
   Lock,
@@ -59,11 +58,11 @@ import {
   ChevronLeft,
   Mic,
   PenTool,
-  Gem,
   SlidersHorizontal,
   TrendingDown,
   Sparkles,
 } from "lucide-react";
+import { NotificationBell } from "@/components/NotificationBell";
 import { CEFRLevel } from "@/types/cefr";
 import { Header } from "@/components/Header";
 import { AppLayout } from "@/components/AppLayout";
@@ -112,6 +111,8 @@ const COLORS = [
   "hsl(270 60% 55%)",
 ];
 
+const DAILY_XP_GOAL = 100;
+
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -128,7 +129,17 @@ export default function Dashboard() {
     xpToNextLevel,
     userRank,
     loading: gamLoading,
+    XP_PER_TEST,
+    XP_PER_CORRECT,
   } = useGamification();
+
+  // Real "today's mission" data: daily challenges + mock test attempts
+  const [todayChallenges, setTodayChallenges] = useState<
+    { id: string; title: string; xp_reward: number }[]
+  >([]);
+  const [completedChallengeIds, setCompletedChallengeIds] = useState<string[]>([]);
+  const [mockTestsToday, setMockTestsToday] = useState(0);
+  const [challengesXPEarnedToday, setChallengesXPEarnedToday] = useState(0);
 
   useEffect(() => {
     if (!loading && !user) navigate("/login");
@@ -137,6 +148,50 @@ export default function Dashboard() {
   useEffect(() => {
     if (user) fetchResults();
   }, [user]);
+
+  useEffect(() => {
+    if (user) fetchTodayMissionData();
+  }, [user]);
+
+  const fetchTodayMissionData = async () => {
+    if (!user) return;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    try {
+      const { data: chData } = await supabase.functions.invoke(
+        "generate-daily-challenges",
+      );
+      const challenges = (chData?.challenges || []) as {
+        id: string;
+        title: string;
+        xp_reward: number;
+      }[];
+      setTodayChallenges(challenges);
+
+      const { data: comps } = await supabase
+        .from("user_daily_challenges")
+        .select("challenge_id, xp_earned, completed_at")
+        .eq("user_id", user.id)
+        .gte("completed_at", todayStart.toISOString());
+      const challengeIds = challenges.map((c) => c.id);
+      const todaysComps = ((comps || []) as any[]).filter((c) =>
+        challengeIds.includes(c.challenge_id),
+      );
+      setCompletedChallengeIds(todaysComps.map((c) => c.challenge_id));
+      setChallengesXPEarnedToday(
+        todaysComps.reduce((sum, c) => sum + (c.xp_earned || 0), 0),
+      );
+
+      const { count } = await supabase
+        .from("mock_test_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("created_at", todayStart.toISOString());
+      setMockTestsToday(count || 0);
+    } catch (err) {
+      console.error("Today mission fetch error:", err);
+    }
+  };
 
   const fetchResults = async () => {
     try {
@@ -406,16 +461,22 @@ export default function Dashboard() {
     return Math.min(9, Math.max(3.5, band)).toFixed(1);
   })();
 
-  const cefrPath: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1"];
-  const currentCEFR: CEFRLevel =
-    [...levelAnalysis].reverse().find((l) => l.testsCompleted > 0)?.level as CEFRLevel || "A1";
-
   const nextReward = achievements
     .filter((a) => !userAchievements.some((ua) => ua.achievement_id === a.id))
-    .sort((a, b) => a.threshold - b.threshold)[0];
-  const nextRewardProgress = nextReward
-    ? Math.min(100, Math.round(((progress?.xp || 0) / Math.max(1, (nextReward.threshold || 10) * 20)) * 100))
-    : 100;
+    .sort((a, b) => (a.threshold || 0) - (b.threshold || 0))[0];
+
+  // Real progress-toward-next-reward, based on the metric the achievement key actually tracks
+  const getAchievementProgress = (ach: typeof achievements[number] | undefined) => {
+    if (!ach) return { current: 0, target: 1, pct: 100 };
+    const target = ach.threshold || 1;
+    let current = 0;
+    if (ach.key?.startsWith("tests")) current = progress?.tests_completed || 0;
+    else if (ach.key?.startsWith("streak")) current = progress?.current_streak || 0;
+    else if (ach.key?.startsWith("level")) current = progress?.level || 0;
+    else current = 0; // special conditions (perfect score, speed, all skills) — not a simple counter
+    return { current, target, pct: Math.min(100, Math.round((current / target) * 100)) };
+  };
+  const nextRewardProgress = getAchievementProgress(nextReward);
 
   const studyTimeByDay = (() => {
     const days = ["Yak", "Dush", "Sesh", "Chor", "Pay", "Jum", "Shan"];
@@ -434,22 +495,58 @@ export default function Dashboard() {
     .filter((s) => s.totalTests > 0)
     .sort((a, b) => b.averageScore - a.averageScore)[0];
 
-  const gemBalance = Math.floor(((progress?.xp || 0) + userAchievements.length * 150) / 10);
+  // Real "today's XP": actual test results submitted today (using the same XP formula as useGamification)
+  // plus any daily-challenge XP actually earned today.
+  const todayStr = new Date().toISOString().split("T")[0];
+  const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+  const resultsTodayXP = results
+    .filter((r) => r.created_at.startsWith(todayStr))
+    .reduce((sum, r) => sum + XP_PER_TEST + r.correct_answers * XP_PER_CORRECT, 0);
+  const resultsYesterdayXP = results
+    .filter((r) => r.created_at.startsWith(yesterdayStr))
+    .reduce((sum, r) => sum + XP_PER_TEST + r.correct_answers * XP_PER_CORRECT, 0);
+  const todaysXP = resultsTodayXP + challengesXPEarnedToday;
+  const xpChangePct =
+    resultsYesterdayXP > 0
+      ? Math.round(((todaysXP - resultsYesterdayXP) / resultsYesterdayXP) * 100)
+      : todaysXP > 0
+        ? 100
+        : 0;
 
+  // Real "Today's Mission" — backed by actual daily-challenge completions, speaking practice, and mock tests today
+  const speakingDoneToday = results.some(
+    (r) => r.skill === "speaking" && r.created_at.startsWith(todayStr),
+  );
+  const challengesDoneToday = completedChallengeIds.length;
+  const challengesTotalToday = todayChallenges.length;
   const missionItems = [
     {
-      label: "25 ta yangi so'z o'rganish",
-      progressLabel: "25 / 25",
-      done: !!progress?.last_activity_date && progress.last_activity_date === new Date().toISOString().split("T")[0],
-      icon: CheckCircle,
+      label: "Bugungi challenglarni bajarish",
+      progressLabel: `${challengesDoneToday} / ${Math.max(challengesTotalToday, challengesDoneToday)}`,
+      done: challengesTotalToday > 0 && challengesDoneToday >= challengesTotalToday,
+      icon: Gift,
     },
-    { label: "Speaking mashqini yakunlash", progressLabel: "0 / 1", done: false, icon: Mic },
-    { label: "Mock testni yakunlash", progressLabel: "0 / 1", done: false, icon: Target },
+    {
+      label: "Speaking mashqini yakunlash",
+      progressLabel: speakingDoneToday ? "1 / 1" : "0 / 1",
+      done: speakingDoneToday,
+      icon: Mic,
+    },
+    {
+      label: "Mock testni yakunlash",
+      progressLabel: `${mockTestsToday} / 1`,
+      done: mockTestsToday >= 1,
+      icon: Target,
+    },
   ];
   const missionDoneCount = missionItems.filter((m) => m.done).length;
   const missionProgressPct = Math.round((missionDoneCount / missionItems.length) * 100);
 
-  const weeklyGoalPct = Math.min(100, Math.round((stats.totalTests / 5) * 100));
+  // Real weekly goal: tests actually completed in the last 7 days vs a 7-test weekly target
+  const testsThisWeek = results.filter(
+    (r) => new Date(r.created_at).getTime() >= Date.now() - 7 * 24 * 60 * 60 * 1000,
+  ).length;
+  const weeklyGoalPct = Math.min(100, Math.round((testsThisWeek / 7) * 100));
 
   const quickActions = [
     { label: "Learn Words", icon: BookOpen, color: "text-emerald-500", path: "/wordbank" },
@@ -481,26 +578,34 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2.5 flex-wrap">
-            <div className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-xl border border-border/60 text-sm text-muted-foreground w-52">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const q = (e.currentTarget.elements.namedItem("q") as HTMLInputElement)?.value?.trim();
+                navigate(q ? `/wordbank?q=${encodeURIComponent(q)}` : "/wordbank");
+              }}
+              className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-xl border border-border/60 text-sm text-muted-foreground w-52 focus-within:border-primary/50 transition-colors"
+            >
               <Search className="w-4 h-4 shrink-0" />
-              <span className="flex-1 truncate">Qidirish...</span>
-              <kbd className="text-[10px] px-1.5 py-0.5 rounded border border-border/60 shrink-0">Ctrl /</kbd>
+              <input
+                name="q"
+                placeholder="So'z qidirish..."
+                className="flex-1 min-w-0 bg-transparent outline-none placeholder:text-muted-foreground text-foreground"
+              />
+            </form>
+            <div className="shrink-0">
+              <NotificationBell />
             </div>
-            <button className="relative w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors shrink-0">
-              <Bell className="w-4 h-4" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
-                3
-              </span>
-            </button>
             {progress && progress.current_streak > 0 && (
               <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-sm font-semibold text-orange-500 shrink-0">
                 <Flame className="w-4 h-4" /> {progress.current_streak} kunlik streak
               </div>
             )}
-            <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-sm font-semibold text-blue-500 shrink-0">
-              <Gem className="w-4 h-4" /> {gemBalance.toLocaleString()}
-            </div>
-            <button className="w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors shrink-0">
+            <button
+              onClick={() => navigate("/profile")}
+              className="w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors shrink-0"
+              title="Sozlamalar"
+            >
               <SlidersHorizontal className="w-4 h-4" />
             </button>
           </div>
@@ -558,10 +663,12 @@ export default function Dashboard() {
                     🎁
                   </div>
                   <p className="text-xs font-semibold truncate max-w-[110px] mx-auto">
-                    {nextReward?.title || "Bronza sandiq"}
+                    {nextReward?.title || "Barchasi olindi!"}
                   </p>
                   <p className="text-[10px] text-muted-foreground">
-                    {Math.max(0, (nextReward?.threshold || 10) * 20 - (progress?.xp || 0))} XP qoldi
+                    {nextReward
+                      ? `${nextRewardProgress.current} / ${nextRewardProgress.target}`
+                      : "🎉"}
                   </p>
                 </div>
               </div>
@@ -758,18 +865,19 @@ export default function Dashboard() {
                     strokeLinecap="round"
                     strokeDasharray={2 * Math.PI * 54}
                     initial={{ strokeDashoffset: 2 * Math.PI * 54 }}
-                    animate={{ strokeDashoffset: 2 * Math.PI * 54 * (1 - Math.min(1, weeklyGoalPct / 100)) }}
+                    animate={{ strokeDashoffset: 2 * Math.PI * 54 * (1 - Math.min(1, todaysXP / DAILY_XP_GOAL)) }}
                     transition={{ duration: 1, ease: "easeOut" }}
                   />
                 </svg>
                 <div className="text-center">
                   <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide">Today's XP</p>
-                  <p className="text-2xl font-display font-black">{stats.totalTests > 0 ? 175 : 0}</p>
+                  <p className="text-2xl font-display font-black">{todaysXP}</p>
                   <p className="text-[10px] text-muted-foreground">XP</p>
                 </div>
               </div>
-              <p className="text-[11px] text-emerald-500 font-medium flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> 25% from yesterday
+              <p className={`text-[11px] font-medium flex items-center gap-1 ${xpChangePct >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+                {xpChangePct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                {xpChangePct >= 0 ? `${xpChangePct}%` : `${Math.abs(xpChangePct)}%`} kechadan {xpChangePct >= 0 ? "ko'proq" : "kamroq"}
               </p>
             </CardContent>
           </Card>

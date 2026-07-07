@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
@@ -29,8 +29,9 @@ const LEVELS = ["A1","A2","B1","B2","C1","C2"];
 export default function WordBank() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [words, setWords] = useLocalStorage<Word[]>("vokabi_wordbank", []);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => searchParams.get("q") || "");
   const [mode, setMode] = useState<"list"|"review"|"add"|"bulk">("list");
   const [newWord, setNewWord] = useState({ word: "", meaning: "", example: "", level: "B1" });
   const [bulkText, setBulkText] = useState("");
