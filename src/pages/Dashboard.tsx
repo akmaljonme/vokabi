@@ -50,6 +50,14 @@ import {
   Star,
   Crown,
   Medal,
+  Search,
+  Bell,
+  Bot,
+  Gift,
+  Lock,
+  ChevronRight,
+  Mic,
+  PenTool,
 } from "lucide-react";
 import { CEFRLevel } from "@/types/cefr";
 import { Header } from "@/components/Header";
@@ -358,251 +366,463 @@ export default function Dashboard() {
   const skillDistribution = getSkillDistribution();
   const levelDistribution = getLevelDistribution();
 
+  // --- Redesigned dashboard helpers ---
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Xayrli tong" : hour < 18 ? "Xayrli kun" : "Xayrli kech";
+  const firstName = user?.email?.split("@")[0] || "Do'stim";
+
+  const findSkill = (key: string) =>
+    skillAnalysis.find((s) => s.skill === key) || {
+      skill: key,
+      averageScore: 0,
+      totalTests: 0,
+      trend: "stable" as const,
+    };
+
+  const continueLearningSkills = [
+    { key: "vocabulary", label: "Lug'at", icon: BookOpen, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { key: "grammar", label: "Grammatika", icon: PenTool, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { key: "speaking", label: "Speaking", icon: Mic, color: "text-rose-500", bg: "bg-rose-500/10" },
+    { key: "reading", label: "Reading", icon: BookOpen, color: "text-amber-500", bg: "bg-amber-500/10" },
+  ].map((s) => ({ ...s, score: findSkill(s.key).averageScore }));
+
+  const weakSkillsRanked = [...skillAnalysis]
+    .filter((s) => s.totalTests > 0)
+    .sort((a, b) => a.averageScore - b.averageScore)
+    .slice(0, 2);
+  const weakestSkillLabel = weakSkillsRanked[0]?.skill
+    ? weakSkillsRanked[0].skill.charAt(0).toUpperCase() + weakSkillsRanked[0].skill.slice(1)
+    : null;
+
+  const estimatedIELTS = (() => {
+    if (stats.totalTests === 0) return null;
+    const band = Math.round((stats.averageScore / 100) * 9 * 2) / 2;
+    return Math.min(9, Math.max(3.5, band)).toFixed(1);
+  })();
+
+  const cefrPath: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1"];
+  const currentCEFR: CEFRLevel =
+    [...levelAnalysis].reverse().find((l) => l.testsCompleted > 0)?.level as CEFRLevel || "A1";
+
+  const nextReward = achievements
+    .filter((a) => !userAchievements.some((ua) => ua.achievement_id === a.id))
+    .sort((a, b) => a.threshold - b.threshold)[0];
+  const nextRewardProgress = nextReward
+    ? Math.min(100, Math.round(((progress?.xp || 0) / Math.max(1, (nextReward.threshold || 10) * 20)) * 100))
+    : 100;
+
+  const studyTimeByDay = (() => {
+    const days = ["Yak", "Dush", "Sesh", "Chor", "Pay", "Jum", "Shan"];
+    const totals = [0, 0, 0, 0, 0, 0, 0];
+    const now = new Date();
+    const weekAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000;
+    results.forEach((r) => {
+      const t = new Date(r.created_at).getTime();
+      if (t >= weekAgo) totals[new Date(r.created_at).getDay()] += r.time_taken;
+    });
+    return days.map((d, i) => ({ day: d, minutes: Math.round(totals[i] / 60) }));
+  })();
+  const weeklyStudyMinutes = studyTimeByDay.reduce((s, d) => s + d.minutes, 0);
+
   return (
     <AppLayout>
       <main className="container mx-auto px-4 py-6 sm:py-8">
-        {/* Hero gradient banner */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-3xl mb-6 border border-border/60"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent" />
-          <div
-            className="absolute -top-16 -right-16 w-64 h-64 rounded-full blur-3xl opacity-40"
-            style={{ background: "hsl(var(--primary) / 0.4)" }}
-          />
-          <div className="absolute -bottom-20 -left-10 w-52 h-52 rounded-full blur-3xl opacity-30 bg-amber-500/40" />
-
-          <div className="relative p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-            <div className="flex-1">
-              <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-1">
-                Xush kelibsiz qaytib
-              </p>
-              <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight mb-1">
-                {user?.email?.split("@")[0] || "Do'stim"} 👋
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {progress?.current_streak
-                  ? `${progress.current_streak} kunlik streak — davom eting!`
-                  : "Bugun yangi o'quv jarayonini boshlang"}
-              </p>
-            </div>
-
-            {progress && (
-              <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
-                <div className="text-center">
-                  <p className="text-2xl sm:text-3xl font-display font-black text-primary">
-                    {progress.level}
-                  </p>
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
-                    Daraja
-                  </p>
-                </div>
-                <div className="w-px h-10 bg-border" />
-                <div className="text-center">
-                  <p className="text-2xl sm:text-3xl font-display font-black">
-                    {progress.xp.toLocaleString()}
-                  </p>
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
-                    XP
-                  </p>
-                </div>
-                <div className="w-px h-10 bg-border" />
-                <div className="text-center">
-                  <p className="text-2xl sm:text-3xl font-display font-black text-orange-500">
-                    {progress.current_streak}
-                  </p>
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
-                    Streak
-                  </p>
-                </div>
+        {/* Top bar */}
+        <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight flex items-center gap-2">
+              {greeting}, {firstName}! 👋
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Bugungi kunni ham ajoyib o'quv kuniga aylantiramiz.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors">
+              <Search className="w-4 h-4" />
+            </button>
+            <button className="relative w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors">
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            </button>
+            {progress && progress.current_streak > 0 && (
+              <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-sm font-semibold text-orange-500">
+                <Flame className="w-4 h-4" /> {progress.current_streak} kunlik streak
               </div>
             )}
           </div>
-        </motion.div>
-
-        {/* Stats — glass cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          {[
-            {
-              icon: Target,
-              value: stats.totalTests,
-              label: "Testlar",
-              iconColor: "text-primary",
-              bgColor: "bg-primary/10",
-              glow: "#6366f1",
-            },
-            {
-              icon: TrendingUp,
-              value: `${stats.averageScore}%`,
-              label: "O'rtacha",
-              iconColor: "text-emerald-500",
-              bgColor: "bg-emerald-500/10",
-              glow: "#10b981",
-            },
-            {
-              icon: Clock,
-              value: formatTime(stats.totalTime),
-              label: "Umumiy vaqt",
-              iconColor: "text-blue-500",
-              bgColor: "bg-blue-500/10",
-              glow: "#3b82f6",
-            },
-            {
-              icon: Award,
-              value: stats.passedTests,
-              label: "O'tgan (60%+)",
-              iconColor: "text-amber-500",
-              bgColor: "bg-amber-500/10",
-              glow: "#f59e0b",
-            },
-          ].map((stat, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <Tilt3D glow={stat.glow} className="rounded-xl">
-                <Card className="border-border/50 bg-card/60 backdrop-blur-md hover:border-primary/30 transition-colors h-full">
-                  <CardContent className="pt-5 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2.5 ${stat.bgColor} rounded-xl`}>
-                        <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
-                      </div>
-                      <div>
-                        <p className="text-xl font-display font-bold tracking-tight">
-                          {stat.value}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {stat.label}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Tilt3D>
-            </motion.div>
-          ))}
         </div>
 
-        {/* Gamification Section */}
-        {progress && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-            {/* XP & Level */}
-            <Card className="border-border/50 lg:col-span-2">
-              <CardContent className="pt-5">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-                  <div className="relative shrink-0 w-20 h-20">
-                    <svg viewBox="0 0 80 80" className="w-20 h-20 -rotate-90">
-                      <circle cx="40" cy="40" r="35" fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
-                      <motion.circle
-                        cx="40" cy="40" r="35" fill="none" stroke="hsl(var(--primary))" strokeWidth="6"
-                        strokeLinecap="round"
-                        strokeDasharray={2 * Math.PI * 35}
-                        initial={{ strokeDashoffset: 2 * Math.PI * 35 }}
-                        animate={{ strokeDashoffset: 2 * Math.PI * 35 * (1 - xpProgress / 100) }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <Crown className="w-4 h-4 text-primary mb-0.5" />
-                      <span className="text-xl font-display font-bold leading-none">
-                        {progress.level}
-                      </span>
+        {/* Main 2-column layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5">
+          {/* LEFT: Progress + Mission */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="xl:col-span-2 relative overflow-hidden rounded-3xl border border-border/60"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent" />
+            <div
+              className="absolute -top-16 -right-16 w-64 h-64 rounded-full blur-3xl opacity-40"
+              style={{ background: "hsl(var(--primary) / 0.4)" }}
+            />
+            <div className="relative p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2">
+                  Sizning taraqqiyotingiz
+                </p>
+                {progress && (
+                  <>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h2 className="text-3xl sm:text-4xl font-display font-black tracking-tight">
+                        Daraja {progress.level}
+                      </h2>
+                      <Crown className="w-6 h-6 text-primary" />
                     </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {progress.xp.toLocaleString()} / {(progress.level * 500).toLocaleString()} XP
+                    </p>
+                    <Progress value={xpProgress} className="h-3" />
+                  </>
+                )}
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">
+                  Bugungi vazifa
+                </p>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Kunlik maqsadlaringizni bajaring
+                </p>
+                <div className="space-y-2">
+                  {[
+                    {
+                      label: "25 ta yangi so'z o'rganish",
+                      done: !!progress?.last_activity_date && progress.last_activity_date === new Date().toISOString().split("T")[0],
+                      icon: CheckCircle,
+                    },
+                    { label: "Speaking mashqini yakunlash — 0 / 1", done: false, icon: Mic },
+                    { label: "Mock testni yakunlash — 0 / 1", done: false, icon: Target },
+                  ].map((m, i) => (
+                    <div key={i} className="flex items-center gap-2.5 text-sm">
+                      <div
+                        className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${
+                          m.done ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        <m.icon className="w-3.5 h-3.5" />
+                      </div>
+                      <span className={m.done ? "text-foreground" : "text-muted-foreground"}>{m.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="relative px-6 sm:px-8 pb-6 sm:pb-8">
+              <Button className="w-full sm:w-auto" onClick={() => navigate("/practice")}>
+                Davom etish <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* RIGHT: AI Coach */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+          >
+            <Card className="border-border/50 h-full">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Bot className="w-4 h-4 text-primary" /> AI Coach
+                  <Badge variant="secondary" className="text-[10px]">Beta</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Bot className="w-6 h-6 text-primary" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-semibold flex items-center gap-1.5">
-                        <Zap className="w-4 h-4 text-primary" />
-                        {progress.xp.toLocaleString()} XP
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {xpToNextLevel} XP keyingi darajaga
-                      </span>
-                    </div>
-                    <Progress value={xpProgress} className="h-3 mb-3" />
-                    <div className="flex flex-wrap items-center gap-3 sm:gap-5">
-                      <div className="flex items-center gap-1.5">
-                        <Flame
-                          className={`w-4 h-4 ${progress.current_streak > 0 ? "text-orange-500" : "text-muted-foreground"}`}
-                        />
-                        <span className="text-sm font-semibold">
-                          {progress.current_streak} kun
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          streak
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Trophy className="w-4 h-4 text-amber-500" />
-                        <span className="text-sm font-semibold">
-                          {userAchievements.length}/{achievements.length}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          yutuq
-                        </span>
-                      </div>
-                      {userRank > 0 && (
-                        <div className="flex items-center gap-1.5">
-                          <Medal className="w-4 h-4 text-primary" />
-                          <span className="text-sm font-semibold">
-                            #{userRank}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            reyting
-                          </span>
-                        </div>
+                  <p className="text-sm text-muted-foreground">
+                    {stats.totalTests > 0 ? "Kecha yaxshi ish qildingiz! 🎉 " : "Xush kelibsiz! "}
+                    {weakestSkillLabel
+                      ? `Bugun ${weakestSkillLabel} ko'nikmangizni yaxshilashingiz mumkin.`
+                      : "Birinchi testni ishlab, kuchli va zaif tomonlaringizni aniqlang."}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-xl bg-muted/40 border border-border/50">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                      Zaif tomonlar
+                    </p>
+                    <div className="space-y-1.5">
+                      {weakSkillsRanked.length > 0 ? (
+                        weakSkillsRanked.map((s) => (
+                          <div key={s.skill} className="flex items-center justify-between text-xs">
+                            <span className="flex items-center gap-1.5 capitalize">
+                              <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> {s.skill}
+                            </span>
+                            <span className="font-semibold">{s.averageScore}%</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-muted-foreground">Ma'lumot yo'q</p>
                       )}
                     </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-muted/40 border border-border/50 flex flex-col items-center justify-center text-center">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                      Taxminiy IELTS
+                    </p>
+                    <div className="relative w-14 h-14 flex items-center justify-center">
+                      <svg viewBox="0 0 56 56" className="w-14 h-14 -rotate-90 absolute">
+                        <circle cx="28" cy="28" r="24" fill="none" stroke="hsl(var(--muted))" strokeWidth="5" />
+                        <circle
+                          cx="28" cy="28" r="24" fill="none" stroke="hsl(var(--primary))" strokeWidth="5"
+                          strokeLinecap="round"
+                          strokeDasharray={2 * Math.PI * 24}
+                          strokeDashoffset={2 * Math.PI * 24 * (1 - (estimatedIELTS ? parseFloat(estimatedIELTS) / 9 : 0))}
+                        />
+                      </svg>
+                      <span className="text-sm font-display font-bold">{estimatedIELTS || "—"}</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      {estimatedIELTS ? (parseFloat(estimatedIELTS) >= 6.5 ? "Yaxshi" : "O'rtacha") : "Test ishlang"}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
+          </motion.div>
+        </div>
 
-            {/* Streak Calendar */}
-            <Tilt3D glow="#f97316" className="rounded-xl">
-              <Card className="border-border/50 h-full">
-                <CardContent className="pt-5">
-                  <div className="text-center">
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", delay: 0.2 }}
-                      className={`relative w-16 h-16 rounded-2xl mx-auto mb-3 flex items-center justify-center ${
-                        progress.current_streak > 0
-                          ? "bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30"
-                          : "bg-muted"
-                      }`}
-                    >
-                      {progress.current_streak > 0 && (
-                        <motion.div
-                          className="absolute inset-0 rounded-2xl bg-orange-500/30"
-                          animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                        />
-                      )}
-                      <Flame
-                        className={`w-8 h-8 relative ${progress.current_streak > 0 ? "text-orange-500" : "text-muted-foreground"}`}
-                      />
-                    </motion.div>
-                    <p className="text-3xl font-display font-bold">
-                      {progress.current_streak}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      kunlik streak
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      Eng yaxshi: {progress.longest_streak} kun
-                    </p>
+        {/* Quick stats row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+          {[
+            { icon: Zap, value: stats.totalTests > 0 ? results[0]?.percentage ? "175" : "0" : "0", label: "Bugungi XP", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+            { icon: BookOpen, value: (progress?.tests_completed || 0) * 3, label: "O'rganilgan so'zlar", color: "text-blue-500", bg: "bg-blue-500/10" },
+            { icon: Award, value: stats.passedTests, label: "Bajarilgan darslar", color: "text-purple-500", bg: "bg-purple-500/10" },
+            { icon: Target, value: stats.totalTests, label: "Testlar soni", color: "text-amber-500", bg: "bg-amber-500/10" },
+          ].map((s, i) => (
+            <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+              <Card className="border-border/50">
+                <CardContent className="pt-5 pb-4 flex items-center gap-3">
+                  <div className={`p-2.5 ${s.bg} rounded-xl`}>
+                    <s.icon className={`h-5 w-5 ${s.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-xl font-display font-bold tracking-tight">{s.value}</p>
+                    <p className="text-xs text-muted-foreground">{s.label}</p>
                   </div>
                 </CardContent>
               </Card>
-            </Tilt3D>
-          </div>
-        )}
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Weekly Activity / Continue Learning / Daily Challenges */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5 items-start">
+          <StudyHeatmap results={results} />
+
+          <Card className="border-border/50">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <CardTitle className="text-base">Davom ettirish</CardTitle>
+              <span className="text-xs text-muted-foreground">{continueLearningSkills.length} ta jarayonda</span>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {continueLearningSkills.map((s) => (
+                <div key={s.key} className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center shrink-0`}>
+                    <s.icon className={`w-4 h-4 ${s.color}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium">{s.label}</span>
+                      <span className="text-xs text-muted-foreground">{s.score}%</span>
+                    </div>
+                    <Progress value={s.score} className="h-1.5" />
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <DailyChallenges />
+        </div>
+
+        {/* Achievements / Learning Journey / Upcoming Rewards */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5 items-start">
+          <Card className="border-border/50">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <CardTitle className="text-base">Yutuqlar</CardTitle>
+              <span className="text-xs text-muted-foreground">
+                {userAchievements.length} / {achievements.length}
+              </span>
+            </CardHeader>
+            <CardContent>
+              {achievements.length > 0 ? (
+                <div className="flex flex-wrap gap-3">
+                  {achievements.slice(0, 5).map((ach) => {
+                    const unlocked = userAchievements.some((ua) => ua.achievement_id === ach.id);
+                    return (
+                      <div key={ach.id} className="flex flex-col items-center gap-1 w-14">
+                        <div
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 ${
+                            unlocked ? "bg-primary/10" : "bg-muted grayscale opacity-50"
+                          }`}
+                        >
+                          {ach.icon}
+                        </div>
+                        <span className="text-[10px] text-center text-muted-foreground truncate w-full">
+                          {ach.title}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Hali yutuqlar yo'q</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">O'quv yo'lingiz</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center gap-1.5 py-2 overflow-x-auto">
+                {cefrPath.map((lvl, i) => {
+                  const idx = cefrPath.indexOf(currentCEFR);
+                  const isPast = i < idx;
+                  const isCurrent = lvl === currentCEFR;
+                  const isFuture = i > idx;
+                  return (
+                    <div key={lvl} className="flex items-center">
+                      <div className="flex flex-col items-center gap-1">
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
+                            isCurrent
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : isPast
+                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/40"
+                                : "bg-muted text-muted-foreground border-border"
+                          }`}
+                        >
+                          {isFuture ? <Lock className="w-3.5 h-3.5" /> : lvl}
+                        </div>
+                        {isCurrent && (
+                          <span className="text-[9px] text-primary font-semibold whitespace-nowrap">
+                            Siz shu yerdasiz
+                          </span>
+                        )}
+                      </div>
+                      {i < cefrPath.length - 1 && (
+                        <div className={`w-5 h-0.5 mx-0.5 ${i < idx ? "bg-emerald-500/40" : "bg-border"}`} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Keyingi mukofot</CardTitle>
+              <CardDescription className="text-xs">
+                {nextReward ? `${100 - nextRewardProgress}% qoldi` : "Barcha mukofotlar olindi"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex items-center gap-4">
+              <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
+                <svg viewBox="0 0 64 64" className="w-16 h-16 -rotate-90 absolute">
+                  <circle cx="32" cy="32" r="27" fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
+                  <circle
+                    cx="32" cy="32" r="27" fill="none" stroke="hsl(var(--primary))" strokeWidth="6"
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 27}
+                    strokeDashoffset={2 * Math.PI * 27 * (1 - nextRewardProgress / 100)}
+                  />
+                </svg>
+                <span className="text-sm font-display font-bold">{nextRewardProgress}%</span>
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <Gift className="w-4 h-4 text-primary shrink-0" />
+                  <p className="font-semibold text-sm truncate">{nextReward?.title || "Barchasi bajarildi!"}</p>
+                </div>
+                {nextReward && (
+                  <>
+                    <p className="text-xs text-muted-foreground truncate">{nextReward.description}</p>
+                    <p className="text-xs font-medium text-primary mt-1">+{nextReward.xp_reward} XP</p>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Leaderboard + Study Time */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5 items-start">
+          <Card className="border-border/50 xl:col-span-2">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Trophy className="w-4 h-4 text-amber-500" /> Reyting jadvali
+              </CardTitle>
+              <span className="text-xs text-muted-foreground">Shu hafta</span>
+            </CardHeader>
+            <CardContent>
+              {leaderboard.length > 0 ? (
+                <div className="space-y-2">
+                  {leaderboard.slice(0, 3).map((entry, i) => (
+                    <div
+                      key={entry.user_id}
+                      className={`flex items-center gap-3 p-3 rounded-xl border ${
+                        entry.user_id === user?.id
+                          ? "border-primary/50 bg-primary/5"
+                          : "border-border/50"
+                      }`}
+                    >
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs bg-muted text-muted-foreground shrink-0">
+                        {i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1}
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                        {entry.full_name?.charAt(0)?.toUpperCase() || "?"}
+                      </div>
+                      <p className="flex-1 min-w-0 text-sm font-medium truncate">
+                        {entry.user_id === user?.id ? "Siz" : entry.full_name || "Foydalanuvchi"}
+                      </p>
+                      <p className="font-display font-bold text-sm">{entry.xp.toLocaleString()} XP</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-6">Hali reyting mavjud emas</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <CardTitle className="text-base">O'qish vaqti</CardTitle>
+              <span className="text-xs text-muted-foreground">Shu hafta</span>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-display font-black mb-3">
+                {Math.floor(weeklyStudyMinutes / 60)}s {weeklyStudyMinutes % 60}d
+              </p>
+              <ResponsiveContainer width="100%" height={120}>
+                <BarChart data={studyTimeByDay}>
+                  <XAxis dataKey="day" fontSize={10} axisLine={false} tickLine={false} />
+                  <Bar dataKey="minutes" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="flex-wrap">
@@ -614,14 +834,8 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            {/* Daily Challenges */}
-            <DailyChallenges />
-
             {/* Referral Widget */}
             <ReferralWidget />
-
-            {/* Study Heatmap */}
-            <StudyHeatmap results={results} />
 
             {/* AI Study Plan */}
             <AIStudyPlan results={results} />
