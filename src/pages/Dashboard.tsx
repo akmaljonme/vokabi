@@ -70,6 +70,11 @@ import { AppLayout } from "@/components/AppLayout";
 import { motion } from "framer-motion";
 import { useGamification } from "@/hooks/useGamification";
 import { useSubscription } from "@/hooks/useSubscription";
+import {
+  getWordBankFromStorage,
+  getWordsLearnedToday,
+  DAILY_WORD_GOAL,
+} from "@/lib/wordActivity";
 import { AchievementToast } from "@/components/AchievementToast";
 import { StudyHeatmap } from "@/components/dashboard/StudyHeatmap";
 import { HeroIllustration, RobotAvatar, TreasureChestIcon } from "@/components/dashboard/DashboardIllustrations";
@@ -518,18 +523,17 @@ export default function Dashboard() {
         ? 100
         : 0;
 
-  // Real "Today's Mission" — backed by actual daily-challenge completions, speaking practice, and mock tests today
+  // Real "Today's Mission" — backed by actual word-learning activity, speaking practice, and mock tests today
   const speakingDoneToday = results.some(
     (r) => r.skill === "speaking" && r.created_at.startsWith(todayStr),
   );
-  const challengesDoneToday = completedChallengeIds.length;
-  const challengesTotalToday = todayChallenges.length;
+  const wordsLearnedToday = getWordsLearnedToday(getWordBankFromStorage());
   const missionItems = [
     {
-      label: "Bugungi challenglarni bajarish",
-      progressLabel: `${challengesDoneToday} / ${Math.max(challengesTotalToday, challengesDoneToday)}`,
-      done: challengesTotalToday > 0 && challengesDoneToday >= challengesTotalToday,
-      icon: Gift,
+      label: `${DAILY_WORD_GOAL} ta so'z bilan shug'ullanish`,
+      progressLabel: `${Math.min(wordsLearnedToday, DAILY_WORD_GOAL)} / ${DAILY_WORD_GOAL}`,
+      done: wordsLearnedToday >= DAILY_WORD_GOAL,
+      icon: BookOpen,
     },
     {
       label: "Speaking mashqini yakunlash",

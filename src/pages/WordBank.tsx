@@ -11,6 +11,7 @@ import {
   ChevronRight, RefreshCw, CheckCircle2, XCircle, Volume2, Sparkles, Loader2
 } from "lucide-react";
 import { toast } from "sonner";
+import { logWordReview } from "@/lib/wordActivity";
 
 interface Word {
   id: string;
@@ -22,6 +23,7 @@ interface Word {
   interval: number; // days
   ease: number;
   reps: number;
+  createdAt?: string;
 }
 
 const LEVELS = ["A1","A2","B1","B2","C1","C2"];
@@ -101,6 +103,7 @@ export default function WordBank() {
       interval: 1,
       ease: 2.5,
       reps: 0,
+      createdAt: new Date().toISOString(),
     };
     setWords(prev => [w, ...prev]);
     setNewWord({ word: "", meaning: "", example: "", level: "B1" });
@@ -143,6 +146,7 @@ export default function WordBank() {
         ready.push({
           id: `${Date.now()}-${it.word}`, word: it.word, meaning: it.meaning, example: "",
           level: "B1", nextReview: new Date().toISOString(), interval: 1, ease: 2.5, reps: 0,
+          createdAt: new Date().toISOString(),
         });
       } else {
         needsAi.push(it.word);
@@ -169,6 +173,7 @@ export default function WordBank() {
           word: p.word || "", meaning: p.meaning || "", example: p.example || "",
           level: LEVELS.includes(p.level) ? p.level : "B1",
           nextReview: new Date().toISOString(), interval: 1, ease: 2.5, reps: 0,
+          createdAt: new Date().toISOString(),
         })).filter((w: Word) => w.word);
         setBulkProgress({ done: aiWords.length, total: items.length });
       } catch {
@@ -177,6 +182,7 @@ export default function WordBank() {
           id: `${Date.now()}-${word}-${Math.random().toString(36).slice(2, 7)}`,
           word, meaning: "", example: "", level: "B1",
           nextReview: new Date().toISOString(), interval: 1, ease: 2.5, reps: 0,
+          createdAt: new Date().toISOString(),
         }));
         toast.error("AI ba'zi so'zlarni to'ldira olmadi — qo'lda tahrirlang");
       }
@@ -201,6 +207,7 @@ export default function WordBank() {
   const rateCard = (quality: 0|1|2|3|4|5) => {
     const updated = sm2(reviewQueue[currentCard], quality);
     setWords(prev => prev.map(w => w.id === updated.id ? updated : w));
+    logWordReview();
     if (currentCard + 1 < reviewQueue.length) {
       setCurrentCard(c => c + 1);
       setFlipped(false);

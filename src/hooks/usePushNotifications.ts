@@ -31,17 +31,33 @@ export const usePushNotifications = () => {
     } catch {}
   };
 
-  // Streak eslatma — har kuni
-  const scheduleStreakReminder = () => {
+  // Streak eslatma — faqat kechqurun va faqat foydalanuvchi bugun hali faol bo'lmagan bo'lsa
+  const scheduleStreakReminder = (params?: {
+    hasActivityToday?: boolean;
+    currentStreak?: number;
+  }) => {
     if (permission !== "granted") return;
-    const lastVisit = localStorage.getItem("vokabi_last_visit");
     const today = new Date().toDateString();
-    if (lastVisit !== today) {
-      sendNotification("🔥 Streakingizni davom ettiring!", {
-        body: "Bugun ham mashq qiling — streak uzilmasin!",
-        tag: "streak-reminder",
-      });
-      localStorage.setItem("vokabi_last_visit", today);
+    const alreadySentToday = localStorage.getItem("vokabi_streak_reminder_sent") === today;
+    if (alreadySentToday) return;
+
+    const hasActivityToday = params?.hasActivityToday ?? false;
+    const currentStreak = params?.currentStreak ?? 0;
+    const hour = new Date().getHours();
+
+    // Faqat kechqurun (18:00dan keyin) va bugun hali hech qanday faoliyat bo'lmasa eslatamiz
+    if (hour >= 18 && !hasActivityToday) {
+      sendNotification(
+        currentStreak > 0 ? "🔥 Streakingiz xavf ostida!" : "👋 Bugun mashq qilmadingiz",
+        {
+          body:
+            currentStreak > 0
+              ? `${currentStreak} kunlik streakingizni yo'qotmang — hoziroq bir mashq qiling!`
+              : "Bugun ham ozgina mashq qilib, o'rganishni davom ettiring.",
+          tag: "streak-reminder",
+        },
+      );
+      localStorage.setItem("vokabi_streak_reminder_sent", today);
     }
   };
 

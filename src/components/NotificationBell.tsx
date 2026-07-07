@@ -2,15 +2,28 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, BellOff, Check } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useGamification } from "@/hooks/useGamification";
 
 export const NotificationBell = () => {
   const { supported, permission, requestPermission, scheduleStreakReminder } = usePushNotifications();
+  const { progress } = useGamification();
   const [showTooltip, setShowTooltip] = useState(false);
   const [justEnabled, setJustEnabled] = useState(false);
 
   useEffect(() => {
-    if (permission === "granted") scheduleStreakReminder();
-  }, [permission]);
+    if (permission !== "granted") return;
+    const today = new Date().toISOString().split("T")[0];
+    const check = () => {
+      scheduleStreakReminder({
+        hasActivityToday: progress?.last_activity_date === today,
+        currentStreak: progress?.current_streak || 0,
+      });
+    };
+    check();
+    // Re-check periodically in case the tab stays open into the evening
+    const interval = setInterval(check, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [permission, progress?.last_activity_date, progress?.current_streak]);
 
   if (!supported) return null;
 
