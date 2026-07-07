@@ -61,6 +61,7 @@ import {
   SlidersHorizontal,
   TrendingDown,
   Sparkles,
+  HelpCircle,
 } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import { CEFRLevel } from "@/types/cefr";
@@ -71,6 +72,8 @@ import { useGamification } from "@/hooks/useGamification";
 import { AchievementToast } from "@/components/AchievementToast";
 import { StudyHeatmap } from "@/components/dashboard/StudyHeatmap";
 import { HeroIllustration, RobotAvatar, TreasureChestIcon } from "@/components/dashboard/DashboardIllustrations";
+import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import { DashboardOnboarding } from "@/components/dashboard/DashboardOnboarding";
 import { Tilt3D } from "@/components/Tilt3D";
 import { AIStudyPlan } from "@/components/dashboard/AIStudyPlan";
 import { DailyChallenges } from "@/components/dashboard/DailyChallenges";
@@ -141,6 +144,7 @@ export default function Dashboard() {
   const [completedChallengeIds, setCompletedChallengeIds] = useState<string[]>([]);
   const [mockTestsToday, setMockTestsToday] = useState(0);
   const [challengesXPEarnedToday, setChallengesXPEarnedToday] = useState(0);
+  const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate("/login");
@@ -412,9 +416,7 @@ export default function Dashboard() {
   if (loading || isLoading) {
     return (
       <AppLayout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary border-t-transparent" />
-        </div>
+        <DashboardSkeleton />
       </AppLayout>
     );
   }
@@ -567,6 +569,10 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
+      <DashboardOnboarding
+        forceOpen={showTour}
+        onClose={() => setShowTour(false)}
+      />
       <main className="container mx-auto px-4 py-6 sm:py-8">
         {/* Top bar */}
         <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
@@ -603,6 +609,13 @@ export default function Dashboard() {
               </div>
             )}
             <button
+              onClick={() => setShowTour(true)}
+              className="w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors shrink-0"
+              title="Qo'llanmani ko'rish"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+            <button
               onClick={() => navigate("/profile")}
               className="w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors shrink-0"
               title="Sozlamalar"
@@ -611,6 +624,29 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
+
+        {stats.totalTests === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-3xl border border-primary/30 bg-primary/5 p-6 mb-5 flex items-center justify-between gap-4 flex-wrap"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary/15 flex items-center justify-center shrink-0">
+                <Sparkles className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="font-display font-bold">Hali birorta test ishlamagansiz</p>
+                <p className="text-sm text-muted-foreground">
+                  Birinchi testni ishlab, AI Coach sizning kuchli va zaif tomonlaringizni aniqlasin!
+                </p>
+              </div>
+            </div>
+            <Button onClick={() => navigate("/mock-tests")} className="shrink-0">
+              Birinchi testni boshlash <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+            </Button>
+          </motion.div>
+        )}
 
         {/* Hero: Your Progress + AI Coach */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5">
