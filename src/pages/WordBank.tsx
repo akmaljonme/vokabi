@@ -31,8 +31,11 @@ export default function WordBank() {
   const navigate = useNavigate();
   const [words, setWords] = useLocalStorage<Word[]>("vokabi_wordbank", []);
   const [search, setSearch] = useState("");
-  const [mode, setMode] = useState<"list"|"review"|"add">("list");
+  const [mode, setMode] = useState<"list"|"review"|"add"|"bulk">("list");
   const [newWord, setNewWord] = useState({ word: "", meaning: "", example: "", level: "B1" });
+  const [bulkText, setBulkText] = useState("");
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
   const [reviewQueue, setReviewQueue] = useState<Word[]>([]);
   const [currentCard, setCurrentCard] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -103,6 +106,89 @@ export default function WordBank() {
     setMode("list");
   };
 
+  const MAX_BULK_WORDS = 40;
+
+  const parseBulkLines = (raw: string) => {
+    // Har bir qatorni yoki vergul bilan ajratilgan elementni alohida so'z sifatida oladi.
+    // "so'z - ma'no" yoki "so'z: ma'no" formatini ham tushunadi.
+    const rawItems = raw.split(/\n|,/).map(s => s.trim()).filter(Boolean);
+    const seen = new Set<string>();
+    const items: { word: string; meaning?: string }[] = [];
+    for (const line of rawItems) {
+      const m = line.match(/^(.+?)\s*[-–:]\s*(.+)$/);
+      const word = (m ? m[1] : line).trim();
+      const meaning = m ? m[2].trim() : undefined;
+      const key = word.toLowerCase();
+      if (!word || seen.has(key)) continue;
+      seen.add(key);
+      items.push({ word, meaning });
+      if (items.length >= MAX_BULK_WORDS) break;
+    }
+    return items;
+  };
+
+  const generateBulkCards = async () => {
+    const items = parseBulkLines(bulkText);
+    if (items.length === 0) { toast.error("Kamida bitta so'z kiriting"); return; }
+
+    setBulkLoading(true);
+    setBulkProgress({ done: 0, total: items.length });
+
+    // Ma'nosi allaqachon berilganlarni to'g'ridan-to'g'ri qo'shamiz
+    const ready: Word[] = [];
+    const needsAi: string[] = [];
+    for (const it of items) {
+      if (it.meaning) {
+        ready.push({
+          id: `${Date.now()}-${it.word}`, word: it.word, meaning: it.meaning, example: "",
+          level: "B1", nextReview: new Date().toISOString(), interval: 1, ease: 2.5, reps: 0,
+        });
+      } else {
+        needsAi.push(it.word);
+      }
+    }
+
+    let aiWords: Word[] = [];
+    if (needsAi.length > 0) {
+      try {
+        const { data, error } = await supabase.functions.invoke("ai-tutor", {
+          body: {
+            messages: [{
+              role: "user",
+              content: `Quyidagi inglizcha so'zlar ro'yxati uchun har biriga o'zbekcha ma'no, qisqa inglizcha misol jumla va CEFR darajasini bering.\n\nSo'zlar: ${needsAi.join(", ")}\n\nFAQAT quyidagi JSON massiv formatida javob bering, boshqa hech narsa yozmang:\n[{"word": "...", "meaning": "...", "example": "...", "level": "A1|A2|B1|B2|C1|C2"}]`
+            }]
+          }
+        });
+        if (error) throw error;
+        const text = data?.response || data?.content?.[0]?.text || "[]";
+        const clean = text.replace(/```json|```/g, "").trim();
+        const parsed = JSON.parse(clean);
+        aiWords = (Array.isArray(parsed) ? parsed : []).map((p: any) => ({
+          id: `${Date.now()}-${p.word}-${Math.random().toString(36).slice(2, 7)}`,
+          word: p.word || "", meaning: p.meaning || "", example: p.example || "",
+          level: LEVELS.includes(p.level) ? p.level : "B1",
+          nextReview: new Date().toISOString(), interval: 1, ease: 2.5, reps: 0,
+        })).filter((w: Word) => w.word);
+        setBulkProgress({ done: aiWords.length, total: items.length });
+      } catch {
+        // AI ishlamasa, so'zlarni bo'sh ma'no bilan qo'shamiz — foydalanuvchi keyin qo'lda to'ldiradi
+        aiWords = needsAi.map(word => ({
+          id: `${Date.now()}-${word}-${Math.random().toString(36).slice(2, 7)}`,
+          word, meaning: "", example: "", level: "B1",
+          nextReview: new Date().toISOString(), interval: 1, ease: 2.5, reps: 0,
+        }));
+        toast.error("AI ba'zi so'zlarni to'ldira olmadi — qo'lda tahrirlang");
+      }
+    }
+
+    const allNew = [...ready, ...aiWords];
+    setWords(prev => [...allNew, ...prev]);
+    toast.success(`✨ ${allNew.length} ta karta yaratildi!`);
+    setBulkText("");
+    setBulkLoading(false);
+    setMode("list");
+  };
+
   const startReview = () => {
     const due = words.filter(w => new Date(w.nextReview) <= new Date());
     setReviewQueue(due);
@@ -156,6 +242,12 @@ export default function WordBank() {
               </motion.button>
             )}
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+              onClick={() => setMode("bulk")}
+              className="btn-outline flex items-center gap-2 px-5 py-2.5 text-sm"
+            >
+              <Sparkles className="w-4 h-4" /> Ro'yxatdan qo'shish
+            </motion.button>
+            <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
               onClick={() => setMode("add")}
               className="btn-outline flex items-center gap-2 px-5 py-2.5 text-sm"
             >
@@ -165,6 +257,50 @@ export default function WordBank() {
         </div>
 
         <AnimatePresence mode="wait">
+
+          {/* BULK ADD — ro'yxatni copy-paste qilib kartalarga aylantirish */}
+          {mode === "bulk" && (
+            <motion.div key="bulk" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+              className="card-elevated rounded-2xl p-6 mb-6"
+            >
+              <h2 className="font-bold text-lg mb-1 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" /> So'zlar ro'yxatidan kartalar yaratish
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                So'zlarni har birini yangi qatorga (yoki vergul bilan ajratib) joylashtiring. AI avtomatik ma'no, misol va darajani to'ldiradi.
+                Xohlasangiz <code className="text-xs bg-muted px-1 py-0.5 rounded">so'z - ma'no</code> formatida ham yozishingiz mumkin.
+              </p>
+              <textarea
+                value={bulkText}
+                onChange={e => setBulkText(e.target.value)}
+                disabled={bulkLoading}
+                placeholder={"eloquent\nresilient\nambiguous - noaniq\nphenomenon"}
+                rows={8}
+                className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60"
+              />
+              <div className="flex items-center justify-between mt-2 mb-4">
+                <p className="text-xs text-muted-foreground">
+                  {parseBulkLines(bulkText).length} ta so'z aniqlandi (maksimal {MAX_BULK_WORDS})
+                </p>
+                {bulkLoading && (
+                  <p className="text-xs text-primary flex items-center gap-1.5">
+                    <Loader2 className="w-3 h-3 animate-spin" /> AI to'ldirmoqda...
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <button onClick={generateBulkCards} disabled={bulkLoading || !bulkText.trim()}
+                  className="btn-primary px-6 py-2.5 text-sm flex items-center gap-2 disabled:opacity-50"
+                >
+                  {bulkLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  Kartalarga aylantirish
+                </button>
+                <button onClick={() => { setMode("list"); setBulkText(""); }} disabled={bulkLoading} className="btn-outline px-6 py-2.5 text-sm">
+                  Bekor qilish
+                </button>
+              </div>
+            </motion.div>
+          )}
 
           {/* ADD WORD */}
           {mode === "add" && (

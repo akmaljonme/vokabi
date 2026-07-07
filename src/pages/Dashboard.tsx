@@ -58,6 +58,7 @@ import { motion } from "framer-motion";
 import { useGamification } from "@/hooks/useGamification";
 import { AchievementToast } from "@/components/AchievementToast";
 import { StudyHeatmap } from "@/components/dashboard/StudyHeatmap";
+import { Tilt3D } from "@/components/Tilt3D";
 import { AIStudyPlan } from "@/components/dashboard/AIStudyPlan";
 import { DailyChallenges } from "@/components/dashboard/DailyChallenges";
 import { ReferralWidget } from "@/components/ReferralWidget";
@@ -430,6 +431,7 @@ export default function Dashboard() {
               label: "Testlar",
               iconColor: "text-primary",
               bgColor: "bg-primary/10",
+              glow: "#6366f1",
             },
             {
               icon: TrendingUp,
@@ -437,6 +439,7 @@ export default function Dashboard() {
               label: "O'rtacha",
               iconColor: "text-emerald-500",
               bgColor: "bg-emerald-500/10",
+              glow: "#10b981",
             },
             {
               icon: Clock,
@@ -444,6 +447,7 @@ export default function Dashboard() {
               label: "Umumiy vaqt",
               iconColor: "text-blue-500",
               bgColor: "bg-blue-500/10",
+              glow: "#3b82f6",
             },
             {
               icon: Award,
@@ -451,6 +455,7 @@ export default function Dashboard() {
               label: "O'tgan (60%+)",
               iconColor: "text-amber-500",
               bgColor: "bg-amber-500/10",
+              glow: "#f59e0b",
             },
           ].map((stat, i) => (
             <motion.div
@@ -458,25 +463,26 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              whileHover={{ y: -2 }}
             >
-              <Card className="border-border/50 bg-card/60 backdrop-blur-md hover:border-primary/30 hover:shadow-lg transition-all">
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2.5 ${stat.bgColor} rounded-xl`}>
-                      <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
+              <Tilt3D glow={stat.glow} className="rounded-xl">
+                <Card className="border-border/50 bg-card/60 backdrop-blur-md hover:border-primary/30 transition-colors h-full">
+                  <CardContent className="pt-5 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 ${stat.bgColor} rounded-xl`}>
+                        <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
+                      </div>
+                      <div>
+                        <p className="text-xl font-display font-bold tracking-tight">
+                          {stat.value}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {stat.label}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xl font-display font-bold tracking-tight">
-                        {stat.value}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {stat.label}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Tilt3D>
             </motion.div>
           ))}
         </div>
@@ -488,17 +494,24 @@ export default function Dashboard() {
             <Card className="border-border/50 lg:col-span-2">
               <CardContent className="pt-5">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-                  <div className="relative shrink-0">
-                    <motion.div
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex flex-col items-center justify-center border border-primary/20"
-                    >
-                      <Crown className="w-5 h-5 text-primary mb-0.5" />
-                      <span className="text-2xl font-display font-bold">
+                  <div className="relative shrink-0 w-20 h-20">
+                    <svg viewBox="0 0 80 80" className="w-20 h-20 -rotate-90">
+                      <circle cx="40" cy="40" r="35" fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
+                      <motion.circle
+                        cx="40" cy="40" r="35" fill="none" stroke="hsl(var(--primary))" strokeWidth="6"
+                        strokeLinecap="round"
+                        strokeDasharray={2 * Math.PI * 35}
+                        initial={{ strokeDashoffset: 2 * Math.PI * 35 }}
+                        animate={{ strokeDashoffset: 2 * Math.PI * 35 * (1 - xpProgress / 100) }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <Crown className="w-4 h-4 text-primary mb-0.5" />
+                      <span className="text-xl font-display font-bold leading-none">
                         {progress.level}
                       </span>
-                    </motion.div>
+                    </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
@@ -550,35 +563,44 @@ export default function Dashboard() {
             </Card>
 
             {/* Streak Calendar */}
-            <Card className="border-border/50">
-              <CardContent className="pt-5">
-                <div className="text-center">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", delay: 0.2 }}
-                    className={`w-16 h-16 rounded-2xl mx-auto mb-3 flex items-center justify-center ${
-                      progress.current_streak > 0
-                        ? "bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30"
-                        : "bg-muted"
-                    }`}
-                  >
-                    <Flame
-                      className={`w-8 h-8 ${progress.current_streak > 0 ? "text-orange-500" : "text-muted-foreground"}`}
-                    />
-                  </motion.div>
-                  <p className="text-3xl font-display font-bold">
-                    {progress.current_streak}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    kunlik streak
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mt-1">
-                    Eng yaxshi: {progress.longest_streak} kun
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <Tilt3D glow="#f97316" className="rounded-xl">
+              <Card className="border-border/50 h-full">
+                <CardContent className="pt-5">
+                  <div className="text-center">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", delay: 0.2 }}
+                      className={`relative w-16 h-16 rounded-2xl mx-auto mb-3 flex items-center justify-center ${
+                        progress.current_streak > 0
+                          ? "bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30"
+                          : "bg-muted"
+                      }`}
+                    >
+                      {progress.current_streak > 0 && (
+                        <motion.div
+                          className="absolute inset-0 rounded-2xl bg-orange-500/30"
+                          animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                      )}
+                      <Flame
+                        className={`w-8 h-8 relative ${progress.current_streak > 0 ? "text-orange-500" : "text-muted-foreground"}`}
+                      />
+                    </motion.div>
+                    <p className="text-3xl font-display font-bold">
+                      {progress.current_streak}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      kunlik streak
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Eng yaxshi: {progress.longest_streak} kun
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Tilt3D>
           </div>
         )}
 

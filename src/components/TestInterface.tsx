@@ -12,6 +12,7 @@ import { SpeakingPanel } from '@/components/SpeakingPanel';
 import { toast } from 'sonner';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Crown, Lock as LockIcon } from 'lucide-react';
+import { TextHighlighter } from '@/components/TextHighlighter';
 
 interface TestInterfaceProps {
   level: CEFRLevel;
@@ -437,14 +438,19 @@ export const TestInterface = ({ level, skill, mockId, testId, onFinish, onBack }
           <div className="lg:w-1/2 bg-card border-r border-border">
             <div className="p-4 sm:p-6 h-[40vh] lg:h-[calc(100vh-3.5rem)] overflow-y-auto">
               <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">{part.passage.title}</h2>
-              {part.passage.paragraphs?.map((para) => (
-                <div key={para.label} className="mb-3 sm:mb-4">
-                  <span className="font-bold text-primary mr-2">{para.label}</span>
-                  <span className="leading-relaxed text-sm sm:text-base">{para.text}</span>
-                </div>
-              )) || (
-                <p className="leading-relaxed whitespace-pre-line text-sm sm:text-base">{part.passage.content}</p>
-              )}
+              <p className="text-[11px] text-muted-foreground mb-3 flex items-center gap-1">
+                💡 Muhim so'z/jumlani belgilash uchun uni sichqoncha bilan tanlang
+              </p>
+              <TextHighlighter>
+                {part.passage.paragraphs?.map((para) => (
+                  <div key={para.label} className="mb-3 sm:mb-4">
+                    <span className="font-bold text-primary mr-2">{para.label}</span>
+                    <span className="leading-relaxed text-sm sm:text-base">{para.text}</span>
+                  </div>
+                )) || (
+                  <p className="leading-relaxed whitespace-pre-line text-sm sm:text-base">{part.passage.content}</p>
+                )}
+              </TextHighlighter>
             </div>
           </div>
         )}
