@@ -70,6 +70,7 @@ import { motion } from "framer-motion";
 import { useGamification } from "@/hooks/useGamification";
 import { AchievementToast } from "@/components/AchievementToast";
 import { StudyHeatmap } from "@/components/dashboard/StudyHeatmap";
+import { HeroIllustration, RobotAvatar, TreasureChestIcon } from "@/components/dashboard/DashboardIllustrations";
 import { Tilt3D } from "@/components/Tilt3D";
 import { AIStudyPlan } from "@/components/dashboard/AIStudyPlan";
 import { DailyChallenges } from "@/components/dashboard/DailyChallenges";
@@ -626,6 +627,7 @@ export default function Dashboard() {
             <div className="absolute -bottom-20 -left-10 w-52 h-52 rounded-full blur-3xl opacity-30 bg-fuchsia-500/40" />
             <Sparkles className="absolute top-6 right-40 w-5 h-5 text-primary/40 hidden sm:block" />
             <Sparkles className="absolute bottom-10 right-64 w-3.5 h-3.5 text-fuchsia-400/40 hidden lg:block" />
+            <HeroIllustration className="hidden md:block absolute right-3 top-1/2 -translate-y-1/2 w-52 lg:w-64 h-auto opacity-90 pointer-events-none" />
 
             <div className="relative p-6 sm:p-8">
               <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
@@ -659,8 +661,8 @@ export default function Dashboard() {
                   <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
                     Keyingi mukofot
                   </p>
-                  <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center text-2xl mb-1.5">
-                    🎁
+                  <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-1.5">
+                    <TreasureChestIcon className="w-9 h-9" />
                   </div>
                   <p className="text-xs font-semibold truncate max-w-[110px] mx-auto">
                     {nextReward?.title || "Barchasi olindi!"}
@@ -722,7 +724,7 @@ export default function Dashboard() {
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Bot className="w-6 h-6 text-primary" />
+                    <RobotAvatar className="w-9 h-9" />
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {stats.totalTests > 0 ? "Kecha yaxshi ish qildingiz! 🎉 " : "Xush kelibsiz! "}
