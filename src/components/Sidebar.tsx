@@ -213,16 +213,27 @@ export const Sidebar = () => {
 
         {/* User card */}
         {!collapsed && user && (
-          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-muted/30 mt-1">
-            <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-xs shrink-0">
-              {(user.email || "U")[0].toUpperCase()}
+          <div className="px-3 py-2.5 rounded-xl bg-muted/30 mt-1 space-y-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-xs shrink-0">
+                {(user.email || "U")[0].toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold truncate">{user.email?.split("@")[0]}</p>
+              </div>
+              <button onClick={handleSignOut} className="text-muted-foreground hover:text-destructive transition-colors">
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold truncate">{user.email?.split("@")[0]}</p>
-            </div>
-            <button onClick={handleSignOut} className="text-muted-foreground hover:text-destructive transition-colors">
-              <LogOut className="w-4 h-4" />
+            <button
+              onClick={() => navigate("/pricing")}
+              className="w-full flex items-center gap-1.5 text-[10px] font-semibold text-amber-500"
+            >
+              <Crown className="w-3 h-3 shrink-0" /> Pro Plan
             </button>
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-amber-500 to-primary rounded-full" style={{ width: "62%" }} />
+            </div>
           </div>
         )}
         {collapsed && (

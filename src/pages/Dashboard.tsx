@@ -56,8 +56,13 @@ import {
   Gift,
   Lock,
   ChevronRight,
+  ChevronLeft,
   Mic,
   PenTool,
+  Gem,
+  SlidersHorizontal,
+  TrendingDown,
+  Sparkles,
 } from "lucide-react";
 import { CEFRLevel } from "@/types/cefr";
 import { Header } from "@/components/Header";
@@ -425,112 +430,181 @@ export default function Dashboard() {
   })();
   const weeklyStudyMinutes = studyTimeByDay.reduce((s, d) => s + d.minutes, 0);
 
+  const strongestSkill = [...skillAnalysis]
+    .filter((s) => s.totalTests > 0)
+    .sort((a, b) => b.averageScore - a.averageScore)[0];
+
+  const gemBalance = Math.floor(((progress?.xp || 0) + userAchievements.length * 150) / 10);
+
+  const missionItems = [
+    {
+      label: "25 ta yangi so'z o'rganish",
+      progressLabel: "25 / 25",
+      done: !!progress?.last_activity_date && progress.last_activity_date === new Date().toISOString().split("T")[0],
+      icon: CheckCircle,
+    },
+    { label: "Speaking mashqini yakunlash", progressLabel: "0 / 1", done: false, icon: Mic },
+    { label: "Mock testni yakunlash", progressLabel: "0 / 1", done: false, icon: Target },
+  ];
+  const missionDoneCount = missionItems.filter((m) => m.done).length;
+  const missionProgressPct = Math.round((missionDoneCount / missionItems.length) * 100);
+
+  const weeklyGoalPct = Math.min(100, Math.round((stats.totalTests / 5) * 100));
+
+  const quickActions = [
+    { label: "Learn Words", icon: BookOpen, color: "text-emerald-500", path: "/wordbank" },
+    { label: "Mock Test", icon: Target, color: "text-blue-500", path: "/mock-tests" },
+    { label: "Speaking Practice", icon: Mic, color: "text-purple-500", path: "/practice" },
+    { label: "Daily Challenge", icon: Gift, color: "text-amber-500", path: "/games" },
+    { label: "Video Lesson", icon: BarChart3, color: "text-rose-500", path: "/videos" },
+  ];
+
+  const leaderboardWithGap = (() => {
+    if (leaderboard.length === 0) return { rows: [], gapToFirst: 0 };
+    const first = leaderboard[0]?.xp || 0;
+    const meIndex = leaderboard.findIndex((e) => e.user_id === user?.id);
+    const myXP = meIndex >= 0 ? leaderboard[meIndex].xp : progress?.xp || 0;
+    return { rows: leaderboard.slice(0, 4), gapToFirst: Math.max(0, first - myXP) };
+  })();
+
   return (
     <AppLayout>
       <main className="container mx-auto px-4 py-6 sm:py-8">
         {/* Top bar */}
-        <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
+        <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight flex items-center gap-2">
-              {greeting}, {firstName}! 👋
+            <h1 className="text-2xl sm:text-3xl font-display font-black tracking-tight flex items-center gap-2 flex-wrap">
+              {greeting}, <span className="text-primary">{firstName}</span>! 👋
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Bugungi kunni ham ajoyib o'quv kuniga aylantiramiz.
+              Keep learning, keep growing. Bugun ham ajoyib kun bo'lsin! 🚀
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors">
-              <Search className="w-4 h-4" />
-            </button>
-            <button className="relative w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-xl border border-border/60 text-sm text-muted-foreground w-52">
+              <Search className="w-4 h-4 shrink-0" />
+              <span className="flex-1 truncate">Qidirish...</span>
+              <kbd className="text-[10px] px-1.5 py-0.5 rounded border border-border/60 shrink-0">Ctrl /</kbd>
+            </div>
+            <button className="relative w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors shrink-0">
               <Bell className="w-4 h-4" />
-              <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                3
+              </span>
             </button>
             {progress && progress.current_streak > 0 && (
-              <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-sm font-semibold text-orange-500">
+              <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-sm font-semibold text-orange-500 shrink-0">
                 <Flame className="w-4 h-4" /> {progress.current_streak} kunlik streak
               </div>
             )}
+            <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-sm font-semibold text-blue-500 shrink-0">
+              <Gem className="w-4 h-4" /> {gemBalance.toLocaleString()}
+            </div>
+            <button className="w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors shrink-0">
+              <SlidersHorizontal className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        {/* Main 2-column layout */}
+        {/* Hero: Your Progress + AI Coach */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5">
-          {/* LEFT: Progress + Mission */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             className="xl:col-span-2 relative overflow-hidden rounded-3xl border border-border/60"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-fuchsia-500/5 to-transparent" />
             <div
               className="absolute -top-16 -right-16 w-64 h-64 rounded-full blur-3xl opacity-40"
               style={{ background: "hsl(var(--primary) / 0.4)" }}
             />
-            <div className="relative p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2">
-                  Sizning taraqqiyotingiz
-                </p>
-                {progress && (
-                  <>
-                    <div className="flex items-center gap-2 mb-2">
-                      <h2 className="text-3xl sm:text-4xl font-display font-black tracking-tight">
-                        Daraja {progress.level}
-                      </h2>
-                      <Crown className="w-6 h-6 text-primary" />
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {progress.xp.toLocaleString()} / {(progress.level * 500).toLocaleString()} XP
-                    </p>
-                    <Progress value={xpProgress} className="h-3" />
-                  </>
-                )}
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">
-                  Bugungi vazifa
-                </p>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Kunlik maqsadlaringizni bajaring
-                </p>
-                <div className="space-y-2">
-                  {[
-                    {
-                      label: "25 ta yangi so'z o'rganish",
-                      done: !!progress?.last_activity_date && progress.last_activity_date === new Date().toISOString().split("T")[0],
-                      icon: CheckCircle,
-                    },
-                    { label: "Speaking mashqini yakunlash — 0 / 1", done: false, icon: Mic },
-                    { label: "Mock testni yakunlash — 0 / 1", done: false, icon: Target },
-                  ].map((m, i) => (
-                    <div key={i} className="flex items-center gap-2.5 text-sm">
-                      <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${
-                          m.done ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        <m.icon className="w-3.5 h-3.5" />
+            <div className="absolute -bottom-20 -left-10 w-52 h-52 rounded-full blur-3xl opacity-30 bg-fuchsia-500/40" />
+            <Sparkles className="absolute top-6 right-40 w-5 h-5 text-primary/40 hidden sm:block" />
+            <Sparkles className="absolute bottom-10 right-64 w-3.5 h-3.5 text-fuchsia-400/40 hidden lg:block" />
+
+            <div className="relative p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2">
+                    Sizning taraqqiyotingiz
+                  </p>
+                  {progress && (
+                    <>
+                      <div className="flex items-center gap-2 mb-2">
+                        <h2 className="text-3xl sm:text-4xl font-display font-black tracking-tight">
+                          Daraja {progress.level}
+                        </h2>
+                        <CheckCircle className="w-6 h-6 text-emerald-500" />
                       </div>
-                      <span className={m.done ? "text-foreground" : "text-muted-foreground"}>{m.label}</span>
-                    </div>
-                  ))}
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {progress.xp.toLocaleString()} / {(progress.level * 500).toLocaleString()} XP
+                      </p>
+                      <div className="flex items-center gap-3 max-w-md">
+                        <Progress value={xpProgress} className="h-3 flex-1" />
+                        <span className="text-sm font-bold text-primary shrink-0 w-10 text-right">
+                          {xpProgress}%
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Next Reward floating card */}
+                <div className="shrink-0 p-3.5 rounded-2xl bg-background/60 backdrop-blur border border-border/60 text-center min-w-[130px]">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+                    Keyingi mukofot
+                  </p>
+                  <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center text-2xl mb-1.5">
+                    🎁
+                  </div>
+                  <p className="text-xs font-semibold truncate max-w-[110px] mx-auto">
+                    {nextReward?.title || "Bronza sandiq"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {Math.max(0, (nextReward?.threshold || 10) * 20 - (progress?.xp || 0))} XP qoldi
+                  </p>
                 </div>
               </div>
-            </div>
-            <div className="relative px-6 sm:px-8 pb-6 sm:pb-8">
+
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-6">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🔥</span>
+                  <div>
+                    <p className="font-display font-bold leading-none">{progress?.current_streak || 0}</p>
+                    <p className="text-[10px] text-muted-foreground">Day Streak</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">⚡</span>
+                  <div>
+                    <p className="font-display font-bold leading-none">{(progress?.xp || 0).toLocaleString()}</p>
+                    <p className="text-[10px] text-muted-foreground">Total XP</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🏆</span>
+                  <div>
+                    <p className="font-display font-bold leading-none">{userAchievements.length}</p>
+                    <p className="text-[10px] text-muted-foreground">Badges</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🎯</span>
+                  <div>
+                    <p className="font-display font-bold leading-none">{weeklyGoalPct}%</p>
+                    <p className="text-[10px] text-muted-foreground">Week Goal</p>
+                  </div>
+                </div>
+              </div>
+
               <Button className="w-full sm:w-auto" onClick={() => navigate("/practice")}>
-                Davom etish <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+                Continue Learning <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
               </Button>
             </div>
           </motion.div>
 
-          {/* RIGHT: AI Coach */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-          >
+          {/* AI Coach */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
             <Card className="border-border/50 h-full">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -546,50 +620,56 @@ export default function Dashboard() {
                   <p className="text-sm text-muted-foreground">
                     {stats.totalTests > 0 ? "Kecha yaxshi ish qildingiz! 🎉 " : "Xush kelibsiz! "}
                     {weakestSkillLabel
-                      ? `Bugun ${weakestSkillLabel} ko'nikmangizni yaxshilashingiz mumkin.`
+                      ? `Bugun ${weakestSkillLabel} ko'nikmangizga e'tibor bering.`
                       : "Birinchi testni ishlab, kuchli va zaif tomonlaringizni aniqlang."}
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-xl bg-muted/40 border border-border/50">
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                      Zaif tomonlar
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="p-2.5 rounded-xl bg-muted/40 border border-border/50">
+                    <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+                      Weak Skill
                     </p>
-                    <div className="space-y-1.5">
-                      {weakSkillsRanked.length > 0 ? (
-                        weakSkillsRanked.map((s) => (
-                          <div key={s.skill} className="flex items-center justify-between text-xs">
-                            <span className="flex items-center gap-1.5 capitalize">
-                              <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> {s.skill}
-                            </span>
-                            <span className="font-semibold">{s.averageScore}%</span>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-xs text-muted-foreground">Ma'lumot yo'q</p>
-                      )}
-                    </div>
+                    {weakSkillsRanked[0] ? (
+                      <>
+                        <span className="flex items-center gap-1 text-xs font-semibold capitalize">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" /> {weakSkillsRanked[0].skill}
+                        </span>
+                        <span className="flex items-center gap-1 text-[11px] text-muted-foreground mt-0.5">
+                          {weakSkillsRanked[0].averageScore}% <TrendingDown className="w-3 h-3 text-red-500" />
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground">—</span>
+                    )}
                   </div>
-                  <div className="p-3 rounded-xl bg-muted/40 border border-border/50 flex flex-col items-center justify-center text-center">
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                      Taxminiy IELTS
+                  <div className="p-2.5 rounded-xl bg-muted/40 border border-border/50">
+                    <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+                      Strong Skill
                     </p>
-                    <div className="relative w-14 h-14 flex items-center justify-center">
-                      <svg viewBox="0 0 56 56" className="w-14 h-14 -rotate-90 absolute">
-                        <circle cx="28" cy="28" r="24" fill="none" stroke="hsl(var(--muted))" strokeWidth="5" />
-                        <circle
-                          cx="28" cy="28" r="24" fill="none" stroke="hsl(var(--primary))" strokeWidth="5"
-                          strokeLinecap="round"
-                          strokeDasharray={2 * Math.PI * 24}
-                          strokeDashoffset={2 * Math.PI * 24 * (1 - (estimatedIELTS ? parseFloat(estimatedIELTS) / 9 : 0))}
-                        />
-                      </svg>
-                      <span className="text-sm font-display font-bold">{estimatedIELTS || "—"}</span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {estimatedIELTS ? (parseFloat(estimatedIELTS) >= 6.5 ? "Yaxshi" : "O'rtacha") : "Test ishlang"}
+                    {strongestSkill ? (
+                      <>
+                        <span className="flex items-center gap-1 text-xs font-semibold capitalize">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" /> {strongestSkill.skill}
+                        </span>
+                        <span className="flex items-center gap-1 text-[11px] text-muted-foreground mt-0.5">
+                          {strongestSkill.averageScore}% <TrendingUp className="w-3 h-3 text-emerald-500" />
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground">—</span>
+                    )}
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-muted/40 border border-border/50 flex flex-col items-center text-center">
+                    <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                      Est. IELTS
                     </p>
+                    <span className="text-lg font-display font-bold leading-none">{estimatedIELTS || "—"}</span>
+                    {estimatedIELTS && (
+                      <span className="text-[9px] text-emerald-500 mt-0.5">
+                        {parseFloat(estimatedIELTS) >= 6.5 ? "Good" : "O'rtacha"}
+                      </span>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -597,68 +677,173 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
-        {/* Quick stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-          {[
-            { icon: Zap, value: stats.totalTests > 0 ? results[0]?.percentage ? "175" : "0" : "0", label: "Bugungi XP", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-            { icon: BookOpen, value: (progress?.tests_completed || 0) * 3, label: "O'rganilgan so'zlar", color: "text-blue-500", bg: "bg-blue-500/10" },
-            { icon: Award, value: stats.passedTests, label: "Bajarilgan darslar", color: "text-purple-500", bg: "bg-purple-500/10" },
-            { icon: Target, value: stats.totalTests, label: "Testlar soni", color: "text-amber-500", bg: "bg-amber-500/10" },
-          ].map((s, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <Card className="border-border/50">
-                <CardContent className="pt-5 pb-4 flex items-center gap-3">
-                  <div className={`p-2.5 ${s.bg} rounded-xl`}>
-                    <s.icon className={`h-5 w-5 ${s.color}`} />
-                  </div>
-                  <div>
-                    <p className="text-xl font-display font-bold tracking-tight">{s.value}</p>
-                    <p className="text-xs text-muted-foreground">{s.label}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+        {/* Quick Actions */}
+        <Card className="border-border/50 mb-5">
+          <CardContent className="py-3.5 flex items-center gap-2.5 overflow-x-auto">
+            <span className="text-sm font-semibold shrink-0 pr-3 mr-1 border-r border-border/50 whitespace-nowrap">
+              Quick Actions
+            </span>
+            {quickActions.map((a) => (
+              <button
+                key={a.label}
+                onClick={() => navigate(a.path)}
+                className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl border border-border/60 text-sm font-medium hover:bg-muted/60 transition-colors whitespace-nowrap"
+              >
+                <a.icon className={`w-4 h-4 ${a.color}`} /> {a.label}
+                <ChevronRight className="w-3.5 h-3.5 opacity-40" />
+              </button>
+            ))}
+          </CardContent>
+        </Card>
 
-        {/* Weekly Activity / Continue Learning / Daily Challenges */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5 items-start">
-          <StudyHeatmap results={results} />
-
-          <Card className="border-border/50">
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Davom ettirish</CardTitle>
-              <span className="text-xs text-muted-foreground">{continueLearningSkills.length} ta jarayonda</span>
+        {/* Today's Mission / Weekly Activity / Today's XP / Leaderboard */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-5 mb-5 items-start">
+          {/* Today's Mission */}
+          <Card className="border-border/50 h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Today's Mission</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {continueLearningSkills.map((s) => (
-                <div key={s.key} className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center shrink-0`}>
-                    <s.icon className={`w-4 h-4 ${s.color}`} />
+            <CardContent className="space-y-3">
+              {missionItems.map((m, i) => (
+                <div
+                  key={i}
+                  className={`flex items-center gap-3 p-2.5 rounded-xl border ${
+                    m.done ? "border-emerald-500/30 bg-emerald-500/5" : "border-border/50"
+                  }`}
+                >
+                  <div
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                      m.done ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <m.icon className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">{s.label}</span>
-                      <span className="text-xs text-muted-foreground">{s.score}%</span>
-                    </div>
-                    <Progress value={s.score} className="h-1.5" />
+                    <p className={`text-xs font-medium truncate ${m.done ? "" : "text-muted-foreground"}`}>
+                      {m.label}
+                    </p>
+                    {m.done && <Progress value={100} className="h-1 mt-1" />}
                   </div>
+                  <span className="text-[10px] text-muted-foreground shrink-0">{m.progressLabel}</span>
+                </div>
+              ))}
+              <div className="pt-2 border-t border-border/50">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-semibold text-muted-foreground">Mission Progress</span>
+                  <span className="text-xs font-bold text-primary">{missionProgressPct}%</span>
+                </div>
+                <Progress value={missionProgressPct} className="h-2" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Weekly Activity */}
+          <StudyHeatmap results={results} />
+
+          {/* Today's XP radial gauge */}
+          <Card className="border-border/50 h-full">
+            <CardContent className="pt-6 flex flex-col items-center justify-center h-full">
+              <div className="relative w-32 h-32 flex items-center justify-center mb-2">
+                <svg viewBox="0 0 128 128" className="w-32 h-32 -rotate-90 absolute">
+                  <defs>
+                    <linearGradient id="xpRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#a855f7" />
+                      <stop offset="50%" stopColor="#22c55e" />
+                      <stop offset="100%" stopColor="#eab308" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="64" cy="64" r="54" fill="none" stroke="hsl(var(--muted))" strokeWidth="10" />
+                  <motion.circle
+                    cx="64" cy="64" r="54" fill="none" stroke="url(#xpRing)" strokeWidth="10"
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 54}
+                    initial={{ strokeDashoffset: 2 * Math.PI * 54 }}
+                    animate={{ strokeDashoffset: 2 * Math.PI * 54 * (1 - Math.min(1, weeklyGoalPct / 100)) }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                  />
+                </svg>
+                <div className="text-center">
+                  <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide">Today's XP</p>
+                  <p className="text-2xl font-display font-black">{stats.totalTests > 0 ? 175 : 0}</p>
+                  <p className="text-[10px] text-muted-foreground">XP</p>
+                </div>
+              </div>
+              <p className="text-[11px] text-emerald-500 font-medium flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" /> 25% from yesterday
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Leaderboard */}
+          <Card className="border-border/50 h-full">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <CardTitle className="text-base">Leaderboard</CardTitle>
+              <span className="text-xs text-muted-foreground flex items-center gap-0.5">This Week <ChevronLeft className="w-3 h-3 rotate-[-90deg]" /></span>
+            </CardHeader>
+            <CardContent>
+              {leaderboardWithGap.rows.length > 0 ? (
+                <div className="space-y-1.5">
+                  {leaderboardWithGap.rows.map((entry, i) => (
+                    <div
+                      key={entry.user_id}
+                      className={`flex items-center gap-2.5 p-2 rounded-xl border ${
+                        entry.user_id === user?.id ? "border-primary/50 bg-primary/5" : "border-border/50"
+                      }`}
+                    >
+                      <div className="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] bg-muted text-muted-foreground shrink-0">
+                        {i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1}
+                      </div>
+                      <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-semibold text-primary shrink-0">
+                        {entry.full_name?.charAt(0)?.toUpperCase() || "?"}
+                      </div>
+                      <p className="flex-1 min-w-0 text-xs font-medium truncate">
+                        {entry.user_id === user?.id ? "You" : entry.full_name || "Foydalanuvchi"}
+                      </p>
+                      <p className="font-display font-bold text-xs">{entry.xp.toLocaleString()} XP</p>
+                    </div>
+                  ))}
+                  {leaderboardWithGap.gapToFirst > 0 && (
+                    <p className="text-[11px] text-muted-foreground pt-1">
+                      You are <span className="text-primary font-semibold">{leaderboardWithGap.gapToFirst} XP</span> away from #1 🏆
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-6">Hali reyting mavjud emas</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Continue Learning / Achievements / Study Time */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5 items-start">
+          <Card className="border-border/50">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <CardTitle className="text-base">Continue Learning</CardTitle>
+              <button onClick={() => navigate("/practice")} className="text-xs text-primary font-medium flex items-center gap-0.5">
+                View All <ChevronRight className="w-3 h-3" />
+              </button>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-3">
+              {continueLearningSkills.map((s) => (
+                <div key={s.key} className={`p-3 rounded-2xl ${s.bg} border border-border/50`}>
+                  <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-2`}>
+                    <s.icon className={`w-4.5 h-4.5 ${s.color}`} />
+                  </div>
+                  <p className="text-xs font-semibold mb-1.5">{s.label}</p>
+                  <Progress value={s.score} className="h-1.5 mb-1" />
+                  <span className="text-[10px] text-muted-foreground">{s.score}%</span>
                 </div>
               ))}
             </CardContent>
           </Card>
 
-          <DailyChallenges />
-        </div>
-
-        {/* Achievements / Learning Journey / Upcoming Rewards */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5 items-start">
           <Card className="border-border/50">
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Yutuqlar</CardTitle>
-              <span className="text-xs text-muted-foreground">
-                {userAchievements.length} / {achievements.length}
-              </span>
+              <CardTitle className="text-base">Achievements</CardTitle>
+              <button onClick={() => navigate("/profile")} className="text-xs text-primary font-medium flex items-center gap-0.5">
+                View All <ChevronRight className="w-3 h-3" />
+              </button>
             </CardHeader>
             <CardContent>
               {achievements.length > 0 ? (
@@ -668,8 +853,10 @@ export default function Dashboard() {
                     return (
                       <div key={ach.id} className="flex flex-col items-center gap-1 w-14">
                         <div
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 ${
-                            unlocked ? "bg-primary/10" : "bg-muted grayscale opacity-50"
+                          className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 ${
+                            unlocked
+                              ? "bg-gradient-to-br from-primary/20 to-fuchsia-500/20 ring-1 ring-primary/30"
+                              : "bg-muted grayscale opacity-50"
                           }`}
                         >
                           {ach.icon}
@@ -688,141 +875,23 @@ export default function Dashboard() {
           </Card>
 
           <Card className="border-border/50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">O'quv yo'lingiz</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center gap-1.5 py-2 overflow-x-auto">
-                {cefrPath.map((lvl, i) => {
-                  const idx = cefrPath.indexOf(currentCEFR);
-                  const isPast = i < idx;
-                  const isCurrent = lvl === currentCEFR;
-                  const isFuture = i > idx;
-                  return (
-                    <div key={lvl} className="flex items-center">
-                      <div className="flex flex-col items-center gap-1">
-                        <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
-                            isCurrent
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : isPast
-                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/40"
-                                : "bg-muted text-muted-foreground border-border"
-                          }`}
-                        >
-                          {isFuture ? <Lock className="w-3.5 h-3.5" /> : lvl}
-                        </div>
-                        {isCurrent && (
-                          <span className="text-[9px] text-primary font-semibold whitespace-nowrap">
-                            Siz shu yerdasiz
-                          </span>
-                        )}
-                      </div>
-                      {i < cefrPath.length - 1 && (
-                        <div className={`w-5 h-0.5 mx-0.5 ${i < idx ? "bg-emerald-500/40" : "bg-border"}`} />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Keyingi mukofot</CardTitle>
-              <CardDescription className="text-xs">
-                {nextReward ? `${100 - nextRewardProgress}% qoldi` : "Barcha mukofotlar olindi"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center gap-4">
-              <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
-                <svg viewBox="0 0 64 64" className="w-16 h-16 -rotate-90 absolute">
-                  <circle cx="32" cy="32" r="27" fill="none" stroke="hsl(var(--muted))" strokeWidth="6" />
-                  <circle
-                    cx="32" cy="32" r="27" fill="none" stroke="hsl(var(--primary))" strokeWidth="6"
-                    strokeLinecap="round"
-                    strokeDasharray={2 * Math.PI * 27}
-                    strokeDashoffset={2 * Math.PI * 27 * (1 - nextRewardProgress / 100)}
-                  />
-                </svg>
-                <span className="text-sm font-display font-bold">{nextRewardProgress}%</span>
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <Gift className="w-4 h-4 text-primary shrink-0" />
-                  <p className="font-semibold text-sm truncate">{nextReward?.title || "Barchasi bajarildi!"}</p>
-                </div>
-                {nextReward && (
-                  <>
-                    <p className="text-xs text-muted-foreground truncate">{nextReward.description}</p>
-                    <p className="text-xs font-medium text-primary mt-1">+{nextReward.xp_reward} XP</p>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Leaderboard + Study Time */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5 items-start">
-          <Card className="border-border/50 xl:col-span-2">
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Trophy className="w-4 h-4 text-amber-500" /> Reyting jadvali
-              </CardTitle>
-              <span className="text-xs text-muted-foreground">Shu hafta</span>
-            </CardHeader>
-            <CardContent>
-              {leaderboard.length > 0 ? (
-                <div className="space-y-2">
-                  {leaderboard.slice(0, 3).map((entry, i) => (
-                    <div
-                      key={entry.user_id}
-                      className={`flex items-center gap-3 p-3 rounded-xl border ${
-                        entry.user_id === user?.id
-                          ? "border-primary/50 bg-primary/5"
-                          : "border-border/50"
-                      }`}
-                    >
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs bg-muted text-muted-foreground shrink-0">
-                        {i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1}
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
-                        {entry.full_name?.charAt(0)?.toUpperCase() || "?"}
-                      </div>
-                      <p className="flex-1 min-w-0 text-sm font-medium truncate">
-                        {entry.user_id === user?.id ? "Siz" : entry.full_name || "Foydalanuvchi"}
-                      </p>
-                      <p className="font-display font-bold text-sm">{entry.xp.toLocaleString()} XP</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-6">Hali reyting mavjud emas</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/50">
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-base">O'qish vaqti</CardTitle>
-              <span className="text-xs text-muted-foreground">Shu hafta</span>
+              <CardTitle className="text-base">Study Time</CardTitle>
+              <span className="text-xs text-muted-foreground">This Week</span>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-display font-black mb-3">
-                {Math.floor(weeklyStudyMinutes / 60)}s {weeklyStudyMinutes % 60}d
+                {Math.floor(weeklyStudyMinutes / 60)}h {weeklyStudyMinutes % 60}m
               </p>
-              <ResponsiveContainer width="100%" height={120}>
+              <ResponsiveContainer width="100%" height={110}>
                 <BarChart data={studyTimeByDay}>
-                  <XAxis dataKey="day" fontSize={10} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="day" fontSize={9} axisLine={false} tickLine={false} />
                   <Bar dataKey="minutes" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </div>
-
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="flex-wrap">
@@ -834,6 +903,9 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* Daily Challenges */}
+            <DailyChallenges />
+
             {/* Referral Widget */}
             <ReferralWidget />
 
