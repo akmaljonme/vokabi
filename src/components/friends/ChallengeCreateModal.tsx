@@ -7,6 +7,7 @@ const supabase: any = _sbClient;
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { CHALLENGE_SKILLS, generateChallengeQuestions } from "@/lib/friendChallenge";
+import { createNotification } from "@/lib/notifications";
 
 interface Props {
   friendId: string;
@@ -38,6 +39,13 @@ export const ChallengeCreateModal = ({ friendId, friendName, onClose, onCreated 
         questions,
       });
       if (error) throw error;
+      await createNotification({
+        userId: friendId,
+        actorId: user.id,
+        type: "challenge_invite",
+        title: "Yangi challenge!",
+        body: `Sizga ${CHALLENGE_SKILLS.find((s) => s.key === skill)?.label} bo'yicha challenge tashladi`,
+      });
       toast.success(`⚔️ ${friendName}ga challenge yuborildi!`);
       onCreated?.();
       onClose();

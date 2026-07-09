@@ -13,6 +13,7 @@ import {
   Trophy, Settings, ChevronLeft, ChevronRight,
   Sparkles, Brain, LogOut, Moon, Sun,
   Shield, ChevronDown, Crown, Sword, School, BookMarked,
+  Bell, Image,
 } from "lucide-react";
 
 import { NotificationBell } from "@/components/NotificationBell";
@@ -34,6 +35,8 @@ const mainItems: NavItem[] = [
   { label: "Examlar",       path: "/exams",       icon: ClipboardList },
   { label: "Hamjamiyat",    path: "/community",   icon: Users },
   { label: "Do'stlar",      path: "/friends",     icon: UserPlus },
+  { label: "Feed",          path: "/feed",        icon: Image },
+  { label: "Bildirishnomalar", path: "/notifications", icon: Bell },
   { label: "Leaderboard",   path: "/leaderboard", icon: Trophy },
   { label: "Turnirlar",     path: "/tournaments", icon: Sword },
   { label: "Pro",           path: "/pricing",     icon: Crown },

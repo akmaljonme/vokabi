@@ -8,6 +8,7 @@ const supabase: any = _sbClient;
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { ChallengeQuestion } from "@/lib/friendChallenge";
+import { createNotification } from "@/lib/notifications";
 
 interface ChallengeRow {
   id: string;
@@ -74,6 +75,16 @@ export const ChallengeQuizModal = ({ challenge, onClose, onDone }: Props) => {
           .from("friend_challenges")
           .update({ status: "completed", winner_id: winnerId })
           .eq("id", challenge.id);
+
+        // Ikkalasiga ham natija haqida xabar
+        const otherUserId = isChallenger ? challenge.opponent_id : challenge.challenger_id;
+        await createNotification({
+          userId: otherUserId,
+          actorId: user?.id,
+          type: "challenge_result",
+          title: winnerId === null ? "Challenge durrang tugadi!" : winnerId === otherUserId ? "🏆 Siz g'alaba qozondingiz!" : "Challenge yakunlandi",
+          body: `Natija: ${cScore}/${questions.length} vs ${oScore}/${questions.length}`,
+        });
       }
 
       toast.success(`Test tugadi! ${score}/${questions.length} to'g'ri javob`);

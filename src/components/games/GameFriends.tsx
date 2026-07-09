@@ -10,6 +10,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { ChallengeCreateModal } from '@/components/friends/ChallengeCreateModal';
 import { ChallengesTab } from '@/components/friends/ChallengesTab';
+import { FollowButton } from '@/components/friends/FollowButton';
+import { createNotification } from '@/lib/notifications';
 
 interface Friend {
   id: string;
@@ -116,12 +118,28 @@ export const GameFriends = ({ onBack }: Props) => {
       return;
     }
     toast({ title: "✅ Do'stlik so'rovi yuborildi!" });
+    createNotification({
+      userId: friendId,
+      actorId: user.id,
+      type: 'friend_request',
+      title: "Yangi do'stlik so'rovi",
+      body: "Sizga do'stlik so'rovi yubordi",
+    });
     setSearchResults(prev => prev.filter(r => r.user_id !== friendId));
   };
 
-  const acceptRequest = async (friendshipId: string) => {
+  const acceptRequest = async (friendshipId: string, requesterId: string) => {
     await (supabase.from('friendships') as any).update({ status: 'accepted' }).eq('id', friendshipId);
     toast({ title: "🤝 Do'st bo'ldingiz!" });
+    if (user) {
+      createNotification({
+        userId: requesterId,
+        actorId: user.id,
+        type: 'friend_accepted',
+        title: "Do'stlik so'rovi qabul qilindi!",
+        body: "Endi siz do'stsiz 🎉",
+      });
+    }
     loadFriends();
   };
 
@@ -199,6 +217,7 @@ export const GameFriends = ({ onBack }: Props) => {
                             Level {f.level}
                           </div>
                         </div>
+                        <FollowButton targetUserId={fid} targetName={f.full_name} />
                         <Button
                           variant="outline"
                           size="sm"
@@ -239,7 +258,7 @@ export const GameFriends = ({ onBack }: Props) => {
                         <p className="text-xs text-muted-foreground">Do'stlik so'rovi</p>
                       </div>
                       <div className="flex gap-1.5">
-                        <Button size="sm" onClick={() => acceptRequest(r.id)} className="h-8">
+                        <Button size="sm" onClick={() => acceptRequest(r.id, r.user_id)} className="h-8">
                           <Check className="w-4 h-4" />
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => rejectRequest(r.id)} className="h-8">
@@ -279,6 +298,7 @@ export const GameFriends = ({ onBack }: Props) => {
                       <p className="font-medium text-sm truncate">{r.full_name || 'Foydalanuvchi'}</p>
                       {r.username && <p className="text-xs text-muted-foreground">@{r.username}</p>}
                     </div>
+                    <FollowButton targetUserId={r.user_id} targetName={r.full_name} />
                     <Button size="sm" variant="outline" onClick={() => sendRequest(r.user_id)}>
                       <UserPlus className="w-4 h-4 mr-1" /> Qo'shish
                     </Button>
