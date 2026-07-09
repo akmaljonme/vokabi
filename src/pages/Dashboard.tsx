@@ -62,6 +62,7 @@ import {
   TrendingDown,
   Sparkles,
   HelpCircle,
+  UserPlus,
 } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import { CEFRLevel } from "@/types/cefr";
@@ -152,6 +153,9 @@ export default function Dashboard() {
   const [mockTestsToday, setMockTestsToday] = useState(0);
   const [challengesXPEarnedToday, setChallengesXPEarnedToday] = useState(0);
   const [showTour, setShowTour] = useState(false);
+  const [friendsCount, setFriendsCount] = useState(0);
+  const [pendingFriendRequests, setPendingFriendRequests] = useState(0);
+  const [topFriend, setTopFriend] = useState<{ full_name: string; xp: number } | null>(null);
 
   useEffect(() => {
     if (!loading && !user) navigate("/login");
@@ -164,6 +168,52 @@ export default function Dashboard() {
   useEffect(() => {
     if (user) fetchTodayMissionData();
   }, [user]);
+
+  useEffect(() => {
+    if (user) fetchFriendsPreview();
+  }, [user]);
+
+  const fetchFriendsPreview = async () => {
+    if (!user) return;
+    try {
+      const { data: friendships } = await supabase
+        .from("friendships")
+        .select("user_id, friend_id")
+        .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
+        .eq("status", "accepted");
+
+      const { count: pendingCount } = await supabase
+        .from("friendships")
+        .select("id", { count: "exact", head: true })
+        .eq("friend_id", user.id)
+        .eq("status", "pending");
+      setPendingFriendRequests(pendingCount || 0);
+
+      const friendIds = (friendships || []).map((f: any) =>
+        f.user_id === user.id ? f.friend_id : f.user_id,
+      );
+      setFriendsCount(friendIds.length);
+
+      if (friendIds.length > 0) {
+        const { data: friendProgress } = await supabase
+          .from("user_progress")
+          .select("user_id, xp")
+          .in("user_id", friendIds)
+          .order("xp", { ascending: false })
+          .limit(1);
+        if (friendProgress && friendProgress.length > 0) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("user_id", friendProgress[0].user_id)
+            .maybeSingle();
+          setTopFriend({ full_name: profile?.full_name || "Do'st", xp: friendProgress[0].xp });
+        }
+      }
+    } catch (err) {
+      console.error("Friends preview fetch error:", err);
+    }
+  };
 
   const fetchTodayMissionData = async () => {
     if (!user) return;
@@ -1045,8 +1095,8 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Business row: Pro Plan CTA + Referral */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5 items-stretch">
+        {/* Business row: Pro Plan CTA + Referral + Friends */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 items-stretch">
           {!subLoading && !isPro ? (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
@@ -1109,6 +1159,53 @@ export default function Dashboard() {
           )}
 
           <ReferralWidget />
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-3xl border border-border/60 p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <UserPlus className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-black text-base">Do'stlar</h3>
+                    <p className="text-xs text-muted-foreground">{friendsCount} ta do'st</p>
+                  </div>
+                </div>
+                {pendingFriendRequests > 0 && (
+                  <span className="w-6 h-6 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+                    {pendingFriendRequests}
+                  </span>
+                )}
+              </div>
+
+              {topFriend ? (
+                <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-muted/40 border border-border/50 mb-4">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                    {topFriend.full_name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium truncate">{topFriend.full_name}</p>
+                    <p className="text-[10px] text-muted-foreground">Eng faol do'stingiz</p>
+                  </div>
+                  <p className="text-xs font-display font-bold shrink-0">{topFriend.xp.toLocaleString()} XP</p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground mb-4">
+                  Do'stlaringizni qo'shing va birga XP to'plang — raqobat qiziqarliroq!
+                </p>
+              )}
+            </div>
+
+            <Button variant="outline" className="w-full" onClick={() => navigate("/friends")}>
+              {friendsCount > 0 ? "Do'stlarni ko'rish" : "Do'st qo'shish"}{" "}
+              <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+            </Button>
+          </motion.div>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">

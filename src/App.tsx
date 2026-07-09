@@ -30,6 +30,7 @@ const VideoLessons   = lazy(() => import("./pages/VideoLessons"));
 const Exams          = lazy(() => import("./pages/Exams"));
 const Pricing        = lazy(() => import("./pages/Pricing"));
 const WordBank       = lazy(() => import("./pages/WordBank"));
+const Friends        = lazy(() => import("./pages/Friends"));
 const Tools          = lazy(() => import("./pages/Tools"));
 const Languages      = lazy(() => import("./pages/Languages"));
 const LanguageLevel  = lazy(() => import("./pages/LanguageLevel"));
@@ -124,6 +125,7 @@ const App = () => (
                     <Route path="/school/teacher" element={<ErrorBoundary><TeacherPanel /></ErrorBoundary>} />
                     <Route path="/school/student" element={<ErrorBoundary><StudentPanel /></ErrorBoundary>} />
                     <Route path="/wordbank"   element={<ErrorBoundary><WordBank /></ErrorBoundary>} />
+                    <Route path="/friends"    element={<ErrorBoundary><Friends /></ErrorBoundary>} />
                     <Route path="/study-room" element={<ErrorBoundary><StudyRoom /></ErrorBoundary>} />
                     <Route path="/essay"      element={<ErrorBoundary><EssayChecker /></ErrorBoundary>} />
                     <Route path="*"          element={<NotFound />} />

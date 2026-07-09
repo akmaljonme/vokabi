@@ -9,7 +9,7 @@ import { toast } from "sonner";
 const supabase: any = _sbClient;
 import {
   LayoutDashboard, Gamepad2, Video, ClipboardList,
-  Users, Home, PenTool, BookOpen,
+  Users, Home, PenTool, BookOpen, UserPlus,
   Trophy, Settings, ChevronLeft, ChevronRight,
   Sparkles, Brain, LogOut, Moon, Sun,
   Shield, ChevronDown, Crown, Sword, School, BookMarked,
@@ -33,6 +33,7 @@ const mainItems: NavItem[] = [
   { label: "Video Darslar", path: "/videos",      icon: Video },
   { label: "Examlar",       path: "/exams",       icon: ClipboardList },
   { label: "Hamjamiyat",    path: "/community",   icon: Users },
+  { label: "Do'stlar",      path: "/friends",     icon: UserPlus },
   { label: "Leaderboard",   path: "/leaderboard", icon: Trophy },
   { label: "Turnirlar",     path: "/tournaments", icon: Sword },
   { label: "Pro",           path: "/pricing",     icon: Crown },
