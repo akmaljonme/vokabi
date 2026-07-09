@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, UserPlus, Search, Check, X, Trophy, Loader2 } from 'lucide-react';
+import { Users, UserPlus, Search, Check, X, Trophy, Loader2, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,6 +8,8 @@ import { supabase as _sbClient } from '@/integrations/supabase/client';
 const supabase: any = _sbClient;
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { ChallengeCreateModal } from '@/components/friends/ChallengeCreateModal';
+import { ChallengesTab } from '@/components/friends/ChallengesTab';
 
 interface Friend {
   id: string;
@@ -30,7 +32,8 @@ export const GameFriends = ({ onBack }: Props) => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'friends' | 'requests' | 'search'>('friends');
+  const [tab, setTab] = useState<'friends' | 'requests' | 'search' | 'challenges'>('friends');
+  const [challengeTarget, setChallengeTarget] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     if (user) loadFriends();
@@ -144,16 +147,17 @@ export const GameFriends = ({ onBack }: Props) => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         {[
           { key: 'friends' as const, label: `Do'stlar (${friends.length})`, icon: Users },
+          { key: 'challenges' as const, label: 'Challenge', icon: Swords },
           { key: 'requests' as const, label: `So'rovlar (${pendingRequests.length})`, icon: UserPlus },
           { key: 'search' as const, label: 'Qidirish', icon: Search },
         ].map(t => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-1.5 min-w-[80px] ${
               tab === t.key ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
             }`}
           >
@@ -162,7 +166,9 @@ export const GameFriends = ({ onBack }: Props) => {
         ))}
       </div>
 
-      {loading ? (
+      {tab === 'challenges' ? (
+        <ChallengesTab />
+      ) : loading ? (
         <div className="text-center py-12"><Loader2 className="w-8 h-8 mx-auto animate-spin text-primary" /></div>
       ) : (
         <AnimatePresence mode="wait">
@@ -193,6 +199,14 @@ export const GameFriends = ({ onBack }: Props) => {
                             Level {f.level}
                           </div>
                         </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs shrink-0"
+                          onClick={() => setChallengeTarget({ id: fid, name: f.full_name || 'Foydalanuvchi' })}
+                        >
+                          <Swords className="w-3.5 h-3.5 mr-1" /> Challenge
+                        </Button>
                         <Button variant="ghost" size="sm" className="text-xs text-destructive" onClick={() => removeFriend(f.id)}>
                           <X className="w-3.5 h-3.5" />
                         </Button>
@@ -277,6 +291,15 @@ export const GameFriends = ({ onBack }: Props) => {
             </motion.div>
           )}
         </AnimatePresence>
+      )}
+
+      {challengeTarget && (
+        <ChallengeCreateModal
+          friendId={challengeTarget.id}
+          friendName={challengeTarget.name}
+          onClose={() => setChallengeTarget(null)}
+          onCreated={() => setTab('challenges')}
+        />
       )}
     </motion.div>
   );

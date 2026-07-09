@@ -187,7 +187,14 @@ export default function Dashboard() {
         .select("id", { count: "exact", head: true })
         .eq("friend_id", user.id)
         .eq("status", "pending");
-      setPendingFriendRequests(pendingCount || 0);
+
+      const { count: pendingChallenges } = await supabase
+        .from("friend_challenges")
+        .select("id", { count: "exact", head: true })
+        .eq("opponent_id", user.id)
+        .eq("status", "pending");
+
+      setPendingFriendRequests((pendingCount || 0) + (pendingChallenges || 0));
 
       const friendIds = (friendships || []).map((f: any) =>
         f.user_id === user.id ? f.friend_id : f.user_id,
