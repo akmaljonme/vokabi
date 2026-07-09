@@ -167,13 +167,16 @@ export const PopupAd = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-background/70 z-[65] backdrop-blur-md"
             onClick={handleClose} />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 30 }}
-            transition={{ type: 'spring', damping: 24, stiffness: 260 }}
-            className="fixed left-1/2 top-1/2 z-[66] w-[calc(100vw-1.5rem)] max-w-[400px] -translate-x-1/2 -translate-y-1/2 max-h-[90vh] overflow-y-auto"
+          <div
+            className="fixed inset-0 z-[66] flex items-center justify-center p-3 pointer-events-none"
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 30 }}
+              transition={{ type: 'spring', damping: 24, stiffness: 260 }}
+              className="w-full max-w-[400px] max-h-[90vh] overflow-y-auto pointer-events-auto"
+            >
             <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-card/80 shadow-2xl">
               {/* Aurora glow */}
               <div className="pointer-events-none absolute -top-20 -right-20 h-52 w-52 rounded-full bg-primary/25 blur-3xl" />
@@ -230,7 +233,8 @@ export const PopupAd = () => {
                 )}
               </div>
             </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
