@@ -6,7 +6,6 @@ import {
   Image as ImageIcon,
   Video,
   BarChart3,
-  Heart,
   Loader2,
   X,
   Plus,
@@ -21,42 +20,16 @@ import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { FollowButton } from "@/components/friends/FollowButton";
+import { PostCard, FeedPost } from "@/components/feed/PostCard";
 
 type PostType = "post" | "reel" | "poll";
-
-interface PostRow {
-  id: string;
-  user_id: string;
-  type: PostType;
-  caption: string | null;
-  media_url: string | null;
-  media_type: "image" | "video" | null;
-  poll_options: { text: string }[] | null;
-  created_at: string;
-  author_name?: string;
-  likes_count: number;
-  liked_by_me: boolean;
-  poll_tally: number[];
-  my_vote: number | null;
-}
-
-const timeAgo = (dateStr: string) => {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "hozir";
-  if (mins < 60) return `${mins}d oldin`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}s oldin`;
-  return `${Math.floor(hours / 24)} kun oldin`;
-};
 
 export default function Feed() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [posts, setPosts] = useState<PostRow[]>([]);
+  const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerType, setComposerType] = useState<PostType>("post");
@@ -78,9 +51,9 @@ export default function Feed() {
     const authorIds = Array.from(new Set(rows.map((r) => r.user_id)));
     const postIds = rows.map((r) => r.id);
 
-    const [{ data: profiles }, { data: likes }, { data: votes }] = await Promise.all([
+    const [{ data: profiles }, { data: likes }, { data: votes }, { data: saves }, { data: commentCounts }] = await Promise.all([
       authorIds.length
-        ? supabase.from("profiles").select("user_id, full_name").in("user_id", authorIds)
+        ? supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", authorIds)
         : Promise.resolve({ data: [] }),
       postIds.length
         ? supabase.from("post_likes").select("post_id, user_id").in("post_id", postIds)
@@ -88,19 +61,29 @@ export default function Feed() {
       postIds.length
         ? supabase.from("poll_votes").select("post_id, user_id, option_index").in("post_id", postIds)
         : Promise.resolve({ data: [] }),
+      postIds.length && user
+        ? supabase.from("post_saves").select("post_id").eq("user_id", user.id).in("post_id", postIds)
+        : Promise.resolve({ data: [] }),
+      postIds.length
+        ? supabase.from("post_comments").select("post_id").in("post_id", postIds)
+        : Promise.resolve({ data: [] }),
     ]);
 
-    const enriched: PostRow[] = rows.map((r) => {
+    const enriched: FeedPost[] = rows.map((r) => {
       const postLikes = (likes || []).filter((l: any) => l.post_id === r.id);
       const postVotes = (votes || []).filter((v: any) => v.post_id === r.id);
       const tally = (r.poll_options || []).map(
         (_: any, i: number) => postVotes.filter((v: any) => v.option_index === i).length,
       );
+      const profile = profiles?.find((p: any) => p.user_id === r.user_id);
       return {
         ...r,
-        author_name: profiles?.find((p: any) => p.user_id === r.user_id)?.full_name || "Foydalanuvchi",
+        author_name: profile?.full_name || "Foydalanuvchi",
+        author_avatar: profile?.avatar_url || null,
         likes_count: postLikes.length,
         liked_by_me: postLikes.some((l: any) => l.user_id === user?.id),
+        saved_by_me: (saves || []).some((s: any) => s.post_id === r.id),
+        comments_count: (commentCounts || []).filter((c: any) => c.post_id === r.id).length,
         poll_tally: tally,
         my_vote: postVotes.find((v: any) => v.user_id === user?.id)?.option_index ?? null,
       };
@@ -180,55 +163,34 @@ export default function Feed() {
     }
   };
 
-  const toggleLike = async (post: PostRow) => {
-    if (!user) return;
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === post.id
-          ? { ...p, liked_by_me: !p.liked_by_me, likes_count: p.likes_count + (p.liked_by_me ? -1 : 1) }
-          : p,
-      ),
-    );
-    if (post.liked_by_me) {
-      await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", user.id);
-    } else {
-      await supabase.from("post_likes").insert({ post_id: post.id, user_id: user.id });
-    }
-  };
-
-  const vote = async (post: PostRow, optionIndex: number) => {
-    if (!user || post.my_vote !== null) return;
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === post.id
-          ? {
-              ...p,
-              my_vote: optionIndex,
-              poll_tally: p.poll_tally.map((c, i) => (i === optionIndex ? c + 1 : c)),
-            }
-          : p,
-      ),
-    );
-    await supabase.from("poll_votes").insert({ post_id: post.id, user_id: user.id, option_index: optionIndex });
-  };
-
-  const deletePost = async (post: PostRow) => {
+  const deletePost = async (post: FeedPost) => {
     if (!user || post.user_id !== user.id) return;
     setPosts((prev) => prev.filter((p) => p.id !== post.id));
     await supabase.from("posts").delete().eq("id", post.id);
   };
 
+  const updatePost = (id: string, patch: Partial<FeedPost>) => {
+    setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  };
+
   return (
     <AppLayout>
       <main className="container mx-auto px-4 py-6 sm:py-8 max-w-xl">
-        <div className="flex items-center gap-3 mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-9 h-9 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <h1 className="text-xl font-display font-black">Feed</h1>
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="w-9 h-9 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <h1 className="text-xl font-display font-black">Feed</h1>
+          </div>
+          {user && (
+            <button onClick={() => navigate(`/u/${user.id}`)} className="text-xs text-primary font-medium">
+              Mening profilim
+            </button>
+          )}
         </div>
 
         {/* Composer trigger */}
@@ -375,88 +337,12 @@ export default function Feed() {
         ) : (
           <div className="space-y-4">
             {posts.map((post, i) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
-                className="rounded-2xl border border-border/60 overflow-hidden"
-              >
-                <div className="flex items-center gap-2.5 p-3.5">
-                  <Avatar className="w-9 h-9 shrink-0">
-                    <AvatarFallback>{post.author_name?.[0] || "?"}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate">{post.author_name}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {timeAgo(post.created_at)} · {post.type === "reel" ? "🎬 Reel" : post.type === "poll" ? "📊 So'rovnoma" : "📝 Post"}
-                    </p>
-                  </div>
-                  <FollowButton targetUserId={post.user_id} targetName={post.author_name} />
-                  {post.user_id === user?.id && (
-                    <button onClick={() => deletePost(post)} className="text-muted-foreground hover:text-destructive">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-
-                {post.caption && (
-                  <p className="px-3.5 pb-3 text-sm whitespace-pre-wrap">{post.caption}</p>
-                )}
-
-                {post.media_url && post.media_type === "video" && (
-                  <video src={post.media_url} className="w-full max-h-[480px] object-cover bg-black" controls />
-                )}
-                {post.media_url && post.media_type === "image" && (
-                  <img src={post.media_url} className="w-full max-h-[480px] object-cover" />
-                )}
-
-                {post.type === "poll" && post.poll_options && (
-                  <div className="px-3.5 pb-3.5 space-y-2">
-                    {post.poll_options.map((opt, idx) => {
-                      const total = post.poll_tally.reduce((a, b) => a + b, 0);
-                      const pct = total > 0 ? Math.round((post.poll_tally[idx] / total) * 100) : 0;
-                      const voted = post.my_vote !== null;
-                      const isMine = post.my_vote === idx;
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => vote(post, idx)}
-                          disabled={voted}
-                          className={`w-full relative overflow-hidden rounded-xl border text-left p-2.5 text-sm transition-colors ${
-                            isMine ? "border-primary" : "border-border/60"
-                          } ${voted ? "cursor-default" : "hover:bg-muted/50"}`}
-                        >
-                          {voted && (
-                            <div
-                              className="absolute inset-y-0 left-0 bg-primary/10"
-                              style={{ width: `${pct}%` }}
-                            />
-                          )}
-                          <div className="relative flex items-center justify-between">
-                            <span className={isMine ? "font-semibold" : ""}>{opt.text}</span>
-                            {voted && <span className="text-xs text-muted-foreground">{pct}%</span>}
-                          </div>
-                        </button>
-                      );
-                    })}
-                    <p className="text-[11px] text-muted-foreground">
-                      {post.poll_tally.reduce((a, b) => a + b, 0)} ta ovoz
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-4 px-3.5 pb-3.5 pt-1">
-                  <button
-                    onClick={() => toggleLike(post)}
-                    className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
-                      post.liked_by_me ? "text-red-500" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <Heart className={`w-4 h-4 ${post.liked_by_me ? "fill-red-500" : ""}`} />
-                    {post.likes_count}
-                  </button>
-                </div>
+              <motion.div key={post.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
+                <PostCard
+                  post={post}
+                  onChange={(patch) => updatePost(post.id, patch)}
+                  onDelete={() => deletePost(post)}
+                />
               </motion.div>
             ))}
           </div>

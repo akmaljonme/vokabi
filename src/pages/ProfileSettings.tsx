@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -40,6 +41,7 @@ interface ProfileData {
   full_name: string | null;
   username: string | null;
   avatar_url: string | null;
+  bio: string | null;
   email_notifications: boolean;
   test_reminders: boolean;
   progress_updates: boolean;
@@ -54,6 +56,7 @@ export default function ProfileSettings() {
     full_name: "",
     username: null,
     avatar_url: null,
+    bio: "",
     email_notifications: true,
     test_reminders: true,
     progress_updates: true,
@@ -78,7 +81,7 @@ export default function ProfileSettings() {
     try {
       const { data, error } = await (supabase.from("profiles") as any)
         .select(
-          "full_name, username, avatar_url, email_notifications, test_reminders, progress_updates",
+          "full_name, username, avatar_url, bio, email_notifications, test_reminders, progress_updates",
         )
         .eq("user_id", user?.id)
         .maybeSingle();
@@ -88,6 +91,7 @@ export default function ProfileSettings() {
           full_name: data.full_name || "",
           username: (data as any).username || "",
           avatar_url: data.avatar_url,
+          bio: (data as any).bio || "",
           email_notifications: data.email_notifications ?? true,
           test_reminders: data.test_reminders ?? true,
           progress_updates: data.progress_updates ?? true,
@@ -197,6 +201,7 @@ export default function ProfileSettings() {
         .update({
           full_name: profile.full_name,
           username: uname,
+          bio: profile.bio?.trim() || null,
           email_notifications: profile.email_notifications,
           test_reminders: profile.test_reminders,
           progress_updates: profile.progress_updates,
@@ -377,6 +382,22 @@ export default function ProfileSettings() {
                   <p className="text-[10px] text-muted-foreground">
                     Hamjamiyatda siz shu nom bilan ko'rinasiz. Faqat kichik
                     harflar, raqamlar va _
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bio" className="text-xs">
+                    Bio
+                  </Label>
+                  <Textarea
+                    id="bio"
+                    placeholder="O'zingiz haqingizda qisqacha yozing..."
+                    value={profile.bio || ""}
+                    onChange={(e) => setProfile((prev) => ({ ...prev, bio: e.target.value.slice(0, 150) }))}
+                    className="text-sm resize-none"
+                    rows={3}
+                  />
+                  <p className="text-[10px] text-muted-foreground text-right">
+                    {(profile.bio || "").length} / 150
                   </p>
                 </div>
               </CardContent>

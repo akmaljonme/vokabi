@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Users, UserPlus, Search, Check, X, Trophy, Loader2, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +29,7 @@ interface Props { onBack: () => void; }
 
 export const GameFriends = ({ onBack }: Props) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [pendingRequests, setPendingRequests] = useState<Friend[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -205,12 +207,16 @@ export const GameFriends = ({ onBack }: Props) => {
                     const fid = f.user_id === user?.id ? f.friend_id : f.user_id;
                     return (
                       <div key={f.id} className="card-elevated p-3 flex items-center gap-3">
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={f.avatar_url || ''} />
-                          <AvatarFallback>{(f.full_name || '?')[0]}</AvatarFallback>
-                        </Avatar>
+                        <button onClick={() => navigate(`/u/${fid}`)} className="shrink-0">
+                          <Avatar className="w-10 h-10">
+                            <AvatarImage src={f.avatar_url || ''} />
+                            <AvatarFallback>{(f.full_name || '?')[0]}</AvatarFallback>
+                          </Avatar>
+                        </button>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{f.full_name || 'Foydalanuvchi'}</p>
+                          <button onClick={() => navigate(`/u/${fid}`)} className="font-medium text-sm truncate hover:underline block text-left">
+                            {f.full_name || 'Foydalanuvchi'}
+                          </button>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <Trophy className="w-3 h-3" /> {f.xp} XP
                             <span>•</span>

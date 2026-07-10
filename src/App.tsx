@@ -33,6 +33,7 @@ const WordBank       = lazy(() => import("./pages/WordBank"));
 const Friends        = lazy(() => import("./pages/Friends"));
 const Notifications  = lazy(() => import("./pages/Notifications"));
 const Feed           = lazy(() => import("./pages/Feed"));
+const Profile        = lazy(() => import("./pages/Profile"));
 const Tools          = lazy(() => import("./pages/Tools"));
 const Languages      = lazy(() => import("./pages/Languages"));
 const LanguageLevel  = lazy(() => import("./pages/LanguageLevel"));
@@ -130,6 +131,7 @@ const App = () => (
                     <Route path="/friends"    element={<ErrorBoundary><Friends /></ErrorBoundary>} />
                     <Route path="/notifications" element={<ErrorBoundary><Notifications /></ErrorBoundary>} />
                     <Route path="/feed"       element={<ErrorBoundary><Feed /></ErrorBoundary>} />
+                    <Route path="/u/:userId"  element={<ErrorBoundary><Profile /></ErrorBoundary>} />
                     <Route path="/study-room" element={<ErrorBoundary><StudyRoom /></ErrorBoundary>} />
                     <Route path="/essay"      element={<ErrorBoundary><EssayChecker /></ErrorBoundary>} />
                     <Route path="*"          element={<NotFound />} />
