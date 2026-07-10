@@ -1,0 +1,25 @@
+-- ═══════════════════════════════════════════════════════════════
+-- MUAMMO 1: "Savollarni tuzib bo'lmadi, birozdan so'ng qayta urinib
+--           ko'ring" (Challenge yaratishda)
+-- ═══════════════════════════════════════════════════════════════
+--
+-- BU SQL/BAZA MUAMMOSI EMAS — hech qanday SQL o'zgarish talab qilinmaydi.
+--
+-- SABAB: src/lib/friendChallenge.ts frontend kodida `ai-tutor` edge
+-- funksiyasining javob formatini noto'g'ri o'qigan edi.
+--
+--   ai-tutor funksiyasi haqiqatda qaytaradi:   { text: "..." }
+--   Kod esa qidirgan edi:                      data.response  yoki  data.content[0].text
+--
+-- Bu ikkalasi ham mavjud bo'lmagani uchun kod har doim bo'sh "[]"
+-- massivga tushib, "Savollarni tuzib bo'lmadi" xatosini bergan.
+--
+-- `ai-tutor` funksiyasining o'zi productionda muammosiz ishlab turibdi
+-- (tekshirildi — ACTIVE holatda).
+--
+-- TUZATISH: src/lib/friendChallenge.ts faylida quyidagi qatorni
+--   const text = data?.response || data?.content?.[0]?.text || "[]";
+-- shunga almashtirdim:
+--   const text = data?.text || "[]";
+--
+-- Bu commit bilan birga push qilindi — qo'shimcha SQL kerak emas.

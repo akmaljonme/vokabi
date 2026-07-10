@@ -35,7 +35,8 @@ export const generateChallengeQuestions = async (
       },
     });
     if (error) throw error;
-    const text = data?.response || data?.content?.[0]?.text || "[]";
+    if (data?.error) throw new Error(data.error);
+    const text = data?.text || "[]";
     const clean = text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
     const questions = (Array.isArray(parsed) ? parsed : [])

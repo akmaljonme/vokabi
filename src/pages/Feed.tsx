@@ -146,10 +146,12 @@ export default function Feed() {
 
       if (file) {
         media_type = composerType === "reel" || file.type.startsWith("video") ? "video" : "image";
-        const ext = file.name.split(".").pop();
+        const ext = file.name.split(".").pop() || "bin";
         const path = `${user.id}/${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("posts-media").upload(path, file);
-        if (upErr) throw upErr;
+        const { error: upErr } = await supabase.storage
+          .from("posts-media")
+          .upload(path, file, { contentType: file.type || undefined, upsert: false });
+        if (upErr) throw new Error(`Fayl yuklashda xato: ${upErr.message}`);
         const { data: pub } = supabase.storage.from("posts-media").getPublicUrl(path);
         media_url = pub.publicUrl;
       }
@@ -165,14 +167,14 @@ export default function Feed() {
             ? pollOptions.filter((o) => o.trim()).map((o) => ({ text: o.trim() }))
             : null,
       });
-      if (error) throw error;
+      if (error) throw new Error(`Post saqlashda xato: ${error.message}`);
 
       toast.success("Joylandi! 🎉");
       resetComposer();
       load();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("Joylashda xatolik yuz berdi");
+      toast.error(err?.message || "Joylashda xatolik yuz berdi");
     } finally {
       setPosting(false);
     }
