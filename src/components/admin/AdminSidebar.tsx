@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Users, FileText, BarChart3, Settings, 
-  ChevronLeft, ChevronRight, Shield, MessageSquare, Video, X, ClipboardList, CreditCard, Megaphone, Trophy, BookMarked
+  ChevronLeft, ChevronRight, Shield, MessageSquare, Video, X, ClipboardList, CreditCard, Megaphone, Trophy, BookMarked, Rocket
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +26,7 @@ const menuItems = [
   { id: 'videos',     label: 'Video Darslar',       icon: Video },
   { id: 'analytics',  label: 'Analytics',           icon: BarChart3 },
   { id: 'ads',        label: 'Reklamalar',          icon: Megaphone },
+  { id: 'announcements', label: "Yangilanish e'loni", icon: Rocket },
   { id: 'settings',   label: 'Settings',            icon: Settings },
 ];
 

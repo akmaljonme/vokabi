@@ -9,7 +9,8 @@ export type NotificationType =
   | "challenge_result"
   | "achievement"
   | "like"
-  | "poll_vote";
+  | "poll_vote"
+  | "announcement";
 
 export const NOTIFICATION_META: Record<NotificationType, { icon: string; color: string }> = {
   friend_request: { icon: "👋", color: "text-blue-500" },
@@ -20,6 +21,7 @@ export const NOTIFICATION_META: Record<NotificationType, { icon: string; color: 
   achievement: { icon: "🎖️", color: "text-purple-500" },
   like: { icon: "❤️", color: "text-red-500" },
   poll_vote: { icon: "📊", color: "text-blue-500" },
+  announcement: { icon: "🚀", color: "text-primary" },
 };
 
 /** Creates a notification for another user. Never throws — notifications are best-effort. */
