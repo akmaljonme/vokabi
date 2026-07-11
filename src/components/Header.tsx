@@ -19,6 +19,9 @@ import {
   PenTool,
   Home,
   LayoutDashboard,
+  Image,
+  UserPlus,
+  Bell,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -47,6 +50,22 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
   const unreadCount = useUnreadDMCount();
   const call = useCall();
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [notifUnread, setNotifUnread] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchCount = async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
+      setNotifUnread(count || 0);
+    };
+    fetchCount();
+    const interval = setInterval(fetchCount, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -273,6 +292,13 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
           <div className="lg:hidden flex items-center gap-1">
             {user && (
               <>
+                {/* Mobile Feed shortcut */}
+                <button
+                  onClick={() => navigate("/feed")}
+                  className="p-2 rounded-xl hover:bg-muted transition-colors"
+                >
+                  <Image className="w-5 h-5" />
+                </button>
                 {/* Mobile DM badge */}
                 <button
                   onClick={() => navigate("/community")}
@@ -378,6 +404,22 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                       {unreadCount > 0 && (
                         <Badge variant="destructive" className="ml-auto h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5">
                           {unreadCount > 99 ? "99+" : unreadCount}
+                        </Badge>
+                      )}
+                    </button>
+                    <button onClick={() => { navigate("/friends"); setIsMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
+                    ><UserPlus className="w-4 h-4 text-primary" /> Do'stlar</button>
+                    <button onClick={() => { navigate("/feed"); setIsMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
+                    ><Image className="w-4 h-4 text-pink-500" /> Feed</button>
+                    <button onClick={() => { navigate("/notifications"); setIsMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
+                    >
+                      <Bell className="w-4 h-4 text-amber-500" /> Bildirishnomalar
+                      {notifUnread > 0 && (
+                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5">
+                          {notifUnread > 99 ? "99+" : notifUnread}
                         </Badge>
                       )}
                     </button>
