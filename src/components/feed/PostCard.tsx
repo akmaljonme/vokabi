@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Send, Bookmark, Trash2, Loader2, Volume2, VolumeX } from "lucide-react";
+import { Heart, MessageCircle, Send, Bookmark, Trash2, Loader2, Volume2, VolumeX, Maximize2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
@@ -244,6 +244,16 @@ export const PostCard = ({ post, onChange, onDelete, hideFollow }: Props) => {
                   playsInline
                   preload="metadata"
                 />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/reels?start=${post.id}`);
+                  }}
+                  className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 backdrop-blur flex items-center justify-center text-white"
+                  title="To'liq ekranda ochish"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

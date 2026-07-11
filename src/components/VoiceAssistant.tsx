@@ -14,7 +14,7 @@ import { useVoicePlayback } from "@/hooks/useVoicePlayback";
 type Mode = "command" | "speaking";
 interface Msg { role: "user" | "assistant"; content: string }
 
-const HIDDEN_PATHS = [/^\/tests\/[^/]+\/take/i, /^\/exams$/i, /^\/mock\//i, /^\/feed$/i, /^\/u\//i];
+const HIDDEN_PATHS = [/^\/tests\/[^/]+\/take/i, /^\/exams$/i, /^\/mock\//i, /^\/feed$/i, /^\/reels$/i, /^\/u\//i];
 
 export const VoiceAssistant = () => {
   const { user } = useAuth();

@@ -41,6 +41,7 @@ export const AITutorChat = () => {
     location.pathname === "/admin" ||
     location.pathname.startsWith("/shared-test") ||
     location.pathname === "/feed" ||
+    location.pathname === "/reels" ||
     location.pathname.startsWith("/u/")
   ) return null;
 

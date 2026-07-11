@@ -413,6 +413,9 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                     <button onClick={() => { navigate("/feed"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
                     ><FeedLogo className="w-5 h-5" /> Feed</button>
+                    <button onClick={() => { navigate("/reels"); setIsMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
+                    ><Video className="w-4 h-4 text-rose-500" /> Reels</button>
                     <button onClick={() => { navigate("/notifications"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
                     >

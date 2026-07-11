@@ -234,7 +234,7 @@ export default function Profile() {
             {filteredPosts.map((post) => (
               <button
                 key={post.id}
-                onClick={() => setActivePost(post)}
+                onClick={() => (post.type === "reel" ? navigate(`/reels?start=${post.id}`) : setActivePost(post))}
                 className="relative aspect-square bg-muted overflow-hidden group"
               >
                 {post.media_url ? (

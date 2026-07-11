@@ -37,6 +37,7 @@ const mainItems: NavItem[] = [
   { label: "Hamjamiyat",    path: "/community",   icon: Users },
   { label: "Do'stlar",      path: "/friends",     icon: UserPlus },
   { label: "Feed",          path: "/feed",        icon: FeedLogo },
+  { label: "Reels",         path: "/reels",       icon: Video },
   { label: "Bildirishnomalar", path: "/notifications", icon: Bell },
   { label: "Leaderboard",   path: "/leaderboard", icon: Trophy },
   { label: "Turnirlar",     path: "/tournaments", icon: Sword },
