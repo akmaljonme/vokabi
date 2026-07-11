@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   Image as ImageIcon,
@@ -11,11 +11,14 @@ import {
   Plus,
   Trash2,
   Send,
+  Users,
+  Globe,
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,14 +27,39 @@ import { PostCard, FeedPost } from "@/components/feed/PostCard";
 import { FeedLogo } from "@/components/dashboard/DashboardIllustrations";
 
 type PostType = "post" | "reel" | "poll";
+type FeedTab = "all" | "following";
+
+const PAGE_SIZE = 10;
+
+const FeedCardSkeleton = () => (
+  <div className="rounded-2xl border border-border/60 overflow-hidden">
+    <div className="flex items-center gap-2.5 p-3">
+      <Skeleton className="w-9 h-9 rounded-full shrink-0" />
+      <div className="flex-1 space-y-1.5">
+        <Skeleton className="h-3.5 w-32" />
+        <Skeleton className="h-2.5 w-20" />
+      </div>
+    </div>
+    <Skeleton className="w-full h-64 rounded-none" />
+    <div className="p-3.5 space-y-2">
+      <Skeleton className="h-4 w-16" />
+      <Skeleton className="h-3 w-full" />
+    </div>
+  </div>
+);
 
 export default function Feed() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [tab, setTab] = useState<FeedTab>("all");
+  const [followingIds, setFollowingIds] = useState<string[] | null>(null);
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerType, setComposerType] = useState<PostType>("post");
   const [caption, setCaption] = useState("");
@@ -39,63 +67,131 @@ export default function Feed() {
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [pollOptions, setPollOptions] = useState(["", ""]);
   const [posting, setPosting] = useState(false);
+  const [deepLinkPost, setDeepLinkPost] = useState<FeedPost | null>(null);
+  const [deepLinkLoading, setDeepLinkLoading] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from("posts")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(30);
-    const rows = (data || []) as any[];
+  const enrichPosts = useCallback(
+    async (rows: any[]): Promise<FeedPost[]> => {
+      const authorIds = Array.from(new Set(rows.map((r) => r.user_id)));
+      const postIds = rows.map((r) => r.id);
 
-    const authorIds = Array.from(new Set(rows.map((r) => r.user_id)));
-    const postIds = rows.map((r) => r.id);
+      const [{ data: profiles }, { data: likes }, { data: votes }, { data: saves }, { data: commentCounts }] = await Promise.all([
+        authorIds.length
+          ? supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", authorIds)
+          : Promise.resolve({ data: [] }),
+        postIds.length
+          ? supabase.from("post_likes").select("post_id, user_id").in("post_id", postIds)
+          : Promise.resolve({ data: [] }),
+        postIds.length
+          ? supabase.from("poll_votes").select("post_id, user_id, option_index").in("post_id", postIds)
+          : Promise.resolve({ data: [] }),
+        postIds.length && user
+          ? supabase.from("post_saves").select("post_id").eq("user_id", user.id).in("post_id", postIds)
+          : Promise.resolve({ data: [] }),
+        postIds.length
+          ? supabase.from("post_comments").select("post_id").in("post_id", postIds)
+          : Promise.resolve({ data: [] }),
+      ]);
 
-    const [{ data: profiles }, { data: likes }, { data: votes }, { data: saves }, { data: commentCounts }] = await Promise.all([
-      authorIds.length
-        ? supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", authorIds)
-        : Promise.resolve({ data: [] }),
-      postIds.length
-        ? supabase.from("post_likes").select("post_id, user_id").in("post_id", postIds)
-        : Promise.resolve({ data: [] }),
-      postIds.length
-        ? supabase.from("poll_votes").select("post_id, user_id, option_index").in("post_id", postIds)
-        : Promise.resolve({ data: [] }),
-      postIds.length && user
-        ? supabase.from("post_saves").select("post_id").eq("user_id", user.id).in("post_id", postIds)
-        : Promise.resolve({ data: [] }),
-      postIds.length
-        ? supabase.from("post_comments").select("post_id").in("post_id", postIds)
-        : Promise.resolve({ data: [] }),
-    ]);
+      return rows.map((r) => {
+        const postLikes = (likes || []).filter((l: any) => l.post_id === r.id);
+        const postVotes = (votes || []).filter((v: any) => v.post_id === r.id);
+        const tally = (r.poll_options || []).map(
+          (_: any, i: number) => postVotes.filter((v: any) => v.option_index === i).length,
+        );
+        const profile = profiles?.find((p: any) => p.user_id === r.user_id);
+        return {
+          ...r,
+          author_name: profile?.full_name || "Foydalanuvchi",
+          author_avatar: profile?.avatar_url || null,
+          likes_count: postLikes.length,
+          liked_by_me: postLikes.some((l: any) => l.user_id === user?.id),
+          saved_by_me: (saves || []).some((s: any) => s.post_id === r.id),
+          comments_count: (commentCounts || []).filter((c: any) => c.post_id === r.id).length,
+          poll_tally: tally,
+          my_vote: postVotes.find((v: any) => v.user_id === user?.id)?.option_index ?? null,
+        };
+      });
+    },
+    [user],
+  );
 
-    const enriched: FeedPost[] = rows.map((r) => {
-      const postLikes = (likes || []).filter((l: any) => l.post_id === r.id);
-      const postVotes = (votes || []).filter((v: any) => v.post_id === r.id);
-      const tally = (r.poll_options || []).map(
-        (_: any, i: number) => postVotes.filter((v: any) => v.option_index === i).length,
-      );
-      const profile = profiles?.find((p: any) => p.user_id === r.user_id);
-      return {
-        ...r,
-        author_name: profile?.full_name || "Foydalanuvchi",
-        author_avatar: profile?.avatar_url || null,
-        likes_count: postLikes.length,
-        liked_by_me: postLikes.some((l: any) => l.user_id === user?.id),
-        saved_by_me: (saves || []).some((s: any) => s.post_id === r.id),
-        comments_count: (commentCounts || []).filter((c: any) => c.post_id === r.id).length,
-        poll_tally: tally,
-        my_vote: postVotes.find((v: any) => v.user_id === user?.id)?.option_index ?? null,
-      };
-    });
-    setPosts(enriched);
-    setLoading(false);
+  // Load who the user follows (needed for the "Kuzatilayotganlar" tab)
+  useEffect(() => {
+    if (!user) {
+      setFollowingIds([]);
+      return;
+    }
+    supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", user.id)
+      .then(({ data }: any) => setFollowingIds((data || []).map((r: any) => r.following_id)));
   }, [user]);
 
+  const load = useCallback(
+    async (reset: boolean) => {
+      if (tab === "following" && followingIds === null) return; // wait for follow list
+      if (tab === "following" && followingIds.length === 0) {
+        setPosts([]);
+        setHasMore(false);
+        setLoading(false);
+        return;
+      }
+
+      if (reset) setLoading(true);
+      else setLoadingMore(true);
+
+      const from = reset ? 0 : posts.length;
+      const to = from + PAGE_SIZE - 1;
+
+      let query = supabase.from("posts").select("*").order("created_at", { ascending: false }).range(from, to);
+      if (tab === "following" && followingIds) query = query.in("user_id", followingIds);
+
+      const { data } = await query;
+      const rows = (data || []) as any[];
+      const enriched = await enrichPosts(rows);
+
+      setPosts((prev) => (reset ? enriched : [...prev, ...enriched]));
+      setHasMore(rows.length === PAGE_SIZE);
+      setLoading(false);
+      setLoadingMore(false);
+    },
+    [tab, followingIds, enrichPosts, posts.length],
+  );
+
   useEffect(() => {
-    load();
-  }, [load]);
+    load(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, followingIds]);
+
+  // Deep link: ?post=<id> opens that post directly, even if not in the loaded page
+  useEffect(() => {
+    const postId = searchParams.get("post");
+    if (!postId) return;
+    setDeepLinkLoading(true);
+    supabase
+      .from("posts")
+      .select("*")
+      .eq("id", postId)
+      .maybeSingle()
+      .then(async ({ data }: any) => {
+        if (data) {
+          const [enriched] = await enrichPosts([data]);
+          setDeepLinkPost(enriched);
+        } else {
+          toast.error("Post topilmadi — o'chirilgan bo'lishi mumkin");
+        }
+        setDeepLinkLoading(false);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const closeDeepLink = () => {
+    setDeepLinkPost(null);
+    searchParams.delete("post");
+    setSearchParams(searchParams, { replace: true });
+  };
 
   const handleFileSelect = (f: File | null) => {
     setFile(f);
@@ -155,7 +251,7 @@ export default function Feed() {
 
       toast.success("Joylandi! 🎉");
       resetComposer();
-      load();
+      load(true);
     } catch (err: any) {
       console.error(err);
       toast.error(err?.message || "Joylashda xatolik yuz berdi");
@@ -177,7 +273,7 @@ export default function Feed() {
   return (
     <AppLayout>
       <main className="container mx-auto px-4 py-6 sm:py-8 max-w-xl">
-        <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
@@ -195,6 +291,26 @@ export default function Feed() {
             </button>
           )}
         </div>
+
+        {/* Barchasi / Kuzatilayotganlar tabs */}
+        {user && (
+          <div className="flex gap-1.5 mb-5 p-1 rounded-xl bg-muted/50 w-fit">
+            {[
+              { key: "all" as const, label: "Barchasi", icon: Globe },
+              { key: "following" as const, label: "Kuzatilayotganlar", icon: Users },
+            ].map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  tab === t.key ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <t.icon className="w-3.5 h-3.5" /> {t.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Composer trigger */}
         {!composerOpen ? (
@@ -328,28 +444,92 @@ export default function Feed() {
 
         {/* Feed list */}
         {loading ? (
-          <div className="text-center py-16">
-            <Loader2 className="w-8 h-8 mx-auto animate-spin text-primary" />
-          </div>
-        ) : posts.length === 0 ? (
-          <div className="text-center py-16 text-muted-foreground">
-            <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p className="font-medium">Hali postlar yo'q</p>
-            <p className="text-sm mt-1">Birinchi bo'lib biror narsa joylang!</p>
-          </div>
-        ) : (
           <div className="space-y-4">
-            {posts.map((post, i) => (
-              <motion.div key={post.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-                <PostCard
-                  post={post}
-                  onChange={(patch) => updatePost(post.id, patch)}
-                  onDelete={() => deletePost(post)}
-                />
-              </motion.div>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <FeedCardSkeleton key={i} />
             ))}
           </div>
+        ) : posts.length === 0 ? (
+          tab === "following" ? (
+            <div className="text-center py-16 text-muted-foreground">
+              <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p className="font-medium">Hali hech kimni kuzatmayapsiz</p>
+              <p className="text-sm mt-1 mb-4">Do'stlaringizni kuzating — ularning postlari shu yerda chiqadi</p>
+              <Button size="sm" variant="outline" onClick={() => navigate("/friends")}>
+                Do'stlarni topish
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center py-16 text-muted-foreground">
+              <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p className="font-medium">Hali postlar yo'q</p>
+              <p className="text-sm mt-1">Birinchi bo'lib biror narsa joylang!</p>
+            </div>
+          )
+        ) : (
+          <>
+            <div className="space-y-4">
+              {posts.map((post, i) => (
+                <motion.div key={post.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i, 5) * 0.03 }}>
+                  <PostCard
+                    post={post}
+                    onChange={(patch) => updatePost(post.id, patch)}
+                    onDelete={() => deletePost(post)}
+                  />
+                </motion.div>
+              ))}
+            </div>
+
+            {hasMore && (
+              <div className="flex justify-center mt-5">
+                <Button variant="outline" size="sm" onClick={() => load(false)} disabled={loadingMore}>
+                  {loadingMore ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : null}
+                  Ko'proq yuklash
+                </Button>
+              </div>
+            )}
+          </>
         )}
+
+        {/* Deep-linked shared post */}
+        <AnimatePresence>
+          {(deepLinkLoading || deepLinkPost) && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-background/80 z-[70] backdrop-blur-md"
+                onClick={closeDeepLink}
+              />
+              <div className="fixed inset-0 z-[71] flex items-center justify-center p-3 pointer-events-none">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  className="w-full max-w-md max-h-[90vh] overflow-y-auto pointer-events-auto"
+                >
+                  {deepLinkLoading ? (
+                    <div className="rounded-2xl border border-border/60 bg-card p-10 flex justify-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  ) : deepLinkPost ? (
+                    <PostCard
+                      post={deepLinkPost}
+                      onChange={(patch) => setDeepLinkPost((p) => (p ? { ...p, ...patch } : p))}
+                      onDelete={() => {
+                        deletePost(deepLinkPost);
+                        closeDeepLink();
+                      }}
+                    />
+                  ) : null}
+                </motion.div>
+              </div>
+            </>
+          )}
+        </AnimatePresence>
       </main>
     </AppLayout>
   );

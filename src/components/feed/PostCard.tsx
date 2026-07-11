@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Send, Bookmark, Trash2, Loader2 } from "lucide-react";
+import { Heart, MessageCircle, Send, Bookmark, Trash2, Loader2, Volume2, VolumeX } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
@@ -63,6 +63,25 @@ export const PostCard = ({ post, onChange, onDelete, hideFollow }: Props) => {
   const [posting, setPosting] = useState(false);
   const [lastTap, setLastTap] = useState(0);
   const [showHeartBurst, setShowHeartBurst] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (post.type !== "reel" || !videoRef.current) return;
+    const el = videoRef.current;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.play().catch(() => {});
+        } else {
+          el.pause();
+        }
+      },
+      { threshold: 0.6 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [post.type, post.media_url]);
 
   const goToProfile = () => navigate(`/u/${post.user_id}`);
 
@@ -183,7 +202,30 @@ export const PostCard = ({ post, onChange, onDelete, hideFollow }: Props) => {
       {post.media_url && (
         <div className="relative" onClick={handleDoubleTap}>
           {post.media_type === "video" ? (
-            <video src={post.media_url} className="w-full max-h-[520px] object-cover bg-black" controls />
+            post.type === "reel" ? (
+              <div className="relative">
+                <video
+                  ref={videoRef}
+                  src={post.media_url}
+                  className="w-full max-h-[640px] object-cover bg-black"
+                  muted={muted}
+                  loop
+                  playsInline
+                  preload="metadata"
+                />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMuted((m) => !m);
+                  }}
+                  className="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-black/50 backdrop-blur flex items-center justify-center text-white"
+                >
+                  {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                </button>
+              </div>
+            ) : (
+              <video src={post.media_url} className="w-full max-h-[520px] object-cover bg-black" controls />
+            )
           ) : (
             <img src={post.media_url} className="w-full max-h-[520px] object-cover select-none" draggable={false} />
           )}
