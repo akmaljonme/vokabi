@@ -21,6 +21,7 @@ const supabase: any = _sbClient;
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { PostCard, FeedPost } from "@/components/feed/PostCard";
+import { FeedLogo } from "@/components/dashboard/DashboardIllustrations";
 
 type PostType = "post" | "reel" | "poll";
 
@@ -184,7 +185,9 @@ export default function Feed() {
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <h1 className="text-xl font-display font-black">Feed</h1>
+            <h1 className="text-xl font-display font-black flex items-center gap-2">
+              <FeedLogo className="w-8 h-8" /> Feed
+            </h1>
           </div>
           {user && (
             <button onClick={() => navigate(`/u/${user.id}`)} className="text-xs text-primary font-medium">

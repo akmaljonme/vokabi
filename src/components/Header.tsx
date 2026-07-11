@@ -19,7 +19,6 @@ import {
   PenTool,
   Home,
   LayoutDashboard,
-  Image,
   UserPlus,
   Bell,
 } from "lucide-react";
@@ -27,6 +26,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUnreadDMCount } from "@/hooks/useUnreadDMCount";
+import { FeedLogo } from "@/components/dashboard/DashboardIllustrations";
 import { useCall } from "@/contexts/CallContext";
 import { Badge } from "@/components/ui/badge";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
@@ -295,9 +295,9 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 {/* Mobile Feed shortcut */}
                 <button
                   onClick={() => navigate("/feed")}
-                  className="p-2 rounded-xl hover:bg-muted transition-colors"
+                  className="p-1.5 rounded-xl hover:bg-muted transition-colors"
                 >
-                  <Image className="w-5 h-5" />
+                  <FeedLogo className="w-6 h-6" />
                 </button>
                 {/* Mobile DM badge */}
                 <button
@@ -412,7 +412,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                     ><UserPlus className="w-4 h-4 text-primary" /> Do'stlar</button>
                     <button onClick={() => { navigate("/feed"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                    ><Image className="w-4 h-4 text-pink-500" /> Feed</button>
+                    ><FeedLogo className="w-5 h-5" /> Feed</button>
                     <button onClick={() => { navigate("/notifications"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
                     >

@@ -114,3 +114,23 @@ export const TreasureChestIcon = ({ className = "" }: { className?: string }) =>
     <rect x="22.5" y="27" width="3" height="6" fill="#a16207" />
   </svg>
 );
+
+// Original Feed logo — rounded square badge with an abstract "pulse/spark" mark,
+// in Vokabi's own brand palette (deliberately not an Instagram camera glyph).
+export const FeedLogo = ({ className = "" }: { className?: string }) => (
+  <svg viewBox="0 0 40 40" className={className} xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="feedLogoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#22c55e" />
+        <stop offset="55%" stopColor="#0ea5e9" />
+        <stop offset="100%" stopColor="#8b5cf6" />
+      </linearGradient>
+    </defs>
+    <rect x="1.5" y="1.5" width="37" height="37" rx="11" fill="url(#feedLogoBg)" />
+    <rect x="1.5" y="1.5" width="37" height="37" rx="11" fill="none" stroke="white" strokeOpacity="0.25" strokeWidth="1.5" />
+    {/* stacked "cards" motif = feed of posts */}
+    <rect x="10" y="12" width="20" height="5.2" rx="2.2" fill="white" fillOpacity="0.55" />
+    <rect x="10" y="19.4" width="20" height="5.2" rx="2.2" fill="white" fillOpacity="0.85" />
+    <rect x="10" y="26.8" width="13" height="5.2" rx="2.2" fill="white" />
+  </svg>
+);
