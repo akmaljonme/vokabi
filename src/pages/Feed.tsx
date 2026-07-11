@@ -13,11 +13,12 @@ import {
   Send,
   Users,
   Globe,
+  Sparkles,
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
 const supabase: any = _sbClient;
@@ -25,11 +26,89 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { PostCard, FeedPost } from "@/components/feed/PostCard";
 import { FeedLogo } from "@/components/dashboard/DashboardIllustrations";
+import { FollowButton } from "@/components/friends/FollowButton";
 
 type PostType = "post" | "reel" | "poll";
 type FeedTab = "all" | "following";
+type TypeFilter = "all" | "post" | "reel" | "poll";
 
 const PAGE_SIZE = 10;
+
+interface SuggestedPerson {
+  user_id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  xp: number;
+}
+
+const SuggestedFollows = ({ excludeIds }: { excludeIds: string[] }) => {
+  const [people, setPeople] = useState<SuggestedPerson[] | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: progress } = await supabase
+        .from("user_progress")
+        .select("user_id, xp")
+        .order("xp", { ascending: false })
+        .limit(20);
+      const ids = (progress || []).map((p: any) => p.user_id).filter((id: string) => !excludeIds.includes(id));
+      if (ids.length === 0) {
+        if (!cancelled) setPeople([]);
+        return;
+      }
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, avatar_url")
+        .in("user_id", ids);
+      const merged = (profiles || [])
+        .map((pr: any) => ({
+          ...pr,
+          xp: progress?.find((p: any) => p.user_id === pr.user_id)?.xp || 0,
+        }))
+        .slice(0, 8);
+      if (!cancelled) setPeople(merged);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!people || people.length === 0) return null;
+
+  return (
+    <div className="mb-6">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2.5 flex items-center gap-1.5">
+        <Sparkles className="w-3.5 h-3.5 text-primary" /> Kimni kuzatish kerak
+      </p>
+      <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+        {people.map((p) => (
+          <div
+            key={p.user_id}
+            className="shrink-0 w-28 rounded-2xl border border-border/60 p-3 flex flex-col items-center text-center gap-2"
+          >
+            <button onClick={() => navigate(`/u/${p.user_id}`)}>
+              <Avatar className="w-12 h-12">
+                {p.avatar_url && <AvatarImage src={p.avatar_url} />}
+                <AvatarFallback>{p.full_name?.[0] || "?"}</AvatarFallback>
+              </Avatar>
+            </button>
+            <button
+              onClick={() => navigate(`/u/${p.user_id}`)}
+              className="text-xs font-medium truncate w-full hover:underline"
+            >
+              {p.full_name || "Foydalanuvchi"}
+            </button>
+            <p className="text-[10px] text-muted-foreground -mt-1.5">{p.xp.toLocaleString()} XP</p>
+            <FollowButton targetUserId={p.user_id} targetName={p.full_name || undefined} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const FeedCardSkeleton = () => (
   <div className="rounded-2xl border border-border/60 overflow-hidden">
@@ -55,6 +134,7 @@ export default function Feed() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [tab, setTab] = useState<FeedTab>("all");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [followingIds, setFollowingIds] = useState<string[] | null>(null);
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,6 +149,29 @@ export default function Feed() {
   const [posting, setPosting] = useState(false);
   const [deepLinkPost, setDeepLinkPost] = useState<FeedPost | null>(null);
   const [deepLinkLoading, setDeepLinkLoading] = useState(false);
+  const [myAvatar, setMyAvatar] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("avatar_url")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }: any) => setMyAvatar(data?.avatar_url || null));
+  }, [user]);
+
+  // Esc — composer yoki deep-link postni yopish
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (deepLinkPost) closeDeepLink();
+      else if (composerOpen) setComposerOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [composerOpen, deepLinkPost]);
 
   const enrichPosts = useCallback(
     async (rows: any[]): Promise<FeedPost[]> => {
@@ -147,6 +250,7 @@ export default function Feed() {
 
       let query = supabase.from("posts").select("*").order("created_at", { ascending: false }).range(from, to);
       if (tab === "following" && followingIds) query = query.in("user_id", followingIds);
+      if (typeFilter !== "all") query = query.eq("type", typeFilter);
 
       const { data } = await query;
       const rows = (data || []) as any[];
@@ -157,13 +261,13 @@ export default function Feed() {
       setLoading(false);
       setLoadingMore(false);
     },
-    [tab, followingIds, enrichPosts, posts.length],
+    [tab, followingIds, typeFilter, enrichPosts, posts.length],
   );
 
   useEffect(() => {
     load(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, followingIds]);
+  }, [tab, followingIds, typeFilter]);
 
   // Deep link: ?post=<id> opens that post directly, even if not in the loaded page
   useEffect(() => {
@@ -236,22 +340,32 @@ export default function Feed() {
         media_url = pub.publicUrl;
       }
 
-      const { error } = await supabase.from("posts").insert({
-        user_id: user.id,
-        type: composerType,
-        caption: caption.trim() || null,
-        media_url,
-        media_type,
-        poll_options:
-          composerType === "poll"
-            ? pollOptions.filter((o) => o.trim()).map((o) => ({ text: o.trim() }))
-            : null,
-      });
+      const { data: inserted, error } = await supabase
+        .from("posts")
+        .insert({
+          user_id: user.id,
+          type: composerType,
+          caption: caption.trim() || null,
+          media_url,
+          media_type,
+          poll_options:
+            composerType === "poll"
+              ? pollOptions.filter((o) => o.trim()).map((o) => ({ text: o.trim() }))
+              : null,
+        })
+        .select()
+        .single();
       if (error) throw new Error(`Post saqlashda xato: ${error.message}`);
 
       toast.success("Joylandi! 🎉");
       resetComposer();
-      load(true);
+      // To'liq qayta yuklashsiz — yangi postni darhol tepaga qo'shamiz
+      if (tab === "all" && typeFilter === "all") {
+        const [enriched] = await enrichPosts([inserted]);
+        setPosts((prev) => [enriched, ...prev]);
+      } else {
+        load(true);
+      }
     } catch (err: any) {
       console.error(err);
       toast.error(err?.message || "Joylashda xatolik yuz berdi");
@@ -294,7 +408,7 @@ export default function Feed() {
 
         {/* Barchasi / Kuzatilayotganlar tabs */}
         {user && (
-          <div className="flex gap-1.5 mb-5 p-1 rounded-xl bg-muted/50 w-fit">
+          <div className="flex gap-1.5 mb-3 p-1 rounded-xl bg-muted/50 w-fit">
             {[
               { key: "all" as const, label: "Barchasi", icon: Globe },
               { key: "following" as const, label: "Kuzatilayotganlar", icon: Users },
@@ -312,10 +426,35 @@ export default function Feed() {
           </div>
         )}
 
+        {/* Tur bo'yicha filtr */}
+        <div className="flex gap-1.5 mb-5 overflow-x-auto pb-0.5">
+          {[
+            { key: "all" as const, label: "Hammasi" },
+            { key: "post" as const, label: "📝 Postlar" },
+            { key: "reel" as const, label: "🎬 Reels" },
+            { key: "poll" as const, label: "📊 So'rovnomalar" },
+          ].map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTypeFilter(t.key)}
+              className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                typeFilter === t.key
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border/60 text-muted-foreground hover:bg-muted/60"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {user && <SuggestedFollows excludeIds={[user.id, ...(followingIds || [])]} />}
+
         {/* Composer trigger */}
         {!composerOpen ? (
           <div className="flex items-center gap-3 mb-6 p-3 rounded-2xl border border-border/60">
             <Avatar className="w-9 h-9 shrink-0">
+              {myAvatar && <AvatarImage src={myAvatar} />}
               <AvatarFallback>{(user?.email || "?")[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <button
@@ -359,11 +498,13 @@ export default function Feed() {
 
             <Textarea
               value={caption}
-              onChange={(e) => setCaption(e.target.value)}
+              onChange={(e) => setCaption(e.target.value.slice(0, 500))}
               placeholder={composerType === "poll" ? "Savolingizni yozing..." : "Nima haqida gaplashamiz?"}
-              className="mb-3 resize-none"
+              className="mb-1 resize-none"
               rows={3}
+              maxLength={500}
             />
+            <p className="text-[10px] text-muted-foreground text-right mb-2">{caption.length} / 500</p>
 
             {composerType === "poll" ? (
               <div className="space-y-2 mb-3">
@@ -450,7 +591,7 @@ export default function Feed() {
             ))}
           </div>
         ) : posts.length === 0 ? (
-          tab === "following" ? (
+          tab === "following" && followingIds && followingIds.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p className="font-medium">Hali hech kimni kuzatmayapsiz</p>
@@ -461,9 +602,15 @@ export default function Feed() {
             </div>
           ) : (
             <div className="text-center py-16 text-muted-foreground">
-              <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p className="font-medium">Hali postlar yo'q</p>
-              <p className="text-sm mt-1">Birinchi bo'lib biror narsa joylang!</p>
+              <FeedLogo className="w-12 h-12 mx-auto mb-3 opacity-60" />
+              <p className="font-medium">
+                {typeFilter === "all" ? "Hali postlar yo'q" : "Bu turdagi postlar topilmadi"}
+              </p>
+              <p className="text-sm mt-1">
+                {typeFilter === "all"
+                  ? "Birinchi bo'lib biror narsa joylang!"
+                  : "Boshqa filtrni tanlab ko'ring"}
+              </p>
             </div>
           )
         ) : (
