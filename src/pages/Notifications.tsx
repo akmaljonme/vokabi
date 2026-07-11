@@ -19,6 +19,7 @@ interface NotificationRow {
   created_at: string;
   actor_id: string | null;
   actor_name?: string;
+  related_id: string | null;
 }
 
 const timeAgo = (dateStr: string) => {
@@ -137,8 +138,17 @@ export default function Notifications() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.02 }}
-                  onClick={() => !n.is_read && markRead(n.id)}
-                  className={`w-full text-left flex items-start gap-3 p-3.5 rounded-2xl border transition-colors ${
+                  onClick={() => {
+                    if (!n.is_read) markRead(n.id);
+                    if (["like", "comment", "poll_vote"].includes(n.type) && n.related_id) {
+                      navigate(`/feed?post=${n.related_id}`);
+                    } else if (["follow", "friend_request", "friend_accepted"].includes(n.type) && n.actor_id) {
+                      navigate(`/u/${n.actor_id}`);
+                    } else if (n.type === "challenge_invite" || n.type === "challenge_result") {
+                      navigate("/friends");
+                    }
+                  }}
+                  className={`w-full text-left flex items-start gap-3 p-3.5 rounded-2xl border transition-colors hover:bg-muted/40 ${
                     n.is_read ? "border-border/50" : "border-primary/40 bg-primary/5"
                   }`}
                 >

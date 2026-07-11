@@ -8,6 +8,7 @@ const supabase: any = _sbClient;
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { FollowButton } from "@/components/friends/FollowButton";
+import { createNotification } from "@/lib/notifications";
 
 export interface FeedPost {
   id: string;
@@ -93,6 +94,16 @@ export const PostCard = ({ post, onChange, onDelete, hideFollow }: Props) => {
       await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", user.id);
     } else {
       await supabase.from("post_likes").insert({ post_id: post.id, user_id: user.id });
+      if (post.user_id !== user.id) {
+        createNotification({
+          userId: post.user_id,
+          actorId: user.id,
+          type: "like",
+          title: "Postingiz yoqdi!",
+          body: "Postingizga layk qo'ydi",
+          relatedId: post.id,
+        });
+      }
     }
   };
 
@@ -124,6 +135,16 @@ export const PostCard = ({ post, onChange, onDelete, hideFollow }: Props) => {
       poll_tally: post.poll_tally.map((c, i) => (i === optionIndex ? c + 1 : c)),
     });
     await supabase.from("poll_votes").insert({ post_id: post.id, user_id: user.id, option_index: optionIndex });
+    if (post.user_id !== user.id) {
+      createNotification({
+        userId: post.user_id,
+        actorId: user.id,
+        type: "poll_vote",
+        title: "So'rovnomangizga ovoz berildi",
+        body: post.poll_options?.[optionIndex]?.text ? `"${post.poll_options[optionIndex].text}" deb ovoz berdi` : undefined,
+        relatedId: post.id,
+      });
+    }
   };
 
   const loadComments = async () => {
@@ -164,6 +185,16 @@ export const PostCard = ({ post, onChange, onDelete, hideFollow }: Props) => {
       ]);
       onChange?.({ comments_count: post.comments_count + 1 });
       setNewComment("");
+      if (post.user_id !== user.id) {
+        createNotification({
+          userId: post.user_id,
+          actorId: user.id,
+          type: "comment",
+          title: "Postingizga izoh qoldirildi",
+          body: content.slice(0, 120),
+          relatedId: post.id,
+        });
+      }
     } catch (err) {
       console.error(err);
       toast.error("Izoh qoldirilmadi");

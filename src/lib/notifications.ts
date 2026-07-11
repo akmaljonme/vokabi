@@ -9,6 +9,7 @@ export type NotificationType =
   | "challenge_result"
   | "achievement"
   | "like"
+  | "comment"
   | "poll_vote"
   | "announcement";
 
@@ -20,6 +21,7 @@ export const NOTIFICATION_META: Record<NotificationType, { icon: string; color: 
   challenge_result: { icon: "🏆", color: "text-amber-500" },
   achievement: { icon: "🎖️", color: "text-purple-500" },
   like: { icon: "❤️", color: "text-red-500" },
+  comment: { icon: "💬", color: "text-blue-500" },
   poll_vote: { icon: "📊", color: "text-blue-500" },
   announcement: { icon: "🚀", color: "text-primary" },
 };
