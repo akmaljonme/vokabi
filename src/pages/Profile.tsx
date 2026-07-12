@@ -12,6 +12,7 @@ import {
   Settings,
   Flame,
   PlayCircle,
+  Bookmark,
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -44,12 +45,14 @@ export default function Profile() {
 
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [posts, setPosts] = useState<FeedPost[]>([]);
+  const [savedPosts, setSavedPosts] = useState<FeedPost[] | null>(null);
+  const [savedLoading, setSavedLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [level, setLevel] = useState<number | null>(null);
   const [streak, setStreak] = useState(0);
-  const [tab, setTab] = useState<"post" | "reel" | "poll">("post");
+  const [tab, setTab] = useState<"post" | "reel" | "poll" | "saved">("post");
   const [activePost, setActivePost] = useState<FeedPost | null>(null);
   const [listModal, setListModal] = useState<"followers" | "following" | null>(null);
   const [listPeople, setListPeople] = useState<SimplePerson[]>([]);
@@ -103,6 +106,59 @@ export default function Profile() {
     setLoading(false);
   }, [userId, user]);
 
+  const loadSaved = useCallback(async () => {
+    if (!user || !isMe) return;
+    setSavedLoading(true);
+    const { data: saveRows } = await supabase
+      .from("post_saves")
+      .select("post_id, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    const postIds = (saveRows || []).map((s: any) => s.post_id);
+    if (postIds.length === 0) {
+      setSavedPosts([]);
+      setSavedLoading(false);
+      return;
+    }
+
+    const { data: postsData } = await supabase.from("posts").select("*").in("id", postIds);
+    const rows = (postsData || []) as any[];
+    // saqlangan tartibida (eng yangi saqlangani birinchi)
+    rows.sort((a, b) => postIds.indexOf(a.id) - postIds.indexOf(b.id));
+
+    const authorIds = Array.from(new Set(rows.map((r) => r.user_id)));
+    const [{ data: profiles }, { data: likes }, { data: votes }, { data: commentCounts }] = await Promise.all([
+      authorIds.length ? supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", authorIds) : Promise.resolve({ data: [] }),
+      supabase.from("post_likes").select("post_id, user_id").in("post_id", postIds),
+      supabase.from("poll_votes").select("post_id, user_id, option_index").in("post_id", postIds),
+      supabase.from("post_comments").select("post_id").in("post_id", postIds),
+    ]);
+
+    const enriched: FeedPost[] = rows.map((r) => {
+      const postLikes = (likes || []).filter((l: any) => l.post_id === r.id);
+      const postVotes = (votes || []).filter((v: any) => v.post_id === r.id);
+      const tally = (r.poll_options || []).map((_: any, i: number) => postVotes.filter((v: any) => v.option_index === i).length);
+      const author = profiles?.find((p: any) => p.user_id === r.user_id);
+      return {
+        ...r,
+        author_name: author?.full_name || "Foydalanuvchi",
+        author_avatar: author?.avatar_url || null,
+        likes_count: postLikes.length,
+        liked_by_me: postLikes.some((l: any) => l.user_id === user.id),
+        saved_by_me: true,
+        comments_count: (commentCounts || []).filter((c: any) => c.post_id === r.id).length,
+        poll_tally: tally,
+        my_vote: postVotes.find((v: any) => v.user_id === user.id)?.option_index ?? null,
+      };
+    });
+    setSavedPosts(enriched);
+    setSavedLoading(false);
+  }, [user, isMe]);
+
+  useEffect(() => {
+    if (tab === "saved" && savedPosts === null) loadSaved();
+  }, [tab, savedPosts, loadSaved]);
+
   useEffect(() => {
     load();
   }, [load]);
@@ -124,7 +180,8 @@ export default function Profile() {
     setListLoading(false);
   };
 
-  const filteredPosts = posts.filter((p) => p.type === tab);
+  const filteredPosts = tab === "saved" ? savedPosts || [] : posts.filter((p) => p.type === tab);
+  const isSavedTabLoading = tab === "saved" && savedLoading && savedPosts === null;
 
   if (loading) {
     return (
@@ -210,6 +267,7 @@ export default function Profile() {
             { key: "post" as const, icon: Grid3x3, label: "Postlar" },
             { key: "reel" as const, icon: Video, label: "Reels" },
             { key: "poll" as const, icon: BarChart3, label: "So'rovnomalar" },
+            ...(isMe ? [{ key: "saved" as const, icon: Bookmark, label: "Saqlangan" }] : []),
           ].map((t) => (
             <button
               key={t.key}
@@ -224,10 +282,24 @@ export default function Profile() {
         </div>
 
         {/* Grid */}
-        {filteredPosts.length === 0 ? (
+        {isSavedTabLoading ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : filteredPosts.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
-            <Grid3x3 className="w-10 h-10 mx-auto mb-2 opacity-30" />
-            <p className="text-sm">Hali hech narsa yo'q</p>
+            {tab === "saved" ? (
+              <>
+                <Bookmark className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">Hali hech narsa saqlanmagan</p>
+                <p className="text-xs mt-1">Feed'da postlarni 🔖 bosib saqlang</p>
+              </>
+            ) : (
+              <>
+                <Grid3x3 className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">Hali hech narsa yo'q</p>
+              </>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-0.5 mt-0.5">
@@ -276,13 +348,17 @@ export default function Profile() {
                 >
                   <PostCard
                     post={activePost}
-                    hideFollow
+                    hideFollow={tab !== "saved"}
                     onChange={(patch) => {
                       setActivePost((p) => (p ? { ...p, ...patch } : p));
                       setPosts((prev) => prev.map((p) => (p.id === activePost.id ? { ...p, ...patch } : p)));
+                      setSavedPosts((prev) =>
+                        prev ? prev.map((p) => (p.id === activePost.id ? { ...p, ...patch } : p)) : prev,
+                      );
                     }}
                     onDelete={() => {
                       setPosts((prev) => prev.filter((p) => p.id !== activePost.id));
+                      setSavedPosts((prev) => (prev ? prev.filter((p) => p.id !== activePost.id) : prev));
                       setActivePost(null);
                       supabase.from("posts").delete().eq("id", activePost.id);
                     }}
