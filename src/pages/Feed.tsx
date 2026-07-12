@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { PostCard, FeedPost } from "@/components/feed/PostCard";
 import { FeedLogo } from "@/components/dashboard/DashboardIllustrations";
 import { FollowButton } from "@/components/friends/FollowButton";
+import { StoriesBar } from "@/components/feed/StoriesBar";
 
 type PostType = "post" | "reel" | "poll";
 type FeedTab = "all" | "following";
@@ -405,6 +406,8 @@ export default function Feed() {
             </button>
           )}
         </div>
+
+        {user && <StoriesBar />}
 
         {/* Barchasi / Kuzatilayotganlar tabs */}
         {user && (
