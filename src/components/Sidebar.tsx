@@ -50,6 +50,7 @@ const toolItems: NavItem[] = [
   { label: "Study Room",    path: "/study-room",    icon: Home },
   { label: "Essay Checker", path: "/essay",         icon: PenTool },
   { label: "So'z Banki",    path: "/wordbank",      icon: BookOpen },
+  { label: "Grammatika",    path: "/grammar",       icon: PenTool },
   { label: "Tools",         path: "/tools",         icon: Sparkles },
   { label: "B2B Admin",     path: "/school/admin",  icon: School, soon: true },
 ];

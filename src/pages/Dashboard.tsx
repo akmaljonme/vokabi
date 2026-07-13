@@ -508,10 +508,10 @@ export default function Dashboard() {
     };
 
   const continueLearningSkills = [
-    { key: "vocabulary", label: "Lug'at", icon: BookOpen, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { key: "grammar", label: "Grammatika", icon: PenTool, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { key: "speaking", label: "Speaking", icon: Mic, color: "text-rose-500", bg: "bg-rose-500/10" },
-    { key: "reading", label: "Reading", icon: BookOpen, color: "text-amber-500", bg: "bg-amber-500/10" },
+    { key: "vocabulary", label: "Lug'at", icon: BookOpen, color: "text-blue-500", bg: "bg-blue-500/10", path: "/wordbank" },
+    { key: "grammar", label: "Grammatika", icon: PenTool, color: "text-emerald-500", bg: "bg-emerald-500/10", path: "/grammar" },
+    { key: "speaking", label: "Speaking", icon: Mic, color: "text-rose-500", bg: "bg-rose-500/10", path: "/practice" },
+    { key: "reading", label: "Reading", icon: BookOpen, color: "text-amber-500", bg: "bg-amber-500/10", path: "/practice" },
   ].map((s) => ({ ...s, score: findSkill(s.key).averageScore }));
 
   const weakSkillsRanked = [...skillAnalysis]
@@ -1035,14 +1035,18 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-3">
               {continueLearningSkills.map((s) => (
-                <div key={s.key} className={`p-3 rounded-2xl ${s.bg} border border-border/50`}>
+                <button
+                  key={s.key}
+                  onClick={() => navigate(s.path)}
+                  className={`text-left p-3 rounded-2xl ${s.bg} border border-border/50 hover:opacity-90 transition-opacity`}
+                >
                   <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-2`}>
                     <s.icon className={`w-4.5 h-4.5 ${s.color}`} />
                   </div>
                   <p className="text-xs font-semibold mb-1.5">{s.label}</p>
                   <Progress value={s.score} className="h-1.5 mb-1" />
                   <span className="text-[10px] text-muted-foreground">{s.score}%</span>
-                </div>
+                </button>
               ))}
             </CardContent>
           </Card>

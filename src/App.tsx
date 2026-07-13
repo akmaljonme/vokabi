@@ -35,6 +35,7 @@ const Notifications  = lazy(() => import("./pages/Notifications"));
 const Feed           = lazy(() => import("./pages/Feed"));
 const Profile        = lazy(() => import("./pages/Profile"));
 const Reels          = lazy(() => import("./pages/Reels"));
+const Grammar        = lazy(() => import("./pages/Grammar"));
 const Tools          = lazy(() => import("./pages/Tools"));
 const Languages      = lazy(() => import("./pages/Languages"));
 const LanguageLevel  = lazy(() => import("./pages/LanguageLevel"));
@@ -134,6 +135,7 @@ const App = () => (
                     <Route path="/feed"       element={<ErrorBoundary><Feed /></ErrorBoundary>} />
                     <Route path="/u/:userId"  element={<ErrorBoundary><Profile /></ErrorBoundary>} />
                     <Route path="/reels"      element={<ErrorBoundary><Reels /></ErrorBoundary>} />
+                    <Route path="/grammar"    element={<ErrorBoundary><Grammar /></ErrorBoundary>} />
                     <Route path="/study-room" element={<ErrorBoundary><StudyRoom /></ErrorBoundary>} />
                     <Route path="/essay"      element={<ErrorBoundary><EssayChecker /></ErrorBoundary>} />
                     <Route path="*"          element={<NotFound />} />

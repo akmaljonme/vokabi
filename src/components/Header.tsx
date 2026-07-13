@@ -203,6 +203,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                           { label: "Study Room", icon: "🏠", path: "/study-room" },
                           { label: "Essay Checker", icon: "✍️", path: "/essay" },
                           { label: "So'z Banki", icon: "📚", path: "/wordbank" },
+                          { label: "Grammatika", icon: "📖", path: "/grammar" },
                           { label: "Tools", icon: "⚡", path: "/tools" },
                         ].map(item => (
                           <button key={item.path} onClick={() => navigate(item.path)}
@@ -470,6 +471,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                             { label: "Study Room", emoji: "🏠", path: "/study-room" },
                             { label: "Essay Checker", emoji: "✍️", path: "/essay" },
                             { label: "So'z Banki", emoji: "📚", path: "/wordbank" },
+                            { label: "Grammatika", emoji: "📖", path: "/grammar" },
                             { label: "Tools", emoji: "⚡", path: "/tools" },
                           ].map(item => (
                             <button key={item.path}
