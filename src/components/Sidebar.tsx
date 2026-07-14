@@ -14,6 +14,7 @@ import {
   Sparkles, Brain, LogOut, Moon, Sun,
   Shield, ChevronDown, Crown, Sword, School, BookMarked,
   Bell,
+  Headphones,
 } from "lucide-react";
 
 import { NotificationBell } from "@/components/NotificationBell";
@@ -51,6 +52,7 @@ const toolItems: NavItem[] = [
   { label: "Essay Checker", path: "/essay",         icon: PenTool },
   { label: "So'z Banki",    path: "/wordbank",      icon: BookOpen },
   { label: "Grammatika",    path: "/grammar",       icon: PenTool },
+  { label: "Listening",     path: "/listening",     icon: Headphones },
   { label: "Tools",         path: "/tools",         icon: Sparkles },
   { label: "B2B Admin",     path: "/school/admin",  icon: School, soon: true },
 ];
