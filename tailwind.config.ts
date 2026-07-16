@@ -69,8 +69,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Nunito', 'system-ui', 'sans-serif'],
-        display: ['Baloo 2', 'Nunito', 'system-ui', 'sans-serif'],
+        sans: ['Poppins', 'system-ui', 'sans-serif'],
+        display: ['Poppins', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       borderRadius: {
