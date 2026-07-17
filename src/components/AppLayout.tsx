@@ -11,6 +11,7 @@ import { BannerAd, PopupAd } from "@/components/ads/AdComponents";
 import { VoiceAssistant } from "@/components/VoiceAssistant";
 import { WhatsNewModal } from "@/components/WhatsNewModal";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useDMPushNotifications } from "@/hooks/useDMPushNotifications";
 
 
 interface AppLayoutProps {
@@ -22,6 +23,7 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isAdmin } = useUserRole(); // user null bo'lsa hook o'zi [] qaytaradi
+  useDMPushNotifications();
 
   return (
     <div className="min-h-screen bg-background">

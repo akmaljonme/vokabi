@@ -19,6 +19,7 @@ import {
 
 import { NotificationBell } from "@/components/NotificationBell";
 import { FeedLogo } from "@/components/dashboard/DashboardIllustrations";
+import { useUnreadDMCount } from "@/hooks/useUnreadDMCount";
 import { SidebarAd } from "@/components/ads/AdComponents";
 
 interface NavItem {
@@ -63,6 +64,7 @@ export const Sidebar = () => {
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
   const { isPro: isProActive } = useSubscription();
+  const dmUnread = useUnreadDMCount();
   const [collapsed, setCollapsed] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(true);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
@@ -133,6 +135,15 @@ export const Sidebar = () => {
       >
         <item.icon className="w-[18px] h-[18px] shrink-0" />
         {!collapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
+        {item.path === "/community" && dmUnread > 0 && (
+          <span
+            className={`shrink-0 flex items-center justify-center h-5 min-w-5 px-1 rounded-full text-[10px] font-bold ${
+              isActive(item.path) ? "bg-primary-foreground text-primary" : "bg-red-500 text-white"
+            } ${collapsed ? "absolute -top-1 -right-1" : ""}`}
+          >
+            {dmUnread > 99 ? "99+" : dmUnread}
+          </span>
+        )}
         {!collapsed && isLocked && (
           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground/70 shrink-0">
             SOON
