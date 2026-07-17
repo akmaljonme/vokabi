@@ -13,6 +13,19 @@ import {
   Flame,
   PlayCircle,
   Bookmark,
+  Users,
+  ChevronRight,
+  Moon,
+  Sun,
+  LogOut,
+  HelpCircle,
+  Trophy,
+  Swords,
+  PenTool,
+  Headphones,
+  BookOpen,
+  Crown,
+  Bell,
 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -22,6 +35,7 @@ const supabase: any = _sbClient;
 import { useAuth } from "@/contexts/AuthContext";
 import { FollowButton } from "@/components/friends/FollowButton";
 import { PostCard, FeedPost } from "@/components/feed/PostCard";
+import { FeedLogo } from "@/components/dashboard/DashboardIllustrations";
 
 interface ProfileRow {
   user_id: string;
@@ -39,7 +53,10 @@ interface SimplePerson {
 
 export default function Profile() {
   const { userId } = useParams<{ userId: string }>();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const [isDark, setIsDark] = useState(() => {
+    try { return document.documentElement.classList.contains("dark"); } catch { return false; }
+  });
   const navigate = useNavigate();
   const isMe = user?.id === userId;
 
@@ -260,6 +277,91 @@ export default function Profile() {
           <p className="font-semibold text-sm">{profile?.full_name}</p>
           {profile?.bio && <p className="text-sm text-muted-foreground whitespace-pre-wrap mt-0.5">{profile.bio}</p>}
         </div>
+
+        {/* Mobile-only hub: Feed/Reels/Community/Notifications + full menu.
+            Desktop foydalanuvchilari buni Sidebar orqali oladi. */}
+        {isMe && (
+          <div className="lg:hidden mb-6 space-y-5">
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: "Feed", icon: FeedLogo, path: "/feed", color: "" },
+                { label: "Reels", icon: Video, path: "/reels", color: "text-rose-500" },
+                { label: "Jamiyat", icon: Users, path: "/community", color: "text-blue-500" },
+                { label: "Xabar", icon: Bell, path: "/notifications", color: "text-amber-500" },
+              ].map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border border-border/60 hover:bg-muted/40 transition-colors"
+                >
+                  <item.icon className={`w-5 h-5 ${item.color}`} />
+                  <span className="text-[10px] font-medium text-muted-foreground">{item.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="rounded-2xl border border-border/60 divide-y divide-border/50 overflow-hidden">
+              {[
+                { label: "Statistika", icon: BarChart3, path: "/dashboard" },
+                { label: "Yutuqlar", icon: Trophy, path: "/dashboard" },
+                { label: "Do'stlar", icon: Users, path: "/friends" },
+                { label: "Turnirlar", icon: Swords, path: "/tournaments" },
+                { label: "Grammatika", icon: PenTool, path: "/grammar" },
+                { label: "Listening", icon: Headphones, path: "/listening" },
+                { label: "So'z Banki", icon: BookOpen, path: "/wordbank" },
+                { label: "Pro rejaga o'tish", icon: Crown, path: "/pricing" },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => navigate(item.path)}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors text-left"
+                >
+                  <item.icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm font-medium flex-1">{item.label}</span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
+                </button>
+              ))}
+            </div>
+
+            <div className="rounded-2xl border border-border/60 divide-y divide-border/50 overflow-hidden">
+              <button
+                onClick={() => {
+                  const next = !isDark;
+                  document.documentElement.classList.toggle("dark", next);
+                  localStorage.setItem("theme", next ? "dark" : "light");
+                  setIsDark(next);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors text-left"
+              >
+                {isDark ? <Sun className="w-4 h-4 text-amber-400 shrink-0" /> : <Moon className="w-4 h-4 text-muted-foreground shrink-0" />}
+                <span className="text-sm font-medium flex-1">{isDark ? "Light mode" : "Dark mode"}</span>
+              </button>
+              <button
+                onClick={() => navigate("/profile")}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors text-left"
+              >
+                <Settings className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-sm font-medium flex-1">Sozlamalar</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
+              </button>
+              <a
+                href="/#faq"
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors text-left"
+              >
+                <HelpCircle className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-sm font-medium flex-1">Yordam</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
+              </a>
+            </div>
+
+            <button
+              onClick={async () => { await signOut(); navigate("/"); }}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-destructive/40 text-destructive font-bold text-sm tracking-wide hover:bg-destructive/10 transition-colors"
+            >
+              <LogOut className="w-4 h-4" /> CHIQISH
+            </button>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex border-t border-border/60">

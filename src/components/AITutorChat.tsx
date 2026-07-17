@@ -164,7 +164,7 @@ export const AITutorChat = () => {
             whileHover={{ scale: 1.12, rotate: 10 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="tutor-chat fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl text-white flex items-center justify-center tutor-float-btn"
+            className="hidden lg:flex tutor-chat fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl text-white items-center justify-center tutor-float-btn"
           >
             <span className="text-2xl">🤖</span>
           </motion.button>
@@ -179,7 +179,7 @@ export const AITutorChat = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.92 }}
             transition={{ type: "spring", damping: 24, stiffness: 300 }}
-            className="tutor-chat fixed bottom-6 right-6 z-50 w-[390px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-5rem)] bg-card border border-border rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            className="hidden lg:flex tutor-chat fixed bottom-6 right-6 z-50 w-[390px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-5rem)] bg-card border border-border rounded-3xl shadow-2xl flex-col overflow-hidden"
             style={{ boxShadow: "0 24px 80px hsl(var(--primary) / 0.2), 0 8px 32px rgba(0,0,0,0.15)" }}
           >
             {/* Header */}

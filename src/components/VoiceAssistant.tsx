@@ -195,7 +195,7 @@ export const VoiceAssistant = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={openPanel}
-            className="fixed bottom-24 left-4 lg:bottom-8 lg:left-[calc(var(--sidebar-w,220px)+1.25rem)] z-50 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 flex items-center justify-center"
+            className="hidden lg:flex fixed bottom-24 left-4 lg:bottom-8 lg:left-[calc(var(--sidebar-w,220px)+1.25rem)] z-50 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 items-center justify-center"
             aria-label="Alisa ovozli yordamchisi"
           >
             <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping opacity-40" />
@@ -213,7 +213,7 @@ export const VoiceAssistant = () => {
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 20, opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", damping: 22, stiffness: 240 }}
-            className="fixed bottom-24 left-4 right-4 lg:bottom-8 lg:left-[calc(var(--sidebar-w,220px)+1.25rem)] lg:right-auto z-50 w-auto lg:w-[380px] max-w-[420px] mx-auto"
+            className="hidden lg:block fixed bottom-24 left-4 right-4 lg:bottom-8 lg:left-[calc(var(--sidebar-w,220px)+1.25rem)] lg:right-auto z-50 w-auto lg:w-[380px] max-w-[420px] mx-auto"
           >
             <Card className="bg-card/95 backdrop-blur-xl border-border shadow-2xl overflow-hidden">
               <div className="px-4 py-3 flex items-center justify-between border-b border-border/60 bg-gradient-to-r from-primary/10 to-transparent">

@@ -21,6 +21,8 @@ import {
   LayoutDashboard,
   UserPlus,
   Bell,
+  Settings,
+  HelpCircle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -323,16 +325,18 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 )}
               </>
             )}
-            <button
-              className="p-2 rounded-xl hover:bg-muted transition-colors"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-            </button>
+            {!user && (
+              <button
+                className="p-2 rounded-xl hover:bg-muted transition-colors"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -386,19 +390,23 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
               {/* Nav items — scrollable */}
               <div className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
 
-                {/* Main nav */}
-                <button onClick={() => { navigate("/practice"); setIsMenuOpen(false); }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium text-left"
-                >📝 Practice Tests</button>
+                {/* Login qilmagan foydalanuvchi uchun */}
+                {!user && (
+                  <button onClick={() => { navigate("/practice"); setIsMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium text-left"
+                  >📝 Practice Tests</button>
+                )}
 
+                {/* Asosiy navigatsiya — Home/Learn/Games/Rank/Profile pastki panelda,
+                    shu yerda faqat o'sha panelda yo'q, qo'shimcha bo'limlar */}
                 {user && (
                   <>
-                    <button onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }}
+                    <button onClick={() => { navigate("/feed"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                    ><LayoutDashboard className="w-4 h-4 text-primary" /> Dashboard</button>
-                    <button onClick={() => { navigate("/games"); setIsMenuOpen(false); }}
+                    ><FeedLogo className="w-5 h-5" /> Feed</button>
+                    <button onClick={() => { navigate("/reels"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                    ><Gamepad2 className="w-4 h-4 text-green-500" /> O'yinlar</button>
+                    ><Video className="w-4 h-4 text-rose-500" /> Reels</button>
                     <button onClick={() => { navigate("/community"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
                     >
@@ -412,12 +420,6 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                     <button onClick={() => { navigate("/friends"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
                     ><UserPlus className="w-4 h-4 text-primary" /> Do'stlar</button>
-                    <button onClick={() => { navigate("/feed"); setIsMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                    ><FeedLogo className="w-5 h-5" /> Feed</button>
-                    <button onClick={() => { navigate("/reels"); setIsMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                    ><Video className="w-4 h-4 text-rose-500" /> Reels</button>
                     <button onClick={() => { navigate("/notifications"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
                     >
@@ -428,9 +430,6 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                         </Badge>
                       )}
                     </button>
-                    <button onClick={() => { navigate("/leaderboard"); setIsMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                    ><span className="text-base">🏆</span> Leaderboard</button>
                     <button onClick={() => { navigate("/tournaments"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
                     ><span className="text-base">⚔️</span> Turnirlar</button>
@@ -463,7 +462,6 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                           className="overflow-hidden space-y-0.5 pl-2"
                         >
                           {[
-                            { label: "Test Yechish", emoji: "🧠", path: "/practice" },
                             { label: "Maqolalar", emoji: "📖", path: "/articles" },
                             { label: "Video Darslar", emoji: "🎬", path: "/videos" },
                             { label: "Examlar", emoji: "📋", path: "/exams" },
@@ -491,12 +489,22 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
               </div>
 
               {/* Bottom actions */}
-              <div className="px-3 pb-4 pt-2 border-t border-border/40 space-y-1.5">
+              <div className="px-3 pb-4 pt-2 border-t border-border/40 space-y-1">
                 <button onClick={toggleTheme}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
                 >
-                  {isDark ? <><Sun className="w-4 h-4" /> Light mode</> : <><Moon className="w-4 h-4" /> Dark mode</>}
+                  {isDark ? <><Sun className="w-4 h-4 text-amber-400" /> Light mode</> : <><Moon className="w-4 h-4" /> Dark mode</>}
                 </button>
+
+                {user && (
+                  <button onClick={() => { navigate("/profile"); setIsMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
+                  ><Settings className="w-4 h-4 text-muted-foreground" /> Sozlamalar</button>
+                )}
+
+                <a href="/#faq" onClick={() => setIsMenuOpen(false)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
+                ><HelpCircle className="w-4 h-4 text-muted-foreground" /> Yordam</a>
 
                 {isAdmin && onToggleAdmin && (
                   <button onClick={() => { onToggleAdmin(); setIsMenuOpen(false); }}
@@ -505,14 +513,9 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 )}
 
                 {user ? (
-                  <>
-                    <button onClick={() => { navigate("/profile"); setIsMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm"
-                    ><User className="w-4 h-4 text-primary" /> Sozlamalar</button>
-                    <button onClick={handleSignOut}
-                      className="w-full btn-outline flex items-center justify-center gap-2 py-2.5 text-sm"
-                    ><LogOut className="w-4 h-4" /> Chiqish</button>
-                  </>
+                  <button onClick={handleSignOut}
+                    className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-2xl border border-destructive/40 text-destructive font-bold text-sm tracking-wide hover:bg-destructive/10 transition-colors"
+                  ><LogOut className="w-4 h-4" /> CHIQISH</button>
                 ) : (
                   <button onClick={() => { navigate("/login"); setIsMenuOpen(false); }}
                     className="w-full btn-primary py-2.5 text-sm"
