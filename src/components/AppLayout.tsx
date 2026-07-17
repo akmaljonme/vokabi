@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -44,7 +45,7 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.25 }}
-        className={user ? "lg:pl-[var(--sidebar-w,220px)]" : ""}
+        className={user ? "lg:pl-[var(--sidebar-w,220px)] pb-16 lg:pb-0" : ""}
       >
         {children}
         {withFooter && <Footer />}
@@ -60,6 +61,7 @@ export const AppLayout = ({ children, withFooter = false }: AppLayoutProps) => {
           <WhatsNewModal />
         </ErrorBoundary>
       )}
+      {user && <MobileBottomNav />}
     </div>
   );
 };
