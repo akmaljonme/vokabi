@@ -240,26 +240,26 @@ export default function WordBank() {
             <h1 className="text-3xl font-display font-bold">📚 So'z Banki</h1>
             <p className="text-muted-foreground mt-1">{words.length} ta so'z · {dueWords.length} ta takrorlash kerak</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {dueWords.length > 0 && (
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                 onClick={startReview}
-                className="btn-primary flex items-center gap-2 px-5 py-2.5 text-sm shadow-glow"
+                className="btn-primary flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm whitespace-nowrap shadow-glow"
               >
-                <Brain className="w-4 h-4" /> Takrorlash ({dueWords.length})
+                <Brain className="w-4 h-4 shrink-0" /> Takrorlash ({dueWords.length})
               </motion.button>
             )}
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
               onClick={() => setMode("bulk")}
-              className="btn-outline flex items-center gap-2 px-5 py-2.5 text-sm"
+              className="btn-outline flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm whitespace-nowrap"
             >
-              <Sparkles className="w-4 h-4" /> Ro'yxatdan qo'shish
+              <Sparkles className="w-4 h-4 shrink-0" /> Ro'yxatdan qo'shish
             </motion.button>
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
               onClick={() => setMode("add")}
-              className="btn-outline flex items-center gap-2 px-5 py-2.5 text-sm"
+              className="btn-outline flex items-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm whitespace-nowrap"
             >
-              <Plus className="w-4 h-4" /> So'z qo'shish
+              <Plus className="w-4 h-4 shrink-0" /> So'z qo'shish
             </motion.button>
           </div>
         </div>

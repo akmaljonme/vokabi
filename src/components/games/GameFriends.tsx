@@ -206,35 +206,37 @@ export const GameFriends = ({ onBack }: Props) => {
                   {friends.map(f => {
                     const fid = f.user_id === user?.id ? f.friend_id : f.user_id;
                     return (
-                      <div key={f.id} className="card-elevated p-3 flex items-center gap-3">
+                      <div key={f.id} className="card-elevated p-3 flex flex-wrap items-center gap-2.5">
                         <button onClick={() => navigate(`/u/${fid}`)} className="shrink-0">
                           <Avatar className="w-10 h-10">
                             <AvatarImage src={f.avatar_url || ''} />
                             <AvatarFallback>{(f.full_name || '?')[0]}</AvatarFallback>
                           </Avatar>
                         </button>
-                        <div className="flex-1 min-w-0">
-                          <button onClick={() => navigate(`/u/${fid}`)} className="font-medium text-sm truncate hover:underline block text-left">
+                        <div className="flex-1 min-w-[100px]">
+                          <button onClick={() => navigate(`/u/${fid}`)} className="font-medium text-sm truncate hover:underline block text-left max-w-full">
                             {f.full_name || 'Foydalanuvchi'}
                           </button>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Trophy className="w-3 h-3" /> {f.xp} XP
+                            <Trophy className="w-3 h-3 shrink-0" /> {f.xp} XP
                             <span>•</span>
                             Level {f.level}
                           </div>
                         </div>
-                        <FollowButton targetUserId={fid} targetName={f.full_name} />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs shrink-0"
-                          onClick={() => setChallengeTarget({ id: fid, name: f.full_name || 'Foydalanuvchi' })}
-                        >
-                          <Swords className="w-3.5 h-3.5 mr-1" /> Challenge
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-xs text-destructive" onClick={() => removeFriend(f.id)}>
-                          <X className="w-3.5 h-3.5" />
-                        </Button>
+                        <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                          <FollowButton targetUserId={fid} targetName={f.full_name} />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs shrink-0"
+                            onClick={() => setChallengeTarget({ id: fid, name: f.full_name || 'Foydalanuvchi' })}
+                          >
+                            <Swords className="w-3.5 h-3.5 mr-1" /> Challenge
+                          </Button>
+                          <Button variant="ghost" size="sm" className="text-xs text-destructive" onClick={() => removeFriend(f.id)}>
+                            <X className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
                       </div>
                     );
                   })}
@@ -295,19 +297,21 @@ export const GameFriends = ({ onBack }: Props) => {
 
               <div className="space-y-2">
                 {searchResults.map(r => (
-                  <div key={r.user_id} className="card-elevated p-3 flex items-center gap-3">
-                    <Avatar className="w-10 h-10">
+                  <div key={r.user_id} className="card-elevated p-3 flex flex-wrap items-center gap-2.5">
+                    <Avatar className="w-10 h-10 shrink-0">
                       <AvatarImage src={r.avatar_url || ''} />
                       <AvatarFallback>{(r.full_name || '?')[0]}</AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-[100px]">
                       <p className="font-medium text-sm truncate">{r.full_name || 'Foydalanuvchi'}</p>
                       {r.username && <p className="text-xs text-muted-foreground">@{r.username}</p>}
                     </div>
-                    <FollowButton targetUserId={r.user_id} targetName={r.full_name} />
-                    <Button size="sm" variant="outline" onClick={() => sendRequest(r.user_id)}>
-                      <UserPlus className="w-4 h-4 mr-1" /> Qo'shish
-                    </Button>
+                    <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                      <FollowButton targetUserId={r.user_id} targetName={r.full_name} />
+                      <Button size="sm" variant="outline" onClick={() => sendRequest(r.user_id)}>
+                        <UserPlus className="w-4 h-4 mr-1" /> Qo'shish
+                      </Button>
+                    </div>
                   </div>
                 ))}
                 {searchResults.length === 0 && searchQuery && !searching && (
