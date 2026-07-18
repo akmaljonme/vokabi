@@ -1,32 +1,43 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Gift, Copy, Check, Users, Trophy } from "lucide-react";
+import { Gift, Copy, Check, Users, Crown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase as _sb } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 const supabase: any = _sb;
 
+const REFERRALS_PER_REWARD = 10;
+
 export const ReferralWidget = () => {
   const { user } = useAuth();
   const [referralCode, setReferralCode] = useState("");
   const [referralCount, setReferralCount] = useState(0);
+  const [rewardsGranted, setRewardsGranted] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
-    // Generate referral code from user id
-    const code = "VKB-" + user.id.slice(0, 6).toUpperCase();
-    setReferralCode(code);
-    // Fetch referral count
-    supabase.from("profiles")
-      .select("id", { count: "exact", head: true })
-      .eq("referred_by", code)
-      .then(({ count }: any) => setReferralCount(count || 0));
+    const load = async () => {
+      const [{ data: profile }, { count }] = await Promise.all([
+        supabase.from("profiles").select("referral_code, referral_rewards_granted").eq("user_id", user.id).maybeSingle(),
+        supabase.from("referrals").select("id", { count: "exact", head: true }).eq("referrer_id", user.id),
+      ]);
+      setReferralCode(profile?.referral_code || "");
+      setRewardsGranted(profile?.referral_rewards_granted || 0);
+      setReferralCount(count || 0);
+      setLoading(false);
+    };
+    load();
   }, [user]);
 
-  const referralUrl = `https://vokabi.uz/register?ref=${referralCode}`;
+  const referralUrl = referralCode ? `${window.location.origin}/register?ref=${referralCode}` : "";
+  const towardNext = referralCount % REFERRALS_PER_REWARD;
+  const remaining = REFERRALS_PER_REWARD - towardNext;
+  const progressPct = Math.round((towardNext / REFERRALS_PER_REWARD) * 100);
 
   const copyLink = async () => {
+    if (!referralUrl) return;
     await navigator.clipboard.writeText(referralUrl);
     setCopied(true);
     toast.success("Havola nusxa olindi! 🎉");
@@ -38,7 +49,7 @@ export const ReferralWidget = () => {
     window.open(`https://t.me/share/url?url=${encodeURIComponent(referralUrl)}&text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  if (!user) return null;
+  if (!user || loading) return null;
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -49,12 +60,12 @@ export const ReferralWidget = () => {
         </div>
         <div>
           <h3 className="font-black text-base">Do'stlarni taklif qiling! 🎁</h3>
-          <p className="text-xs text-muted-foreground">Har bir do'stingiz uchun bonus XP oling</p>
+          <p className="text-xs text-muted-foreground">Har 10 ta do'st — 1 oylik Pro reja bepul</p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 mb-5">
+      <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="rounded-2xl bg-background/60 p-3 text-center">
           <div className="flex items-center justify-center gap-1.5 text-primary mb-1">
             <Users className="w-4 h-4" />
@@ -64,11 +75,25 @@ export const ReferralWidget = () => {
         </div>
         <div className="rounded-2xl bg-background/60 p-3 text-center">
           <div className="flex items-center justify-center gap-1.5 text-amber-500 mb-1">
-            <Trophy className="w-4 h-4" />
-            <span className="text-xl font-black">{referralCount * 500}</span>
+            <Crown className="w-4 h-4" />
+            <span className="text-xl font-black">{rewardsGranted}</span>
           </div>
-          <p className="text-xs text-muted-foreground font-semibold">Bonus XP</p>
+          <p className="text-xs text-muted-foreground font-semibold">Yutilgan Pro oylar</p>
         </div>
+      </div>
+
+      {/* Progress toward next reward */}
+      <div className="mb-5">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs font-semibold text-muted-foreground">Keyingi Pro oygacha</span>
+          <span className="text-xs font-bold text-primary">{towardNext} / {REFERRALS_PER_REWARD}</span>
+        </div>
+        <div className="h-2 rounded-full bg-background/60 overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-primary to-amber-500 rounded-full transition-all" style={{ width: `${progressPct}%` }} />
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-1.5">
+          Yana {remaining} ta do'stingiz ro'yxatdan o'tsa — 1 oylik Pro reja avtomatik beriladi!
+        </p>
       </div>
 
       {/* Referral link */}
@@ -102,10 +127,6 @@ export const ReferralWidget = () => {
           WhatsApp
         </button>
       </div>
-
-      <p className="text-center text-xs text-muted-foreground mt-3">
-        Do'stingiz ro'yxatdan o'tganda siz <strong className="text-primary">500 XP</strong> olasiz!
-      </p>
     </motion.div>
   );
 };

@@ -58,12 +58,35 @@ const Register = () => {
     urlParams.get("class") || sessionStorage.getItem("pending_class_code") || "";
   const inviteTeacherCode =
     urlParams.get("teacher-code") || sessionStorage.getItem("pending_teacher_code") || "";
+  const inviteReferralCode =
+    urlParams.get("ref") || sessionStorage.getItem("pending_referral_code") || "";
 
   // URL'dan kelsa — sessionStorage'ga saqlab qo'yamiz
   useEffect(() => {
     if (inviteClassCode) sessionStorage.setItem("pending_class_code", inviteClassCode);
     if (inviteTeacherCode) sessionStorage.setItem("pending_teacher_code", inviteTeacherCode);
-  }, [inviteClassCode, inviteTeacherCode]);
+    if (inviteReferralCode) sessionStorage.setItem("pending_referral_code", inviteReferralCode);
+  }, [inviteClassCode, inviteTeacherCode, inviteReferralCode]);
+
+  // Referral kodni haqiqiy foydalanuvchiga bog'lab qo'yamiz (bir marta, xato bo'lsa jimgina o'tkazib yuboramiz)
+  const processReferral = async (newUserId: string) => {
+    const code = (sessionStorage.getItem("pending_referral_code") || "").trim().toUpperCase();
+    if (!code) return;
+    try {
+      const { data: referrer } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("referral_code", code)
+        .maybeSingle();
+      if (referrer?.user_id && referrer.user_id !== newUserId) {
+        await supabase.from("referrals").insert({ referrer_id: referrer.user_id, referred_id: newUserId });
+      }
+    } catch {
+      // referal kodi noto'g'ri yoki allaqachon ishlatilgan — jim o'tkazamiz
+    } finally {
+      sessionStorage.removeItem("pending_referral_code");
+    }
+  };
 
   const [step, setStep] = useState(0);
   const [prefs, setPrefs] = useState({
@@ -90,6 +113,7 @@ const Register = () => {
 
   useEffect(() => {
     if (!authLoading && user) {
+      processReferral(user.id);
       // Agar invite kod bor bo'lsa — mos panelga yo'naltiramiz (u yerda auto-join ishlaydi)
       const pendingClass = sessionStorage.getItem("pending_class_code");
       const pendingTeacher = sessionStorage.getItem("pending_teacher_code");
