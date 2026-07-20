@@ -18,8 +18,7 @@ import { lazy, Suspense } from "react";
 // Lazy load all pages — faqat kerakli sahifa yuklanadi
 const Index          = lazy(() => import("./pages/Index"));
 const Auth           = lazy(() => import("./pages/Auth"));
-const Login          = lazy(() => import("./pages/Login"));
-const Register       = lazy(() => import("./pages/Register"));
+const PhoneAuth       = lazy(() => import("./pages/PhoneAuth"));
 const Dashboard      = lazy(() => import("./pages/Dashboard"));
 const ProfileSettings= lazy(() => import("./pages/ProfileSettings"));
 const Games          = lazy(() => import("./pages/Games"));
@@ -50,8 +49,6 @@ const ArticleReader  = lazy(() => import("./pages/ArticleReader"));
 const Blog         = lazy(() => import("./pages/Blog"));
 const BlogPost     = lazy(() => import("./pages/BlogPost"));
 const ForSchools   = lazy(() => import("./pages/ForSchools"));
-const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const ResetPassword  = lazy(() => import("./pages/ResetPassword"));
 const Tournaments    = lazy(() => import("./pages/Tournaments"));
 const SchoolAdmin    = lazy(() => import("./pages/school/SchoolAdmin"));
 const AdminPage      = lazy(() => import("./pages/AdminPage"));
@@ -96,8 +93,8 @@ const App = () => (
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
                     <Route path="/"          element={<ErrorBoundary><Index /></ErrorBoundary>} />
-                    <Route path="/login"     element={<ErrorBoundary><Login /></ErrorBoundary>} />
-                    <Route path="/register"  element={<ErrorBoundary><Register /></ErrorBoundary>} />
+                    <Route path="/login"     element={<ErrorBoundary><PhoneAuth /></ErrorBoundary>} />
+                    <Route path="/register"  element={<ErrorBoundary><PhoneAuth /></ErrorBoundary>} />
                     <Route path="/auth"      element={<Navigate to="/login" replace />} />
                     <Route path="/dashboard" element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
                     <Route path="/profile"   element={<ErrorBoundary><ProfileSettings /></ErrorBoundary>} />
@@ -114,8 +111,8 @@ const App = () => (
                     <Route path="/blog/:slug"  element={<ErrorBoundary><BlogPost /></ErrorBoundary>} />
                     <Route path="/for-schools" element={<ErrorBoundary><ForSchools /></ErrorBoundary>} />
                     <Route path="/shared-test/:id" element={<ErrorBoundary><SharedTest /></ErrorBoundary>} />
-                    <Route path="/forgot-password" element={<ErrorBoundary><ForgotPassword /></ErrorBoundary>} />
-                    <Route path="/reset-password"  element={<ErrorBoundary><ResetPassword /></ErrorBoundary>} />
+                    <Route path="/forgot-password" element={<Navigate to="/login" replace />} />
+                    <Route path="/reset-password"  element={<Navigate to="/login" replace />} />
                     <Route path="/tournaments" element={<ErrorBoundary><Tournaments /></ErrorBoundary>} />
                     <Route path="/tools"      element={<ErrorBoundary><Tools /></ErrorBoundary>} />
                     <Route path="/languages"   element={<Navigate to="/learning-path" replace />} />

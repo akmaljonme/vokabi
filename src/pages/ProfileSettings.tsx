@@ -219,7 +219,7 @@ export default function ProfileSettings() {
   };
 
   const getInitials = (name: string | null) => {
-    if (!name) return user?.email?.[0]?.toUpperCase() || "U";
+    if (!name) return "U";
     return name
       .split(" ")
       .map((n) => n[0])
@@ -321,13 +321,17 @@ export default function ProfileSettings() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-xs">
-                    Email
+                  <Label htmlFor="phone" className="text-xs">
+                    Telefon raqam
                   </Label>
                   <Input
-                    id="email"
-                    type="email"
-                    value={user?.email || ""}
+                    id="phone"
+                    type="tel"
+                    value={
+                      user?.phone
+                        ? `+${user.phone}`
+                        : (user?.user_metadata as any)?.phone || ""
+                    }
                     disabled
                     className="bg-muted text-sm"
                   />

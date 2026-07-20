@@ -253,10 +253,12 @@ export const Sidebar = () => {
           <div className="px-3 py-2.5 rounded-xl bg-muted/30 mt-1 space-y-2">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-xs shrink-0">
-                {(user.email || "U")[0].toUpperCase()}
+                U
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold truncate">{user.email?.split("@")[0]}</p>
+                <p className="text-xs font-semibold truncate">
+                  {user.phone ? `+${user.phone}` : (user.user_metadata as any)?.phone || "Foydalanuvchi"}
+                </p>
               </div>
               <button onClick={handleSignOut} className="text-muted-foreground hover:text-destructive transition-colors">
                 <LogOut className="w-4 h-4" />
