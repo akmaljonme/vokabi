@@ -78,7 +78,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
       .then(({ data }: any) => {
         if (data)
           setDisplayName(
-            data.username ? `@${data.username}` : data.full_name || (user.phone ? `+${user.phone}` : "Foydalanuvchi"),
+            data.username ? `@${data.username}` : data.full_name || user.email,
           );
       });
   }, [user]);
@@ -270,7 +270,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                     <User className="w-3.5 h-3.5 text-primary" />
                   </div>
                   <span className="text-sm font-medium truncate max-w-28">
-                    {displayName || (user.phone ? `+${user.phone}` : "Foydalanuvchi")}
+                    {displayName || user.email}
                   </span>
                 </button>
                 <button
@@ -378,10 +378,10 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
               {user && (
                 <div className="px-4 py-3 border-b border-border/40 flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center font-bold text-primary text-sm">
-                    {(displayName || "U")[0].toUpperCase()}
+                    {(displayName || user.email || "U")[0].toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate">{displayName || (user.phone ? `+${user.phone}` : "Foydalanuvchi")}</p>
+                    <p className="text-sm font-semibold truncate">{displayName || user.email}</p>
                     <p className="text-xs text-muted-foreground">Foydalanuvchi</p>
                   </div>
                 </div>

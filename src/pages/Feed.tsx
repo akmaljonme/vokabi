@@ -458,7 +458,7 @@ export default function Feed() {
           <div className="flex items-center gap-3 mb-6 p-3 rounded-2xl border border-border/60">
             <Avatar className="w-9 h-9 shrink-0">
               {myAvatar && <AvatarImage src={myAvatar} />}
-              <AvatarFallback>U</AvatarFallback>
+              <AvatarFallback>{(user?.email || "?")[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <button
               onClick={() => setComposerOpen(true)}
