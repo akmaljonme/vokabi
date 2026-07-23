@@ -1,7 +1,9 @@
 import { Bot, Mail, Megaphone, Phone, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export const Footer = () => {
+  const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   const contatcLinks = [
@@ -46,8 +48,7 @@ export const Footer = () => {
               </span>
             </div>
             <p className="text-white/60 text-sm leading-relaxed mb-6">
-              IELTS va CEFR imtihonlariga professional tayyorgarlik platformasi.
-              Bilimingizni sinang va rivojlantiring.
+              {t("footer.description")}
             </p>
             <div className="flex gap-3">
               <Link
@@ -73,14 +74,14 @@ export const Footer = () => {
 
           <div>
             <h4 className="font-display font-semibold text-sm uppercase tracking-wider mb-5 text-white/80">
-              Product
+              {t("footer.product")}
             </h4>
             <ul className="space-y-3">
               {[
-                "Practice Tests",
-                "Mock Exams",
-                "Study Materials",
-                "Progress Tracking",
+                t("footer.practiceTests"),
+                t("footer.mockExams"),
+                t("footer.studyMaterials"),
+                t("footer.progressTracking"),
               ].map((item) => (
                 <li key={item}>
                   <a
@@ -96,10 +97,10 @@ export const Footer = () => {
 
           <div>
             <h4 className="font-display font-semibold text-sm uppercase tracking-wider mb-5 text-white/80">
-              Company
+              {t("footer.company")}
             </h4>
             <ul className="space-y-3">
-              {["About Us", "Blog", "Careers", "Contact"].map((item) => (
+              {[t("footer.aboutUs"), t("footer.blog"), t("footer.careers"), t("footer.contactUs")].map((item) => (
                 <li key={item}>
                   <a
                     href="#"
@@ -114,7 +115,7 @@ export const Footer = () => {
 
           <div>
             <h4 className="font-display font-semibold text-sm uppercase tracking-wider mb-5 text-white/80">
-              Contact
+              {t("footer.contact")}
             </h4>
             <ul className="space-y-4">
               {contatcLinks.map(({ icon, label, href, title }) => (
@@ -141,7 +142,7 @@ export const Footer = () => {
 
         <div className="border-t border-white/10 mt-14 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/50 text-xs">
-            © {currentYear} Vokabi. All rights reserved. Created by{" "}
+            © {currentYear} Vokabi. {t("footer.rights")} {t("footer.createdBy")}{" "}
             <Link
               to="https://t.me/a_karimboyev"
               target="_blank"
@@ -153,7 +154,7 @@ export const Footer = () => {
             </Link>
           </p>
           <div className="flex gap-6 text-xs">
-            {["Privacy Policy", "Terms of Service"].map((item) => (
+            {[t("footer.privacyPolicy"), t("footer.termsOfService")].map((item) => (
               <a
                 key={item}
                 href="#"

@@ -36,6 +36,10 @@ import {
 import { AppLayout } from "@/components/AppLayout";
 import { CertificateDownload } from "@/components/CertificateDownload";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import { useUILanguage } from "@/hooks/useUILanguage";
+import { SUPPORTED_UI_LANGUAGES, UI_LANGUAGE_LABELS, UI_LANGUAGE_FLAGS } from "@/i18n";
+import { Languages as LanguagesIcon } from "lucide-react";
 
 interface ProfileData {
   full_name: string | null;
@@ -49,6 +53,8 @@ interface ProfileData {
 
 export default function ProfileSettings() {
   const { user, loading } = useAuth();
+  const { t } = useTranslation();
+  const { currentLanguage, setUILanguage } = useUILanguage();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -266,6 +272,32 @@ export default function ProfileSettings() {
           </TabsList>
 
           <TabsContent value="settings" className="space-y-5">
+            <Card className="border-border/50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <LanguagesIcon className="h-4 w-4" /> {t("settings.interfaceLanguage")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground mb-3">{t("settings.interfaceLanguageDesc")}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {SUPPORTED_UI_LANGUAGES.map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => setUILanguage(lang)}
+                      className={`flex items-center gap-2 p-2.5 rounded-xl border-2 transition-all text-left text-sm font-medium
+                        ${currentLanguage === lang
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/40 hover:bg-muted/50"}`}
+                    >
+                      <span>{UI_LANGUAGE_FLAGS[lang]}</span>
+                      <span>{UI_LANGUAGE_LABELS[lang]}</span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="border-border/50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">

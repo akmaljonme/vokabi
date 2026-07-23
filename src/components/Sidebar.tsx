@@ -21,6 +21,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { FeedLogo } from "@/components/dashboard/DashboardIllustrations";
 import { useUnreadDMCount } from "@/hooks/useUnreadDMCount";
 import { SidebarAd } from "@/components/ads/AdComponents";
+import { useTranslation } from "react-i18next";
 
 interface NavItem {
   label: string;
@@ -30,32 +31,32 @@ interface NavItem {
   soon?: boolean;
 }
 
-const mainItems: NavItem[] = [
-  { label: "Dashboard",     path: "/dashboard",   icon: LayoutDashboard },
-  { label: "Mock Testlar",  path: "/mock-tests",  icon: BookMarked, soon: true },
-  { label: "O'yinlar",      path: "/games",       icon: Gamepad2 },
-  { label: "Video Darslar", path: "/videos",      icon: Video },
-  { label: "Examlar",       path: "/exams",       icon: ClipboardList },
-  { label: "Hamjamiyat",    path: "/community",   icon: Users },
-  { label: "Do'stlar",      path: "/friends",     icon: UserPlus },
-  { label: "Feed",          path: "/feed",        icon: FeedLogo },
-  { label: "Reels",         path: "/reels",       icon: Video },
-  { label: "Bildirishnomalar", path: "/notifications", icon: Bell },
-  { label: "Leaderboard",   path: "/leaderboard", icon: Trophy },
-  { label: "Turnirlar",     path: "/tournaments", icon: Sword },
-  { label: "Pro",           path: "/pricing",     icon: Crown },
+const getMainItems = (t: (k: string) => string): NavItem[] => [
+  { label: t("nav.dashboard"),     path: "/dashboard",   icon: LayoutDashboard },
+  { label: t("nav.mockTests"),  path: "/mock-tests",  icon: BookMarked, soon: true },
+  { label: t("nav.games"),      path: "/games",       icon: Gamepad2 },
+  { label: t("nav.videoLessons"), path: "/videos",      icon: Video },
+  { label: t("nav.exams"),       path: "/exams",       icon: ClipboardList },
+  { label: t("nav.community"),    path: "/community",   icon: Users },
+  { label: t("nav.friends"),      path: "/friends",     icon: UserPlus },
+  { label: t("nav.feed"),          path: "/feed",        icon: FeedLogo },
+  { label: t("nav.reels"),         path: "/reels",       icon: Video },
+  { label: t("nav.notifications"), path: "/notifications", icon: Bell },
+  { label: t("nav.leaderboard"),   path: "/leaderboard", icon: Trophy },
+  { label: t("nav.tournaments"),     path: "/tournaments", icon: Sword },
+  { label: t("nav2.pro"),           path: "/pricing",     icon: Crown },
 ];
 
-const toolItems: NavItem[] = [
-  { label: "Test Yechish",  path: "/practice",      icon: Brain },
-  { label: "Maqolalar",     path: "/articles",      icon: BookOpen },
-  { label: "Study Room",    path: "/study-room",    icon: Home },
-  { label: "Essay Checker", path: "/essay",         icon: PenTool },
-  { label: "So'z Banki",    path: "/wordbank",      icon: BookOpen },
-  { label: "Grammatika",    path: "/grammar",       icon: PenTool },
-  { label: "Listening",     path: "/listening",     icon: Headphones },
-  { label: "Tools",         path: "/tools",         icon: Sparkles },
-  { label: "B2B Admin",     path: "/school/admin",  icon: School, soon: true },
+const getToolItems = (t: (k: string) => string): NavItem[] => [
+  { label: t("nav2.practice"),  path: "/practice",      icon: Brain },
+  { label: t("nav.articles"),     path: "/articles",      icon: BookOpen },
+  { label: t("nav2.studyRoom"),    path: "/study-room",    icon: Home },
+  { label: t("nav2.essayChecker"), path: "/essay",         icon: PenTool },
+  { label: t("nav.wordBank"),    path: "/wordbank",      icon: BookOpen },
+  { label: t("nav.grammar"),    path: "/grammar",       icon: PenTool },
+  { label: t("nav.listening"),     path: "/listening",     icon: Headphones },
+  { label: t("nav.tools"),         path: "/tools",         icon: Sparkles },
+  { label: t("nav2.b2bAdmin"),     path: "/school/admin",  icon: School, soon: true },
 ];
 
 export const Sidebar = () => {
@@ -65,6 +66,9 @@ export const Sidebar = () => {
   const { isAdmin } = useUserRole();
   const { isPro: isProActive } = useSubscription();
   const dmUnread = useUnreadDMCount();
+  const { t } = useTranslation();
+  const mainItems = getMainItems(t);
+  const toolItems = getToolItems(t);
   const [collapsed, setCollapsed] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(true);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
@@ -120,7 +124,7 @@ export const Sidebar = () => {
         whileTap={{ scale: isLocked ? 1 : 0.97 }}
         onClick={() => {
           if (isLocked) {
-            toast.info("Bu bo'lim tez kunda ochiladi 🚀");
+            toast.info(t("nav2.soonToast"));
             return;
           }
           navigate(item.path);
@@ -146,12 +150,12 @@ export const Sidebar = () => {
         )}
         {!collapsed && isLocked && (
           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground/70 shrink-0">
-            SOON
+            {t("nav2.soon")}
           </span>
         )}
         {collapsed && (
           <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-popover border border-border rounded-lg text-xs font-medium text-foreground shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none z-50 whitespace-nowrap">
-            {item.label}{isLocked ? " (tez kunda)" : ""}
+            {item.label}{isLocked ? ` (${t("nav2.soon").toLowerCase()})` : ""}
           </div>
         )}
       </motion.button>
@@ -196,7 +200,7 @@ export const Sidebar = () => {
 
       {/* Nav */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-0.5">
-        {!collapsed && <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest px-3 mb-2">Asosiy</p>}
+        {!collapsed && <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest px-3 mb-2">{t("nav2.main")}</p>}
         {mainItems.map(item => <NavBtn key={item.path} item={item} />)}
 
         <div className="my-2 mx-1 border-t border-border/30" />
@@ -207,7 +211,7 @@ export const Sidebar = () => {
             <button onClick={() => setToolsOpen(o => !o)}
               className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest hover:text-muted-foreground transition-colors"
             >
-              Vositalar
+              {t("nav.tools")}
               <ChevronDown className={`w-3.5 h-3.5 transition-transform ${toolsOpen ? "rotate-180" : ""}`} />
             </button>
             <AnimatePresence>
@@ -227,7 +231,7 @@ export const Sidebar = () => {
         {isAdmin && (
           <>
             <div className="my-2 mx-1 border-t border-border/30" />
-            <NavBtn item={{ label: "Admin Panel", path: "/admin", icon: Shield }} />
+            <NavBtn item={{ label: t("nav2.adminPanel"), path: "/admin", icon: Shield }} />
           </>
         )}
         {!collapsed && <SidebarAd />}
@@ -235,7 +239,7 @@ export const Sidebar = () => {
 
       {/* Bottom: user + theme + notifications */}
       <div className="px-2 pb-3 pt-2 border-t border-border/30 space-y-1">
-        <NavBtn item={{ label: "Sozlamalar", path: "/profile", icon: Settings }} />
+        <NavBtn item={{ label: t("nav.settings"), path: "/profile", icon: Settings }} />
 
         {/* Theme + Notification row */}
         <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between px-2"} gap-2`}>
@@ -243,7 +247,7 @@ export const Sidebar = () => {
             className="flex items-center gap-3 px-2 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
           >
             {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
-            {!collapsed && (isDark ? "Light" : "Dark")}
+            {!collapsed && (isDark ? t("nav2.light") : t("nav2.dark"))}
           </button>
           {!collapsed && <NotificationBell />}
         </div>
@@ -267,7 +271,7 @@ export const Sidebar = () => {
               className={`w-full flex items-center gap-1.5 text-[10px] font-semibold ${isProActive ? "text-amber-500" : "text-muted-foreground"}`}
             >
               <Crown className="w-3 h-3 shrink-0" />
-              {isProActive ? `Pro Plan${daysLeft !== null ? ` · ${daysLeft} kun qoldi` : ""}` : "Free Plan · Yangilash"}
+              {isProActive ? `${t("nav2.proPlan")}${daysLeft !== null ? ` · ${daysLeft} ${t("nav2.daysLeft")}` : ""}` : `${t("nav2.freePlan")} · ${t("nav2.upgrade")}`}
             </button>
             {isProActive ? (
               <div className="h-1.5 rounded-full bg-muted overflow-hidden">

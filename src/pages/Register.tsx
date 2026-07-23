@@ -10,6 +10,8 @@ import {
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthLayout from "./Auth";
+import { useTranslation } from "react-i18next";
+import { SUPPORTED_UI_LANGUAGES, UI_LANGUAGE_LABELS, UI_LANGUAGE_FLAGS, UI_LANGUAGE_STORAGE_KEY, UILanguage } from "@/i18n";
 const supabase: any = _sbClient;
 
 const emailSchema = z.string().trim().email().max(255);
@@ -44,12 +46,13 @@ const GOALS = [
   { id: "general",      emoji: "📚", label: "Umumiy o'rganish" },
 ];
 
-// 3 ta onboarding qadami + 1 ta register forma = 4 qadam
-const STEPS = ["Sabab", "Daraja", "Maqsad", "Hisob"];
+// 1 til qadami + 3 ta onboarding qadami + 1 ta register forma = 5 qadam
+const STEPS = ["Til", "Sabab", "Daraja", "Maqsad", "Hisob"];
 
 const Register = () => {
   const { user, signUp, signInWithGoogle, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
 
   // Invite kodlarni URL yoki sessionStorage'dan olamiz — signup jarayonida
   // email tasdiqlash bo'lsa ham yo'qolmasin
@@ -90,6 +93,7 @@ const Register = () => {
 
   const [step, setStep] = useState(0);
   const [prefs, setPrefs] = useState({
+    ui_language: (i18n.language as UILanguage) || "uz",
     learning_purpose: "",
     current_level: "",
     learning_goal: "",
@@ -142,9 +146,10 @@ const Register = () => {
   }, [username, checkUsername]);
 
   const canNext = () => {
-    if (step === 0) return !!prefs.learning_purpose;
-    if (step === 1) return !!prefs.current_level;
-    if (step === 2) return !!prefs.learning_goal;
+    if (step === 0) return !!prefs.ui_language;
+    if (step === 1) return !!prefs.learning_purpose;
+    if (step === 2) return !!prefs.current_level;
+    if (step === 3) return !!prefs.learning_goal;
     return false;
   };
 
@@ -202,12 +207,14 @@ const Register = () => {
         ...prefs,
         onboarding_done: true,
       }));
+      localStorage.setItem(UI_LANGUAGE_STORAGE_KEY, prefs.ui_language);
 
       try {
         const { data: { user: newUser } } = await supabase.auth.getUser();
         if (newUser) {
           await supabase.from("profiles").update({
             target_language: "english",
+            ui_language: prefs.ui_language,
             learning_purpose: prefs.learning_purpose,
             current_level: prefs.current_level,
             learning_goal: prefs.learning_goal,
@@ -302,8 +309,8 @@ const Register = () => {
     );
   }
 
-  // ── Onboarding (0–2 qadam) ────────────────────────────────
-  if (step < 3) {
+  // ── Onboarding (0–3 qadam) ────────────────────────────────
+  if (step < 4) {
     return (
       <div className="fixed inset-0 bg-background flex flex-col items-center p-4 overflow-auto">
         <div className="w-full max-w-lg flex flex-col" style={{ minHeight: "100dvh", paddingBottom: "1rem" }}>
@@ -342,8 +349,33 @@ const Register = () => {
               exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.18 }}
               className="bg-card border border-border rounded-2xl p-5 overflow-y-auto mb-4 flex-1">
 
-              {/* Sabab */}
+              {/* Til */}
               {step === 0 && (
+                <div>
+                  <h2 className="font-semibold text-lg mb-1">Sayt qaysi tilda ishlasin?</h2>
+                  <p className="text-muted-foreground text-sm mb-4">Buni sozlamalardan istalgan vaqt o'zgartirishingiz mumkin</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {SUPPORTED_UI_LANGUAGES.map(lang => (
+                      <button key={lang}
+                        onClick={() => {
+                          setPrefs(pr => ({ ...pr, ui_language: lang }));
+                          i18n.changeLanguage(lang);
+                        }}
+                        className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all text-left
+                          ${prefs.ui_language === lang
+                            ? "border-primary bg-primary/5"
+                            : "border-border hover:border-primary/40 hover:bg-muted/50"}`}>
+                        <span className="text-xl">{UI_LANGUAGE_FLAGS[lang]}</span>
+                        <span className="font-medium text-sm">{UI_LANGUAGE_LABELS[lang]}</span>
+                        {prefs.ui_language === lang && <Check className="w-4 h-4 text-primary ml-auto shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sabab */}
+              {step === 1 && (
                 <div>
                   <h2 className="font-semibold text-lg mb-1">Nima uchun ingliz tili o'rganmoqchisiz?</h2>
                   <p className="text-muted-foreground text-sm mb-4">Bu sizga mos kontent ko'rsatishga yordam beradi</p>
@@ -365,7 +397,7 @@ const Register = () => {
               )}
 
               {/* Daraja */}
-              {step === 1 && (
+              {step === 2 && (
                 <div>
                   <h2 className="font-semibold text-lg mb-1">Hozirgi darajangiz qanday?</h2>
                   <p className="text-muted-foreground text-sm mb-4">Aniq bilmasangiz ham taxminan tanlang</p>
@@ -393,7 +425,7 @@ const Register = () => {
               )}
 
               {/* Maqsad */}
-              {step === 2 && (
+              {step === 3 && (
                 <div>
                   <h2 className="font-semibold text-lg mb-1">Asosiy maqsadingiz nima?</h2>
                   <p className="text-muted-foreground text-sm mb-4">Sizga mos mashqlar tavsiya qilamiz</p>
@@ -432,7 +464,7 @@ const Register = () => {
           </div>
 
           <p className="text-center text-xs text-muted-foreground mt-3 shrink-0">
-            {step + 1} / 4 — {STEPS[step]}
+            {step + 1} / {STEPS.length} — {STEPS[step]}
           </p>
           <p className="text-center text-xs text-muted-foreground mt-2 shrink-0">
             Allaqachon ro'yxatdan o'tganmisiz?{" "}
@@ -478,7 +510,7 @@ const Register = () => {
             {item.emoji} {item.label}
           </span>
         ))}
-        <button onClick={() => setStep(0)} className="text-xs text-muted-foreground hover:text-foreground underline ml-auto">
+        <button onClick={() => setStep(1)} className="text-xs text-muted-foreground hover:text-foreground underline ml-auto">
           O'zgartirish
         </button>
       </div>

@@ -32,6 +32,7 @@ import { FeedLogo } from "@/components/dashboard/DashboardIllustrations";
 import { useCall } from "@/contexts/CallContext";
 import { Badge } from "@/components/ui/badge";
 import { supabase as _sbClient } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 const supabase: any = _sbClient;
 
 interface HeaderProps {
@@ -41,6 +42,7 @@ interface HeaderProps {
 }
 
 export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPracticeOpen, setIsPracticeOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -140,7 +142,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
               onMouseLeave={() => setIsPracticeOpen(false)}
             >
               <button className="flex items-center gap-1 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm">
-                Practice Tests
+                {t("header.practiceTests")}
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isPracticeOpen ? "rotate-180" : ""}`} />
               </button>
               <AnimatePresence>
@@ -156,7 +158,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                       <button key={level} onClick={() => { try { navigate("/practice"); } catch { onNavigate("levels"); } }}
                         className="w-full px-3 py-2 text-left rounded-lg hover:bg-muted transition-colors text-sm font-medium"
                       >
-                        {level} Level Tests
+                        {level} {t("header.levelTests")}
                       </button>
                     ))}
                   </motion.div>
@@ -168,14 +170,14 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
               <>
                 <button onClick={() => navigate("/dashboard")}
                   className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
-                >Dashboard</button>
+                >{t("nav.dashboard")}</button>
                 <button onClick={() => navigate("/games")}
                   className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
-                ><Gamepad2 className="w-3.5 h-3.5" /> O'yinlar</button>
+                ><Gamepad2 className="w-3.5 h-3.5" /> {t("nav.games")}</button>
                 <button onClick={() => navigate("/community")}
                   className="relative px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm flex items-center gap-1.5"
                 >
-                  <Users className="w-3.5 h-3.5" /> Hamjamiyat
+                  <Users className="w-3.5 h-3.5" /> {t("nav.community")}
                   {unreadCount > 0 && (
                     <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5">
                       {unreadCount > 99 ? "99+" : unreadCount}
@@ -186,7 +188,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 {/* More dropdown */}
                 <div className="relative" onMouseEnter={() => setIsMoreOpen(true)} onMouseLeave={() => setIsMoreOpen(false)}>
                   <button className="flex items-center gap-1 px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm">
-                    Ko'proq <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isMoreOpen ? "rotate-180" : ""}`} />
+                    {t("header.more")} <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isMoreOpen ? "rotate-180" : ""}`} />
                   </button>
                   <AnimatePresence>
                     {isMoreOpen && (
@@ -198,16 +200,16 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                         className="absolute top-full left-0 mt-1 w-52 bg-card rounded-xl shadow-xl border border-border p-1.5 z-50"
                       >
                         {[
-                          { label: "Video Darslar", icon: "🎬", path: "/videos" },
-                          { label: "Examlar", icon: "📋", path: "/exams" },
-                          { label: "Test Yechish", icon: "📝", path: "/learning-path" },
-                          { label: "School", icon: "🏫", path: "/school" },
-                          { label: "Study Room", icon: "🏠", path: "/study-room" },
-                          { label: "Essay Checker", icon: "✍️", path: "/essay" },
-                          { label: "So'z Banki", icon: "📚", path: "/wordbank" },
-                          { label: "Grammatika", icon: "📖", path: "/grammar" },
-                          { label: "Listening", icon: "🎧", path: "/listening" },
-                          { label: "Tools", icon: "⚡", path: "/tools" },
+                          { label: t("nav.videoLessons"), icon: "🎬", path: "/videos" },
+                          { label: t("nav.exams"), icon: "📋", path: "/exams" },
+                          { label: t("header.practiceTests"), icon: "📝", path: "/learning-path" },
+                          { label: t("header.school"), icon: "🏫", path: "/school" },
+                          { label: t("nav2.studyRoom"), icon: "🏠", path: "/study-room" },
+                          { label: t("nav2.essayChecker"), icon: "✍️", path: "/essay" },
+                          { label: t("nav.wordBank"), icon: "📚", path: "/wordbank" },
+                          { label: t("nav.grammar"), icon: "📖", path: "/grammar" },
+                          { label: t("nav.listening"), icon: "🎧", path: "/listening" },
+                          { label: t("nav.tools"), icon: "⚡", path: "/tools" },
                         ].map(item => (
                           <button key={item.path} onClick={() => navigate(item.path)}
                             className="w-full px-3 py-2 text-left rounded-lg hover:bg-muted transition-colors text-sm font-medium flex items-center gap-2.5"
@@ -224,16 +226,16 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
 
             <button onClick={() => navigate("/pricing")}
               className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
-            >Pricing</button>
+            >{t("nav.pricing")}</button>
             <button onClick={() => navigate("/blog")}
               className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
-            >Blog</button>
+            >{t("header.blog")}</button>
             <button onClick={() => navigate("/for-schools")}
               className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
-            >B2B</button>
+            >{t("header.b2b")}</button>
             <a href="#faq"
               className="px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all font-medium text-sm"
-            >FAQ</a>
+            >{t("header.faq")}</a>
           </nav>
 
           {/* Auth Button */}
@@ -241,7 +243,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
             <button
               onClick={toggleTheme}
               className="p-2.5 rounded-xl hover:bg-muted transition-colors"
-              title="Toggle theme"
+              title={t("header.toggleTheme")}
             >
               {isDark ? (
                 <Sun className="w-[18px] h-[18px]" />
@@ -259,7 +261,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                     className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/15 transition-colors text-sm font-medium"
                   >
                     <Shield className="w-4 h-4" />
-                    Admin
+                    {t("header.admin")}
                   </motion.button>
                 )}
                 <button
@@ -287,7 +289,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 onClick={() => navigate("/login")}
                 className="btn-primary text-sm px-5 py-2.5"
               >
-                Boshlash
+                {t("header.getStarted")}
               </motion.button>
             )}
           </div>
@@ -382,7 +384,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">{displayName || user.email}</p>
-                    <p className="text-xs text-muted-foreground">Foydalanuvchi</p>
+                    <p className="text-xs text-muted-foreground">{t("header.user")}</p>
                   </div>
                 </div>
               )}
@@ -394,7 +396,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 {!user && (
                   <button onClick={() => { navigate("/practice"); setIsMenuOpen(false); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium text-left"
-                  >📝 Practice Tests</button>
+                  >📝 {t("header.practiceTests")}</button>
                 )}
 
                 {/* Asosiy navigatsiya — Home/Learn/Games/Rank/Profile pastki panelda,
@@ -403,14 +405,14 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                   <>
                     <button onClick={() => { navigate("/feed"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                    ><FeedLogo className="w-5 h-5" /> Feed</button>
+                    ><FeedLogo className="w-5 h-5" /> {t("nav.feed")}</button>
                     <button onClick={() => { navigate("/reels"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                    ><Video className="w-4 h-4 text-rose-500" /> Reels</button>
+                    ><Video className="w-4 h-4 text-rose-500" /> {t("nav.reels")}</button>
                     <button onClick={() => { navigate("/community"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
                     >
-                      <Users className="w-4 h-4 text-blue-500" /> Hamjamiyat
+                      <Users className="w-4 h-4 text-blue-500" /> {t("nav.community")}
                       {unreadCount > 0 && (
                         <Badge variant="destructive" className="ml-auto h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5">
                           {unreadCount > 99 ? "99+" : unreadCount}
@@ -419,11 +421,11 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                     </button>
                     <button onClick={() => { navigate("/friends"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                    ><UserPlus className="w-4 h-4 text-primary" /> Do'stlar</button>
+                    ><UserPlus className="w-4 h-4 text-primary" /> {t("nav.friends")}</button>
                     <button onClick={() => { navigate("/notifications"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
                     >
-                      <Bell className="w-4 h-4 text-amber-500" /> Bildirishnomalar
+                      <Bell className="w-4 h-4 text-amber-500" /> {t("nav.notifications")}
                       {notifUnread > 0 && (
                         <Badge variant="destructive" className="ml-auto h-5 min-w-5 flex items-center justify-center text-[10px] px-1.5">
                           {notifUnread > 99 ? "99+" : notifUnread}
@@ -432,13 +434,13 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                     </button>
                     <button onClick={() => { navigate("/tournaments"); setIsMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                    ><span className="text-base">⚔️</span> Turnirlar</button>
+                    ><span className="text-base">⚔️</span> {t("nav.tournaments")}</button>
                   </>
                 )}
 
                 <button onClick={() => { navigate("/pricing"); setIsMenuOpen(false); }}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                ><span className="text-base">💎</span> Pricing</button>
+                ><span className="text-base">💎</span> {t("nav.pricing")}</button>
 
                 {/* Vositalar accordion */}
                 {user && (
@@ -448,7 +450,7 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                         onClick={() => setIsMoreOpen(o => !o)}
                         className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-semibold text-muted-foreground"
                       >
-                        <span className="flex items-center gap-2"><Sparkles className="w-4 h-4" /> Vositalar</span>
+                        <span className="flex items-center gap-2"><Sparkles className="w-4 h-4" /> {t("nav.tools")}</span>
                         <ChevronDown className={`w-4 h-4 transition-transform ${isMoreOpen ? "rotate-180" : ""}`} />
                       </button>
                     </div>
@@ -462,17 +464,17 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                           className="overflow-hidden space-y-0.5 pl-2"
                         >
                           {[
-                            { label: "Maqolalar", emoji: "📖", path: "/articles" },
-                            { label: "Video Darslar", emoji: "🎬", path: "/videos" },
-                            { label: "Examlar", emoji: "📋", path: "/exams" },
-                            { label: "Tillar", emoji: "🌍", path: "/languages" },
-                            { label: "School", emoji: "🏫", path: "/school" },
-                            { label: "Study Room", emoji: "🏠", path: "/study-room" },
-                            { label: "Essay Checker", emoji: "✍️", path: "/essay" },
-                            { label: "So'z Banki", emoji: "📚", path: "/wordbank" },
-                            { label: "Grammatika", emoji: "📖", path: "/grammar" },
-                            { label: "Listening", emoji: "🎧", path: "/listening" },
-                            { label: "Tools", emoji: "⚡", path: "/tools" },
+                            { label: t("nav.articles"), emoji: "📖", path: "/articles" },
+                            { label: t("nav.videoLessons"), emoji: "🎬", path: "/videos" },
+                            { label: t("nav.exams"), emoji: "📋", path: "/exams" },
+                            { label: t("header.languages"), emoji: "🌍", path: "/languages" },
+                            { label: t("header.school"), emoji: "🏫", path: "/school" },
+                            { label: t("nav2.studyRoom"), emoji: "🏠", path: "/study-room" },
+                            { label: t("nav2.essayChecker"), emoji: "✍️", path: "/essay" },
+                            { label: t("nav.wordBank"), emoji: "📚", path: "/wordbank" },
+                            { label: t("nav.grammar"), emoji: "📖", path: "/grammar" },
+                            { label: t("nav.listening"), emoji: "🎧", path: "/listening" },
+                            { label: t("nav.tools"), emoji: "⚡", path: "/tools" },
                           ].map(item => (
                             <button key={item.path}
                               onClick={() => { navigate(item.path); setIsMenuOpen(false); }}
@@ -493,33 +495,33 @@ export const Header = ({ onNavigate, isAdmin, onToggleAdmin }: HeaderProps) => {
                 <button onClick={toggleTheme}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
                 >
-                  {isDark ? <><Sun className="w-4 h-4 text-amber-400" /> Light mode</> : <><Moon className="w-4 h-4" /> Dark mode</>}
+                  {isDark ? <><Sun className="w-4 h-4 text-amber-400" /> {t("header.lightMode")}</> : <><Moon className="w-4 h-4" /> {t("header.darkMode")}</>}
                 </button>
 
                 {user && (
                   <button onClick={() => { navigate("/profile"); setIsMenuOpen(false); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                  ><Settings className="w-4 h-4 text-muted-foreground" /> Sozlamalar</button>
+                  ><Settings className="w-4 h-4 text-muted-foreground" /> {t("nav.settings")}</button>
                 )}
 
                 <a href="/#faq" onClick={() => setIsMenuOpen(false)}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm font-medium"
-                ><HelpCircle className="w-4 h-4 text-muted-foreground" /> Yordam</a>
+                ><HelpCircle className="w-4 h-4 text-muted-foreground" /> {t("header.help")}</a>
 
                 {isAdmin && onToggleAdmin && (
                   <button onClick={() => { onToggleAdmin(); setIsMenuOpen(false); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary/10 text-primary hover:bg-primary/15 transition-colors text-sm font-medium"
-                  ><Shield className="w-4 h-4" /> Admin Panel</button>
+                  ><Shield className="w-4 h-4" /> {t("header.adminPanel")}</button>
                 )}
 
                 {user ? (
                   <button onClick={handleSignOut}
                     className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-2xl border border-destructive/40 text-destructive font-bold text-sm tracking-wide hover:bg-destructive/10 transition-colors"
-                  ><LogOut className="w-4 h-4" /> CHIQISH</button>
+                  ><LogOut className="w-4 h-4" /> {t("header.logoutCaps")}</button>
                 ) : (
                   <button onClick={() => { navigate("/login"); setIsMenuOpen(false); }}
                     className="w-full btn-primary py-2.5 text-sm"
-                  >Kirish</button>
+                  >{t("nav.login")}</button>
                 )}
               </div>
             </motion.div>

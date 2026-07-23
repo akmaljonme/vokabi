@@ -8,6 +8,7 @@ import { CallProvider } from "@/contexts/CallContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AITutorChat } from "@/components/AITutorChat";
 import { useDMNotifications } from "@/hooks/useDMNotifications";
+import { useUILanguage } from "@/hooks/useUILanguage";
 import { GlobalCallOverlay } from "@/components/community/GlobalCallOverlay";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/PageLoader";
@@ -78,6 +79,7 @@ const queryClient = new QueryClient({
 
 const GlobalListeners = () => {
   useDMNotifications();
+  useUILanguage(); // Foydalanuvchi kirganda saqlangan interfeys tilini yuklaydi
   return null;
 };
 
