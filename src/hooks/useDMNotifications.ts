@@ -37,6 +37,10 @@ export const useDMNotifications = () => {
         const senderName = sender?.username ? `@${sender.username}` : sender?.full_name || 'Foydalanuvchi';
         const preview = msg.content.length > 50 ? msg.content.slice(0, 50) + '...' : msg.content;
 
+        // ESLATMA: doimiy bildirishnoma yozuvi endi server tomonida
+        // (notify_on_direct_message trigger) avtomatik yaratiladi — bu yerda
+        // faqat foydalanuvchi hozir onlayn bo'lsa ko'radigan tezkor toast.
+
         // In-app toast
         toast(`${senderName}`, {
           description: preview,

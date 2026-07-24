@@ -146,6 +146,10 @@ export default function Notifications() {
                       navigate(`/u/${n.actor_id}`);
                     } else if (n.type === "challenge_invite" || n.type === "challenge_result") {
                       navigate("/friends");
+                    } else if (n.type === "message" && n.actor_id) {
+                      navigate(`/community?dm=${n.actor_id}`);
+                    } else if (n.type === "payment_approved" || n.type === "payment_rejected") {
+                      navigate("/pricing");
                     }
                   }}
                   className={`w-full text-left flex items-start gap-3 p-3.5 rounded-2xl border transition-colors hover:bg-muted/40 ${
@@ -156,7 +160,12 @@ export default function Notifications() {
                     {meta.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold">{n.title}</p>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="text-sm font-semibold">{n.title}</p>
+                      <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">
+                        {meta.section}
+                      </span>
+                    </div>
                     {n.body && <p className="text-xs text-muted-foreground mt-0.5">{n.body}</p>}
                     <p className="text-[10px] text-muted-foreground mt-1">{timeAgo(n.created_at)}</p>
                   </div>

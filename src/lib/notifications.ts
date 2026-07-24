@@ -11,19 +11,25 @@ export type NotificationType =
   | "like"
   | "comment"
   | "poll_vote"
-  | "announcement";
+  | "announcement"
+  | "message"
+  | "payment_approved"
+  | "payment_rejected";
 
-export const NOTIFICATION_META: Record<NotificationType, { icon: string; color: string }> = {
-  friend_request: { icon: "👋", color: "text-blue-500" },
-  friend_accepted: { icon: "🤝", color: "text-emerald-500" },
-  follow: { icon: "➕", color: "text-primary" },
-  challenge_invite: { icon: "⚔️", color: "text-amber-500" },
-  challenge_result: { icon: "🏆", color: "text-amber-500" },
-  achievement: { icon: "🎖️", color: "text-purple-500" },
-  like: { icon: "❤️", color: "text-red-500" },
-  comment: { icon: "💬", color: "text-blue-500" },
-  poll_vote: { icon: "📊", color: "text-blue-500" },
-  announcement: { icon: "🚀", color: "text-primary" },
+export const NOTIFICATION_META: Record<NotificationType, { icon: string; color: string; section: string }> = {
+  friend_request:   { icon: "👋", color: "text-blue-500",    section: "Do'stlar" },
+  friend_accepted:  { icon: "🤝", color: "text-emerald-500", section: "Do'stlar" },
+  follow:           { icon: "➕", color: "text-primary",     section: "Profil" },
+  challenge_invite: { icon: "⚔️", color: "text-amber-500",   section: "Do'stlar • Musobaqa" },
+  challenge_result: { icon: "🏆", color: "text-amber-500",   section: "Do'stlar • Musobaqa" },
+  achievement:      { icon: "🎖️", color: "text-purple-500",  section: "Yutuqlar" },
+  like:             { icon: "❤️", color: "text-red-500",     section: "Lenta" },
+  comment:          { icon: "💬", color: "text-blue-500",    section: "Lenta" },
+  poll_vote:        { icon: "📊", color: "text-blue-500",    section: "Lenta" },
+  announcement:     { icon: "🚀", color: "text-primary",     section: "E'lon" },
+  message:          { icon: "✉️", color: "text-emerald-500", section: "Hamjamiyat • Shaxsiy xabar" },
+  payment_approved: { icon: "✅", color: "text-green-500",   section: "To'lov • Pro obuna" },
+  payment_rejected: { icon: "❌", color: "text-destructive", section: "To'lov" },
 };
 
 /** Creates a notification for another user. Never throws — notifications are best-effort. */
