@@ -299,7 +299,7 @@ export default function StudentPanel() {
                     <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center text-xl">🎮</div>
                     <div>
                       <p className="font-bold text-sm">O'yin o'ynash</p>
-                      <p className="text-xs text-muted-foreground">21+ interaktiv o'yin</p>
+                      <p className="text-xs text-muted-foreground">20+ interaktiv o'yin</p>
                     </div>
                     <ArrowRight className="w-4 h-4 text-amber-500 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>

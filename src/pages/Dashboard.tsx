@@ -908,8 +908,11 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-5 mb-5 items-start">
           {/* Today's Mission */}
           <Card className="border-border/50 h-full">
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle className="text-base">Today's Mission</CardTitle>
+              <span className="text-[10px] text-muted-foreground">
+                {Math.floor(weeklyStudyMinutes / 60)}h {weeklyStudyMinutes % 60}m bu hafta
+              </span>
             </CardHeader>
             <CardContent className="space-y-3">
               {missionItems.map((m, i) => (
@@ -1024,8 +1027,8 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Continue Learning / Achievements / Study Time */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5 items-start">
+        {/* Continue Learning / Achievements */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 items-start">
           <Card className="border-border/50">
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle className="text-base">Continue Learning</CardTitle>
@@ -1086,137 +1089,6 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
-
-          <Card className="border-border/50">
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Study Time</CardTitle>
-              <span className="text-xs text-muted-foreground">This Week</span>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-display font-black mb-3">
-                {Math.floor(weeklyStudyMinutes / 60)}h {weeklyStudyMinutes % 60}m
-              </p>
-              <ResponsiveContainer width="100%" height={110}>
-                <BarChart data={studyTimeByDay}>
-                  <XAxis dataKey="day" fontSize={9} axisLine={false} tickLine={false} />
-                  <Bar dataKey="minutes" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Business row: Pro Plan CTA + Referral + Friends */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 items-stretch">
-          {!subLoading && !isPro ? (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-6 flex flex-col justify-between"
-            >
-              <div
-                className="absolute -top-16 -right-16 w-56 h-56 rounded-full blur-3xl opacity-30 bg-amber-500/40"
-              />
-              <div className="relative">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-500/15 flex items-center justify-center shrink-0">
-                    <Crown className="w-5 h-5 text-amber-500" />
-                  </div>
-                  <div>
-                    <h3 className="font-display font-black text-base">Pro Planga o'ting</h3>
-                    <p className="text-xs text-muted-foreground">Barcha imkoniyatlarni oching</p>
-                  </div>
-                </div>
-                <div className="space-y-2 mb-5">
-                  <div className="flex items-center gap-2.5 text-sm">
-                    <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                    <span>
-                      <Mic className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Speaking testlari — hozir qulflangan
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-sm">
-                    <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                    <span>
-                      <PenTool className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Writing testlari — hozir qulflangan
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                    Cheksiz mock testlar va reklamasiz tajriba
-                  </div>
-                </div>
-              </div>
-              <Button
-                onClick={() => navigate("/pricing")}
-                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-90 text-white border-0"
-              >
-                Pro'ga yangilash <Crown className="w-4 h-4 ml-2" />
-              </Button>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-6 flex flex-col justify-center items-center text-center"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/15 flex items-center justify-center mb-3">
-                <Crown className="w-7 h-7 text-amber-500" />
-              </div>
-              <h3 className="font-display font-black text-base mb-1">Siz Pro foydalanuvchisiz! 👑</h3>
-              <p className="text-sm text-muted-foreground">
-                Barcha Speaking, Writing va mock testlardan cheklovsiz foydalanmoqdasiz. Rahmat!
-              </p>
-            </motion.div>
-          )}
-
-          <ReferralWidget />
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-3xl border border-border/60 p-6 flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <UserPlus className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-display font-black text-base">Do'stlar</h3>
-                    <p className="text-xs text-muted-foreground">{friendsCount} ta do'st</p>
-                  </div>
-                </div>
-                {pendingFriendRequests > 0 && (
-                  <span className="w-6 h-6 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center shrink-0">
-                    {pendingFriendRequests}
-                  </span>
-                )}
-              </div>
-
-              {topFriend ? (
-                <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-muted/40 border border-border/50 mb-4">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
-                    {topFriend.full_name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate">{topFriend.full_name}</p>
-                    <p className="text-[10px] text-muted-foreground">Eng faol do'stingiz</p>
-                  </div>
-                  <p className="text-xs font-display font-bold shrink-0">{topFriend.xp.toLocaleString()} XP</p>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground mb-4">
-                  Do'stlaringizni qo'shing va birga XP to'plang — raqobat qiziqarliroq!
-                </p>
-              )}
-            </div>
-
-            <Button variant="outline" className="w-full" onClick={() => navigate("/friends")}>
-              {friendsCount > 0 ? "Do'stlarni ko'rish" : "Do'st qo'shish"}{" "}
-              <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
-            </Button>
-          </motion.div>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
@@ -1612,6 +1484,119 @@ export default function Dashboard() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Pro Plan CTA + Referral + Friends — o'quv kontentidan keyin, kamroq chalg'ituvchi joyda */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-6 items-stretch">
+          {!subLoading && !isPro ? (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-6 flex flex-col justify-between"
+            >
+              <div
+                className="absolute -top-16 -right-16 w-56 h-56 rounded-full blur-3xl opacity-30 bg-amber-500/40"
+              />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/15 flex items-center justify-center shrink-0">
+                    <Crown className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-black text-base">Pro Planga o'ting</h3>
+                    <p className="text-xs text-muted-foreground">Barcha imkoniyatlarni oching</p>
+                  </div>
+                </div>
+                <div className="space-y-2 mb-5">
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span>
+                      <Mic className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Speaking testlari — hozir qulflangan
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span>
+                      <PenTool className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> Writing testlari — hozir qulflangan
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    Cheksiz mock testlar va reklamasiz tajriba
+                  </div>
+                </div>
+              </div>
+              <Button
+                onClick={() => navigate("/pricing")}
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-90 text-white border-0"
+              >
+                Pro'ga yangilash <Crown className="w-4 h-4 ml-2" />
+              </Button>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent p-6 flex flex-col justify-center items-center text-center"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/15 flex items-center justify-center mb-3">
+                <Crown className="w-7 h-7 text-amber-500" />
+              </div>
+              <h3 className="font-display font-black text-base mb-1">Siz Pro foydalanuvchisiz! 👑</h3>
+              <p className="text-sm text-muted-foreground">
+                Barcha Speaking, Writing va mock testlardan cheklovsiz foydalanmoqdasiz. Rahmat!
+              </p>
+            </motion.div>
+          )}
+
+          <ReferralWidget />
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-3xl border border-border/60 p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <UserPlus className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-black text-base">Do'stlar</h3>
+                    <p className="text-xs text-muted-foreground">{friendsCount} ta do'st</p>
+                  </div>
+                </div>
+                {pendingFriendRequests > 0 && (
+                  <span className="w-6 h-6 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+                    {pendingFriendRequests}
+                  </span>
+                )}
+              </div>
+
+              {topFriend ? (
+                <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-muted/40 border border-border/50 mb-4">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                    {topFriend.full_name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium truncate">{topFriend.full_name}</p>
+                    <p className="text-[10px] text-muted-foreground">Eng faol do'stingiz</p>
+                  </div>
+                  <p className="text-xs font-display font-bold shrink-0">{topFriend.xp.toLocaleString()} XP</p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground mb-4">
+                  Do'stlaringizni qo'shing va birga XP to'plang — raqobat qiziqarliroq!
+                </p>
+              )}
+            </div>
+
+            <Button variant="outline" className="w-full" onClick={() => navigate("/friends")}>
+              {friendsCount > 0 ? "Do'stlarni ko'rish" : "Do'st qo'shish"}{" "}
+              <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+            </Button>
+          </motion.div>
+        </div>
       </main>
 
       <AchievementToast

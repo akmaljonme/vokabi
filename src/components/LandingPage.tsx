@@ -56,6 +56,7 @@ import type { Feedback } from "@/types/cefr";
 import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { TryDemoQuiz } from "@/components/landing/TryDemoQuiz";
 
 let __isMobileGlobal = false;
 
@@ -396,9 +397,13 @@ export const LandingPage = ({
     fetchFeedbacks();
   }, []);
 
+  const [showDemo, setShowDemo] = useState(false);
+
   const handleStartTest = () => {
+    // Mehmon (login qilmagan) tashrifchi darhol ro'yxatdan o'tishga
+    // majburlanmasin — avval kichik demo-viktorina orqali qiymatni tatib ko'rsin.
     if (user) onStartTest();
-    else navigate("/login");
+    else setShowDemo(true);
   };
 
   const fireConfetti = useCallback(() => {
@@ -463,7 +468,7 @@ export const LandingPage = ({
       duolingo: false,
     },
     {
-      feature: "21+ O'yin",
+      feature: "20+ O'yin",
       vokabi: true,
       scoreup: false,
       selflearn: false,
@@ -651,7 +656,7 @@ export const LandingPage = ({
                   transition={{ duration: 0.7, delay: 0.9 }}
                   className="text-white/90 max-w-2xl text-sm sm:text-lg leading-relaxed font-semibold mb-10 px-2"
                 >
-                  <span className="font-extrabold">Vokabi</span> — 21+ o'yin, AI-powered testlar va Writing & Speaking baholashni bitta platformada birlashtirgan o'quv festivali. Bilimingizni real darajaga aylantiring.
+                  <span className="font-extrabold">Vokabi</span> — 20+ o'yin, AI-powered testlar va Writing & Speaking baholashni bitta platformada birlashtirgan o'quv festivali. Bilimingizni real darajaga aylantiring.
                 </motion.p>
 
                 <motion.div
@@ -668,18 +673,18 @@ export const LandingPage = ({
                     style={{ boxShadow: "0 6px 0 0 hsl(217 91% 28%)" }}
                   >
                     <Rocket className="w-5 h-5" />
-                    {user ? "Testni Boshlash" : "Ro'yxatdan o'tish"}
+                    {user ? "Testni Boshlash" : "Bepul sinab ko'ring"}
                     <ArrowRight className="w-5 h-5" />
                   </motion.button>
                   <motion.button
                     whileHover={{ y: -3 }}
                     whileTap={{ y: 2 }}
-                    onClick={() => navigate(user ? "/games" : "/login")}
+                    onClick={() => { if (user) navigate("/games"); else setShowDemo(true); }}
                     className="bg-[hsl(45_100%_55%)] text-[hsl(28_95%_25%)] px-9 py-4 rounded-full font-display font-extrabold text-base sm:text-lg inline-flex items-center gap-2.5 transition-transform border-2 border-[hsl(28_95%_45%)]"
                     style={{ boxShadow: "0 6px 0 0 hsl(28 95% 38%)" }}
                   >
                     <Gamepad2 className="w-5 h-5" />
-                    21+ O'yin
+                    20+ O'yin
                   </motion.button>
                 </motion.div>
 
@@ -689,7 +694,7 @@ export const LandingPage = ({
                   transition={{ delay: 1.3 }}
                   className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-10"
                 >
-                  {["Bepul start", "AI tahlil", "21+ o'yin", "CEFR sertifikat"].map((t) => (
+                  {["Bepul start", "AI tahlil", "20+ o'yin", "CEFR sertifikat"].map((t) => (
                     <div key={t} className="flex items-center gap-1.5 text-white/85 text-xs sm:text-sm font-bold">
                       <CheckCircle2 className="w-4 h-4 text-yellow-200" />
                       {t}
@@ -736,13 +741,13 @@ export const LandingPage = ({
                     <span className="font-extrabold">Vokabi</span> — o'zbek o'quvchilari uchun ingliz tilini mukammal o'rganish platformasi.
                   </h3>
                   <p className="text-white/90 text-base sm:text-lg leading-relaxed font-semibold">
-                    Biz an'anaviy darsliklarni AI texnologiyalari bilan birlashtirib, har bir o'quvchiga o'z darajasiga mos shaxsiy yo'lni taqdim etamiz. CEFR standarti, 21+ interaktiv o'yin, real Writing & Speaking baholash — barchasi bitta joyda.
+                    Biz an'anaviy darsliklarni AI texnologiyalari bilan birlashtirib, har bir o'quvchiga o'z darajasiga mos shaxsiy yo'lni taqdim etamiz. CEFR standarti, 20+ interaktiv o'yin, real Writing & Speaking baholash — barchasi bitta joyda.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {[
                     { n: liveStats.users > 0 ? `${liveStats.users.toLocaleString()}+` : "—", l: "Faol o'quvchi" },
-                    { n: "21+", l: "O'yin va test" },
+                    { n: "20+", l: "O'yin va test" },
                     { n: "6", l: "CEFR daraja" },
                     { n: "24/7", l: "AI yordamchi" },
                   ].map((s) => (
@@ -777,7 +782,7 @@ export const LandingPage = ({
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { icon: Brain, title: "AI Tahlil", desc: "Writing va Speaking javoblaringizni AI bir necha soniyada CEFR bo'yicha baholaydi.", color: "blue" },
-                { icon: Gamepad2, title: "21+ O'yin", desc: "So'z, grammatika va tinglash o'yinlari — o'rganishni o'yinga aylantiring.", color: "amber" },
+                { icon: Gamepad2, title: "20+ O'yin", desc: "So'z, grammatika va tinglash o'yinlari — o'rganishni o'yinga aylantiring.", color: "amber" },
                 { icon: Award, title: "CEFR Sertifikat", desc: "Test natijalari bo'yicha avtomatik PNG sertifikat — yuklab oling va ulashing.", color: "blue" },
                 { icon: Video, title: "Video Darslar", desc: "Tanlangan o'quv videolari — har bir CEFR darajasi uchun moslangan.", color: "amber" },
                 { icon: Bot, title: "AI Tutor", desc: "24/7 sun'iy intellekt yordamchisi — har qanday savolingizga javob.", color: "blue" },
@@ -823,7 +828,7 @@ export const LandingPage = ({
               {[
                 { n: "01", t: "Ro'yxatdan o'ting", d: "Bir necha soniyada hisob yarating va darajangizni tanlang." },
                 { n: "02", t: "Joriy darajangizni aniqlang", d: "Qisqa CEFR placement test bilan A1 dan C2 gacha darajangizni belgilang." },
-                { n: "03", t: "O'yinlar va testlar bilan o'rganing", d: "Har kuni 15 daqiqa — 21+ o'yin, AI Tutor va video darslar yordamida." },
+                { n: "03", t: "O'yinlar va testlar bilan o'rganing", d: "Har kuni 15 daqiqa — 20+ o'yin, AI Tutor va video darslar yordamida." },
                 { n: "04", t: "Sertifikat oling", d: "Yakuniy testdan o'tib, rasmiy CEFR sertifikatingizni yuklab oling." },
               ].map((step, i) => (
                 <motion.div
@@ -948,7 +953,7 @@ export const LandingPage = ({
         <div className="container mx-auto px-4 relative z-10">
           <FadeUp className="text-center mb-16">
             <span className="premium-badge mb-5 inline-flex">
-              <Gamepad2 className="w-3.5 h-3.5" /> 21+ O'YINLAR
+              <Gamepad2 className="w-3.5 h-3.5" /> 20+ O'YINLAR
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.25rem] font-display font-bold mb-4 tracking-tight leading-[1.15] text-balance px-2">
               O'yin orqali <span className="text-gradient">o'rganing</span>
@@ -1324,7 +1329,7 @@ export const LandingPage = ({
                 <h3 className="text-4xl font-display font-bold tracking-tight mb-1">$0</h3>
                 <p className="text-sm text-muted-foreground mb-6">Abadiy bepul</p>
                 <ul className="space-y-2.5 mb-8 flex-1">
-                  {["Kuniga 3 ta test", "Reading & Listening", "Lug'at & Grammatika", "21+ o'yin", "Natijalar tarixi"].map((f) => (
+                  {["Kuniga 3 ta test", "Reading & Listening", "Lug'at & Grammatika", "20+ o'yin", "Natijalar tarixi"].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
                       <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />{f}
                     </li>
@@ -1332,7 +1337,7 @@ export const LandingPage = ({
                 </ul>
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   onClick={handleStartTest} className="w-full btn-outline py-3 text-sm mt-auto">
-                  {user ? "Testni Boshlash" : "Bepul Boshlash"}
+                  {user ? "Testni Boshlash" : "Bepul sinab ko'ring"}
                 </motion.button>
               </Card3D>
             </FadeUp>
@@ -1484,7 +1489,7 @@ export const LandingPage = ({
               },
               {
                 q: "Nechta o'yin bor?",
-                a: "21+ o'yin mavjud: Word Match, Spelling Bee, Grammar Battle, Crossword, Memory Cards, Tongue Twisters va boshqalar.",
+                a: "20+ o'yin mavjud: Word Match, Spelling Bee, Grammar Battle, Crossword, Memory Cards, Tongue Twisters va boshqalar.",
               },
               {
                 q: "Pro versiya nimalar beradi?",
@@ -1594,7 +1599,7 @@ export const LandingPage = ({
                 }}
                 className="inline-flex w-full sm:w-auto items-center justify-center gap-2.5 bg-white text-gray-900 font-bold text-base px-8 py-4 rounded-2xl hover:bg-white/95 transition-colors shadow-xl"
               >
-                {user ? "Testni Boshlash" : "Bepul Ro'yxatdan O'tish"}
+                {user ? "Testni Boshlash" : "Bepul sinab ko'ring"}
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
             </motion.div>
@@ -1602,6 +1607,8 @@ export const LandingPage = ({
         </div>
       </section>
     </div>
+
+    <TryDemoQuiz open={showDemo} onClose={() => setShowDemo(false)} />
     </>
   );
 };

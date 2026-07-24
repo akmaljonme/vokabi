@@ -509,10 +509,10 @@ export default function SharedTest() {
                 </div>
                 <h3 className="text-xl font-black mb-2">Vokabi bilan ingliz tilini o'rgan! 🚀</h3>
                 <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto leading-relaxed">
-                  IELTS & CEFR testlari, AI baholash, 21+ interaktiv o'yin, Speaking va Writing — barchasi bir joyda.
+                  IELTS & CEFR testlari, AI baholash, 20+ interaktiv o'yin, Speaking va Writing — barchasi bir joyda.
                 </p>
                 <div className="grid grid-cols-2 gap-3 mb-6">
-                  {[["📝","IELTS & CEFR"],["🤖","AI Writing & Speaking"],["🎮","21+ o'yin"],["📈","Progress tracking"]].map(([e, t]) => (
+                  {[["📝","IELTS & CEFR"],["🤖","AI Writing & Speaking"],["🎮","20+ o'yin"],["📈","Progress tracking"]].map(([e, t]) => (
                     <div key={t} className="flex items-center gap-2 p-3 rounded-2xl bg-background border border-border text-left">
                       <span className="text-lg">{e}</span><span className="font-semibold text-xs">{t}</span>
                     </div>
@@ -531,7 +531,7 @@ export default function SharedTest() {
         <footer className="border-t border-border py-6 px-4">
           <div className="max-w-xl mx-auto rounded-2xl bg-primary/5 border border-primary/15 p-5 text-center">
             <p className="font-black text-sm mb-1">Vokabi.uz — Ingliz tilini o'rganishning eng aqlli yo'li</p>
-            <p className="text-xs text-muted-foreground mb-3">IELTS, CEFR, AI baholash, 21+ o'yin</p>
+            <p className="text-xs text-muted-foreground mb-3">IELTS, CEFR, AI baholash, 20+ o'yin</p>
             <a href="/" className="text-xs font-black text-primary hover:underline">Bepul boshlash →</a>
           </div>
         </footer>

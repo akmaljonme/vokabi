@@ -45,7 +45,7 @@ export const ReferralWidget = () => {
   };
 
   const shareOnTelegram = () => {
-    const text = `🎓 Vokabi bilan ingliz tilini o'rganing!\n\nAI testlar, IELTS tayyorgarlik, 21+ o'yin — barchasi bepul!\n\n🔗 ${referralUrl}`;
+    const text = `🎓 Vokabi bilan ingliz tilini o'rganing!\n\nAI testlar, IELTS tayyorgarlik, 20+ o'yin — barchasi bepul!\n\n🔗 ${referralUrl}`;
     window.open(`https://t.me/share/url?url=${encodeURIComponent(referralUrl)}&text=${encodeURIComponent(text)}`, "_blank");
   };
 
