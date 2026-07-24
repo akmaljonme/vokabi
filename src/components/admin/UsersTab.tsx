@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Search, MoreVertical, Shield, ShieldOff, Trash2, Eye, Crown, AlertTriangle } from 'lucide-react';
+import { Search, MoreVertical, Shield, ShieldOff, Trash2, Eye, Crown, AlertTriangle, Download } from 'lucide-react';
 import { supabase as _sbClient } from '@/integrations/supabase/client';
 const supabase: any = _sbClient;
+import { logAdminAction } from '@/lib/adminAudit';
+import { exportToCSV } from '@/lib/csvExport';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
@@ -28,6 +30,7 @@ interface UserProfile {
   full_name: string | null;
   avatar_url: string | null;
   created_at: string;
+  last_seen_at: string | null;
   roles: string[];
   test_count: number;
   avg_score: number;
@@ -112,11 +115,13 @@ export const UsersTab = () => {
           .delete()
           .eq('user_id', userId)
           .eq('role', 'admin');
+        await logAdminAction('role_removed', userId, { role: 'admin' });
         toast.success('Admin role removed');
       } else {
         await supabase
           .from('user_roles')
           .insert({ user_id: userId, role: 'admin' });
+        await logAdminAction('role_granted', userId, { role: 'admin' });
         toast.success('Admin role granted');
       }
       fetchUsers();
@@ -133,11 +138,13 @@ export const UsersTab = () => {
           .from('subscriptions')
           .delete()
           .eq('user_id', userId);
+        await logAdminAction('pro_removed', userId);
         toast.success('Pro status olib tashlandi');
       } else {
         await supabase
           .from('subscriptions')
           .upsert({ user_id: userId, plan: 'pro' }, { onConflict: 'user_id' });
+        await logAdminAction('pro_granted', userId, { plan: 'pro' });
         toast.success('Pro status berildi');
       }
       fetchUsers();
@@ -158,6 +165,7 @@ export const UsersTab = () => {
       if (res.error || res.data?.error) {
         throw new Error(res.data?.error || res.error?.message || 'Xatolik');
       }
+      await logAdminAction('user_deleted', deleteTarget.user_id, { full_name: deleteTarget.full_name });
       toast.success(`${deleteTarget.full_name || 'Foydalanuvchi'} o'chirildi`);
       setDeleteTarget(null);
       fetchUsers();
@@ -203,14 +211,34 @@ export const UsersTab = () => {
           <h2 className="text-2xl font-bold">Users Management</h2>
           <p className="text-muted-foreground">{users.length} total users</p>
         </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search users..." 
-            className="pl-10 w-64"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search users..." 
+              className="pl-10 w-64"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => {
+              exportToCSV('vokabi_users', filteredUsers.map(u => ({
+                'Ism': u.full_name || '',
+                'User ID': u.user_id,
+                'Rol': u.roles.join('; ') || 'user',
+                'Plan': u.is_pro ? 'Pro' : 'Free',
+                'Testlar soni': u.test_count,
+                "O'rtacha ball": u.avg_score,
+                "Ro'yxatdan o'tgan": new Date(u.created_at).toLocaleDateString('uz-UZ'),
+                'Oxirgi faollik': u.last_seen_at ? new Date(u.last_seen_at).toLocaleString('uz-UZ') : '—',
+              })));
+              logAdminAction('csv_exported', null, { export: 'users_csv', count: filteredUsers.length }).catch(() => {});
+            }}
+          >
+            <Download className="w-4 h-4 mr-2" /> CSV eksport
+          </Button>
         </div>
       </div>
 
@@ -226,6 +254,7 @@ export const UsersTab = () => {
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Tests Taken</th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Avg Score</th>
                 <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Joined</th>
+                <th className="text-left py-4 px-4 text-sm font-medium text-muted-foreground">Last seen</th>
                 <th className="text-right py-4 px-4 text-sm font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
@@ -280,6 +309,11 @@ export const UsersTab = () => {
                     </td>
                     <td className="py-4 px-4 text-sm text-muted-foreground">
                       {format(new Date(user.created_at), 'MMM d, yyyy')}
+                    </td>
+                    <td className="py-4 px-4 text-sm text-muted-foreground">
+                      {user.last_seen_at
+                        ? format(new Date(user.last_seen_at), 'MMM d, HH:mm')
+                        : '—'}
                     </td>
                     <td className="py-4 px-4 text-right">
                       <DropdownMenu>

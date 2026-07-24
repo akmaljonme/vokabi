@@ -41,6 +41,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Foydalanuvchi faol ekanini belgilash (admin uchun "oxirgi faollik" statistikasi)
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .update({ last_seen_at: new Date().toISOString() })
+      .eq('user_id', user.id)
+      .then(() => {});
+  }, [user?.id]);
+
   const signUp = async (email: string, password: string, fullName?: string, username?: string) => {
     // First try to sign up
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({

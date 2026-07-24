@@ -5,6 +5,7 @@ import { Loader2, Check, X, Eye, Clock, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { logAdminAction } from "@/lib/adminAudit";
 
 type Status = "pending" | "approved" | "rejected";
 
@@ -111,6 +112,10 @@ export const PaymentsTab = () => {
         .eq("id", req.id);
       if (updErr) throw updErr;
 
+      await logAdminAction("payment_approved", req.user_id, {
+        plan: req.plan, amount: req.amount, payment_request_id: req.id,
+      });
+
       toast.success(`Pro ${PLAN_LABEL[req.plan]} muddatga yoqildi`);
       setViewing(null);
       load();
@@ -128,6 +133,9 @@ export const PaymentsTab = () => {
       .eq("id", req.id);
     setProcessing(null);
     if (error) return toast.error(error.message);
+    await logAdminAction("payment_rejected", req.user_id, {
+      plan: req.plan, amount: req.amount, payment_request_id: req.id,
+    });
     toast.success("So'rov rad etildi");
     setViewing(null);
     load();

@@ -15,6 +15,8 @@ import { AnalyticsTab } from './AnalyticsTab';
 import { TournamentsTab } from './TournamentsTab';
 import { MockTestsTab } from './MockTestsTab';
 import { AnnouncementsTab } from './AnnouncementsTab';
+import { ReportsTab } from './ReportsTab';
+import { ActivityLogTab } from './ActivityLogTab';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -40,6 +42,8 @@ export const AdminDashboard = ({ onExitAdmin }: AdminDashboardProps) => {
       case 'videos': return <VideoLessonsTab />;
       case 'ads': return <AdsTab />;
       case 'analytics': return <AnalyticsTab />;
+      case 'reports': return <ReportsTab />;
+      case 'activity': return <ActivityLogTab />;
       case 'tournaments': return <TournamentsTab />;
       case 'mock-tests': return <MockTestsTab />;
       case 'announcements': return <AnnouncementsTab />;
