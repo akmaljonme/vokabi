@@ -1,29 +1,28 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Crown, Sparkles, Zap, Loader2 } from "lucide-react";
+import { Check, Crown, Sparkles, Zap } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
-import { supabase as _sbClient } from "@/integrations/supabase/client";
-const supabase: any = _sbClient;
-import { toast } from "sonner";
+import { PaymentDialog } from "@/components/payment/PaymentDialog";
 
 export type PlanKey = "1_month" | "6_months" | "1_year";
 
 export const PLANS: Array<{
   key: PlanKey;
   name: string;
-  price: string;
+  price: number;
+  priceLabel: string;
   perMonth: string;
   badge?: string;
   highlight?: boolean;
   savings?: string;
 }> = [
-  { key: "1_month",  name: "1 oy",   price: "$1.99",  perMonth: "$1.99/oy" },
-  { key: "6_months", name: "6 oy",   price: "$5.99",  perMonth: "$1.00/oy", badge: "Eng mashhur", highlight: true, savings: "50% tejash" },
-  { key: "1_year",   name: "1 yil",  price: "$10.99", perMonth: "$0.92/oy", savings: "54% tejash" },
+  { key: "1_month",  name: "1 oy",   price: 25000,  priceLabel: "25 000 so'm",  perMonth: "25 000 so'm/oy" },
+  { key: "6_months", name: "6 oy",   price: 75000,  priceLabel: "75 000 so'm",  perMonth: "12 500 so'm/oy", badge: "Eng mashhur", highlight: true, savings: "50% tejash" },
+  { key: "1_year",   name: "1 yil",  price: 130000, priceLabel: "130 000 so'm", perMonth: "10 833 so'm/oy", savings: "57% tejash" },
 ];
 
 const FEATURES = [
@@ -41,41 +40,17 @@ const Pricing = () => {
   const { user } = useAuth();
   const { isPro } = useSubscription();
   const navigate = useNavigate();
-  const [loadingPlan, setLoadingPlan] = useState<PlanKey | null>(null);
+  const [dialogPlan, setDialogPlan] = useState<typeof PLANS[number] | null>(null);
 
-  const handleBuy = async (planKey: PlanKey) => {
+  const handleBuy = (plan: typeof PLANS[number]) => {
     if (!user) {
       navigate("/login");
       return;
     }
-
-    setLoadingPlan(planKey);
-    try {
-      const { data, error } = await supabase.functions.invoke("stripe-checkout", {
-        body: {
-          planKey,
-          userId: user.id,
-          userEmail: user.email,
-          successUrl: `${window.location.origin}/pricing?success=true`,
-          cancelUrl: `${window.location.origin}/pricing?canceled=true`,
-        },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error("Stripe URL kelmadi");
-      }
-    } catch (e: any) {
-      console.error(e);
-      toast.error("Xatolik yuz berdi: " + (e.message || "Qayta urinib ko'ring"));
-    } finally {
-      setLoadingPlan(null);
-    }
+    setDialogPlan(plan);
   };
 
-  // Success/cancel URL dan xabar ko'rsatish
+  // Success/cancel URL dan xabar ko'rsatish (eski Stripe havolalaridan qolgan foydalanuvchilar uchun)
   const params = new URLSearchParams(window.location.search);
   const isSuccess = params.get("success") === "true";
   const isCanceled = params.get("canceled") === "true";
@@ -145,7 +120,7 @@ const Pricing = () => {
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-muted-foreground mb-2">{plan.name}</h3>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-display font-bold">{plan.price}</span>
+                  <span className="text-4xl font-display font-bold">{plan.priceLabel}</span>
                 </div>
                 <div className="text-sm text-muted-foreground mt-1">{plan.perMonth}</div>
                 {plan.savings && (
@@ -165,32 +140,34 @@ const Pricing = () => {
               </ul>
 
               <button
-                onClick={() => handleBuy(plan.key)}
-                disabled={isPro || loadingPlan !== null}
+                onClick={() => handleBuy(plan)}
+                disabled={isPro}
                 className={`w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
                   plan.highlight
                     ? "bg-primary text-primary-foreground hover:opacity-90"
                     : "bg-foreground text-background hover:opacity-90"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {loadingPlan === plan.key ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Yuklanmoqda...</>
-                ) : isPro ? (
-                  "Faol obuna"
-                ) : (
-                  "Sotib olish"
-                )}
+                {isPro ? "Faol obuna" : "Sotib olish"}
               </button>
             </motion.div>
           ))}
         </div>
 
         <div className="text-center mt-12 text-sm text-muted-foreground max-w-xl mx-auto space-y-1">
-          <p>Stripe orqali xavfsiz to'lov. Visa, Mastercard qabul qilinadi.</p>
+          <p>Humo/UzCard orqali to'lov — chek yuklaysiz, admin 1-2 soat ichida tasdiqlaydi.</p>
           <p>Obunani istalgan vaqt bekor qilish mumkin.</p>
         </div>
       </main>
       <Footer />
+
+      {dialogPlan && (
+        <PaymentDialog
+          plan={{ key: dialogPlan.key, name: dialogPlan.name, price: dialogPlan.price }}
+          open={!!dialogPlan}
+          onClose={() => setDialogPlan(null)}
+        />
+      )}
     </AppLayout>
   );
 };

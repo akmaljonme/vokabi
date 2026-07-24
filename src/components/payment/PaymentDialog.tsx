@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { PlanKey } from "@/pages/Pricing";
 
 export const CARD_NUMBER = "9860 3566 2914 3336";
-export const CARD_HOLDER = "KARIMBOY NORMETOV";
+export const CARD_HOLDER = "KARIMBOYEV NORMETOV";
 
 interface Props {
   plan: { key: PlanKey; name: string; price: number };

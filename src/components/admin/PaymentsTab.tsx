@@ -12,7 +12,7 @@ type Status = "pending" | "approved" | "rejected";
 interface PaymentRequest {
   id: string;
   user_id: string;
-  plan: "1_month" | "3_months" | "1_year";
+  plan: "1_month" | "6_months" | "1_year";
   amount: number;
   receipt_url: string;
   status: Status;
@@ -25,13 +25,13 @@ interface PaymentRequest {
 
 const PLAN_DAYS: Record<string, number> = {
   "1_month": 30,
-  "3_months": 90,
+  "6_months": 182,
   "1_year": 365,
 };
 
 const PLAN_LABEL: Record<string, string> = {
   "1_month": "1 oy",
-  "3_months": "3 oy",
+  "6_months": "6 oy",
   "1_year": "1 yil",
 };
 
